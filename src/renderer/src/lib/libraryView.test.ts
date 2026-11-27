@@ -120,7 +120,7 @@ describe('libraryTabs', () => {
     ])
     expect(tabs.map((t) => t.label)).toEqual([
       'Settings',
-      'All Games',
+      'All',
       'Steam',
       'Epic',
       'Nintendo SNES'

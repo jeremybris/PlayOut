@@ -202,7 +202,7 @@ describe('migrateTabDef', () => {
 describe('recommended tabs', () => {
   it('recommends All Games on Title A–Z with playable first', () => {
     const all = RECOMMENDED_TABS.find((t) => t.key === 'all-games')!
-    expect(all.name).toBe('All Games')
+    expect(all.name).toBe('All')
     expect(all.sort).toBe('title-asc')
     expect(all.playableFirst).toBe(true)
     expect(hasRecommendedTab([newTabDef()], all)).toBe(true)
