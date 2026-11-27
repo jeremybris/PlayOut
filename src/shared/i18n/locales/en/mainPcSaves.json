@@ -1,0 +1,23 @@
+{
+  "notManual": "Only the saves of PC games you added can be copied.",
+  "folder": {
+    "notAbsolute": "Choose a whole folder path.",
+    "holdsGame": "That folder holds the game itself (pick the folder its saves are in).",
+    "tooBroad": "That folder is too broad to copy (pick the game’s own save folder).",
+    "ownFolder": "That folder is one of PlayOut’s own (pick the game’s own save folder).",
+    "usedBy": "That folder overlaps the save folder of {title}.",
+    "notFolder": "{path} is not a folder.",
+    "link": "That folder is a link or junction to another folder (pick the folder it points to).",
+    "tooManyFiles": "That folder holds more than {max} files, so it is not just saves.",
+    "holdsPrograms": "That folder holds programs (.exe or .dll files), so it is not just saves.",
+    "tooLarge": "That folder takes {size} MB, more than the {max} MB PlayOut copies.",
+    "notPlain": "Choose a plain folder on one of this PC's drives (not a network, device or stream path).",
+    "holdsLink": "That folder holds a link or junction ({name}): choose the real folder instead.",
+    "missing": "Save folder not found ({path}): choose it again.",
+    "sameGame": "{title} in your library is the same game and already copies its saves: clear its save folder first."
+  },
+  "launch": {
+    "conflict": "The saves of {title} changed on this PC and in the Emulation folder since they were last copied. Choose which to keep.",
+    "confirm": "The Emulation folder has saves {machine} copied for a game with the same name ({title}). Use them?"
+  }
+}

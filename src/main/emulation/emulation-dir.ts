@@ -2,6 +2,7 @@ import { stat } from 'fs/promises'
 import { mkdir } from 'fs/promises'
 import { basename, dirname, join } from 'path'
 import { RECOMP_SAVES_FOLDER } from '../../shared/recomp'
+import { PC_SAVES_FOLDER } from '../../shared/pc-saves'
 import type { Settings, SettingsPatch } from '../../shared/types'
 import type { Logger } from '../logger'
 import { ADDED_ROM_SYSTEMS } from './emulation-folders'
@@ -131,15 +132,14 @@ export async function ensureDefaultEmulationDir(
       }
   }
   if (chosen) {
-    // A chosen folder keeps what it has; only Updates and DLC (with the PS3 HDD) and the Recompilations Saves folder
-    // are added when they are missing.
+    // A chosen folder keeps what it has; only Updates and DLC (with the PS3 HDD) and the Recompilations Saves and PC
+    // Saves folders are added when they are missing.
     if (await isDirectory(chosen)) {
       await updatesAndDlc(chosen, deps.log)
-      await mkdir(join(chosen, RECOMP_SAVES_FOLDER), { recursive: true }).catch((err) =>
-        deps.log.warn(
-          `${RECOMP_SAVES_FOLDER} could not be made in ${chosen}: ${(err as Error).message}`
+      for (const folder of [RECOMP_SAVES_FOLDER, PC_SAVES_FOLDER])
+        await mkdir(join(chosen, folder), { recursive: true }).catch((err) =>
+          deps.log.warn(`${folder} could not be made in ${chosen}: ${(err as Error).message}`)
         )
-      )
       await addedRomFolders(chosen, deps.log)
     }
     return null

@@ -61,7 +61,8 @@ const library = {
   emulationDir: path.nullable(),
   coopKeyboardMouse: z.boolean(),
   coopTwoPlayerLayout: z.enum(['stacked', 'sideBySide']),
-  trimGames: z.boolean()
+  trimGames: z.boolean(),
+  copyPcSaves: z.boolean()
 }
 const emulators = {
   overrides: z.record(shortId, path),

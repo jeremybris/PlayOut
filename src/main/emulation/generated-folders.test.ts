@@ -32,6 +32,7 @@ describe('generatedFolderPlan', () => {
       [
         'bios',
         'hdpacks',
+        'PC Saves',
         'Recompilations Saves',
         'roms',
         'saves',
@@ -116,6 +117,7 @@ describe('generateFolders', () => {
       [
         'bios',
         'hdpacks',
+        'PC Saves',
         'Recompilations Saves',
         'roms',
         'saves',

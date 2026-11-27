@@ -63,11 +63,13 @@ describe('the Emulation folder', () => {
       await ensureDefaultEmulationDir({ settings: chosen, userData, systemIds: [], log })
     ).toBeNull()
     await expect(fs.access(join(userData, 'Emulation'))).rejects.toThrow()
-    // A chosen folder that exists only gets Updates and DLC and Recompilations Saves (one that is missing is not made).
+    // A chosen folder that exists only gets Updates and DLC, Recompilations Saves and PC Saves (one that is missing is
+    // not made).
     await expect(fs.access(join(userData, 'Mine'))).rejects.toThrow()
     await fs.mkdir(join(userData, 'Mine'))
     await ensureDefaultEmulationDir({ settings: chosen, userData, systemIds: ['ps2'], log })
     expect((await fs.readdir(join(userData, 'Mine'))).sort()).toEqual([
+      'PC Saves',
       'Recompilations Saves',
       'Updates and DLC'
     ])

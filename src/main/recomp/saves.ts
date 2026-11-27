@@ -381,6 +381,27 @@ export interface SaveSnapshot {
   roots: string[]
 }
 
+/**
+ * What a listed entry really is. Windows lists every reparse point as a link, OneDrive placeholders (cloud files,
+ * downloaded or not) too: lstat tells the real links and junctions (null: never followed) apart, as in
+ * streaming/emulation-sync/scan.ts. `unreadable` (default: null) is what an entry whose lstat fails gives.
+ */
+async function entryKind(
+  dir: string,
+  e: Dirent,
+  unreadable: (err: unknown) => 'dir' | 'file' | null = () => null
+): Promise<'dir' | 'file' | null> {
+  if (!e.isSymbolicLink()) return e.isDirectory() ? 'dir' : e.isFile() ? 'file' : null
+  let st: Awaited<ReturnType<typeof fs.lstat>>
+  try {
+    st = await fs.lstat(join(dir, e.name))
+  } catch (err) {
+    return unreadable(err)
+  }
+  if (st.isSymbolicLink()) return null
+  return st.isDirectory() ? 'dir' : st.isFile() ? 'file' : null
+}
+
 async function walkInto(
   root: string,
   into: SaveSnapshot['files'],
@@ -399,11 +420,11 @@ async function walkInto(
       if (budget.left <= 0) return
       const p = join(dir, e.name)
       // Links and junctions are not followed: they lead out of the folder (often into a big shared one).
-      if (e.isSymbolicLink()) continue
-      if (e.isDirectory()) {
+      const kind = await entryKind(dir, e)
+      if (kind === 'dir') {
         if (depth < SNAPSHOT_MAX_DEPTH && !SKIP_WALK.has(e.name.toLowerCase()))
           stack.push([p, depth + 1])
-      } else if (e.isFile()) {
+      } else if (kind === 'file') {
         try {
           const st = await fs.lstat(p)
           budget.left--
@@ -447,7 +468,7 @@ export async function snapshotSaveCandidates(
       continue
     }
     for (const e of entries) {
-      if (!e.isDirectory() || !nameMatches(e.name, tokens)) continue
+      if (!nameMatches(e.name, tokens) || (await entryKind(base, e)) !== 'dir') continue
       const p = join(base, e.name)
       // Already walked (inside the install), or holding the install (PlayOut's own data folder): skip.
       if (roots.some((r) => isInside(r, p) || isInside(p, r))) continue
@@ -680,14 +701,14 @@ async function judgeCandidate(dir: string, strong: boolean): Promise<FoundSaveFo
       continue
     }
     for (const e of entries) {
-      if (e.isSymbolicLink()) continue
+      const kind = await entryKind(d, e)
       const p = join(d, e.name)
-      if (e.isDirectory()) {
+      if (kind === 'dir') {
         if (depth < FIND_MAX_DEPTH && !SKIP_WALK.has(e.name.toLowerCase()))
           stack.push([p, depth + 1])
         continue
       }
-      if (!e.isFile()) continue
+      if (kind !== 'file') continue
       if (++files > FIND_MAX_FILES) return null
       if (PROGRAM_EXT.has(extname(e.name).toLowerCase())) return null
       const parts = relParts(dir, p).slice(0, -1)
@@ -746,13 +767,15 @@ export async function findSaveFolders(
     candidates.push({ path: p, strong: strongNameMatch(basename(p), whole) })
   }
   const dirsOf = async (dir: string): Promise<Dirent[]> => {
+    let entries: Dirent[]
     try {
-      return (await fs.readdir(dir, { withFileTypes: true })).filter(
-        (e) => e.isDirectory() && !e.isSymbolicLink()
-      )
+      entries = await fs.readdir(dir, { withFileTypes: true })
     } catch {
       return []
     }
+    const out: Dirent[] = []
+    for (const e of entries) if ((await entryKind(dir, e)) === 'dir') out.push(e)
+    return out
   }
   if (tokens.length) {
     for (const base of bases) {
@@ -895,9 +918,26 @@ export interface SaveFile {
   mtimeMs: number
 }
 
+/** A missing file or folder (gone, or a path through a file): nothing to list there. */
+function isGone(err: unknown): boolean {
+  const code = (err as NodeJS.ErrnoException)?.code
+  return code === 'ENOENT' || code === 'ENOTDIR'
+}
+
+function unreadableSaves(path: string, err: unknown): Error {
+  return new Error(
+    tMain('mainRecomp.saves.unreadable', {
+      path,
+      error: err instanceof Error ? err.message : String(err)
+    })
+  )
+}
+
 /**
  * Every file under the save roots (a root may be a single file). The roots themselves may be links (an emulator-style
- * junction to a shared folder); links inside them are not followed. Missing roots give nothing.
+ * junction to a shared folder); links inside them are not followed (OneDrive placeholders are listed: they are the
+ * saves). Missing roots give nothing. Anything there that cannot be read (a locked folder, a placeholder that fails to
+ * open) throws: saves that cannot be listed would read as no saves, and be restored over.
  */
 export async function listSaveFiles(paths: string[]): Promise<SaveFile[]> {
   const out: SaveFile[] = []
@@ -906,8 +946,9 @@ export async function listSaveFiles(paths: string[]): Promise<SaveFile[]> {
     let st: Awaited<ReturnType<typeof fs.stat>>
     try {
       st = await fs.stat(root)
-    } catch {
-      continue
+    } catch (err) {
+      if (isGone(err)) continue
+      throw unreadableSaves(root, err)
     }
     if (st.isFile()) {
       out.push({ root: i, rel: basename(root), abs: root, size: st.size, mtimeMs: st.mtimeMs })
@@ -920,19 +961,24 @@ export async function listSaveFiles(paths: string[]): Promise<SaveFile[]> {
       let entries: Dirent[]
       try {
         entries = await fs.readdir(dir, { withFileTypes: true })
-      } catch {
-        continue
+      } catch (err) {
+        if (isGone(err)) continue
+        throw unreadableSaves(dir, err)
       }
       for (const e of entries) {
         const p = join(dir, e.name)
-        if (e.isSymbolicLink()) continue
-        if (e.isDirectory()) stack.push(p)
-        else if (e.isFile()) {
+        const kind = await entryKind(dir, e, (err) => {
+          if (isGone(err)) return null
+          throw unreadableSaves(p, err)
+        })
+        if (kind === 'dir') stack.push(p)
+        else if (kind === 'file') {
           let fst: Awaited<ReturnType<typeof fs.lstat>>
           try {
             fst = await fs.lstat(p)
-          } catch {
-            continue
+          } catch (err) {
+            if (isGone(err)) continue
+            throw unreadableSaves(p, err)
           }
           out.push({
             root: i,

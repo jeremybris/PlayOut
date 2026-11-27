@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs'
+import { promises as fs, type Dirent } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -8,6 +8,7 @@ import {
   type RecompCloudState
 } from '../../shared/recomp'
 import type { Logger } from '../logger'
+import { setMainLanguage } from '../i18n'
 import { isExcluded } from '../streaming/emulation-sync/rules'
 import { listZip, readZipEntry } from '../util/zip'
 import {
@@ -643,5 +644,303 @@ describe('adoptOldCopy', () => {
     await write(join(old, 'current', '0', 'a.sav'), 'changed after meta')
     expect(await adoptOldCopy(old, join(emuDir, 'third'), log)).toBe(false)
     expect(await exists(join(emuDir, 'third'))).toBe(false)
+  })
+})
+
+/**
+ * Make fs.readdir report the entries named `names` (in folders under `under`) as links, the way Windows lists OneDrive placeholders (cloud
+ * files, hydrated or not): every reparse point is a link to readdir, while lstat shows the regular file or folder.
+ */
+function asPlaceholders(under: string, names: string[]): { mockRestore: () => void } {
+  const real = fs.readdir.bind(fs) as (...a: unknown[]) => Promise<unknown>
+  return vi.spyOn(fs, 'readdir').mockImplementation((async (p: unknown, opts?: unknown) => {
+    const out = await real(p, opts)
+    if (!(opts as { withFileTypes?: boolean } | undefined)?.withFileTypes) return out
+    if (!String(p).startsWith(under)) return out
+    return (out as Dirent[]).map((e) =>
+      names.includes(e.name)
+        ? Object.assign(Object.create(Object.getPrototypeOf(e) as object) as Dirent, e, {
+            isSymbolicLink: () => true,
+            isFile: () => false,
+            isDirectory: () => false
+          })
+        : e
+    )
+  }) as never)
+}
+
+describe('restore safety', () => {
+  it('a save that is a OneDrive placeholder is a save, never restored over without a word', async () => {
+    await write(join(saves, 'a.sav'), 'A1')
+    await syncSaves(ID, [saves], state(), deps('PC-A'), 'after-play')
+    await write(join(otherSaves, 'a.sav'), 'B own')
+    const spy = asPlaceholders(otherSaves, ['a.sav'])
+    let s: RecompCloudState
+    try {
+      s = await syncSaves(ID, [otherSaves], state(), deps('PC-B'), 'before-play')
+    } finally {
+      spy.mockRestore()
+    }
+    expect(s.conflict).not.toBeNull()
+    expect(await read(join(otherSaves, 'a.sav'))).toBe('B own')
+  })
+
+  it('a placeholder folder of saves is walked like a folder', async () => {
+    await write(join(saves, 'slots', 'a.sav'), 'A1')
+    await syncSaves(ID, [saves], state(), deps('PC-A'), 'after-play')
+    await write(join(otherSaves, 'slots', 'a.sav'), 'B own')
+    const spy = asPlaceholders(otherSaves, ['slots'])
+    let s: RecompCloudState
+    try {
+      s = await syncSaves(ID, [otherSaves], state(), deps('PC-B'), 'before-play')
+    } finally {
+      spy.mockRestore()
+    }
+    expect(s.conflict).not.toBeNull()
+    expect(await read(join(otherSaves, 'slots', 'a.sav'))).toBe('B own')
+  })
+
+  it('a real link (junction) inside a save folder is still not followed', async () => {
+    const outside = join(tmp, 'outside')
+    await write(join(outside, 'big.dat'), 'not a save')
+    await write(join(saves, 'a.sav'), 'A1')
+    await fs.symlink(outside, join(saves, 'linked'), 'junction')
+    const s = await syncSaves(ID, [saves], state(), deps('PC-A'), 'after-play')
+    expect(s.error).toBeNull()
+    expect(await exists(join(base(), 'current', '0', 'linked'))).toBe(false)
+    expect(await read(join(base(), 'current', '0', 'a.sav'))).toBe('A1')
+  })
+
+  it('a placeholder that cannot be read: pending, nothing restored over it', async () => {
+    await write(join(saves, 'a.sav'), 'A1')
+    await syncSaves(ID, [saves], state(), deps('PC-A'), 'after-play')
+    await write(join(otherSaves, 'a.sav'), 'B own')
+    const readdir = asPlaceholders(otherSaves, ['a.sav'])
+    const realLstat = fs.lstat.bind(fs)
+    const lstat = vi.spyOn(fs, 'lstat').mockImplementation((async (p: unknown, o?: unknown) => {
+      if (String(p).startsWith(otherSaves) && String(p).endsWith('a.sav'))
+        throw Object.assign(new Error('The cloud operation was unsuccessful'), { code: 'EIO' })
+      return realLstat(p as string, o as never)
+    }) as never)
+    let s: RecompCloudState
+    try {
+      s = await syncSaves(ID, [otherSaves], state(), deps('PC-B'), 'before-play')
+    } finally {
+      lstat.mockRestore()
+      readdir.mockRestore()
+    }
+    expect(s.pending).toBe(true)
+    expect(s.error).toBeTruthy()
+    expect(await read(join(otherSaves, 'a.sav'))).toBe('B own')
+  })
+
+  it('a save folder that cannot be read is never taken for an empty one and restored over', async () => {
+    await write(join(saves, 'a.sav'), 'A1')
+    await write(join(saves, 'locked', 'x.sav'), 'X1')
+    await syncSaves(ID, [saves], state(), deps('PC-A'), 'after-play')
+    await write(join(otherSaves, 'locked', 'x.sav'), 'B own')
+    const locked = join(otherSaves, 'locked')
+    const real = fs.readdir.bind(fs) as (...a: unknown[]) => Promise<unknown>
+    const spy = vi.spyOn(fs, 'readdir').mockImplementation((async (p: unknown, o?: unknown) => {
+      if (String(p) === locked) throw Object.assign(new Error('access denied'), { code: 'EACCES' })
+      return real(p, o)
+    }) as never)
+    let s: RecompCloudState
+    try {
+      s = await syncSaves(ID, [otherSaves], state(), deps('PC-B'), 'before-play')
+    } finally {
+      spy.mockRestore()
+    }
+    expect(s.pending).toBe(true)
+    expect(s.error).toContain(locked)
+    expect(await read(join(locked, 'x.sav'))).toBe('B own')
+    expect(await exists(join(otherSaves, 'a.sav'))).toBe(false)
+  })
+
+  it("a restore that fails part way puts this PC's saves back as they were", async () => {
+    await write(join(saves, 'a.sav'), 'A1')
+    await write(join(saves, 'b.sav'), 'B1')
+    const sA = await syncSaves(ID, [saves], state(), deps('PC-A'), 'after-play')
+    const sB = await syncSaves(ID, [otherSaves], state(), deps('PC-B'), 'before-play')
+    await write(join(otherSaves, 'a.sav'), 'A2')
+    await write(join(otherSaves, 'a0.sav'), 'new')
+    await write(join(otherSaves, 'b.sav'), 'B2')
+    await syncSaves(ID, [otherSaves], sB, deps('PC-B'), 'after-play')
+    const fromCopy = join(base(), 'current')
+    const real = fs.copyFile.bind(fs)
+    const spy = vi.spyOn(fs, 'copyFile').mockImplementation((async (
+      from: unknown,
+      to: unknown,
+      mode?: unknown
+    ) => {
+      if (String(from).startsWith(fromCopy) && String(from).endsWith('b.sav'))
+        throw Object.assign(new Error('locked'), { code: 'EPERM' })
+      return real(from as string, to as string, mode as number)
+    }) as never)
+    let s: RecompCloudState
+    try {
+      s = await syncSaves(ID, [saves], sA, deps('PC-A'), 'before-play')
+    } finally {
+      spy.mockRestore()
+    }
+    expect(s.pending).toBe(true)
+    expect(await read(join(saves, 'a.sav'))).toBe('A1')
+    expect(await read(join(saves, 'b.sav'))).toBe('B1')
+    expect(await exists(join(saves, 'a0.sav'))).toBe(false)
+    expect((await hashSaves([saves])).hash).toBe(sA.syncedHash)
+    // The backup made before the restore is kept, and nothing else is left in the backups folder.
+    const dir = join(tmp, 'backups-PC-A', cloudSaveKey(ID))
+    expect(await zips(dir)).toHaveLength(1)
+    expect(await fs.readdir(dir)).toEqual(await zips(dir))
+    // Not stuck: the next try copies back.
+    const again = await syncSaves(ID, [saves], s, deps('PC-A'), 'before-play')
+    expect(again).toMatchObject({ pending: false, error: null, conflict: null })
+    expect(await read(join(saves, 'b.sav'))).toBe('B2')
+  })
+
+  it('the different-save-folders refusal is translated', async () => {
+    await write(join(otherSaves, 'a.sav'), 'B')
+    await syncSaves(ID, [otherSaves], state(), deps('PC-B'), 'after-play')
+    const two = [join(tmp, 'C', 'one'), join(tmp, 'C', 'two')]
+    setMainLanguage('es')
+    let s: RecompCloudState
+    try {
+      s = await syncSaves(ID, two, state(), deps('PC-A'), 'before-play')
+    } finally {
+      setMainLanguage('en')
+    }
+    expect(s.pending).toBe(true)
+    expect(s.error).not.toMatch(/same save folders/)
+    expect(s.error).toContain('{local}/Zelda64Recompiled/saves')
+  })
+})
+
+describe('interrupted copies, read-only saves and PCs sharing a name', () => {
+  /** A rename spy that fails (EBUSY) for the targets `fails` picks, until `off`. */
+  function busyRenames(fails: (to: string) => boolean): { off: () => void } {
+    const real = fs.rename.bind(fs)
+    let on = true
+    const spy = vi.spyOn(fs, 'rename').mockImplementation(async (from, to) => {
+      if (on && fails(String(to))) {
+        const e = new Error('EBUSY: held') as NodeJS.ErrnoException
+        e.code = 'EBUSY'
+        throw e
+      }
+      return real(from, to)
+    })
+    return {
+      off: () => {
+        on = false
+        spy.mockRestore()
+      }
+    }
+  }
+
+  const leftovers = async (): Promise<string[]> =>
+    (await fs.readdir(base())).filter((n) => /\.playout-(new|old)$/.test(n))
+
+  it('an upload cut off after the swap (meta.json and the take-out held) is finished by the next copy', async () => {
+    await write(join(saves, 'a.sav'), 'A1')
+    const a1 = await syncSaves(ID, [saves], state(), deps('PC-A'), 'after-play')
+    const b1 = await syncSaves(ID, [otherSaves], state(), deps('PC-B'), 'before-play')
+    expect(await read(join(otherSaves, 'a.sav'))).toBe('A1')
+    await write(join(saves, 'a.sav'), 'A2')
+    const busy = busyRenames((to) => to.endsWith('meta.json') || to.includes('current.failed'))
+    let cut: RecompCloudState
+    try {
+      cut = await syncSaves(ID, [saves], a1, deps('PC-A'), 'after-play')
+    } finally {
+      busy.off()
+    }
+    expect(cut.error).toBeTruthy()
+    // current/ holds A2 while meta.json still names A1: every PC would read "still arriving" for good.
+    expect(await read(join(base(), 'current', '0', 'a.sav'))).toBe('A2')
+    expect((await readCopyMeta(base()))?.hash).toBe(a1.syncedHash)
+    // The faults are over: the next copy finishes the upload, and the other PC then takes A2.
+    const again = await syncSaves(ID, [saves], cut, deps('PC-A'), 'before-play')
+    expect(again).toMatchObject({ pending: false, error: null, conflict: null })
+    expect((await readCopyMeta(base()))?.hash).toBe((await hashSaves([saves])).hash)
+    expect(await leftovers()).toEqual([])
+    const b2 = await syncSaves(ID, [otherSaves], b1, deps('PC-B'), 'before-play')
+    expect(b2).toMatchObject({ pending: false, error: null, conflict: null })
+    expect(await read(join(otherSaves, 'a.sav'))).toBe('A2')
+  })
+
+  it('an upload stopped at meta.json (PlayOut closed) is finished after a restart, also with new saves since', async () => {
+    await write(join(saves, 'a.sav'), 'A1')
+    const a1 = await syncSaves(ID, [saves], state(), deps('PC-A'), 'after-play')
+    await write(join(saves, 'a.sav'), 'A2')
+    const real = fs.rename.bind(fs)
+    let reached: () => void = noop
+    const atMeta = new Promise<void>((ok) => (reached = ok))
+    const spy = vi.spyOn(fs, 'rename').mockImplementation(async (from, to) => {
+      if (String(to).endsWith('meta.json')) {
+        reached()
+        return new Promise<void>(() => undefined) // PlayOut stops here
+      }
+      return real(from, to)
+    })
+    void syncSaves(ID, [saves], a1, deps('PC-A'), 'after-play')
+    await atMeta
+    spy.mockRestore()
+    // Restarted: the stored state is still A1's, and the player has changed the saves again since.
+    await write(join(saves, 'a.sav'), 'A3')
+    const next = await syncSaves(ID, [saves], a1, deps('PC-A'), 'manual')
+    expect(next).toMatchObject({ pending: false, error: null, conflict: null })
+    expect(await read(join(base(), 'current', '0', 'a.sav'))).toBe('A3')
+    expect((await readCopyMeta(base()))?.hash).toBe((await hashSaves([saves])).hash)
+    expect(await leftovers()).toEqual([])
+  })
+
+  it('an unfinished current/ next to the set-aside copy is undone (and backed up), then the copy goes on', async () => {
+    await write(join(saves, 'a.sav'), 'A1')
+    const a1 = await syncSaves(ID, [saves], state(), deps('PC-A'), 'after-play')
+    // Left by an upload cut off before a pending meta.json was written (older versions wrote none).
+    await fs.rename(join(base(), 'current'), join(base(), 'current.0a1b2c3d.playout-old'))
+    await write(join(base(), 'current', '0', 'a.sav'), 'HALF')
+    await write(join(saves, 'a.sav'), 'A2')
+    const next = await syncSaves(ID, [saves], a1, deps('PC-A'), 'after-play')
+    expect(next).toMatchObject({ pending: false, error: null, conflict: null })
+    expect(await read(join(base(), 'current', '0', 'a.sav'))).toBe('A2')
+    expect(await leftovers()).toEqual([])
+    expect((await zips(copyBackups())).some((z) => z.includes('unfinished copy'))).toBe(true)
+  })
+
+  it('another PC with the same name never counts as this one: its copy still arriving is waited for', async () => {
+    const pcA = deps('GAMING-PC', { machineId: 'id-a', backupsDir: join(tmp, 'backups-a') })
+    const pcB = deps('GAMING-PC', { machineId: 'id-b', backupsDir: join(tmp, 'backups-b') })
+    await write(join(saves, 'a.sav'), 'A1')
+    const a1 = await syncSaves(ID, [saves], state(), pcA, 'after-play')
+    const b1 = await syncSaves(ID, [otherSaves], state(), pcB, 'before-play')
+    await write(join(otherSaves, 'a.sav'), 'B2-NEWEST')
+    await syncSaves(ID, [otherSaves], b1, pcB, 'after-play')
+    const bMeta = await readCopyMeta(base())
+    expect(bMeta?.machineId).toBe('id-b')
+    // On this side of the sync, the other PC's meta.json has arrived and its save not yet.
+    await write(join(base(), 'current', '0', 'a.sav'), 'A1')
+    const a2 = await syncSaves(ID, [saves], a1, pcA, 'manual')
+    expect(a2.pending).toBe(true)
+    expect(a2.error).toMatch(/still arriving/)
+    expect((await readCopyMeta(base()))?.hash).toBe(bMeta?.hash)
+    expect(await read(join(base(), 'current', '0', 'a.sav'))).toBe('A1')
+  })
+
+  it('a read-only save is restored over (and stays read-only), on every PC', async () => {
+    await write(join(saves, 'a.sav'), 'A1')
+    await fs.chmod(join(saves, 'a.sav'), 0o444)
+    const a1 = await syncSaves(ID, [saves], state(), deps('PC-A'), 'after-play')
+    const b1 = await syncSaves(ID, [otherSaves], state(), deps('PC-B'), 'before-play')
+    expect(await read(join(otherSaves, 'a.sav'))).toBe('A1')
+    await fs.chmod(join(saves, 'a.sav'), 0o666)
+    await write(join(saves, 'a.sav'), 'A2')
+    await fs.chmod(join(saves, 'a.sav'), 0o444)
+    const a2 = await syncSaves(ID, [saves], a1, deps('PC-A'), 'after-play')
+    expect(a2).toMatchObject({ pending: false, error: null })
+    const b2 = await syncSaves(ID, [otherSaves], b1, deps('PC-B'), 'before-play')
+    expect(b2).toMatchObject({ pending: false, error: null, conflict: null })
+    expect(await read(join(otherSaves, 'a.sav'))).toBe('A2')
+    expect((await fs.stat(join(otherSaves, 'a.sav'))).mode & 0o200).toBe(0)
+    // Writable again, so the temp folder can be removed.
+    for (const f of [join(saves, 'a.sav'), join(otherSaves, 'a.sav')]) await fs.chmod(f, 0o666)
   })
 })

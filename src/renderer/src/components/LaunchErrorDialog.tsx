@@ -31,6 +31,8 @@ function kindTitle(kind: LaunchError['kind'], t: Translate): string {
       return t('components.launchError.title.fileMissing')
     case 'failed':
       return t('components.launchError.title.failed')
+    case 'save-conflict':
+      return t('components.launchError.title.saveConflict')
   }
 }
 

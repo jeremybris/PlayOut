@@ -1,6 +1,7 @@
 import { mkdir, stat } from 'fs/promises'
 import { basename, join } from 'path'
 import { RECOMP_SAVES_FOLDER } from '../../shared/recomp'
+import { PC_SAVES_FOLDER } from '../../shared/pc-saves'
 import { EMULATION_FOLDERS, EMUDECK_ROM_SUBFOLDERS, EMUDECK_ROM_SYSTEMS } from './emulation-folders'
 import { UPDATES_DLC_FOLDERS } from './ps3-hdd'
 
@@ -28,7 +29,8 @@ function romSystems(kind: GeneratedFolderKind, systemIds: readonly string[]): st
  * Every folder to create, relative to the generated folder (forward slashes become the platform's separator).
  * roms: one folder per system, named by its ES-DE id (snes, psx, n64, …). Emulation: EmuDeck's folders, with
  * roms/<system> for every ES-DE and EmuDeck system, "Updates and DLC" (Switch, Xbox360, and PS3 with RPCS3's
- * dev_hdd0), and PlayOut's own "Recompilations Saves" (copies of recompilation saves, src/main/recomp/cloud.ts).
+ * dev_hdd0), PlayOut's own "Recompilations Saves" (copies of recompilation saves, src/main/recomp/cloud.ts) and "PC Saves"
+ * (copies of the saves of PC games the user added, src/main/pc-saves).
  */
 export function generatedFolderPlan(
   kind: GeneratedFolderKind,
@@ -42,6 +44,8 @@ export function generatedFolderPlan(
   out.push(...UPDATES_DLC_FOLDERS)
   // PlayOut's copies of recompilation saves (they reach other PCs with the Emulation folder sync).
   out.push(RECOMP_SAVES_FOLDER)
+  // And of the saves of PC games the user added (PC Saves).
+  out.push(PC_SAVES_FOLDER)
   return out.map((path) => join(...path.split('/')))
 }
 

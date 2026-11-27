@@ -40,7 +40,10 @@
     "noLocal": "There are no saves on this PC to keep.",
     "noCloud": "There are no saves in the Emulation folder to keep.",
     "stillArrivingRetry": "The copy in the Emulation folder is still arriving (or incomplete); try again in a moment.",
-    "tooManyFiles": "The save folder {folder} holds more than {max} files, so it is not just saves."
+    "tooManyFiles": "The save folder {folder} holds more than {max} files, so it is not just saves.",
+    "unreadable": "PlayOut could not read {path} ({error}), so it leaves the saves as they are and tries again later (a OneDrive file may still be downloading).",
+    "foldersDiffer": "The copy's save folder(s) ({copy}) are not this PC's ({here}); set the same save folders on both PCs.",
+    "noFolders": "none"
   },
   "launch": {
     "noRecomp": "This game has no recompilation.",

@@ -53,6 +53,9 @@ import { DATA_DIR_NAME } from './peerparty/prefs'
 import { PEERPARTY_FOLDER } from '../shared/peerparty'
 import { createIngameHelper } from './overlay/ingame/helper'
 import { createRecompService } from './recomp/service'
+import { recompRootCandidates } from './recomp/state'
+import { createPcSavesService, type PcSavesService } from './pc-saves/service'
+import { emulatorRootCandidates } from './emulator-setup/service'
 import { createVrModsService } from './vr-mods/service'
 import { VR_MODS_FOLDER } from '../shared/vr-mods'
 import { createPs3UpdateService } from './emulation/ps3-update-service'
@@ -626,6 +629,8 @@ async function main(cli: CliOptions): Promise<void> {
 
   // Whether an Upgrade menu action runs for a game; set once the upgrades service exists (created further down).
   let upgradeBusy: (gameId: string) => boolean = () => false
+  // PC Saves (main/pc-saves): set once its service exists (further down); a launch reaches it only later.
+  let pcSavesRef: PcSavesService | null = null
   const launcher = createLauncher({
     settings,
     emulation,
@@ -637,7 +642,10 @@ async function main(cli: CliOptions): Promise<void> {
     beforeLaunch: (emulatorId, exe, rom, context) =>
       emulatorSetup.beforeLaunch(emulatorId, exe, rom, context),
     // An upgrade rewriting the game's files (the Upgrade menu): every start of it waits until it ends.
-    launchBlocked: (game) => (upgradeBusy(game.id) ? upgradeRunningMessage(tMain) : null)
+    launchBlocked: (game) => (upgradeBusy(game.id) ? upgradeRunningMessage(tMain) : null),
+    // A game the user added: a newer copy of its saves in the Emulation folder comes back first (PC Saves).
+    beforeGameLaunch: (game, context) =>
+      pcSavesRef?.beforePlay(game, context) ?? Promise.resolve(null)
   })
   launcherRef = launcher
   // PCSX2 scans the PS2 games it does not list yet once nothing runs: after a game, and when the library gained games.
@@ -1403,7 +1411,10 @@ async function main(cli: CliOptions): Promise<void> {
     },
     holdSync: () => streaming.holdEmulationSync?.() ?? (() => {}),
     // The saves' last-synced hashes moved with the copies (a folder chosen without moving forgets them).
-    beforeSwitch: (from, to) => recomp.noteEmulationFolderMoved(from, to),
+    beforeSwitch: async (from, to) => {
+      await recomp.noteEmulationFolderMoved(from, to)
+      await pcSavesRef?.noteEmulationFolderMoved(from, to)
+    },
     afterSwitch: async (from, to) => {
       // Folders the new place lacks (a folder used as it is); the emulators are pointed at it by the emulator setup's
       // own settings watcher (configs, junctions, BIOS links), the ROM folder by keepRomsRootInSync.
@@ -1468,6 +1479,27 @@ async function main(cli: CliOptions): Promise<void> {
     openExternal: (uri) => shell.openExternal(uri)
   })
 
+  // PC Saves (docs/USER-GUIDE.md): the save folders the user chose for games they added, copied to <Emulation>/PC Saves
+  // before and after play (with the recompilations' copy machinery); the Emulation folder sync carries them.
+  const pcSaves = createPcSavesService({
+    userData,
+    library,
+    launcher,
+    events,
+    enabled: () => settings.get().library.copyPcSaves,
+    emulationDir: () => emulationDirOf(settings.get(), userData),
+    ownFolders: () => [
+      dirname(app.getPath('exe')),
+      ...recompRootCandidates(resolvePaths().exeDir, userData),
+      ...emulatorRootCandidates(resolvePaths().exeDir, userData)
+    ],
+    holdSync: () => streaming.holdEmulationSync?.() ?? (() => {}),
+    moving: () => emulationMove.moving(),
+    documents: app.getPath('documents'),
+    log: createLogger('pc-saves')
+  })
+  pcSavesRef = pcSaves
+
   // A move of the Emulation folder that PlayOut closed during is finished or undone before anything can start a new one:
   // started before the window can ask (moving() is true meanwhile: a move, the offer and launches wait or refuse).
   const emulationRecovered = cli.mock
@@ -1500,6 +1532,7 @@ async function main(cli: CliOptions): Promise<void> {
       peerParty,
       peerPartyOverlay,
       recomp,
+      pcSaves,
       vrMods,
       streaming,
       overlay,

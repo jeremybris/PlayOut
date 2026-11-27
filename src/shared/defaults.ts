@@ -45,7 +45,8 @@ export function defaultSettings(): Settings {
       coopKeyboardMouse: false,
       coopTwoPlayerLayout: 'stacked',
       // New ROM games keep their format (Settings > Library "Trim Games" off).
-      trimGames: false
+      trimGames: false,
+      copyPcSaves: true
     },
     emulators: {
       overrides: {},

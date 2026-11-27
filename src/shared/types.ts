@@ -175,7 +175,17 @@ export interface LaunchResult {
 }
 
 export interface LaunchError {
-  kind: 'emulator-missing' | 'core-missing' | 'client-missing' | 'file-missing' | 'failed'
+  /**
+   * save-conflict: a game the user added has a saves question open (PC Saves: both sides changed, or "Use the copy
+   * from <PC>?"); the dialog asks it.
+   */
+  kind:
+    | 'emulator-missing'
+    | 'core-missing'
+    | 'client-missing'
+    | 'file-missing'
+    | 'failed'
+    | 'save-conflict'
   message: string
   /** For emulator-missing / core-missing: which emulator or core could not be found. */
   emulatorId?: string
@@ -1360,6 +1370,11 @@ export interface Settings {
      * GameCube ISO → RVZ; main/convert/auto-trim.ts). Games already in the library are not touched. Default false.
      */
     trimGames: boolean
+    /**
+     * PC Saves: the saves of PC games the user added are copied to <Emulation folder>/PC Saves before and after play,
+     * for each game whose save folder was chosen (its Edit sheet). Default true.
+     */
+    copyPcSaves: boolean
   }
   emulators: {
     /** emulator id (e.g. 'RETROARCH') -> executable path. */
@@ -1978,6 +1993,8 @@ export interface PlayOutEvents {
   'session:started': { gameId: string; startedAt: string }
   'session:ended': { gameId: string; startedAt: string; endedAt: string; minutes: number }
   'launch:error': { gameId: string; error: LaunchError }
+  /** A game's PC Saves copy changed (copied, a conflict, a folder chosen or cleared). */
+  'pc-saves:changed': { gameId: string }
   /** Every change of a tracked install, at most once per second per game. */
   'install:progress': InstallProgress
   /** The install queue changed (added, started, finished, removed, moved): every entry, the active one first. */

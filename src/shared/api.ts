@@ -76,6 +76,7 @@ import type {
   RecompSaves,
   RecompSettingsView
 } from './recomp'
+import type { PcSaveFolderCheck, PcSaveView } from './pc-saves'
 import type { VrModRelease, VrModsView } from './vr-mods'
 
 export interface PlayOutApi {
@@ -480,6 +481,19 @@ export interface PlayOutApi {
   syncRecompSaves(recompId: string): Promise<RecompCloudState>
   /** Both sides changed: keep this PC's saves ('local') or the Emulation folder's copy ('cloud'); the other is backed up. */
   resolveRecompConflict(recompId: string, keep: 'local' | 'cloud'): Promise<RecompCloudState>
+  // --- PC Saves (a game the user added: its save folder copied to <Emulation>/PC Saves) ---
+  /** The game's save copy; null for a game that is not one the user added (or a paired host's). */
+  getPcSaves(gameId: string): Promise<PcSaveView | null>
+  /** A folder's size before it is chosen as the game's save folder; rejects with the reason it is refused. */
+  inspectPcSaveFolder(gameId: string, path: string): Promise<PcSaveFolderCheck>
+  /** Choose the game's save folder (checked again, then copied when the game is not running); null clears it. */
+  setPcSaveFolder(gameId: string, path: string | null): Promise<PcSaveView>
+  /** Copy now (refused while the game runs). */
+  syncPcSaves(gameId: string): Promise<PcSaveView>
+  /** Both sides changed: keep this PC's saves ('local') or the Emulation folder's copy ('cloud'). */
+  resolvePcSaveConflict(gameId: string, keep: 'local' | 'cloud'): Promise<PcSaveView>
+  /** The answer to "Use the copy from <PC>?". */
+  answerPcSaveCopy(gameId: string, use: boolean): Promise<PcSaveView>
   /** Open the install folder, the first save folder, or the folder holding the copies in the Emulation folder. */
   openRecompFolder(recompId: string, which: 'install' | 'saves' | 'copies'): Promise<void>
   /**
@@ -831,6 +845,12 @@ export const API_METHODS = [
   'syncRecompSaves',
   'resolveRecompConflict',
   'openRecompFolder',
+  'getPcSaves',
+  'inspectPcSaveFolder',
+  'setPcSaveFolder',
+  'syncPcSaves',
+  'resolvePcSaveConflict',
+  'answerPcSaveCopy',
   'getRecompImageOffers',
   'answerRecompImageOffer',
   'askRecompImageDelete',

@@ -51,6 +51,10 @@
       "clear": "Predeterminada",
       "picker": "Elige tu carpeta Emulation (contiene bios, roms, saves…)",
       "generatePicker": "Elige dónde poner la carpeta Emulation (se crea una carpeta Emulation dentro)"
+    },
+    "copyPcSaves": {
+      "label": "Copiar las partidas guardadas de los juegos que has añadido",
+      "description": "Para cada juego de PC que hayas añadido, elige su carpeta de partidas guardadas en la hoja Editar del juego: PlayOut la copia a PC Saves en la carpeta Emulation antes y después de jugar, para que las partidas guardadas te sigan a tus otros PC. Lo que se reemplaza se guarda antes como copia de seguridad en este PC."
     }
   },
   "frontPage": {

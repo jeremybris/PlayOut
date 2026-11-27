@@ -1,0 +1,51 @@
+{
+  "row": {
+    "label": "Save folder",
+    "notSet": "Not set",
+    "description": "Copied to PC Saves in the Emulation folder, so your saves follow you to your other PCs.",
+    "choose": "Choose…",
+    "clear": "Clear",
+    "copyNow": "Copy now",
+    "chooseTitle": "Choose the folder {title} keeps its saves in",
+    "chooseAria": "Choose the save folder",
+    "clearAria": "Clear the save folder",
+    "copyNowAria": "Copy the saves now"
+  },
+  "status": {
+    "featureOff": "Copying the saves of games you added is off (Settings › Library).",
+    "never": "Not copied yet.",
+    "syncedAt": "Last copied {date}.",
+    "syncedAtFrom": "Last copied {date}; the copy holds the saves from {machine}.",
+    "pending": "Waiting to be copied.",
+    "error": "Could not copy: {error}",
+    "running": "It is running: its saves are copied when you close it.",
+    "conflict": "The saves changed on this PC and in the Emulation folder: pick which to keep.",
+    "confirm": "The Emulation folder has saves {machine} copied for a game with the same name ({title})."
+  },
+  "conflict": {
+    "title": "Which saves should {title} use?",
+    "text": "Your saves changed on this PC{localAt} and in the Emulation folder's copy{cloudAt}. Pick the ones to keep; the others are kept as a backup.",
+    "textDevice": "Your saves changed on this PC{localAt} and in the Emulation folder's copy from {device}{cloudAt}. Pick the ones to keep; the others are kept as a backup.",
+    "keepLocal": "Keep this PC's saves",
+    "keepCloud": "Keep the Emulation folder's copy"
+  },
+  "confirm": {
+    "title": "Use the copy from {machine}?",
+    "text": "The Emulation folder has saves {machine} copied for a game with the same name ({title}). Use them for this game? This PC's saves are backed up before anything is replaced.",
+    "use": "Use that copy",
+    "ignore": "Don't use it"
+  },
+  "large": {
+    "title": "Copy {size} of saves?",
+    "message": "{path} holds {files} files ({size}). A copy of it goes into the Emulation folder and to every PC that folder is shared with.",
+    "confirm": "Use this folder"
+  },
+  "toasts": {
+    "chosen": "Save folder set ({size} in {files} files).",
+    "cleared": "Save folder cleared; the saves and their copy are kept.",
+    "copied": "Saves copied.",
+    "failed": "Could not change the save folder.",
+    "readFailed": "Could not read the save copy.",
+    "resolvedStarting": "Starting {title}…"
+  }
+}

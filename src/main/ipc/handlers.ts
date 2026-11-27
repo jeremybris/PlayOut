@@ -46,6 +46,7 @@ import type { CoopService } from '../coop/coop-service'
 import type { PeerPartyService } from '../peerparty/service'
 import type { PeerPartyOverlay } from '../peerparty/overlay'
 import type { RecompService } from '../recomp/service'
+import type { PcSavesService } from '../pc-saves/service'
 import type { VrModsService } from '../vr-mods/service'
 import type { StreamingService } from '../streaming/streaming-service'
 import { parseRemoteGameId } from '../streaming/remote-library'
@@ -84,6 +85,8 @@ export interface AppServices {
   convert: ConvertService
   /** Recompilations: the UP button, the Recompilation page, Settings › Recompilations (main/recomp/service.ts). */
   recomp: RecompService
+  /** PC Saves: the save folders of games the user added, copied to the Emulation folder (main/pc-saves). */
+  pcSaves: PcSavesService
   /** VR mods: Settings › VR and its browser (main/vr-mods/service.ts). */
   vrMods: VrModsService
   streaming: StreamingService
@@ -1081,6 +1084,30 @@ export function createHandlers(s: AppServices): ApiHandlers {
         recompIdSchema.parse(recompId),
         z.enum(['local', 'cloud']).parse(keep)
       )
+    },
+    async getPcSaves(gameId) {
+      return s.pcSaves.view(idSchema.parse(gameId))
+    },
+    async inspectPcSaveFolder(gameId, path) {
+      return s.pcSaves.inspect(idSchema.parse(gameId), pathSchema.parse(path))
+    },
+    async setPcSaveFolder(gameId, path) {
+      const folder = pathSchema.nullable().parse(path)
+      // Clear stays allowed; a folder chosen mid-move would be checked against the Emulation folder being left.
+      if (folder !== null) notWhileMoving()
+      return s.pcSaves.setFolder(idSchema.parse(gameId), folder)
+    },
+    async syncPcSaves(gameId) {
+      notWhileMoving()
+      return s.pcSaves.syncNow(idSchema.parse(gameId))
+    },
+    async resolvePcSaveConflict(gameId, keep) {
+      notWhileMoving()
+      return s.pcSaves.resolve(idSchema.parse(gameId), z.enum(['local', 'cloud']).parse(keep))
+    },
+    async answerPcSaveCopy(gameId, use) {
+      notWhileMoving()
+      return s.pcSaves.answerCopy(idSchema.parse(gameId), z.boolean().parse(use))
     },
     openRecompFolder(recompId, which) {
       return s.recomp.openRecompFolder(

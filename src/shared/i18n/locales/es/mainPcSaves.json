@@ -1,0 +1,23 @@
+{
+  "notManual": "Solo se pueden copiar las partidas guardadas de los juegos de PC que has añadido.",
+  "folder": {
+    "notAbsolute": "Elige la ruta completa de una carpeta.",
+    "holdsGame": "Esa carpeta contiene el propio juego (elige la carpeta donde están sus partidas guardadas).",
+    "tooBroad": "Esa carpeta es demasiado amplia para copiarla (elige la carpeta de partidas guardadas del juego).",
+    "ownFolder": "Esa carpeta es de PlayOut (elige la carpeta de partidas guardadas del juego).",
+    "usedBy": "Esa carpeta se solapa con la carpeta de partidas guardadas de {title}.",
+    "notFolder": "{path} no es una carpeta.",
+    "link": "Esa carpeta es un enlace o una unión a otra carpeta (elige la carpeta a la que apunta).",
+    "tooManyFiles": "Esa carpeta tiene más de {max} archivos, así que no son solo partidas guardadas.",
+    "holdsPrograms": "Esa carpeta contiene programas (archivos .exe o .dll), así que no son solo partidas guardadas.",
+    "tooLarge": "Esa carpeta ocupa {size} MB, más de los {max} MB que copia PlayOut.",
+    "notPlain": "Elige una carpeta normal de una de las unidades de este PC (no una ruta de red, de dispositivo ni de flujo).",
+    "holdsLink": "Esa carpeta contiene un enlace o una unión ({name}): elige la carpeta real.",
+    "missing": "No se encuentra la carpeta de partidas guardadas ({path}): vuelve a elegirla.",
+    "sameGame": "{title}, de tu biblioteca, es el mismo juego y ya copia sus partidas guardadas: quita primero su carpeta de partidas guardadas."
+  },
+  "launch": {
+    "conflict": "Las partidas guardadas de {title} han cambiado en este PC y en la carpeta Emulation desde la última copia. Elige cuáles conservar.",
+    "confirm": "La carpeta Emulation tiene partidas guardadas que {machine} copió de un juego con el mismo nombre ({title}). ¿Usarlas?"
+  }
+}

@@ -670,6 +670,45 @@ describe('createGameLauncher', () => {
     launcher.dispose()
   })
 
+  it('asks beforeGameLaunch first: its error refuses the start, a throw does not, a stream says so', async () => {
+    const tracker = fakeTracker()
+    const opened: string[] = []
+    const seen: { id: string; streamed: boolean }[] = []
+    let answer: 'refuse' | 'throw' | 'ok' = 'refuse'
+    const launcher = createGameLauncher({
+      emulation: noEmulation(),
+      tracker,
+      log: collectingLog(),
+      beforeGameLaunch: async (game, context) => {
+        seen.push({ id: game.id, streamed: context.streamed })
+        if (answer === 'throw') throw new Error('disk gone')
+        return answer === 'refuse' ? { kind: 'save-conflict', message: 'Pick the saves.' } : null
+      },
+      io: {
+        async openExternal(uri) {
+          opened.push(uri)
+        }
+      }
+    })
+    const game = makeGame({ id: 'manual:x', launch: { kind: 'uri', uri: 'steam://rungameid/620' } })
+    expect(await launcher.launch(game)).toEqual({
+      ok: false,
+      error: { kind: 'save-conflict', message: 'Pick the saves.' }
+    })
+    expect(opened).toEqual([])
+    expect(tracker.calls).toEqual([])
+    answer = 'throw'
+    expect(await launcher.launch(game, { streamed: true })).toMatchObject({ ok: true })
+    answer = 'ok'
+    expect(await launcher.launch(game)).toMatchObject({ ok: true })
+    expect(seen).toEqual([
+      { id: 'manual:x', streamed: false },
+      { id: 'manual:x', streamed: true },
+      { id: 'manual:x', streamed: false }
+    ])
+    launcher.dispose()
+  })
+
   it('opens URIs with the shell and starts a session without a child', async () => {
     const tracker = fakeTracker()
     const opened: string[] = []

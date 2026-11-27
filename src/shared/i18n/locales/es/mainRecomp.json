@@ -40,7 +40,10 @@
     "noLocal": "No hay partidas guardadas en este PC para conservar.",
     "noCloud": "No hay partidas guardadas en la carpeta Emulation para conservar.",
     "stillArrivingRetry": "La copia de la carpeta Emulation aún está llegando (o está incompleta); inténtalo de nuevo en un momento.",
-    "tooManyFiles": "La carpeta de partidas guardadas {folder} tiene más de {max} archivos, así que no son solo partidas guardadas."
+    "tooManyFiles": "La carpeta de partidas guardadas {folder} tiene más de {max} archivos, así que no son solo partidas guardadas.",
+    "unreadable": "PlayOut no pudo leer {path} ({error}), así que deja las partidas guardadas como están y lo intentará más tarde (puede que un archivo de OneDrive aún se esté descargando).",
+    "foldersDiffer": "Las carpetas de partidas guardadas de la copia ({copy}) no son las de este PC ({here}); configura las mismas carpetas de partidas guardadas en ambos PC.",
+    "noFolders": "ninguna"
   },
   "launch": {
     "noRecomp": "Este juego no tiene recompilación.",

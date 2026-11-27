@@ -1,6 +1,16 @@
 import type { EmulationMoveRequest } from '@shared/emulation-move'
 import type { HomeRowMode, ScanProgress, SourceId, SourceStatus } from '@shared/types'
-import { Copy, Download, Eye, FolderTree, House, Package, RefreshCw, Scissors } from 'lucide-react'
+import {
+  Copy,
+  Download,
+  Eye,
+  FolderTree,
+  House,
+  Package,
+  RefreshCw,
+  Save,
+  Scissors
+} from 'lucide-react'
 import { useCallback, useEffect, useState, type ReactElement } from 'react'
 import { api } from '../../../api/client'
 import { Button } from '../../../components/Button'
@@ -337,6 +347,15 @@ export function LibrarySection({ settings, patch }: SectionProps): ReactElement 
             !!documentsEmulationDir &&
             !samePath(settings.library.emulationDir || defaultEmulationDir, documentsEmulationDir)
           }
+        />
+        {/* PC Saves (main/pc-saves): each added game's save folder is chosen in its Edit sheet. */}
+        <Toggle
+          focusKey={fk(SECTION, 'copyPcSaves')}
+          icon={<Save />}
+          label={t('settingsLibrary.folders.copyPcSaves.label')}
+          description={t('settingsLibrary.folders.copyPcSaves.description')}
+          checked={settings.library.copyPcSaves}
+          onChange={(v) => patch({ library: { copyPcSaves: v } })}
         />
       </div>
 

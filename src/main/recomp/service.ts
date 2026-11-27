@@ -168,6 +168,12 @@ import {
 } from './state'
 import { displayTitle } from '../util/game-title'
 import { tMain } from '../i18n'
+import {
+  createKeyedLock,
+  folderNamesWithin,
+  machineIdOf,
+  pathThereWithin
+} from '../save-copy/shared'
 
 /** The recompilation methods of the API (the IPC handlers call these as they are). */
 export type RecompMethods = Pick<
@@ -372,6 +378,8 @@ export interface RecompServiceDeps {
   knownFolders?: () => KnownFolders
   /** This PC's name in the save copies (default: the computer name). */
   machine?: string
+  /** This install's own id in the save copies (default: save-copy/shared.ts machineIdOf(userData)). */
+  machineId?: string
   now?: () => Date
   /**
    * Whether this PC is online (Electron's net.isOnline). At start the catalogs are checked for new recompilations
@@ -531,6 +539,8 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
     resolve(deps.emulationDir?.() ?? defaultEmulationDir(deps.userData))
   const savesRoot = (): string => join(emulationDir(), RECOMP_SAVES_FOLDER)
   const machine = deps.machine ?? hostname()
+  let machineId = deps.machineId
+  const ownId = (): string => (machineId ??= machineIdOf(deps.userData))
   const controller = new AbortController()
   const httpCacheDir = join(deps.userData, 'cache', 'recomp')
   const httpCache = (): CachedFetchDeps => ({
@@ -579,7 +589,7 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
   /** Being started or played: its folder and saves are in use. */
   const inUse = (id: string): boolean => playing.has(id) || launching.has(id)
   /** Save copies are serialized per recompilation. */
-  const syncLocks = new Map<string, Promise<unknown>>()
+  const withLock = createKeyedLock()
   const digestCache: DigestCache = new Map()
   /** Developer profiles (recomplauncher.json) by "<id>|<updatedAt>". */
   const profiles = new Map<string, Promise<DeveloperProfile | null>>()
@@ -1438,39 +1448,13 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
    * The folder names in <Emulation>/Recompilations Saves, read once with a time limit: [] when it does not exist yet,
    * null when it cannot be read in time (a disconnected network or USB drive).
    */
-  async function copyFolderNames(): Promise<string[] | null> {
-    let timer: NodeJS.Timeout | undefined
-    const read = fs.readdir(savesRoot(), { withFileTypes: true }).then(
-      (ds) => ds.filter((d) => d.isDirectory()).map((d) => d.name),
-      (err: NodeJS.ErrnoException) => (err.code === 'ENOENT' ? [] : null)
-    )
-    const timeout = new Promise<null>((ok) => {
-      timer = setTimeout(() => ok(null), COPY_FOLDER_READ_MS)
-      timer.unref?.()
-    })
-    try {
-      return await Promise.race([read, timeout])
-    } finally {
-      if (timer) clearTimeout(timer)
-    }
+  function copyFolderNames(): Promise<string[] | null> {
+    return folderNamesWithin(savesRoot(), COPY_FOLDER_READ_MS)
   }
 
   /** Whether a file or folder is there, answered within COPY_FOLDER_READ_MS (false when it takes longer). */
-  async function pathThere(p: string): Promise<boolean> {
-    let timer: NodeJS.Timeout | undefined
-    const check = fs.stat(p).then(
-      () => true,
-      () => false
-    )
-    const timeout = new Promise<boolean>((ok) => {
-      timer = setTimeout(() => ok(false), COPY_FOLDER_READ_MS)
-      timer.unref?.()
-    })
-    try {
-      return await Promise.race([check, timeout])
-    } finally {
-      if (timer) clearTimeout(timer)
-    }
+  function pathThere(p: string): Promise<boolean> {
+    return pathThereWithin(p, COPY_FOLDER_READ_MS)
   }
 
   /**
@@ -1575,17 +1559,6 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
     return { templates, paths: expandSavePaths(templates, ctx), source }
   }
 
-  function withLock<T>(id: string, job: () => Promise<T>): Promise<T> {
-    const prev = syncLocks.get(id) ?? Promise.resolve()
-    const run = prev.then(job, job)
-    const tail = run.catch(() => undefined)
-    syncLocks.set(id, tail)
-    void tail.then(() => {
-      if (syncLocks.get(id) === tail) syncLocks.delete(id)
-    })
-    return run
-  }
-
   async function copyDeps(
     templates: string[],
     copyDir: string,
@@ -1595,6 +1568,7 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
       rootDir,
       dir: copyDir,
       machine,
+      machineId: ownId(),
       log,
       now,
       backupsDir: join(recompPlayoutDir(await root()), 'save-backups'),

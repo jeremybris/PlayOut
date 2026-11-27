@@ -778,7 +778,10 @@ describe('host stream hand-off', () => {
     expect(prepared).toEqual({ ok: true, sunshinePort: 47989 })
     const run = await h.pipe.deps!.onRun()
     expect(run).toEqual({ gameId: 'steam:1' })
-    expect(h.launcher.launch).toHaveBeenCalledWith(expect.objectContaining({ id: 'steam:1' }))
+    // A paired PC's stream: the launch says so (PC Saves then starts it with a saves question open).
+    expect(h.launcher.launch).toHaveBeenCalledWith(expect.objectContaining({ id: 'steam:1' }), {
+      streamed: true
+    })
     expect((await h.service.status()).host.streaming).toEqual({
       clientName: 'Laptop',
       gameId: 'steam:1',

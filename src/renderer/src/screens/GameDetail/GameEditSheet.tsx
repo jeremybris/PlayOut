@@ -43,6 +43,7 @@ import { useSettingsStore } from '../../state/settings'
 import { useStreamingStore } from '../../state/streaming'
 import { useUiStore } from '../../state/ui'
 import { GenresTagsField, GenresTagsSearch } from './GenresTagsField'
+import { PcSaveFolderRow } from './PcSaveFolderRow'
 
 const log = createLog('game-edit')
 
@@ -192,7 +193,7 @@ export interface GameEditSheetProps {
  * The game page's Edit sheet (the pen button): every metadata field the page shows (title, description, release
  * date, developers, publishers, genres and tags (one Genres & Tags dropdown: GenresTagsField), local players, controls, How Long to Beat, rating), each saying where
  * its value comes from (scraped, the PlayOut cloud, your edit) with a Reset back to the cloud's / scraped value; the
- * game's own settings (emulator, launch arguments, install size, hidden); and the custom artwork pickers (local
+ * game's own settings (emulator, launch arguments, install size, a game the user added's save folder, hidden); and the custom artwork pickers (local
  * only, applied at once). Save sends the changes (api.setMetadataEdit / updateGame); Cancel or B drops them.
  * A paired host's game (game.remote) shows the metadata fields only: its values come from the host, the edit stays on
  * this PC (main/metadata-edits/remote-edits.ts) and goes with the game if it is downloaded; the settings and artwork
@@ -824,6 +825,8 @@ function EditForm({
               clearable
               className="gsheet__field"
             />
+            {/* A game the user added: its save folder, copied to PC Saves in the Emulation folder (applied at once). */}
+            {game.source === 'manual' ? <PcSaveFolderRow game={game} focusKey={fk} /> : null}
             <Toggle
               focusKey={fk('hidden')}
               label={t('gameDetail.edit.settings.hide')}

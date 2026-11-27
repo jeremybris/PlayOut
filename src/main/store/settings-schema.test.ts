@@ -146,6 +146,16 @@ describe('normalizeSettings', () => {
     expect(() => parseSettingsPatch({ library: { trimGames: 1 } })).toThrow()
   })
 
+  it('copying the saves of games you added is on by default and for files from before it existed', () => {
+    expect(defaultSettings().library.copyPcSaves).toBe(true)
+    expect(normalizeSettings({ library: { romsRoot: null } })!.library.copyPcSaves).toBe(true)
+    expect(normalizeSettings({ library: { copyPcSaves: false } })!.library.copyPcSaves).toBe(false)
+    expect(parseSettingsPatch({ library: { copyPcSaves: false } })).toEqual({
+      library: { copyPcSaves: false }
+    })
+    expect(() => parseSettingsPatch({ library: { copyPcSaves: 'no' } })).toThrow()
+  })
+
   it('the PlayOut database is used and contributed to by default, and a malformed choice is repaired', () => {
     expect(defaultSettings().scrapers.gameDatabase).toEqual({ enabled: true, contribute: true })
     // A file from before the setting existed.

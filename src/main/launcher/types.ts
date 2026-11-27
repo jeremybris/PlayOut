@@ -1,5 +1,5 @@
 import type { ChildProcess } from 'child_process'
-import type { Game, LaunchResult } from '../../shared/types'
+import type { Game, LaunchError, LaunchResult } from '../../shared/types'
 import type { EmulationService } from '../emulation/types'
 import type { EventBus } from '../events'
 import type { Logger } from '../logger'
@@ -35,6 +35,14 @@ export interface LauncherDeps {
   ): Promise<void>
   /** Why the game must not start now, else null (see GameLauncherDeps.launchBlocked). */
   launchBlocked?(game: Game): string | null
+  /** Before a planned launch starts anything (see GameLauncherDeps.beforeGameLaunch). */
+  beforeGameLaunch?(game: Game, context: { streamed: boolean }): Promise<LaunchError | null>
+}
+
+/** How a game is started: the emulator picked in the Play menu; `streamed` = for a paired PC's stream. */
+export interface LaunchOptions {
+  emulatorId?: string
+  streamed?: boolean
 }
 
 export interface RunningGame {
@@ -46,7 +54,7 @@ export interface RunningGame {
 
 export interface LauncherService {
   /** Start the game, begin a session, and track it according to game.tracking. */
-  launch(game: Game, options?: { emulatorId?: string }): Promise<LaunchResult>
+  launch(game: Game, options?: LaunchOptions): Promise<LaunchResult>
   running(): RunningGame | null
   /**
    * Track a game started some other way (Co-Op: the helper process runs the instances and lives as long as the

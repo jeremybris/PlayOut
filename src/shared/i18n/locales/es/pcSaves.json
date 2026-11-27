@@ -1,0 +1,51 @@
+{
+  "row": {
+    "label": "Carpeta de partidas guardadas",
+    "notSet": "Sin elegir",
+    "description": "Se copia a PC Saves en la carpeta Emulation, para que tus partidas guardadas te sigan a tus otros PC.",
+    "choose": "Elegir…",
+    "clear": "Quitar",
+    "copyNow": "Copiar ahora",
+    "chooseTitle": "Elige la carpeta donde {title} guarda sus partidas",
+    "chooseAria": "Elegir la carpeta de partidas guardadas",
+    "clearAria": "Quitar la carpeta de partidas guardadas",
+    "copyNowAria": "Copiar ahora las partidas guardadas"
+  },
+  "status": {
+    "featureOff": "La copia de partidas guardadas de los juegos que has añadido está desactivada (Ajustes › Biblioteca).",
+    "never": "Aún no se ha copiado.",
+    "syncedAt": "Última copia: {date}.",
+    "syncedAtFrom": "Última copia: {date}; la copia tiene las partidas guardadas de {machine}.",
+    "pending": "Pendiente de copiar.",
+    "error": "No se pudo copiar: {error}",
+    "running": "Está en ejecución: sus partidas guardadas se copian cuando lo cierres.",
+    "conflict": "Las partidas guardadas cambiaron en este PC y en la carpeta Emulation: elige cuáles conservar.",
+    "confirm": "La carpeta Emulation tiene partidas guardadas que {machine} copió de un juego con el mismo nombre ({title})."
+  },
+  "conflict": {
+    "title": "¿Qué partidas guardadas debe usar {title}?",
+    "text": "Tus partidas guardadas cambiaron en este PC{localAt} y en la copia de la carpeta Emulation{cloudAt}. Elige las que quieres conservar; las otras se guardan como copia de seguridad.",
+    "textDevice": "Tus partidas guardadas cambiaron en este PC{localAt} y en la copia de la carpeta Emulation desde {device}{cloudAt}. Elige las que quieres conservar; las otras se guardan como copia de seguridad.",
+    "keepLocal": "Conservar las de este PC",
+    "keepCloud": "Conservar la copia de la carpeta Emulation"
+  },
+  "confirm": {
+    "title": "¿Usar la copia de {machine}?",
+    "text": "La carpeta Emulation tiene partidas guardadas que {machine} copió de un juego con el mismo nombre ({title}). ¿Usarlas para este juego? Las partidas guardadas de este PC se guardan como copia de seguridad antes de reemplazar nada.",
+    "use": "Usar esa copia",
+    "ignore": "No usarla"
+  },
+  "large": {
+    "title": "¿Copiar {size} de partidas guardadas?",
+    "message": "{path} tiene {files} archivos ({size}). Una copia va a la carpeta Emulation y a todos los PC con los que se comparte esa carpeta.",
+    "confirm": "Usar esta carpeta"
+  },
+  "toasts": {
+    "chosen": "Carpeta de partidas guardadas elegida ({size} en {files} archivos).",
+    "cleared": "Carpeta de partidas guardadas quitada; las partidas guardadas y su copia se conservan.",
+    "copied": "Partidas guardadas copiadas.",
+    "failed": "No se pudo cambiar la carpeta de partidas guardadas.",
+    "readFailed": "No se pudo leer la copia de partidas guardadas.",
+    "resolvedStarting": "Iniciando {title}…"
+  }
+}

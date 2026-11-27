@@ -1855,7 +1855,7 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
       const result =
         game.romRemoved || playsOnlyRecomp(game)
           ? await keptLaunch(game)
-          : await launcher.launch(game).catch((err: unknown) => ({
+          : await launcher.launch(game, { streamed: true }).catch((err: unknown) => ({
               ok: false as const,
               error: { message: message(err) }
             }))

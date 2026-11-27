@@ -1175,6 +1175,28 @@ once a day). Started offline, it uses the copy from last time and checks as soon
   PlayOut asks which to keep (**Keep this PC's saves** / **Keep the Emulation folder's copy**) before the game starts.
   Saves an older PlayOut copied into a cloud folder you chose are taken over once, the first time each recompilation
   is copied (the old copy is left where it was); if they differ from this PC's saves, PlayOut asks which to keep.
+- **Saves of PC games you added.** The same copying works for PC games you added yourself (Add game). Open the
+  game's page, **Edit**, and under the game's settings press **Choose…** next to **Save folder** to pick the folder the
+  game keeps its saves in (PlayOut shows its size first and asks before using a folder over 100 MB). From then on
+  PlayOut copies that folder to `PC Saves\<game> (<code>)\` in your Emulation folder after you play, and copies a newer
+  copy back before you play — so a PC that shares the Emulation folder (streaming's Emulation folder sync, or a cloud
+  app) gets your saves when you pick the same game's save folder there. It also copies when the Emulation folder sync
+  is off. What a copy replaces is backed up on this PC first (`pc-save-backups` in PlayOut's settings folder, never in
+  the Emulation folder); when the saves changed on both sides, Play asks which to keep (**Keep this PC's saves** /
+  **Keep the Emulation folder's copy**), as it does the first time both PCs already had saves. A copy another PC made
+  for a game with the same title but a different program asks **Use the copy from <PC>?** before it is used. **Copy
+  now** copies straight away; **Clear** stops copying that game and leaves its saves and their copy as they are.
+  Folders that are too broad or not just saves are refused: a drive or a folder right below one, your user folder
+  (and other users'), AppData, Local, Roaming, LocalLow, Documents, Saved Games, My Games, Desktop, Downloads,
+  Pictures, Videos, Music or OneDrive themselves, network and device paths, a folder holding the game's program or
+  other .exe / .dll files, a link or junction (or a folder holding one), PlayOut's own folders (the Emulation folder,
+  its settings folder, Recompilations, Emulators), another game's save folder, a second entry of a game that already
+  copies its saves, and anything over 512 MB or 20,000 files. All of this is checked again before every copy: a
+  folder that no longer passes is skipped with a message, never copied in part. A save folder that is gone together
+  with the folder around it (the game was moved) shows **Save folder not found**: choose it again. Games started
+  with Co-Op or PeerParty, or outside PlayOut, are copied at their next start with Play; a game started again while
+  it still runs copies nothing back; a game a paired PC streams starts even with the question open, which then waits
+  for you here. **Settings → Library → Copy saves of games you added** turns it off for every game.
 - **Where they go:** `<PlayOut folder>\Recompilations\<name>\` (next to PlayOut.exe), or
   `%APPDATA%\PlayOut\Recompilations\` when PlayOut is in Program Files or its folder cannot be written. Settings →
   Recompilations shows the folder.

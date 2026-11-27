@@ -58,7 +58,8 @@
       "coreMissing": "No se encontró el núcleo de RetroArch",
       "clientMissing": "No se encontró el cliente de la tienda",
       "fileMissing": "No se encontraron los archivos del juego",
-      "failed": "No se pudo iniciar"
+      "failed": "No se pudo iniciar",
+      "saveConflict": "Primero elige las partidas guardadas"
     },
     "subtitle": "No se pudo iniciar {title}",
     "subtitleUnknown": "No se pudo iniciar este juego",

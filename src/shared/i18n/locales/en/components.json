@@ -58,7 +58,8 @@
       "coreMissing": "RetroArch core not found",
       "clientMissing": "Store client not found",
       "fileMissing": "Game files not found",
-      "failed": "Could not launch"
+      "failed": "Could not launch",
+      "saveConflict": "Saves to choose first"
     },
     "subtitle": "Couldn't launch {title}",
     "subtitleUnknown": "Couldn't launch this game",

@@ -67,8 +67,13 @@ export interface CloudMeta {
   hash: string
   /** When these saves were uploaded (ISO). */
   at: string
-  /** The PC that uploaded them. */
+  /** The PC that uploaded them (its name, shown to the user). */
   machine: string
+  /**
+   * The uploading PlayOut install's own random id (CloudSyncDeps.machineId): tells this PC's copies from another PC's
+   * with the same name (cloned images, two PCs both called GAMING-PC). Absent in copies written by older versions.
+   */
+  machineId?: string
   /** The save folders as templates, in root-index order. */
   roots: string[]
   /**
@@ -78,6 +83,11 @@ export interface CloudMeta {
    * Absent in copies written by older versions (then any copy newer than the last sync is taken, as before).
    */
   history?: string[]
+  /**
+   * What the copy is of, for other PCs to recognise it (PC Saves: the game's title and stable key). Recompilation
+   * copies have none.
+   */
+  extra?: Record<string, string>
 }
 
 /** Hashes kept in a copy's meta.json history. */
@@ -87,12 +97,19 @@ export const MAX_COPY_HISTORY = 100
  * The copy's meta.json, telling "not there" (an empty copy, or one whose meta.json has not arrived yet) from "there
  * but unreadable" (an online-only placeholder that fails to open, half-written, corrupt).
  */
-async function loadCloudMeta(
+function loadCloudMeta(
   base: string
+): Promise<{ state: 'missing' | 'unreadable' | 'ok'; meta: CloudMeta | null }> {
+  return loadMetaFile(join(base, 'meta.json'))
+}
+
+/** A meta.json, or a pending one ("meta.json.<hex>.playout-new", see upload), read from `file`. */
+async function loadMetaFile(
+  file: string
 ): Promise<{ state: 'missing' | 'unreadable' | 'ok'; meta: CloudMeta | null }> {
   let text: string
   try {
-    text = await fs.readFile(join(base, 'meta.json'), 'utf8')
+    text = await fs.readFile(file, 'utf8')
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code
     return { state: code === 'ENOENT' ? 'missing' : 'unreadable', meta: null }
@@ -107,6 +124,7 @@ async function loadCloudMeta(
         hash: m.hash,
         at: typeof m.at === 'string' ? m.at : new Date(0).toISOString(),
         machine: typeof m.machine === 'string' ? m.machine : 'another PC',
+        ...(typeof m.machineId === 'string' && m.machineId ? { machineId: m.machineId } : {}),
         roots: m.roots.filter((r): r is string => typeof r === 'string'),
         ...(Array.isArray(m.history)
           ? {
@@ -114,12 +132,21 @@ async function loadCloudMeta(
                 .filter((h): h is string => typeof h === 'string')
                 .slice(0, MAX_COPY_HISTORY)
             }
-          : {})
+          : {}),
+        ...(stringRecord(m.extra) ? { extra: stringRecord(m.extra)! } : {})
       }
     }
   } catch {
     return { state: 'unreadable', meta: null }
   }
+}
+
+/** An object's string values (meta.json's `extra`), else null. */
+function stringRecord(v: unknown): Record<string, string> | null {
+  if (typeof v !== 'object' || v === null || Array.isArray(v)) return null
+  const out: Record<string, string> = {}
+  for (const [k, x] of Object.entries(v)) if (typeof x === 'string') out[k] = x
+  return out
 }
 
 /** The meta.json of the copy in `dir` (null when there is none or it is unreadable). */
@@ -347,14 +374,25 @@ export function isWritableSaveRoot(path: string): boolean {
   return true
 }
 
-/** Copy a file via a temp file next to the target, keeping its modification time. */
+/** Whether a file's read-only attribute is set (on Windows: no write bit). */
+const readOnly = (mode: number): boolean => (mode & 0o200) === 0
+
+/**
+ * Copy a file via a temp file next to the target, keeping its modification time and its read-only attribute. A
+ * read-only target is made writable first: Windows refuses to rename over a read-only file.
+ */
 async function copyFileAtomic(from: string, to: string): Promise<void> {
   await fs.mkdir(dirname(to), { recursive: true })
   const tmp = `${to}.playout-${randomBytes(3).toString('hex')}.tmp`
   try {
     await fs.copyFile(from, tmp)
     const st = await fs.stat(from)
+    const ro = readOnly(st.mode)
+    if (ro) await fs.chmod(tmp, 0o666).catch(() => undefined)
     await fs.utimes(tmp, st.atime, st.mtime).catch(() => undefined)
+    if (ro) await fs.chmod(tmp, 0o444).catch(() => undefined)
+    const target = await fs.lstat(to).catch(() => null)
+    if (target?.isFile() && readOnly(target.mode)) await fs.chmod(to, 0o666)
     await renameRetry(tmp, to)
   } catch (err) {
     await fs.rm(tmp, { force: true }).catch(() => undefined)
@@ -411,6 +449,11 @@ export interface CloudSyncDeps {
   dir: string
   /** This PC's name (meta.json, backup names, the conflict prompt). */
   machine: string
+  /**
+   * This PlayOut install's own random id (save-copy/shared.ts machineIdOf), written into meta.json: "this PC's own
+   * copy" is told by it, not by the name, which two PCs can share. Absent: by the name (as older versions did).
+   */
+  machineId?: string
   log: Logger
   now?: () => Date
   /**
@@ -420,7 +463,18 @@ export interface CloudSyncDeps {
   backupsDir: string
   /** The save folders as templates (index-aligned with savePaths), recorded in meta.json for other PCs. */
   templates?: string[]
+  /** The log lines' prefix (default 'recomp saves'). */
+  logTag?: string
+  /** Written into meta.json's `extra` by every upload (what the copy is of; see CloudMeta.extra). */
+  extraMeta?: Record<string, string>
+  /**
+   * The save folders are the user's own choice on each PC (PC Saves): copied root i goes into save folder i whenever
+   * both have as many, whatever their templates. Absent: roots are matched by template (recompilations).
+   */
+  rootsByPosition?: boolean
 }
+
+const tag = (deps: Pick<CloudSyncDeps, 'logTag'>): string => deps.logTag ?? 'recomp saves'
 
 class CloudUnavailable extends Error {}
 
@@ -461,7 +515,7 @@ async function readSides(savePaths: string[], deps: CloudSyncDeps): Promise<Side
     deps.templates && deps.templates.length === savePaths.length ? deps.templates : savePaths
   let order = savePaths.map((_, i) => i)
   let rootsMatch = true
-  if (meta) {
+  if (meta && !(deps.rootsByPosition && meta.roots.length === savePaths.length)) {
     const matched = matchSaveRoots(meta.roots, localTemplates)
     if (matched) order = matched
     else rootsMatch = false
@@ -511,6 +565,27 @@ async function readSides(savePaths: string[], deps: CloudSyncDeps): Promise<Side
     },
     cloud: { hash: cloudHash, meta, files: cloudFiles, intact }
   }
+}
+
+/**
+ * readSides, after finishing or undoing this PC's own interrupted upload when the copy is not whole. `finished`: the
+ * hash of the upload finished (these saves were this PC's when it copied them: what it last synced with).
+ */
+async function readSidesRecovered(
+  entryId: string,
+  savePaths: string[],
+  deps: CloudSyncDeps
+): Promise<{ sides: Sides; finished: string | null }> {
+  const sides = await readSides(savePaths, deps)
+  if (sides.cloud.intact) return { sides, finished: null }
+  let recovered: Recovered = null
+  try {
+    recovered = await recoverOwnUpload(entryId, sides.base, deps)
+  } catch (err) {
+    deps.log.warn(`${tag(deps)}: ${entryId} this PC's interrupted copy could not be recovered`, err)
+  }
+  if (!recovered) return { sides, finished: null }
+  return { sides: await readSides(savePaths, deps), finished: recovered.finished }
 }
 
 /** Back up this PC's saves into <backupsDir>/<safe id>/<ISO> <reason>.zip (10 kept). */
@@ -624,10 +699,106 @@ export async function adoptOldCopy(
   }
 }
 
+/** Whether this PC wrote the copy `meta` describes: by install id when both have one, else by the PC's name. */
+export function isOwnCopy(
+  meta: Pick<CloudMeta, 'machine' | 'machineId'>,
+  deps: Pick<CloudSyncDeps, 'machine' | 'machineId'>
+): boolean {
+  if (deps.machineId && meta.machineId) return meta.machineId === deps.machineId
+  return meta.machine === deps.machine
+}
+
+/** A pending meta.json an upload writes before it swaps current/ (renamed into place once the swap is done). */
+const PENDING_META = /^meta\.json\.[0-9a-f]{8}\.playout-new$/i
+/** The previous current/ an upload set aside while it swapped the new one in. */
+const SET_ASIDE = /^current\.[0-9a-f]{8}\.playout-old$/i
+/** Any work in progress an upload leaves in the copy folder. */
+const LEFTOVER = /\.playout-(new|old)$/i
+
+/** What recoverOwnUpload did: null nothing; `finished` the hash of the upload it finished (null: it undid one). */
+type Recovered = { finished: string | null } | null
+
+/** The saves hash of a copy's `count` roots under `dir` (<dir>/0, <dir>/1...). */
+async function rootsHash(dir: string, count: number): Promise<string | null> {
+  return (await hashSaves(Array.from({ length: count }, (_, i) => join(dir, String(i))))).hash
+}
+
+/** Remove the work in progress earlier uploads left in the copy folder (the copy itself is whole again). */
+async function removeLeftovers(base: string, deps: CloudSyncDeps): Promise<void> {
+  const names = await fs.readdir(base).catch(() => [] as string[])
+  for (const n of names.filter((x) => LEFTOVER.test(x)))
+    await removeInside(base, join(base, n)).catch((err) =>
+      deps.log.warn(`${tag(deps)}: left over in the copy folder:`, join(base, n), err)
+    )
+}
+
+/**
+ * Finish or undo this PC's own upload that was cut off between swapping current/ and writing meta.json (PlayOut
+ * closed, the PC lost power, or a sync client or antivirus held meta.json): current/ then holds the new saves while
+ * meta.json still names the previous ones, which every PC reads as a copy still arriving, for good.
+ * - A pending meta.json this PC wrote whose hash is current/'s is put in place (the upload is finished).
+ * - Else, with meta.json this PC's and current/ not matching it, the previous current/ this PC set aside is put back
+ *   when it matches meta.json (the upload is undone; what current/ held is backed up first).
+ * Set-aside folders and pending meta.json files exist only on the PC that made them (the Emulation folder sync leaves
+ * them out). Returns what was done (null: nothing), with the hash of an upload it finished.
+ */
+async function recoverOwnUpload(
+  entryId: string,
+  base: string,
+  deps: CloudSyncDeps
+): Promise<Recovered> {
+  let names: string[]
+  try {
+    names = await fs.readdir(base)
+  } catch {
+    return null
+  }
+  const current = join(base, 'current')
+  for (const n of names.filter((x) => PENDING_META.test(x)).sort()) {
+    const pending = (await loadMetaFile(join(base, n))).meta
+    if (!pending || !isOwnCopy(pending, deps)) continue
+    if ((await rootsHash(current, pending.roots.length)) !== pending.hash) continue
+    await renameRetry(join(base, n), join(base, 'meta.json'))
+    deps.log.info(`${tag(deps)}: ${entryId} finished this PC's interrupted copy in ${base}`)
+    await removeLeftovers(base, deps)
+    return { finished: pending.hash }
+  }
+  const meta = (await loadCloudMeta(base)).meta
+  if (!meta || !isOwnCopy(meta, deps)) return null
+  const count = meta.roots.length
+  if ((await rootsHash(current, count)) === meta.hash) return null
+  for (const n of names.filter((x) => SET_ASIDE.test(x)).sort()) {
+    const old = join(base, n)
+    if ((await rootsHash(old, count)) !== meta.hash) continue
+    if (await pathExists(current)) {
+      const files = await listSaveFiles(await currentRoots(base))
+      if (files.length) {
+        const now = (deps.now ?? (() => new Date()))()
+        const dir = join(deps.backupsDir, cloudSaveKey(entryId), 'replaced copies')
+        await zipSaves(join(dir, `${stamp(now)} unfinished copy.zip`), files, {
+          at: now.toISOString(),
+          machine: deps.machine,
+          hash: null,
+          roots: meta.roots,
+          reason: 'an unfinished copy, taken out'
+        })
+        await pruneBackups(dir, KEEP_CLOUD_BACKUPS)
+      }
+      await renameRetry(current, join(base, inProgress('current.failed', 'old')))
+    }
+    await renameRetry(old, current)
+    deps.log.info(`${tag(deps)}: ${entryId} undid this PC's interrupted copy in ${base}`)
+    await removeLeftovers(base, deps)
+    return { finished: null }
+  }
+  return null
+}
+
 /**
  * Copy this PC's saves to the Emulation folder: a fresh copy in a temp folder, the current copy backed up (unless it
- * is these very saves), swapped in, then meta.json. A failure part way puts the previous copy back, so current/ and
- * meta.json always agree again.
+ * is these very saves), a pending meta.json written, current/ swapped in, then the pending meta.json renamed into
+ * place. A failure part way puts the previous copy back, so current/ and meta.json agree again; when even that fails
+ * (or PlayOut stops part way), the pending meta.json and the set-aside copy stay for recoverOwnUpload.
  */
 /**
  * The history an upload records: `replaced` is the copy hash the uploader knowingly replaces (the copy it last synced
@@ -653,6 +824,7 @@ async function upload(
   const tmp = join(base, inProgress('current', 'new'))
   const current = join(base, 'current')
   const old = join(base, inProgress('current', 'old'))
+  const metaTmp = join(base, inProgress('meta.json', 'new'))
   let movedOld = false
   let swapped = false
   try {
@@ -665,6 +837,17 @@ async function upload(
       throw new Error(tMain('mainRecomp.saves.changedWhileCopying'))
     // Whatever is replaced is kept first (a backup failure stops the upload: nothing is replaced unsaved).
     if (sides.cloud.hash !== sides.local.hash) await backupCloud(entryId, sides, deps)
+    const meta: CloudMeta = {
+      hash: sides.local.hash ?? '',
+      at: now.toISOString(),
+      machine: deps.machine,
+      ...(deps.machineId ? { machineId: deps.machineId } : {}),
+      roots: sides.templates,
+      history: history.filter((h) => h !== sides.local.hash).slice(0, MAX_COPY_HISTORY),
+      ...(deps.extraMeta ? { extra: { ...deps.extraMeta } } : {})
+    }
+    // Written before the swap: should PlayOut stop between the swap and meta.json, it finishes the copy later.
+    await fs.writeFile(metaTmp, JSON.stringify(meta, null, 2))
     try {
       await renameRetry(current, old)
       movedOld = true
@@ -673,45 +856,36 @@ async function upload(
     }
     await renameRetry(tmp, current)
     swapped = true
-    const meta: CloudMeta = {
-      hash: sides.local.hash ?? '',
-      at: now.toISOString(),
-      machine: deps.machine,
-      roots: sides.templates,
-      history: history.filter((h) => h !== sides.local.hash).slice(0, MAX_COPY_HISTORY)
-    }
-    const metaTmp = join(base, inProgress('meta.json', 'new'))
-    try {
-      await fs.writeFile(metaTmp, JSON.stringify(meta, null, 2))
-      await renameRetry(metaTmp, join(base, 'meta.json'))
-    } catch (err) {
-      await fs.rm(metaTmp, { force: true }).catch(() => undefined)
-      throw err
-    }
+    await renameRetry(metaTmp, join(base, 'meta.json'))
     swapped = false
   } catch (err) {
+    let newInPlace = swapped
     if (swapped) {
       // meta.json still describes the previous copy: take the new one out again.
       const discard = join(base, inProgress('current.failed', 'old'))
       try {
         await renameRetry(current, discard)
+        newInPlace = false
         await removeInside(base, discard).catch(() => undefined)
       } catch (e) {
-        deps.log.warn('recomp saves: the new copy could not be taken out again', e)
+        deps.log.warn(`${tag(deps)}: the new copy could not be taken out again`, e)
       }
     }
     if (movedOld && !(await pathExists(current).catch(() => true))) {
       await renameRetry(old, current).catch((e) =>
-        deps.log.warn('recomp saves: the previous copy could not be put back from', old, e)
+        deps.log.warn(`${tag(deps)}: the previous copy could not be put back from`, old, e)
       )
     }
+    // The new copy still in place: its pending meta.json stays, and the next copy finishes it (recoverOwnUpload).
+    if (!newInPlace) await fs.rm(metaTmp, { force: true }).catch(() => undefined)
     await removeInside(base, tmp).catch(() => undefined)
     throw err
   }
   if (movedOld)
     await removeInside(base, old).catch((err) =>
-      deps.log.warn('recomp saves: old copy left', old, err)
+      deps.log.warn(`${tag(deps)}: old copy left`, old, err)
     )
+  await removeLeftovers(base, deps)
   return sides.local.hash
 }
 
@@ -723,17 +897,65 @@ async function upload(
 function checkRestorable(sides: Sides): void {
   const meta = sides.cloud.meta
   if (meta && (!sides.rootsMatch || meta.roots.length !== sides.paths.length)) {
+    const none = tMain('mainRecomp.saves.noFolders')
     throw new Error(
-      `The copy's save folder(s) (${meta.roots.join(', ') || 'none'}) are not this PC's (${sides.templates.join(', ') || 'none'}); set the same save folders on both PCs.`
+      tMain('mainRecomp.saves.foldersDiffer', {
+        copy: meta.roots.join(', ') || none,
+        here: sides.templates.join(', ') || none
+      })
     )
   }
 }
 
-async function restore(sides: Sides): Promise<string | null> {
+/**
+ * restore, all or nothing: every file it replaces or deletes is first copied aside (into this recompilation's local
+ * backups folder, never the Emulation folder), and a failure part way puts them back and takes out the files it
+ * added, so this PC never keeps a mix of its saves and the copy's.
+ */
+async function restore(entryId: string, sides: Sides, deps: CloudSyncDeps): Promise<string | null> {
   const meta = sides.cloud.meta
   if (!meta) return null
-  const savePaths = sides.paths
   checkRestorable(sides)
+  const backups = join(deps.backupsDir, cloudSaveKey(entryId))
+  const stash = join(backups, inProgress('restore', 'old'))
+  /** Each change made, in order: the file, the folder it may be deleted from, and where its old content is kept. */
+  const done: { target: string; within: string; kept: string | null }[] = []
+  const keep = async (target: string, within: string): Promise<void> => {
+    const kept = (await pathExists(target)) ? join(stash, String(done.length)) : null
+    if (kept) await copyFileAtomic(target, kept)
+    done.push({ target, within, kept })
+  }
+  try {
+    const hash = await restoreFiles(sides, meta, keep)
+    await removeInside(backups, stash).catch(() => undefined)
+    return hash
+  } catch (err) {
+    let whole = true
+    for (const d of done.reverse()) {
+      try {
+        if (d.kept) await copyFileAtomic(d.kept, d.target)
+        else await removeInside(d.within, d.target)
+      } catch (e) {
+        whole = false
+        deps.log.warn(`${tag(deps)}: ${entryId} could not put ${d.target} back`, e)
+      }
+    }
+    if (whole) await removeInside(backups, stash).catch(() => undefined)
+    else
+      deps.log.warn(
+        `${tag(deps)}: ${entryId} this PC's saves before the restore are kept in`,
+        stash
+      )
+    throw err
+  }
+}
+
+async function restoreFiles(
+  sides: Sides,
+  meta: CloudMeta,
+  keep: (target: string, within: string) => Promise<void>
+): Promise<string | null> {
+  const savePaths = sides.paths
   // A root that is a single file (the copy keeps it as current/<i>/<its name>): a file here, or — when missing
   // here — a copied root holding just one file of that name.
   const fileRoot: boolean[] = []
@@ -752,17 +974,16 @@ async function restore(sides: Sides): Promise<string | null> {
     const target = fileRoot[f.root] ? root : join(root, ...f.rel.split('/'))
     if (!isInside(root, target)) throw new Error(`Refusing to write ${target} outside ${root}.`)
     want.add(normalizePath(target))
+    await keep(target, fileRoot[f.root] ? dirname(root) : root)
     await copyFileAtomic(f.abs, target)
   }
   for (const f of sides.local.files) {
     if (want.has(normalizePath(f.abs))) continue
     const root = savePaths[f.root]
-    if (normalizePath(root) === normalizePath(f.abs)) {
-      // A single-file root the copy does not have: only its parent may hold it, delete just that file.
-      await removeInside(dirname(root), f.abs)
-    } else {
-      await removeInside(root, f.abs)
-    }
+    // A single-file root the copy does not have: only its parent may hold it, delete just that file.
+    const within = normalizePath(root) === normalizePath(f.abs) ? dirname(root) : root
+    await keep(f.abs, within)
+    await removeInside(within, f.abs)
   }
   const after = await hashSaves(savePaths)
   if (after.hash !== meta.hash) throw new Error(tMain('mainRecomp.saves.copyMismatch'))
@@ -817,12 +1038,15 @@ export async function syncSaves(
     }
   }
   let sides: Sides
+  let finished: string | null
   try {
-    sides = await readSides(savePaths, deps)
+    ;({ sides, finished } = await readSidesRecovered(entryId, savePaths, deps))
   } catch (err) {
-    deps.log.warn(`recomp saves: ${entryId} (${direction}) cannot sync:`, err)
+    deps.log.warn(`${tag(deps)}: ${entryId} (${direction}) cannot sync:`, err)
     return failed(state, err)
   }
+  // An upload of this PC's finished just now: what this PC last synced with, as if it had not been cut off.
+  if (finished) state = { ...state, syncedHash: finished }
   const L = sides.local.hash
   const C = sides.cloud.hash
   const S = state.syncedHash
@@ -830,7 +1054,7 @@ export async function syncSaves(
     if (!sides.cloud.intact) {
       // Our own interrupted upload, with the local saves unchanged since: write it again. Anyone else's: wait.
       const meta = sides.cloud.meta
-      if (meta && meta.machine === deps.machine && L !== null && L === S) {
+      if (meta && isOwnCopy(meta, deps) && L !== null && L === S) {
         // This PC's own copy keeps its history (or, when its meta.json is behind these saves, replaces it).
         const history = meta.hash === L ? (meta.history ?? []) : nextHistory(sides, meta.hash)
         await upload(entryId, sides, deps, history)
@@ -853,15 +1077,15 @@ export async function syncSaves(
     }
     if (C === null) {
       deps.log.info(
-        `recomp saves: ${entryId} copying to the Emulation folder (${direction}, no copy there)`
+        `${tag(deps)}: ${entryId} copying to the Emulation folder (${direction}, no copy there)`
       )
       return synced(state, await upload(entryId, sides, deps, []), now)
     }
     if (L === null) {
       deps.log.info(
-        `recomp saves: ${entryId} copying back from the Emulation folder (${direction}, nothing here)`
+        `${tag(deps)}: ${entryId} copying back from the Emulation folder (${direction}, nothing here)`
       )
-      return synced(state, await restore(sides), now)
+      return synced(state, await restore(entryId, sides, deps), now)
     }
     // Only a copy that moved on from this PC's last sync is taken (its history reaches S). One that did not is a
     // conflict although this PC's saves did not change: two PCs uploaded from the same saves and the Emulation folder
@@ -869,20 +1093,20 @@ export async function syncSaves(
     const history = sides.cloud.meta?.history
     if (L === S && C !== S && (history === undefined || (S !== null && history.includes(S)))) {
       deps.log.info(
-        `recomp saves: ${entryId} copy newer (${sides.cloud.meta?.machine}), copying back (${direction})`
+        `${tag(deps)}: ${entryId} copy newer (${sides.cloud.meta?.machine}), copying back (${direction})`
       )
       checkRestorable(sides)
       await backupLocal(entryId, sides, deps, 'before restore')
-      return synced(state, await restore(sides), now)
+      return synced(state, await restore(entryId, sides, deps), now)
     }
     if (C === S && L !== S) {
       deps.log.info(
-        `recomp saves: ${entryId} local newer, copying to the Emulation folder (${direction})`
+        `${tag(deps)}: ${entryId} local newer, copying to the Emulation folder (${direction})`
       )
       return synced(state, await upload(entryId, sides, deps, nextHistory(sides, C)), now)
     }
     // Both changed since the last sync (or never synced and different): the user decides.
-    deps.log.info(`recomp saves: ${entryId} conflict (${direction})`)
+    deps.log.info(`${tag(deps)}: ${entryId} conflict (${direction})`)
     return {
       ...state,
       localHash: L,
@@ -895,7 +1119,7 @@ export async function syncSaves(
       }
     }
   } catch (err) {
-    deps.log.warn(`recomp saves: ${entryId} (${direction}) sync failed:`, err)
+    deps.log.warn(`${tag(deps)}: ${entryId} (${direction}) sync failed:`, err)
     return failed(state, err, L)
   }
 }
@@ -915,7 +1139,7 @@ export async function resolveConflict(
   let sides: Sides
   try {
     if (!savePaths.length) throw new Error(tMain('mainRecomp.saves.unknownLocationShort'))
-    sides = await readSides(savePaths, deps)
+    sides = (await readSidesRecovered(entryId, savePaths, deps)).sides
   } catch (err) {
     return failed(state, err)
   }
@@ -931,11 +1155,11 @@ export async function resolveConflict(
     if (sides.local.hash !== sides.cloud.hash) {
       checkRestorable(sides)
       await backupLocal(entryId, sides, deps, 'before restore')
-      return synced(state, await restore(sides), now)
+      return synced(state, await restore(entryId, sides, deps), now)
     }
     return synced(state, sides.local.hash, now)
   } catch (err) {
-    deps.log.warn(`recomp saves: ${entryId} resolving the conflict (${keep}) failed:`, err)
+    deps.log.warn(`${tag(deps)}: ${entryId} resolving the conflict (${keep}) failed:`, err)
     return failed(state, err, sides.local.hash)
   }
 }

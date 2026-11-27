@@ -20,6 +20,7 @@ export function createLauncher(deps: LauncherDeps): LauncherService {
     log: deps.log,
     beforeLaunch: deps.beforeLaunch,
     launchBlocked: deps.launchBlocked,
+    beforeGameLaunch: deps.beforeGameLaunch,
     events: deps.events
   })
   return {
@@ -36,7 +37,13 @@ export function createLauncher(deps: LauncherDeps): LauncherService {
   }
 }
 
-export type { LauncherDeps, LauncherService, RunningGame, WindowController } from './types'
+export type {
+  LauncherDeps,
+  LauncherService,
+  LaunchOptions,
+  RunningGame,
+  WindowController
+} from './types'
 export type { ProcessInfo, ProcessMonitor } from './process-monitor'
 export type {
   SessionTiming,

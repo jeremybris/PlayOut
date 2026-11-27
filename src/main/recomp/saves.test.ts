@@ -1,7 +1,7 @@
-import { promises as fs } from 'fs'
+import { promises as fs, type Dirent } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { InstalledRecomp, RecompEntry } from '../../shared/recomp'
 import type { KnownFolders } from '../util/paths'
 import {
@@ -13,6 +13,7 @@ import {
   hashSaves,
   isPlausibleSaveFolder,
   isSafeSaveRoot,
+  listSaveFiles,
   looksLikeSave,
   nameTokens,
   readDeveloperSaves,
@@ -624,5 +625,82 @@ describe('save folders that would hold game data or private files', () => {
       ctx
     )
     expect(r).toEqual({ paths: ['{install}/assets'], source: 'user' })
+  })
+})
+
+/**
+ * Make fs.readdir report the entries named `names` as links, the way Windows lists OneDrive placeholders (cloud
+ * files, hydrated or not): every reparse point is a link to readdir, while lstat shows the regular file or folder.
+ */
+function asPlaceholders(names: string[]): { mockRestore: () => void } {
+  const real = fs.readdir.bind(fs) as (...a: unknown[]) => Promise<unknown>
+  return vi.spyOn(fs, 'readdir').mockImplementation((async (p: unknown, opts?: unknown) => {
+    const out = await real(p, opts)
+    if (!(opts as { withFileTypes?: boolean } | undefined)?.withFileTypes) return out
+    return (out as Dirent[]).map((e) =>
+      names.includes(e.name)
+        ? Object.assign(Object.create(Object.getPrototypeOf(e) as object) as Dirent, e, {
+            isSymbolicLink: () => true,
+            isFile: () => false,
+            isDirectory: () => false
+          })
+        : e
+    )
+  }) as never)
+}
+
+describe('OneDrive placeholders (listed as links, regular files to lstat)', () => {
+  it('listSaveFiles lists placeholder files and walks placeholder folders', async () => {
+    const root = join(folders.localAppData, 'Zelda64Recompiled')
+    await write(join(root, 'a.sav'), 'a')
+    await write(join(root, 'slots', 'b.sav'), 'b')
+    const spy = asPlaceholders(['a.sav', 'slots'])
+    try {
+      expect((await listSaveFiles([root])).map((f) => f.rel)).toEqual(['a.sav', 'slots/b.sav'])
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
+  it('listSaveFiles still skips real links (junctions)', async () => {
+    const root = join(folders.localAppData, 'Zelda64Recompiled')
+    await write(join(root, 'a.sav'), 'a')
+    await write(join(tmp, 'elsewhere', 'big.dat'), 'x')
+    await fs.symlink(join(tmp, 'elsewhere'), join(root, 'linked'), 'junction')
+    expect((await listSaveFiles([root])).map((f) => f.rel)).toEqual(['a.sav'])
+  })
+
+  it('a session snapshot sees placeholder saves', async () => {
+    await write(join(install, 'saves', 'slot1.sav'), 'save')
+    const spy = asPlaceholders(['saves'])
+    try {
+      const snap = await snapshotSaveCandidates(entry(), installed(), folders)
+      expect([...snap.files.keys()]).toContain(join(install, 'saves', 'slot1.sav'))
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
+  it('findSaveFolders finds a placeholder save folder and counts its placeholder saves', async () => {
+    await write(join(folders.localAppData, 'Zelda64Recompiled', 'saves', 'file1.bin'), 'save')
+    const spy = asPlaceholders(['Zelda64Recompiled', 'saves', 'file1.bin'])
+    try {
+      expect(
+        (await findSaveFolders(entry(), installed(), ctx)).map((f) => [f.path, f.saves])
+      ).toEqual([[join(folders.localAppData, 'Zelda64Recompiled'), 1]])
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
+  it('a session snapshot walks a placeholder save folder under AppData', async () => {
+    await write(join(folders.localAppData, 'Zelda64Recompiled', 'saves', 'file1.bin'), 'save')
+    const spy = asPlaceholders(['Zelda64Recompiled'])
+    try {
+      const snap = await snapshotSaveCandidates(entry(), installed(), folders)
+      expect(snap.roots).toContain(join(folders.localAppData, 'Zelda64Recompiled'))
+    } finally {
+      spy.mockRestore()
+    }
   })
 })

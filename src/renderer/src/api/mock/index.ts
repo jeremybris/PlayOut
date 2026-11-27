@@ -90,6 +90,7 @@ import { createRecompMock } from './recomp'
 import { createVrModsMock } from './vrMods'
 import { createSteamDlcMock } from './steamDlc'
 import { createUpgradesMock } from './upgrades'
+import { createPcSavesMock } from './pcSaves'
 import { createPeerPartyMock } from './peerparty'
 import { createMetadataCloudMock } from './metadataCloud'
 import { createStreamingMock } from './streaming'
@@ -1288,6 +1289,16 @@ export function createMockApi(options: MockOptions = {}): PlayOutApi {
   // Upgrades (mock/upgrades.ts): Cyberpunk 2077 has old DLSS / FSR / XeSS files, Helldivers 2 warns about bans.
   const upgrades = createUpgradesMock({ emitter, games, log })
 
+  // PC Saves (mock/pcSaves.ts): a game you added gets a save folder from its Edit sheet; the path picked picks the state.
+  const pcSaves = createPcSavesMock({
+    emitter,
+    games,
+    emulationDir: mockEmulationDir,
+    featureOn: () => settings.library.copyPcSaves,
+    runningId: () => running?.gameId ?? null,
+    now
+  })
+
   // PeerParty (mock/peerparty.ts): installed multiplayer PC games without competitive tags or anti-cheat get LAN play.
   const peerParty = createPeerPartyMock({
     emitter,
@@ -1924,6 +1935,11 @@ export function createMockApi(options: MockOptions = {}): PlayOutApi {
           })
         }
       }
+      if (pcSaves.blocksLaunch(id))
+        return launchFailed(id, {
+          kind: 'save-conflict',
+          message: `The saves of ${title} changed on this PC and in the Emulation folder since they were last copied. Choose which to keep.`
+        })
       log(`launch ${title}: ${describeLaunch(game.launch)}`)
       return { ok: true, startedAt: beginSession(game) }
     },
@@ -2227,6 +2243,7 @@ ${apiKey}`
     // --- Steam DLC (mock/steamDlc.ts) ---------------------------------------------------
     ...steamDlc.api,
     ...upgrades.api,
+    ...pcSaves.api,
 
     // --- PeerParty (mock/peerparty.ts) ----------------------------------------------------
     ...peerParty.api,

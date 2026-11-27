@@ -14,7 +14,7 @@ import {
   type ProcessMonitor
 } from './process-monitor'
 import type { SessionTracker } from './session-tracker'
-import type { LauncherService } from './types'
+import type { LauncherService, LaunchOptions } from './types'
 import { tMain } from '../i18n'
 
 /** What a Windows shortcut points at (Electron's shell.readShortcutLink). */
@@ -67,6 +67,11 @@ export interface GameLauncherDeps {
    * so Play, the play menu and a streamed start are all refused with this line.
    */
   launchBlocked?(game: Game): string | null
+  /**
+   * Called once a launch is planned, before anything starts (PC Saves copies a newer copy of a game's saves back): an
+   * error refuses the start with it; a throw is logged and the game starts. `streamed`: a paired PC's stream.
+   */
+  beforeGameLaunch?(game: Game, context: { streamed: boolean }): Promise<LaunchError | null>
   io?: Partial<LaunchIo>
 }
 
@@ -267,7 +272,7 @@ export function createGameLauncher(deps: GameLauncherDeps): LauncherService {
     if (ran) endedAt.set(ran.emulatorId, { at: Date.now(), pid: ran.pid })
   })
 
-  function launch(game: Game, options?: { emulatorId?: string }): Promise<LaunchResult> {
+  function launch(game: Game, options?: LaunchOptions): Promise<LaunchResult> {
     const blocked = deps.launchBlocked?.(game) ?? null
     if (blocked) {
       log.warn(`cannot launch ${game.title}: ${blocked}`)
@@ -283,11 +288,23 @@ export function createGameLauncher(deps: GameLauncherDeps): LauncherService {
     return result
   }
 
-  async function launchNow(game: Game, options?: { emulatorId?: string }): Promise<LaunchResult> {
+  async function launchNow(game: Game, options?: LaunchOptions): Promise<LaunchResult> {
     const plan = await planLaunch(game, options, emulation, log)
     if ('error' in plan) {
       log.warn(`cannot launch ${game.title}: ${plan.error.kind}: ${plan.error.message}`)
       return { ok: false, error: plan.error }
+    }
+    if (deps.beforeGameLaunch) {
+      let refused: LaunchError | null = null
+      try {
+        refused = await deps.beforeGameLaunch(game, { streamed: options?.streamed === true })
+      } catch (err) {
+        log.warn(`before-launch step for ${game.title} failed: ${(err as Error).message}`)
+      }
+      if (refused) {
+        log.warn(`cannot launch ${game.title}: ${refused.kind}: ${refused.message}`)
+        return { ok: false, error: refused }
+      }
     }
     if (plan.kind === 'spawn') await ensureBattlenetClient(game)
     if (plan.kind === 'spawn' && plan.emulatorId && deps.beforeLaunch) {

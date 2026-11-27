@@ -5,6 +5,7 @@ import { ConfirmDialog } from './components/ConfirmDialog'
 import { CoverMenuHost } from './components/CoverMenu'
 import { ScanBars } from './components/ScanBars'
 import { LaunchErrorDialog } from './components/LaunchErrorDialog'
+import { PcSaveConflictDialog } from './components/PcSaveConflictDialog'
 import { ToastHost } from './components/Toast'
 import {
   MODAL_EXIT_FALLBACK_MS,
@@ -529,6 +530,9 @@ function ModalView({ modal, onClose }: { modal: OpenModal; onClose: () => void }
     case 'quickpanel':
       return <QuickPanel focus={modal.focus} onClose={onClose} />
     case 'launch-error':
+      // A game the user added with a saves question open: the question itself (PC Saves).
+      if (modal.error.kind === 'save-conflict')
+        return <PcSaveConflictDialog gameId={modal.gameId} error={modal.error} onClose={onClose} />
       return <LaunchErrorDialog gameId={modal.gameId} error={modal.error} onClose={onClose} />
     case 'recomp':
       return (

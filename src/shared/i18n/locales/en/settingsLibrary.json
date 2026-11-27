@@ -51,6 +51,10 @@
       "clear": "Default",
       "picker": "Choose your Emulation folder (holds bios, roms, saves…)",
       "generatePicker": "Choose where to put the Emulation folder (an Emulation folder is made inside it)"
+    },
+    "copyPcSaves": {
+      "label": "Copy saves of games you added",
+      "description": "For each PC game you added, pick its save folder in the game’s Edit sheet: PlayOut copies it to PC Saves in the Emulation folder before and after you play, so the saves follow you to your other PCs. What is replaced is backed up on this PC first."
     }
   },
   "frontPage": {

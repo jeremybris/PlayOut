@@ -14,8 +14,8 @@ import { safeEntryPath } from '../../util/zip'
  * - the ROM folder, when it is another folder inside the Emulation folder;
  * - the leftovers of PlayOut's own work: a sync's files in progress (`.playout-sync`) and the emulator setup's
  *   junction probes and moved folders (`.playout-new`, `.playout-old`, `.playout-old-2`…).
- * Kept in: "Recompilations Saves", the copies of recompilation saves (src/main/recomp/cloud.ts): this sync is how they
- * reach the other PC. Their work in progress uses the `.playout-new` / `.playout-old` names above, and their backups
+ * Kept in: "Recompilations Saves" and "PC Saves", the copies of recompilation saves (src/main/recomp/cloud.ts) and of
+ * the saves of PC games the user added (src/main/pc-saves): this sync is how they reach the other PC. Their work in progress uses the `.playout-new` / `.playout-old` names above, and their backups
  * stay outside the Emulation folder.
  * Junctions and other links are never followed or copied (the walker skips them): each PC's emulator setup makes
  * its own, pointing at that PC's folders.

@@ -1187,6 +1187,44 @@
   gap: 0.8rem;
 }
 
+/*
+ * The Save folder row (PC Saves): its status and description wrap; the answers sit under them. The thumb stays to
+ * the left of the text like the artwork rows (the text's basis is 0, not its longest line); only the buttons wrap
+ * onto a line of their own when the pane is narrow.
+ */
+.gsheet__media--saves {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.gsheet__media--saves > .gsheet__media-text {
+  flex: 1 1 0;
+  min-width: 18rem;
+}
+
+.gsheet__media--saves > .gsheet__media-actions {
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.gsheet__media--saves .gsheet__media-desc {
+  white-space: normal;
+}
+
+.gsheet__media--saves .gsheet__media-desc--path {
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.gsheet__media-desc--warn {
+  color: var(--color-warning, var(--color-text-secondary));
+}
+
+.gsheet__media--saves .gsheet__media-text .gsheet__media-actions {
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+}
+
 .gsheet__media-actions .btn {
   padding: 0 1.4rem;
 }
