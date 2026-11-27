@@ -1,4 +1,3 @@
-import { knownWithoutRetroAchievements } from '@shared/ra-consoles'
 import type {
   Game,
   InstallProgress,
@@ -27,6 +26,9 @@ import { IconButton } from '../../components/IconButton'
 import { StarRating } from '../../components/StarRating'
 import { Stat } from '../../components/Stat'
 import { FeatureGrid } from './FeatureGrid'
+import { SteamLinksGrid } from './SteamLinksGrid'
+import { presentSteamLinks } from './steamLinks'
+import { achievementsStat } from './achievements-stat'
 import {
   FEATURE_FOCUS,
   featuresWaitForPlay,
@@ -215,11 +217,9 @@ export function ActionBar({
   const queued = game.installed && !remote ? undefined : queuedProp
   // ROMs: RetroAchievements takes the place of store achievements (its list says how to sign in when needed); left
   // out for a ROM (a recompilation's game too) known to have none: its system has none, or the RetroAchievements
-  // sync found none for it.
-  const isRom = game.source === 'rom'
-  const showAchievements =
-    meta.achievements !== undefined ||
-    (!remote && (game.source === 'steam' || (isRom && !knownWithoutRetroAchievements(game))))
+  // sync found none for it. A recompilation whose achievements PlayOut reads shows its own (achievements-stat.ts).
+  const achStat = achievementsStat(game)
+  const showAchievements = achStat.show
   // The list open when the sync finds the game has none: it closes, and focus goes to Play (its stat is gone).
   // Once per opening: the toggle flips, so a second call would open it again.
   const closedFor = useRef(false)
@@ -381,7 +381,8 @@ export function ActionBar({
       sizeOnButton ?? '',
       failure ?? '',
       queueNote ?? '',
-      presentFeatures({ recomp, upgrade, coop, peerParty })
+      presentFeatures({ recomp, upgrade, coop, peerParty }),
+      presentSteamLinks(game)
     ].join('|')
   )
 
@@ -534,6 +535,7 @@ export function ActionBar({
           streamLive: live
         })}
       />
+      <SteamLinksGrid game={game} />
       {failure ? (
         <span className="gdetail__install-failed" role="status">
           {failure}
@@ -547,7 +549,9 @@ export function ActionBar({
       <div ref={statsRef} className={cx('gdetail__stats', fit.compact && COMPACT)}>
         {showAchievements ? (
           <Stat
-            label={isRom ? 'RetroAchievements' : t('gameDetail.stats.achievements')}
+            label={
+              achStat.label === 'retro' ? 'RetroAchievements' : t('gameDetail.stats.achievements')
+            }
             value={achievementsValue}
             trailing={
               <ChevronDown

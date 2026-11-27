@@ -100,6 +100,20 @@ describe('mock recompilations', () => {
     expect(await api.getGameRecomps(games.find((g) => g.title === 'Hades')!.id)).toBeNull()
   })
 
+  it("shows Burnout Revenge's recompilation achievements, gamerscore and unlock dates", async () => {
+    const api = createMockApi({ search: '' })
+    const id = await gameIdOf(api, 'Burnout Revenge')
+    const before = (await api.getLibrary()).games.find((g) => g.id === id)!
+    expect(before.metadata.recomp?.achievements).toEqual([XERENGE])
+    const info = await api.getAchievements(id)
+    expect(info).toMatchObject({ provider: 'recomp', total: 8, unlocked: 3 })
+    expect(info?.points?.total).toBeGreaterThan(info!.points!.earned)
+    expect(info?.list.filter((a) => a.unlocked).every((a) => a.unlockedAt)).toBe(true)
+    // The counts land on the card, as main's do.
+    const after = (await api.getLibrary()).games.find((g) => g.id === id)!
+    expect(after.metadata.achievements).toMatchObject({ unlocked: 3, total: 8 })
+  })
+
   it('getGameRecomps lists both Doom 64 ports with the installed one, its update and the ROM found', async () => {
     const api = createMockApi({ search: '' })
     const id = await gameIdOf(api, 'Doom 64')

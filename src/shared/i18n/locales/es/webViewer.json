@@ -1,0 +1,35 @@
+{
+  "links": {
+    "label": "Enlaces de Steam",
+    "store": "Página de la tienda de Steam",
+    "workshop": "Steam Workshop",
+    "pcgamingwiki": "PCGamingWiki",
+    "guides": "Guías de Steam",
+    "storeTitle": "Página de la tienda de Steam: ábrela aquí, en PlayOut",
+    "workshopTitle": "Steam Workshop: los mods y el contenido de la comunidad del juego, aquí en PlayOut",
+    "pcgamingwikiTitle": "PCGamingWiki: arreglos, ajustes y ubicación de las partidas, aquí en PlayOut",
+    "guidesTitle": "Guías de Steam: las guías de la comunidad, aquí en PlayOut"
+  },
+  "viewer": {
+    "label": "{title} en PlayOut",
+    "loading": "Cargando…",
+    "failed": "La página no se ha cargado. Comprueba la conexión y pulsa Recargar.",
+    "back": "Atrás",
+    "forward": "Adelante",
+    "reload": "Recargar",
+    "external": "Abrir en el navegador",
+    "close": "Cerrar",
+    "previewTitle": "Vista previa",
+    "preview": "En PlayOut, esta página se muestra aquí: {url}",
+    "held": "La página quiere abrir {host} fuera de PlayOut.",
+    "dismiss": "Descartar"
+  },
+  "hints": {
+    "back": "Atrás / Cerrar",
+    "previous": "Página anterior",
+    "next": "Página siguiente",
+    "scroll": "Desplazar",
+    "reload": "Recargar",
+    "external": "Abrir en el navegador"
+  }
+}

@@ -282,7 +282,12 @@
     "unlockedOn": "Unlocked {date}",
     "unlocked": "Unlocked",
     "hardcore": "Hardcore",
-    "locked": "Locked"
+    "locked": "Locked",
+    "gamerscore": "{earned}/{total} G",
+    "gamerscorePts": "{points} G",
+    "recompPlayOnce": "No achievements to show yet. Play the game once; its achievements appear here after you unlock one.",
+    "recompCountOnly_one": "{count} achievement unlocked. The game's achievement list could not be read from your copy of the game.",
+    "recompCountOnly_other": "{count} achievements unlocked. The game's achievement list could not be read from your copy of the game."
   },
   "coop": {
     "subtitle": "Co-Op setup",

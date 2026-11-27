@@ -887,3 +887,190 @@ describe('credential changes mid-flight', () => {
     expect(library.getGame(ids.chrono)?.metadata.achievements).toBeUndefined()
   })
 })
+
+// ---------------------------------------------------------------------------
+// Recompilations
+// ---------------------------------------------------------------------------
+
+describe('recompilation achievements', () => {
+  const RECOMP = 'github:someone/game-recomp'
+  const played = vi.fn()
+  beforeEach(() => played.mockReset())
+
+  /** A disc image card whose installed recompilation Play starts; `readable` = PlayOut reads its achievements. */
+  async function recompCard(systemId: string, readable = true): Promise<string> {
+    const id = library.mergeScan('rom', [await rom(`game-${systemId}.iso`, 'Some Game', systemId)])
+      .newGameIds[0]!
+    library.applyMetadata(
+      id,
+      {
+        metadata: {
+          recomp: {
+            titleKey: `${systemId}:some game`,
+            count: 1,
+            installed: [RECOMP],
+            preferred: RECOMP,
+            ...(readable ? { achievements: [RECOMP] } : {}),
+            updatedAt: new Date().toISOString()
+          }
+        }
+      },
+      { overwrite: true, quiet: true }
+    )
+    return id
+  }
+
+  const recompInfo = (unlocked: number, total: number): AchievementsInfo => ({
+    provider: 'recomp',
+    total,
+    unlocked,
+    points: { earned: unlocked * 10, total: total * 10 },
+    list: []
+  })
+
+  it('reads the recompilation Play starts before RetroAchievements and writes its counts', async () => {
+    setRaCreds()
+    const id = await recompCard('snes')
+    const fakes = raFakes()
+    const read = vi.fn(async () => recompInfo(2, 5))
+    const svc = createService(fakes)
+    svc.useRecomp({ read, played })
+    changed = []
+    const info = await svc.get(id)
+    expect(info?.provider).toBe('recomp')
+    expect(read).toHaveBeenCalledWith(expect.objectContaining({ id }), RECOMP)
+    expect(fakes.raGame).not.toHaveBeenCalled()
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 2, total: 5 })
+    expect(library.getGame(id)?.metadata.sources?.['recomp-achievements']).toBe(RECOMP)
+    expect(changed).toEqual([[id]])
+    // Kept a few minutes: the next open does not read again.
+    await svc.get(id)
+    expect(read).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps RetroAchievements for a recompilation PlayOut cannot read achievements of', async () => {
+    setRaCreds()
+    const id = await recompCard('snes', false)
+    library.applyMetadata(
+      id,
+      { metadata: { sources: { [RA_SOURCE]: '319' } } },
+      { overwrite: true, quiet: true }
+    )
+    const fakes = raFakes()
+    const read = vi.fn(async () => recompInfo(1, 1))
+    const svc = createService(fakes)
+    svc.useRecomp({ read, played })
+    expect((await svc.get(id))?.provider).toBe('retroachievements')
+    expect(read).not.toHaveBeenCalled()
+  })
+
+  it('writes no counts when only the unlocks could be read, and nothing without a reader', async () => {
+    const id = await recompCard('xbox360')
+    const svc = createService()
+    expect(await svc.get(id)).toBeNull()
+    svc.useRecomp({
+      read: async () => ({ provider: 'recomp', total: 0, unlocked: 3, list: [] }),
+      played
+    })
+    expect(await svc.get(id)).toMatchObject({ unlocked: 3, total: 0 })
+    expect(library.getGame(id)?.metadata.achievements).toBeUndefined()
+  })
+
+  it('reads them again after a play session of that recompilation only', async () => {
+    const id = await recompCard('xbox360')
+    let unlocked = 1
+    const read = vi.fn(async () => recompInfo(unlocked, 4))
+    const svc = createService()
+    svc.useRecomp({ read, played })
+    await svc.get(id)
+    unlocked = 3
+    await svc.recompPlayed('github:other/recomp')
+    expect(read).toHaveBeenCalledTimes(1)
+    expect(played).not.toHaveBeenCalledWith(RECOMP)
+    await svc.recompPlayed(RECOMP)
+    // The reader looks for the unlock file again (it appears with the first unlock).
+    expect(played).toHaveBeenCalledWith(RECOMP)
+    expect(read).toHaveBeenCalledTimes(2)
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 3, total: 4 })
+    // The new answer is the one kept.
+    expect((await svc.get(id))?.unlocked).toBe(3)
+    expect(read).toHaveBeenCalledTimes(2)
+  })
+
+  it('leaves a recompilation counts on the card when RetroAchievements signs out', async () => {
+    const id = await recompCard('xbox360')
+    const svc = createService(raFakes())
+    svc.useRecomp({ read: async () => recompInfo(1, 2), played })
+    await svc.get(id)
+    await svc.syncRetro()
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 1, total: 2 })
+  })
+
+  it("leaves a Steam card with an installed recompilation to Steam's achievements", async () => {
+    library.mergeScan('steam', [scanned()])
+    library.applyMetadata(
+      'steam:620',
+      {
+        metadata: {
+          recomp: {
+            titleKey: 'xbox360:portal 2',
+            count: 1,
+            installed: [RECOMP],
+            preferred: RECOMP,
+            achievements: [RECOMP],
+            updatedAt: new Date().toISOString()
+          }
+        }
+      },
+      { overwrite: true, quiet: true }
+    )
+    setSteamKey()
+    const steamGame = vi.fn<Opt<'steamGame'>>(async () => listInfo(4, 51))
+    const read = vi.fn(async () => recompInfo(1, 2))
+    const svc = createService({ steamGame })
+    svc.useRecomp({ read, played })
+    expect(await svc.get('steam:620')).toMatchObject({ unlocked: 4, total: 51 })
+    expect(read).not.toHaveBeenCalled()
+    await svc.recompPlayed(RECOMP)
+    expect(read).not.toHaveBeenCalled()
+    expect(library.getGame('steam:620')?.metadata.sources?.['recomp-achievements']).toBeUndefined()
+  })
+
+  it('takes the counts off the card once the recompilation is uninstalled', async () => {
+    const id = await recompCard('xbox360')
+    const svc = createService()
+    svc.useRecomp({ read: async () => recompInfo(2, 4), played })
+    await svc.get(id)
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 2, total: 4 })
+    // Still the recompilation Play starts: nothing to forget.
+    svc.forgetStaleRecomp()
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 2, total: 4 })
+    const recomp = library.getGame(id)!.metadata.recomp!
+    library.applyMetadata(
+      id,
+      { metadata: { recomp: { ...recomp, installed: [], achievements: undefined } } },
+      { overwrite: true, quiet: true }
+    )
+    changed = []
+    svc.forgetStaleRecomp()
+    const after = library.getGame(id)!.metadata
+    expect(after.achievements).toBeUndefined()
+    expect(after.sources?.['recomp-achievements']).toBeUndefined()
+    expect(changed).toEqual([[id]])
+  })
+
+  it('forgets stale counts when the page opens, before RetroAchievements is asked', async () => {
+    const id = await recompCard('xbox360')
+    const svc = createService()
+    svc.useRecomp({ read: async () => recompInfo(2, 4), played })
+    await svc.get(id)
+    const recomp = library.getGame(id)!.metadata.recomp!
+    library.applyMetadata(
+      id,
+      { metadata: { recomp: { ...recomp, installed: [] } } },
+      { overwrite: true, quiet: true }
+    )
+    expect(await svc.get(id)).toBeNull()
+    expect(library.getGame(id)?.metadata.achievements).toBeUndefined()
+  })
+})

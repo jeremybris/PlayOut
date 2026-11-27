@@ -92,6 +92,7 @@ export function pushLayer(id: string, focusKey?: string): void {
   layers.push(id)
   layerOrders.set(id, nextOrder++)
   if (focusKey) layerFocusKeys.set(id, focusKey)
+  notifyLayers()
 }
 
 /** Remove a layer; the root layer can never be removed. */
@@ -101,6 +102,21 @@ export function popLayer(id: string): void {
   if (index >= 0) layers.splice(index, 1)
   layerFocusKeys.delete(id)
   layerOrders.delete(id)
+  if (index >= 0) notifyLayers()
+}
+
+const layerListeners = new Set<() => void>()
+
+function notifyLayers(): void {
+  for (const listener of [...layerListeners]) listener()
+}
+
+/** Called after every push and pop (the top layer may have changed); returns the unsubscribe function. */
+export function addLayerListener(listener: () => void): () => void {
+  layerListeners.add(listener)
+  return () => {
+    layerListeners.delete(listener)
+  }
 }
 
 /** The layer that currently receives button actions. */
@@ -216,5 +232,6 @@ export function resetActionBus(): void {
   nextOrder = 1
   registrations.clear()
   listeners.clear()
+  layerListeners.clear()
   frozen = false
 }

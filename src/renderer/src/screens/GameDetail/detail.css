@@ -329,6 +329,105 @@
   outline-color: var(--ring);
 }
 
+/* ---- web viewer (a Steam game's Store / Workshop / PCGamingWiki / Guides page inside PlayOut, WebViewer.tsx) ----
+   The page itself is a native view main lays over .web-viewer__page; nothing PlayOut draws can sit on top of it. */
+
+/* The game page's own place (between the system bar and the button hints), so neither covers the bar or the page. */
+.modal.web-viewer {
+  position: absolute;
+  top: var(--panel-top);
+  right: var(--panel-inset-x);
+  bottom: var(--panel-bottom);
+  left: var(--panel-inset-x);
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.web-viewer__bar {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex: none;
+  padding: 1.2rem 1.6rem;
+  border-bottom: 1px solid var(--color-control-stroke);
+}
+
+.web-viewer__title {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0 0.8rem;
+}
+
+.web-viewer__name,
+.web-viewer__host {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.web-viewer__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+}
+
+.web-viewer__host {
+  color: var(--color-text-secondary);
+}
+
+.web-viewer__page {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  background: #1f1f1f;
+}
+
+/* The preview (mock API) has no web page: a note where it would be. */
+.web-viewer__preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  height: 100%;
+  padding: 2.4rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+/* A link elsewhere the page asked for without a click: offered here, never opened by itself. */
+.web-viewer__held {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex: none;
+  padding: 0.8rem 1.6rem;
+  border-bottom: 1px solid var(--color-control-stroke);
+}
+
+.web-viewer__held-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--color-text-secondary);
+}
+
+/* While the viewer is open its button hints replace the game page's (both are portaled to <body>). */
+body:has(.hints--web-viewer) .hints:not(.hints--web-viewer) {
+  display: none;
+}
+
 /* ---- screenshot viewer (a Steam screenshot full size over the page) ---------- */
 
 .modal.shot-viewer {

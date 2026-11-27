@@ -55,6 +55,9 @@ import type { SteamDlcService } from '../steam-dlc/service'
 import type { UpgradesService } from '../upgrades/service'
 import { upgradeRunningMessage } from '../../shared/upgrades'
 import type { MetadataCloudService } from '../metadata-cloud/service'
+import type { SteamTagsService } from '../scrapers/steam-tags'
+import type { WebViewer } from '../web-viewer/viewer'
+import { STEAM_LINK_KINDS, WEB_VIEWER_ACTIONS } from '../../shared/web-viewer'
 import { tMain } from '../i18n'
 import { queueMissing } from '../scrapers/missing-art'
 
@@ -116,6 +119,10 @@ export interface AppServices {
   overlay: OverlaySuite
   /** The overlay's Friends tab: Steam friends and Steam's chat (main/friends/steam-friends.ts). */
   friends: FriendsService
+  /** The in-app web viewer of the game page's Steam links (main/web-viewer). */
+  webViewer: WebViewer
+  /** Steam tags: a refreshed game whose Steam answer predates the Workshop flag is read again (scrapers/steam-tags). */
+  steamTags?: Pick<SteamTagsService, 'refreshed'>
   events: EventBus
   log: Logger
   window: {
@@ -656,10 +663,13 @@ export function createHandlers(s: AppServices): ApiHandlers {
       const force = options?.force === true
       if (ids !== undefined) {
         // The user asked: a game that failed a moment ago is tried again (automatic enqueues back off instead).
-        const queued = s.metadata.enqueue(z.array(idSchema).parse(ids), {
+        const gameIds = z.array(idSchema).parse(ids)
+        const queued = s.metadata.enqueue(gameIds, {
           force,
           retryFailed: true
         })
+        // The Workshop link's answer for games read before it was (no background re-read: on Refresh only).
+        s.steamTags?.refreshed(gameIds)
         return { queued }
       }
       // "Refresh missing": games whose metadata never finished (not only 'none'/'failed': a game left 'pending' by an
@@ -1261,6 +1271,35 @@ export function createHandlers(s: AppServices): ApiHandlers {
         throw new Error(tMain('mainDialogs.refusedUrl'))
       }
       await shell.openExternal(u)
+    },
+    async openWebViewer(kind, appId) {
+      return s.webViewer.open(
+        z.enum(STEAM_LINK_KINDS).parse(kind),
+        z
+          .number()
+          .int()
+          .positive()
+          .lt(2 ** 31)
+          .parse(appId)
+      )
+    },
+    async closeWebViewer() {
+      s.webViewer.close()
+    },
+    async webViewerAction(action) {
+      await s.webViewer.action(z.enum(WEB_VIEWER_ACTIONS).parse(action))
+    },
+    async scrollWebViewer(deltaY) {
+      await s.webViewer.scroll(z.number().finite().parse(deltaY))
+    },
+    async setWebViewerBounds(bounds) {
+      const pixels = z.number().finite().min(0).max(100_000)
+      s.webViewer.setBounds(
+        z.object({ x: pixels, y: pixels, width: pixels, height: pixels }).strict().parse(bounds)
+      )
+    },
+    async setWebViewerVisible(visible) {
+      s.webViewer.setVisible(z.boolean().parse(visible))
     },
     async openPath(path) {
       const error = await shell.openPath(pathSchema.parse(path))

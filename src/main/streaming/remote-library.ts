@@ -582,7 +582,9 @@ function sanitizeMetadata(raw: unknown): GameMetadata {
     out.steamTags = {
       tags: tagList.slice(0, 50),
       ...(str(steamTags.updatedAt) ? { updatedAt: steamTags.updatedAt } : {}),
-      ...(controlsFrom(steamTags.controls) ?? {})
+      ...(controlsFrom(steamTags.controls) ?? {}),
+      // The game page's Workshop link: left out only when the host knows the app has none.
+      ...(typeof steamTags.workshop === 'boolean' ? { workshop: steamTags.workshop } : {})
     }
   const shots = obj(m.steamScreenshots)
   if (shots && Array.isArray(shots.items)) {

@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
   playableHere,
+  recompAchievementsFor,
   recompInPlaceOf,
   recompOnlyKey,
   recompToPlay,
   staleStandIns
 } from './recomp-play'
+import { recompAchievementsSupported } from './recomp'
 import type { Game, GameRecompInfo } from './types'
 
 type RomLike = Pick<Game, 'source' | 'installed' | 'romRemoved' | 'metadata'> & { remote?: unknown }
@@ -108,5 +110,38 @@ describe('recompOnlyKey', () => {
     expect(recompOnlyKey({ extra: { recompOnly: 'n64:mm' }, remote: {} })).toBeNull()
     expect(recompOnlyKey({ extra: {} })).toBeNull()
     expect(recompOnlyKey({})).toBeNull()
+  })
+})
+
+describe('recompAchievementsFor', () => {
+  it('is the recompilation Play starts when PlayOut reads its achievements', () => {
+    const withAch = (achievements: string[]): RomLike =>
+      rom({ metadata: { recomp: { ...recomp(['a', 'b']), achievements } } as never })
+    expect(recompAchievementsFor(withAch(['b']))).toBe('b')
+    // Another installed version has them, but Play starts 'b'.
+    expect(recompAchievementsFor(withAch(['a']))).toBeNull()
+    expect(recompAchievementsFor(rom())).toBeNull()
+    expect(recompAchievementsFor({ ...withAch(['b']), remote: { hostId: 'h' } })).toBeNull()
+  })
+})
+
+describe('recompAchievementsSupported', () => {
+  it('is an Xbox 360 recompilation the catalog gives a title id or user data folder for', () => {
+    expect(
+      recompAchievementsSupported({ systemId: 'xbox360', rl: { id: 'x', titleId: '4D5307E6' } })
+    ).toBe(true)
+    expect(
+      recompAchievementsSupported({
+        systemId: 'xbox360',
+        rl: { id: 'x', achievementsFolder: '{game}' }
+      })
+    ).toBe(true)
+    expect(recompAchievementsSupported({ systemId: 'xbox360', rl: { id: 'x' } })).toBe(false)
+    expect(recompAchievementsSupported({ systemId: 'xbox360' })).toBe(false)
+    // The PlayStation and Game Boy Advance recompilations report unlocks another way: not read.
+    expect(
+      recompAchievementsSupported({ systemId: 'psx', rl: { id: 'x', titleId: '4D5307E6' } })
+    ).toBe(false)
+    expect(recompAchievementsSupported(null)).toBe(false)
   })
 })

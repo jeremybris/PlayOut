@@ -30,7 +30,9 @@ import {
   type SteamCredential,
   type SteamProgress
 } from './steam'
-import { tMain } from '../i18n'
+import { mainLanguage, tMain } from '../i18n'
+import { RECOMP_ACHIEVEMENTS_SOURCE, recompAchievementsFor } from '../../shared/recomp-play'
+import type { RecompAchievementsReader } from '../recomp/achievements'
 
 /** A game's list is fetched again after this long. */
 const LIVE_TTL_MS = 10 * 60 * 1000
@@ -73,6 +75,18 @@ export type SteamAccountCredential = (refresh: boolean) => Promise<SteamCredenti
 export interface AchievementsService {
   /** The accounts service is created after this one; it hands over the Steam account here. */
   useSteamAccount(credential: SteamAccountCredential): void
+  /** The recompilation service is created after this one; it hands over its achievements reader here. */
+  useRecomp(reader: RecompAchievementsReader): void
+  /**
+   * A recompilation's play session ended: the games it plays for read its achievements again (their counts on the
+   * cards follow). Nothing else reads them in the background.
+   */
+  recompPlayed(recompId: string): Promise<void>
+  /**
+   * Take recompilation counts off the cards whose recompilation no longer gives them (uninstalled, or Play now starts
+   * another recompilation or the emulator). Cheap; run after the library's metadata changes.
+   */
+  forgetStaleRecomp(): void
   /** A game's achievements with the user's unlocks; null when there are none or no account to read them with. */
   get(gameId: string): Promise<AchievementsInfo | null>
   /** Unlocked / total for every Steam game in the library. */
@@ -122,6 +136,7 @@ export function createAchievementsService(
   const hashRom = options.hashRom ?? raHashRom
 
   let steamAccount: SteamAccountCredential | null = null
+  let recompReader: RecompAchievementsReader | null = null
   /** Bumped by steamSignedOut: Steam work that started before it writes nothing. */
   let steamGeneration = 0
   let disposed = false
@@ -491,11 +506,16 @@ export function createAchievementsService(
     changed.push(gameId)
   }
 
-  /** ROMs that carry RetroAchievements counts; cleared when the account goes away. */
+  /** ROMs that carry RetroAchievements counts; cleared when the account goes away (a recompilation's stay). */
   function clearRetro(): void {
     const ids = library
       .games()
-      .filter((g) => isRom(g) && (g.metadata.achievements || g.metadata.sources?.[RA_SOURCE]))
+      .filter(
+        (g) =>
+          isRom(g) &&
+          !g.metadata.sources?.[RECOMP_ACHIEVEMENTS_SOURCE] &&
+          (g.metadata.achievements || g.metadata.sources?.[RA_SOURCE])
+      )
       .map((g) => g.id)
     announce(library.clearAchievements(ids, RA_SOURCE))
   }
@@ -658,9 +678,54 @@ export function createAchievementsService(
     settingsTimer.unref?.()
   })
 
+  // --- recompilations -------------------------------------------------------------
+
+  /** The cache key of a recompilation's list (its texts follow the UI language). */
+  const recompKey = (recompId: string): string => `recomp:${recompId}:${mainLanguage()}`
+
+  /** Whether a card carries counts from a recompilation that no longer gives them. */
+  function staleRecomp(game: Game): boolean {
+    const from = game.metadata.sources?.[RECOMP_ACHIEVEMENTS_SOURCE]
+    return !!from && !game.remote && recompAchievementsFor(game) !== from
+  }
+
+  function forgetStaleRecomp(): void {
+    if (disposed) return
+    const ids = library
+      .games()
+      .filter(staleRecomp)
+      .map((g) => g.id)
+    if (!ids.length) return
+    for (const id of ids) cache.delete(id)
+    announce(library.clearAchievements(ids, RECOMP_ACHIEVEMENTS_SOURCE))
+  }
+
   // --- one game -------------------------------------------------------------------
 
+  /** A recompilation's achievements (the one Play starts), its counts written to the card when it has a list. */
+  async function loadRecomp(game: Game, recompId: string): Promise<AchievementsInfo | null> {
+    if (!recompReader) return null
+    const info = await recompReader.read(game, recompId)
+    if (
+      info &&
+      info.total > 0 &&
+      writeCounts(
+        game.id,
+        { unlocked: info.unlocked, total: info.total },
+        { sources: { [RECOMP_ACHIEVEMENTS_SOURCE]: recompId } }
+      )
+    )
+      announce([game.id])
+    return info
+  }
+
   async function load(game: Game): Promise<AchievementsInfo | null> {
+    // Play starts a recompilation PlayOut reads achievements of: its achievements, not RetroAchievements'.
+    const recompId = recompAchievementsFor(game)
+    if (recompId) return loadRecomp(game, recompId)
+    // Counts left from a recompilation no longer installed (or no longer the one Play starts) go first.
+    if (staleRecomp(game))
+      announce(library.clearAchievements([game.id], RECOMP_ACHIEVEMENTS_SOURCE))
     if (game.source === 'rom') {
       const creds = raCredentials()
       if (!creds) return null
@@ -698,7 +763,12 @@ export function createAchievementsService(
   async function get(gameId: string): Promise<AchievementsInfo | null> {
     const game = library.getGame(gameId)
     if (!game) return null
-    const key = game.source === 'rom' ? credentialKey(raCredentials()) : 'steam'
+    const recompId = recompAchievementsFor(game)
+    const key = recompId
+      ? recompKey(recompId)
+      : game.source === 'rom'
+        ? credentialKey(raCredentials())
+        : 'steam'
     const cached = cache.get(gameId)
     if (cached && cached.key === key && Date.now() - cached.at < LIVE_TTL_MS) return cached.info
     const running = inflight.get(gameId)
@@ -725,6 +795,27 @@ export function createAchievementsService(
     useSteamAccount(credential) {
       steamAccount = credential
     },
+    useRecomp(reader) {
+      recompReader = reader
+    },
+    async recompPlayed(recompId) {
+      if (disposed) return
+      // The unlock file may have just appeared (the first unlock), and a game executable may have been put in place.
+      recompReader?.played(recompId)
+      for (const game of library.games()) {
+        if (recompAchievementsFor(game) !== recompId) continue
+        cache.delete(game.id)
+        try {
+          const info = await loadRecomp(game, recompId)
+          if (info) cache.set(game.id, { at: Date.now(), key: recompKey(recompId), info })
+        } catch (err) {
+          log.warn(
+            `achievements for ${game.id} after playing ${recompId} failed: ${describeError(err)}`
+          )
+        }
+      }
+    },
+    forgetStaleRecomp,
     get,
     syncSteam,
     steamSignedOut,

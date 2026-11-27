@@ -293,6 +293,19 @@ The full texts of all of these licences and notices, unmodified, are in `resourc
 open-source PS4 tools LibOrbisPkg (https://github.com/OpenOrbis/LibOrbisPkg) and shadPS4
 (https://github.com/shadps4-emu/shadPS4) publish. No Sony retail keys and no Sony or Oodle files are included.
 
+## Xbox 360 executable key
+
+`src/main/recomp/achievements/xex.ts` holds the publicly known Xbox 360 executable (XEX2) retail key, the same value
+the open-source Xbox 360 emulator Xenia (https://github.com/xenia-project/xenia, BSD 3-Clause) publishes. PlayOut uses
+it only to read the achievement list in the player's own copy of a game (its `default.xex`) for an installed Xbox 360
+recompilation. No Microsoft files are included. The XEX2, LZX, XDBF and XDVDFS readers in that folder were written
+for PlayOut from the formats' public descriptions. The unlock files they read are written by the recompilations
+themselves through the ReXGlue runtime (https://github.com/rexglue/rexglue-sdk, BSD 3-Clause); PlayOut includes no
+ReXGlue code. The unlock file format (decimal `[unlocked.<id>]` tables and the older `unlocked = [ids]` list), the
+way a recompilation's own `achievements.toml` is laid over the game's list and where that file is looked for follow
+ReXGlue's own source (`achievement_manager.cpp`, `title_state.cpp`). No other launcher's or service's achievement
+code, lists, points or names are used.
+
 ## Pictures from third-party icon packs
 
 The console and platform pictures (`src/renderer/src/assets/console-icons`, `scripts/console-icons-extra`), the system

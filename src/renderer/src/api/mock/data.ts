@@ -157,7 +157,9 @@ function meta(m: MetaInput): GameMetadata {
           ? { keyboard: 'full' as const }
           : {}),
         ...(m.genres.includes('Card Game') ? { touch: 'supported' as const } : {})
-      }
+      },
+      // Steam Workshop (the game page's Workshop link): the card games have none, so their square is empty.
+      workshop: !m.genres.includes('Card Game')
     }
   }
   if (m.rating !== undefined) {

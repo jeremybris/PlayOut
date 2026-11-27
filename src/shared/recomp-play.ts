@@ -45,6 +45,23 @@ export function recompToPlay(
   return info.installed.includes(info.preferred) ? info.preferred : info.installed[0]!
 }
 
+/** The `metadata.sources` key of a game whose achievement counts came from its recompilation (the recompilation id). */
+export const RECOMP_ACHIEVEMENTS_SOURCE = 'recomp-achievements'
+
+/**
+ * The recompilation whose achievements the game page shows: the one Play starts (recompToPlay), when PlayOut can read
+ * its achievements (GameRecompInfo.achievements). Only a ROM card (a recompilation's own card is one too): a store
+ * game (Steam, say) keeps its store's achievements even while a recompilation of it is installed. Null otherwise: the
+ * game keeps its other achievements, if any.
+ */
+export function recompAchievementsFor(
+  game: Pick<Game, 'source' | 'installed' | 'romRemoved' | 'metadata'> & { remote?: unknown }
+): string | null {
+  if (game.source !== 'rom') return null
+  const id = recompToPlay(game)
+  return id && game.metadata.recomp?.achievements?.includes(id) ? id : null
+}
+
 /** The library games each `staleStandIns` answer was worked out from (the same array is asked again and again). */
 const staleCache = new WeakMap<readonly unknown[], ReadonlySet<string>>()
 

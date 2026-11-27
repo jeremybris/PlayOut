@@ -394,6 +394,7 @@ export function sameRecompInfo(a: GameRecompInfo | undefined, b: GameRecompInfo)
     a.count === b.count &&
     a.preferred === b.preferred &&
     a.installed.length === b.installed.length &&
-    a.installed.every((id, i) => id === b.installed[i])
+    a.installed.every((id, i) => id === b.installed[i]) &&
+    (a.achievements ?? []).join('\n') === (b.achievements ?? []).join('\n')
   )
 }

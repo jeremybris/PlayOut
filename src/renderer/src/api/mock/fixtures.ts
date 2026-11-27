@@ -124,6 +124,60 @@ export function sampleAchievements(game: Game, sessions: PlaySession[]): Achieve
   }
 }
 
+const RECOMP_ACHIEVEMENTS: {
+  name: string
+  description: string
+  gamerscore: number
+  secret?: boolean
+}[] = [
+  { name: 'Revenge Rookie', description: 'Win your first race.', gamerscore: 10 },
+  { name: 'Traffic Checker', description: 'Check 50 cars into the traffic.', gamerscore: 15 },
+  { name: 'Takedown Artist', description: 'Earn 100 takedowns.', gamerscore: 25 },
+  { name: 'Crash Course', description: 'Score 1,000,000 in Crash mode.', gamerscore: 20 },
+  { name: 'Burnout Chain', description: 'Chain four burnouts in one race.', gamerscore: 30 },
+  { name: 'Road Rage', description: 'Finish a Road Rage event with 20 takedowns.', gamerscore: 25 },
+  { name: 'Elite License', description: 'Reach the Elite rank.', gamerscore: 50, secret: true },
+  { name: 'Perfect Run', description: 'Earn a gold medal on every event.', gamerscore: 75 }
+]
+
+/**
+ * An Xbox 360 recompilation's achievements as main reads them (recomp/achievements): the game's own list with
+ * gamerscore, three unlocked with the dates the unlock file gives, a secret one still locked.
+ */
+export function sampleRecompAchievements(game: Game): AchievementsInfo {
+  const fallback = game.lastPlayed ?? game.addedAt
+  const unlockedCount = 3
+  let earned = 0
+  let total = 0
+  const list = RECOMP_ACHIEVEMENTS.map((a, i) => {
+    const unlocked = i < unlockedCount
+    total += a.gamerscore
+    if (unlocked) earned += a.gamerscore
+    return {
+      id: String(i + 1),
+      name: a.name,
+      description: a.description,
+      unlocked,
+      ...(unlocked
+        ? {
+            unlockedAt: new Date(
+              Date.parse(fallback) - (unlockedCount - i) * 86_400_000
+            ).toISOString()
+          }
+        : {}),
+      ...(a.secret ? { hidden: true } : {}),
+      points: a.gamerscore
+    }
+  })
+  return {
+    provider: 'recomp',
+    total: list.length,
+    unlocked: unlockedCount,
+    points: { earned, total },
+    list
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Metadata search
 // ---------------------------------------------------------------------------

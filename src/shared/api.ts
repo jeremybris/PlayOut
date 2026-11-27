@@ -9,6 +9,7 @@ import type {
   MetadataSuggestion
 } from './metadata-cloud'
 import type { MetadataEdit, MetadataEditField, MetadataLayers } from './metadata-edit'
+import type { SteamLinkKind, WebViewerAction, WebViewerBounds, WebViewerState } from './web-viewer'
 import type {
   AccountStatus,
   AchievementsInfo,
@@ -335,6 +336,20 @@ export interface PlayOutApi {
   setFullscreen(fullscreen: boolean): Promise<void>
   isFullscreen(): Promise<boolean>
   openExternal(url: string): Promise<void>
+  /**
+   * The in-app web viewer (main/web-viewer): show a Steam game's link (Store, Workshop, PCGamingWiki, Guides) inside
+   * PlayOut's window. Main builds the address from the kind and the app id; its state comes with 'web-viewer:state'.
+   */
+  openWebViewer(kind: SteamLinkKind, appId: number): Promise<WebViewerState>
+  closeWebViewer(): Promise<void>
+  /** The viewer's Back / Forward / Reload / Open in browser. */
+  webViewerAction(action: WebViewerAction): Promise<void>
+  /** Scroll the viewer's page by `deltaY` CSS pixels (down positive): the controller's D-pad and right stick. */
+  scrollWebViewer(deltaY: number): Promise<void>
+  /** Where the viewer's page sits in the window (the renderer's CSS pixels). */
+  setWebViewerBounds(bounds: WebViewerBounds): Promise<void>
+  /** Hide the viewer's page while something of PlayOut's sits over the viewer (the native page would cover it). */
+  setWebViewerVisible(visible: boolean): Promise<void>
   openPath(path: string): Promise<void>
   showItemInFolder(path: string): Promise<void>
   /**
@@ -814,6 +829,12 @@ export const API_METHODS = [
   'setFullscreen',
   'isFullscreen',
   'openExternal',
+  'openWebViewer',
+  'closeWebViewer',
+  'webViewerAction',
+  'scrollWebViewer',
+  'setWebViewerBounds',
+  'setWebViewerVisible',
   'openPath',
   'showItemInFolder',
   'openFolders',

@@ -14,6 +14,7 @@ import type { PlayOutApi } from '../../shared/api'
 import {
   RECOMP_SAVES_FOLDER,
   isUnscannedRecomp,
+  recompAchievementsSupported,
   type AddedRecomp,
   type RecompSendResult,
   type AddedRecompState,
@@ -124,6 +125,7 @@ import {
   type VerifyResult
 } from './gamefiles'
 import type { CachedFetchDeps } from './http-cache'
+import type { RecompAchievementSource } from './achievements'
 import {
   findExe,
   installRecomp as realInstall,
@@ -266,6 +268,11 @@ export interface RecompService extends RecompMethods {
   installRoot(): Promise<string>
   /** The install folder of an installed recompilation, else null. */
   installedDir(id: string): Promise<string | null>
+  /**
+   * Where an installed recompilation's achievements are read from (recomp/achievements), or null when it is not
+   * installed or PlayOut cannot read its achievements (recompAchievementsSupported).
+   */
+  achievementSource(id: string): Promise<RecompAchievementSource | null>
   /** Match the library again soon (after a library change; debounced). */
   kick(): void
   /**
@@ -391,6 +398,8 @@ export interface RecompServiceDeps {
   dialog: RecompDialogs
   /** Open a folder in Explorer (rejects with the shell's message). */
   openPath(path: string): Promise<void>
+  /** A play session of a recompilation ended (after its saves were handled): its achievements are read again. */
+  afterPlayed?: (recompId: string) => void
   /** The disc images behind the "Delete the original disc image?" question (image-offer.ts); absent = never asked. */
   originalImage?: OriginalImageFiles
   /** Library cards for installed recompilations whose game is not in the library; absent = none are made. */
@@ -803,6 +812,14 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
       : entry
   }
 
+  /** A game's recompilation info with the installed entries whose achievements PlayOut can read. */
+  function withAchievements(info: GameRecompInfo): GameRecompInfo {
+    const ids = info.installed.filter((id) => recompAchievementsSupported(catalog?.entries.get(id)))
+    const rest = { ...info }
+    delete rest.achievements
+    return ids.length ? { ...rest, achievements: ids } : rest
+  }
+
   function saveCtx(installed: InstalledRecomp): SaveContext {
     return {
       install: installed.dir,
@@ -1045,7 +1062,9 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
       // recompilation, or a ROM card (an owned-only store game that is not installed does not count).
       if (game.installed || game.romRemoved || game.source === 'rom')
         if (!gameOfTitle.has(title.key) || game.installed) gameOfTitle.set(title.key, game.id)
-      const info = recompInfo(title, installedIds, m.preferred[title.key] ?? null, nowIso)
+      const info = withAchievements(
+        recompInfo(title, installedIds, m.preferred[title.key] ?? null, nowIso)
+      )
       if (sameRecompInfo(game.metadata.recomp, info)) continue
       library.applyMetadata(
         game.id,
@@ -1108,13 +1127,13 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
       // It stands for its game (no recompilation-only card beside it) once its own recompilation is installed; until
       // then another installed recompilation of the game keeps its own card, so it can be played.
       if (installedIds.includes(id) && !keys.has(key)) keys.set(key, game.id)
-      const info: GameRecompInfo = {
+      const info: GameRecompInfo = withAchievements({
         titleKey: key,
         count: 1,
         installed: installedIds.includes(id) ? [id] : [],
         preferred: id,
         updatedAt: nowIso
-      }
+      })
       if (!sameRecompInfo(game.metadata.recomp, info)) {
         library.applyMetadata(
           game.id,
@@ -1214,9 +1233,11 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
       covered.add(key)
       covered.add(stored)
       const matched = title ? recompInfo(title, installedIds, preferred[key] ?? null, nowIso) : null
-      const info: GameRecompInfo = matched
-        ? { ...matched, installed: [...new Set([...matched.installed, ...installedHere])] }
-        : { ...game.metadata.recomp!, installed: installedHere }
+      const info: GameRecompInfo = withAchievements(
+        matched
+          ? { ...matched, installed: [...new Set([...matched.installed, ...installedHere])] }
+          : { ...game.metadata.recomp!, installed: installedHere }
+      )
       if (!sameRecompInfo(game.metadata.recomp, info)) {
         library.applyMetadata(
           game.id,
@@ -1243,7 +1264,7 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
         titleKey: key,
         title: title.game,
         platformId: !system || system === 'other' ? 'pc' : system,
-        recomp: recompInfo(title, installedIds, preferred[key] ?? null, nowIso),
+        recomp: withAchievements(recompInfo(title, installedIds, preferred[key] ?? null, nowIso)),
         art: {
           cover: art((e) => e.coverUrl),
           hero: art((e) => e.heroUrl),
@@ -1894,6 +1915,7 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
       log.warn(`recomp: after playing ${id}: ${message(err)}`)
     } finally {
       changed([id])
+      deps.afterPlayed?.(id)
     }
   }
 
@@ -4273,11 +4295,32 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
     async installedDir(id) {
       return (await installedOf(id))?.dir ?? null
     },
+    async achievementSource(id) {
+      const rec = await installedOf(id)
+      const entry = rec ? entryOf(id, rec) : null
+      if (!rec || !entry || !recompAchievementsSupported(entry)) return null
+      return {
+        recompId: id,
+        titleId: entry.rl?.titleId ?? null,
+        folder: entry.rl?.achievementsFolder ?? null,
+        install: rec.dir,
+        ctx: saveCtx(rec),
+        saveTemplates: rec.savePaths,
+        gameFiles: Object.values(rec.gameFiles).map((f) => f.path)
+      }
+    },
     recompForGame(game) {
       if (!catalog || !index || !baseCatalog || baseCatalog.entries.size === 0) return undefined
       const title = matchGameToTitle(matchable(game), catalog, index)
       return title
-        ? recompInfo(title, knownInstalled, knownPreferred[title.key] ?? null, now().toISOString())
+        ? withAchievements(
+            recompInfo(
+              title,
+              knownInstalled,
+              knownPreferred[title.key] ?? null,
+              now().toISOString()
+            )
+          )
         : null
     },
     start(): void {

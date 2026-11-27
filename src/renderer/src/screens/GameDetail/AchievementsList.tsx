@@ -1,3 +1,4 @@
+import { recompAchievementsFor } from '@shared/recomp-play'
 import type { AchievementsInfo, Game } from '@shared/types'
 import { Lock, Settings as SettingsIcon, Trophy } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactElement } from 'react'
@@ -13,6 +14,7 @@ import { formatDate, formatPercent } from '../../lib/format'
 import { createLog } from '../../lib/log'
 import { retroSignedIn, useRetroAchievementsStatus } from '../../state/retroachievements'
 import { useUiStore } from '../../state/ui'
+import { achievementsStat } from './achievements-stat'
 
 const log = createLog('achievements')
 
@@ -34,8 +36,10 @@ type Loaded = { gameId: string; state: Exclude<LoadState, { status: 'loading' }>
 
 /**
  * Achievement list that replaces the description block while expanded (design 6.8). Loads lazily from
- * api.getAchievements: Steam for store games, RetroAchievements for ROMs. A null result points to the sign-in
- * the game needs (Steam account or key; the RetroAchievements account in Settings > Emulators).
+ * api.getAchievements: Steam for store games, RetroAchievements for ROMs, the recompilation's own for a game Play
+ * starts a recompilation of whose achievements PlayOut reads (gamerscore, unlock dates from its unlock file). A null
+ * result points to the sign-in the game needs (Steam account or key; the RetroAchievements account in Settings >
+ * Emulators), or for a recompilation, to playing it once.
  * Rows are focusable so the gamepad can scroll the list; B collapses it.
  */
 export function AchievementsList({
@@ -45,14 +49,16 @@ export function AchievementsList({
 }: AchievementsListProps): ReactElement {
   const t = useT()
   const openModal = useUiStore((s) => s.openModal)
-  const isRom = game.source === 'rom'
+  // The recompilation's own achievements (the one Play starts), or RetroAchievements' for a ROM (achievements-stat.ts).
+  const isRom = achievementsStat(game).label === 'retro'
+  const recomp = !game.remote && recompAchievementsFor(game) !== null
   // A rejected key counts as signed out: the fix is in Settings, not in the ROM.
   const retroStatus = useRetroAchievementsStatus()
   const retroReady = retroSignedIn(retroStatus)
   // A paired host's game: its list is the host's (its accounts), so this PC's sign-in would not help.
   const hostGame = !!game.remote
   // The unavailable message offers a settings button when signing in would help.
-  const settingsHint = !hostGame && (game.source === 'steam' || (isRom && !retroReady))
+  const settingsHint = !hostGame && !recomp && (game.source === 'steam' || (isRom && !retroReady))
   const [loaded, setLoaded] = useState<Loaded | null>(null)
   const state = useMemo<LoadState>(
     () => (loaded && loaded.gameId === game.id ? loaded.state : { status: 'loading' }),
@@ -108,6 +114,7 @@ export function AchievementsList({
   const total =
     state.status === 'ready' ? state.info.total : (game.metadata.achievements?.total ?? 0)
   const points = state.status === 'ready' ? state.info.points : undefined
+  const gamerscore = state.status === 'ready' && state.info.provider === 'recomp'
 
   return (
     <section className="gdetail__achievements" aria-label={t('gameDetail.achievements.title')}>
@@ -124,10 +131,12 @@ export function AchievementsList({
             <span className="gdetail__ach-percent">{formatPercent((unlocked / total) * 100)}</span>
             {points && points.total > 0 ? (
               <span className="gdetail__ach-points u-tabular">
-                {t('gameDetail.achievements.points', {
-                  earned: points.earned,
-                  total: points.total
-                })}
+                {t(
+                  gamerscore
+                    ? 'gameDetail.achievements.gamerscore'
+                    : 'gameDetail.achievements.points',
+                  { earned: points.earned, total: points.total }
+                )}
               </span>
             ) : null}
             <span className="gdetail__ach-progress" aria-hidden="true">
@@ -154,6 +163,8 @@ export function AchievementsList({
                   ? t('gameDetail.achievements.hostNone', { host: game.remote.hostName })
                   : t('gameDetail.achievements.hostNoneUnknown')}
               </p>
+            ) : recomp ? (
+              <p>{t('gameDetail.achievements.recompPlayOnce')}</p>
             ) : game.source === 'steam' ? (
               <>
                 <p>{t('gameDetail.achievements.steamNone')}</p>
@@ -189,11 +200,20 @@ export function AchievementsList({
             )}
           </div>
         ) : state.info.list.length === 0 ? (
-          <p className="gdetail__ach-status">{t('gameDetail.achievements.noneInGame')}</p>
+          <p className="gdetail__ach-status">
+            {state.info.provider === 'recomp' && state.info.unlocked > 0
+              ? t('gameDetail.achievements.recompCountOnly', { count: state.info.unlocked })
+              : t('gameDetail.achievements.noneInGame')}
+          </p>
         ) : (
           <ul className="gdetail__ach-list" role="list">
             {state.info.list.map((achievement, index) => (
-              <AchievementRow key={achievement.id} index={index} achievement={achievement} />
+              <AchievementRow
+                key={achievement.id}
+                index={index}
+                achievement={achievement}
+                gamerscore={gamerscore}
+              />
             ))}
           </ul>
         )}
@@ -206,10 +226,13 @@ type Achievement = AchievementsInfo['list'][number]
 
 function AchievementRow({
   index,
-  achievement
+  achievement,
+  gamerscore
 }: {
   index: number
   achievement: Achievement
+  /** Points are Xbox gamerscore ("25 G"). */
+  gamerscore: boolean
 }): ReactElement {
   const t = useT()
   const { ref, props: controlProps } = useFocusableControl<HTMLLIElement>({
@@ -245,7 +268,12 @@ function AchievementRow({
       <span className="gdetail__ach-when">
         {achievement.points !== undefined ? (
           <span className="gdetail__ach-pts u-tabular">
-            {t('gameDetail.achievements.pts', { points: achievement.points })}
+            {t(
+              gamerscore ? 'gameDetail.achievements.gamerscorePts' : 'gameDetail.achievements.pts',
+              {
+                points: achievement.points
+              }
+            )}
           </span>
         ) : null}
         {achievement.unlocked

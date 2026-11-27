@@ -1,6 +1,12 @@
 import type { Game, GameMetadata, InstallProgress } from '@shared/types'
 import type { RecompExecutables } from '@shared/recomp'
-import { playableHere, recompAddedId, recompOnlyKey, recompToPlay } from '@shared/recomp-play'
+import {
+  playableHere,
+  recompAchievementsFor,
+  recompAddedId,
+  recompOnlyKey,
+  recompToPlay
+} from '@shared/recomp-play'
 import { upgradeRunningMessage } from '@shared/upgrades'
 import { Gamepad, Gamepad2, Glasses, Keyboard, Layers, Pointer, Users, X } from 'lucide-react'
 import {
@@ -240,6 +246,16 @@ export function GameDetailModal({ gameId, onClose }: GameDetailModalProps): Reac
 
   const [descriptionOpen, setDescriptionOpen] = useState(false)
   const [achievementsOpen, setAchievementsOpen] = useState(false)
+  // A recompilation whose achievements PlayOut reads: read when the page opens (main keeps the answer a few minutes),
+  // so the stat's counts are current; nothing reads them in the background.
+  const achievementsRecomp = game ? recompAchievementsFor(game) : null
+  const gameIdForAchievements = game?.id
+  useEffect(() => {
+    if (!achievementsRecomp || !gameIdForAchievements) return
+    api
+      .getAchievements(gameIdForAchievements)
+      .catch((err) => log.warn('recompilation achievements failed', err))
+  }, [achievementsRecomp, gameIdForAchievements])
   // The collapsed description is clamped by CSS; "More" appears only while that clamp hides text.
   const description = game ? describe(game.metadata) : null
   const descriptionRef = useRef<HTMLParagraphElement | null>(null)

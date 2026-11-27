@@ -30,6 +30,7 @@ import type { PlayOutApi } from '@shared/api'
 import {
   AUTO_STARTS_BEFORE_ASK,
   RECOMP_SAVES_FOLDER,
+  recompAchievementsSupported,
   type AddedRecompState,
   type GameFileNeed,
   type GameFileState,
@@ -264,7 +265,9 @@ function catalogEntries(): RecompEntry[] {
       license: 'MIT',
       installer: true,
       assetPattern: 'xerenge-*-windows-setup.exe',
-      setupNotes: ['Run the setup: it installs the game from your Burnout Revenge disc image.']
+      setupNotes: ['Run the setup: it installs the game from your Burnout Revenge disc image.'],
+      // A ReXGlue recompilation: its achievements show on Burnout Revenge's page (mock getAchievements).
+      rl: { id: 'xerenge', titleId: '4541080F' }
     }),
     entry({
       id: DOOM64EX_PLUS,
@@ -714,12 +717,15 @@ export function createRecompMock(deps: RecompMockDeps): RecompMock {
         preferred: preferredOf(title),
         updatedAt: now()
       }
+      const withAch = info.installed.filter((id) => recompAchievementsSupported(entries.get(id)))
+      if (withAch.length) info.achievements = withAch
       const before = game.metadata.recomp
       if (
         !before ||
         before.count !== info.count ||
         before.preferred !== info.preferred ||
-        before.installed.join() !== info.installed.join()
+        before.installed.join() !== info.installed.join() ||
+        (before.achievements ?? []).join() !== (info.achievements ?? []).join()
       ) {
         game.metadata = { ...game.metadata, recomp: info }
         changed.push(game.id)

@@ -95,6 +95,11 @@ let paused = false
  * move around (and press A on) PlayOut's own menus, opening its on-screen keyboard over the game.
  */
 let needsFocus = false
+/**
+ * setGamepadActiveElsewhere: the window counts as active although its document lost the focus (the in-app web viewer's
+ * page, a view inside the same window, has it once clicked).
+ */
+let activeElsewhere: (() => boolean) | null = null
 /** Whether the last frame dispatched nothing (paused, or this window not active). */
 let idle = false
 /**
@@ -135,7 +140,8 @@ let source: GamepadSource | null = null
 let sourceTimer: ReturnType<typeof setInterval> | null = null
 let sourceEpoch: number | null = null
 
-const windowActive = (): boolean => typeof document.hasFocus !== 'function' || document.hasFocus()
+const windowActive = (): boolean =>
+  typeof document.hasFocus !== 'function' || document.hasFocus() || !!activeElsewhere?.()
 
 function freshState(): PadState {
   return {
@@ -414,7 +420,7 @@ function onVisibilityChange(): void {
  * getting it back starts the settle.
  */
 function onWindowBlur(): void {
-  if (!needsFocus || source) return
+  if (!needsFocus || source || activeElsewhere?.()) return
   settleHeld()
   idle = true
 }
@@ -478,6 +484,14 @@ export function setGamepadPaused(next: boolean): void {
  */
 export function setGamepadNeedsFocus(next: boolean): void {
   needsFocus = next
+}
+
+/**
+ * While set, the focus gate also passes when `active()` is true: PlayOut's window is the foreground one but a view
+ * inside it has the keyboard focus (the in-app web viewer's page, WebViewer.tsx). null: the document's focus only.
+ */
+export function setGamepadActiveElsewhere(active: (() => boolean) | null): void {
+  activeElsewhere = active
 }
 
 /**

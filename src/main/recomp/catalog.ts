@@ -536,6 +536,9 @@ interface RlPart {
   installer: boolean
   archived: boolean
   windows: boolean
+  /** The game's Xbox 360 title id (8 hex digits, upper case) and its user data folder template, for one-game apps. */
+  titleId: string | null
+  achievementsFolder: string | null
 }
 
 interface Draft {
@@ -689,6 +692,18 @@ function isTakenDown(plan: Obj): boolean {
   return obj(facts?.health)?.dmca === true || !!facts?.takedown
 }
 
+/** An Xbox 360 title id as 8 upper-case hex digits, else null. */
+function titleIdOf(v: unknown): string | null {
+  const s = str(v)?.replace(/^0x/i, '')
+  return s && /^[0-9a-f]{8}$/i.test(s) ? s.toUpperCase() : null
+}
+
+/** A folder template from the catalog (a short path, one line), else null. */
+function folderTemplate(v: unknown): string | null {
+  const s = str(v)
+  return s && s.length <= 260 && !/[\r\n]/.test(s) ? s : null
+}
+
 function rlPartOf(app: Obj, game: string | null, art: Obj | null, systemId: string | null): RlPart {
   const boot = obj(app.boot)
   const assets = obj(app.assets)
@@ -702,6 +717,8 @@ function rlPartOf(app: Obj, game: string | null, art: Obj | null, systemId: stri
   const gameName = game ?? str(app.game) ?? ''
   // The app's database record describes the app as a whole: not one game of a multi-game app (`game` given).
   const about = game === null ? obj(app.about) : null
+  // Older catalogs put the title id and folder in an `achievements` object.
+  const achievementsInfo = obj(app.achievements)
   return {
     rlId: str(app.id) ?? '',
     name: str(app.name),
@@ -738,7 +755,11 @@ function rlPartOf(app: Obj, game: string | null, art: Obj | null, systemId: stri
     needsText: str(app.needs),
     installer: app.installer === true || str(boot?.kind) === 'installer',
     archived: app.archived === true,
-    windows: systems.includes('windows') && !!windowsAsset && app.soon !== true
+    windows: systems.includes('windows') && !!windowsAsset && app.soon !== true,
+    // The app's own (one game): a game of a multi-game app has its own title.
+    titleId: game === null ? titleIdOf(app.title_id ?? achievementsInfo?.title_id) : null,
+    achievementsFolder:
+      game === null ? folderTemplate(app.achievements_folder ?? achievementsInfo?.folder) : null
   }
 }
 
@@ -915,7 +936,16 @@ function finalize(d: Draft): RecompEntry | null {
     coverUrl: rl?.cover ?? finds?.boxart ?? null,
     heroUrl: rl?.hero ?? null,
     archived,
-    sources
+    sources,
+    ...(rl?.rlId && (rl.titleId || rl.achievementsFolder)
+      ? {
+          rl: {
+            id: rl.rlId,
+            ...(rl.titleId ? { titleId: rl.titleId } : {}),
+            ...(rl.achievementsFolder ? { achievementsFolder: rl.achievementsFolder } : {})
+          }
+        }
+      : {})
   }
 }
 

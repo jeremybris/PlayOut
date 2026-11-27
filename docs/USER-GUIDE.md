@@ -480,7 +480,8 @@ _Released <date> · developer · publisher_ and the action bar:
   genres for ROM games ("Role-Playing", "Platform"), from the same monthly download. A ROM game LaunchBox has no
   genres for keeps the genres from the metadata sources as before, and so does every ROM game until LaunchBox could
   be reached once (a failed download is tried again six hours later). Steam, GOG, Epic and the other stores always use those.
-- **Achievements x/y** (press it to expand the list; ROM games show **RetroAchievements x/y** instead, section 5.4),
+- **Achievements x/y** (press it to expand the list; ROM games show **RetroAchievements x/y** instead, section 5.4,
+  except a game whose Xbox 360 recompilation Play starts, which shows its own achievements, section 4.5),
   then **Play time / Main story**: your play time over HowLongToBeat's main story time in the same unit
   (_12.5 / 59 Hrs_, _45 Min / 26 Hrs_), so you see how close you are to beating the game (_Play time / Solo_ for a
   game HowLongToBeat times as Solo; just _Play time_ when it has no time).
@@ -601,6 +602,31 @@ What happens when you **Save** an edit:
 - Removing your edit of a field (**Reset**, then **Save**) only changes this PC; it is not sent anywhere.
 - Text with HTML tags or control characters is kept on this PC only (the cloud refuses it; a toast says so).
 - Artwork (cover, hero, logo) is never shared: it stays on this PC.
+
+**Steam links (Steam games).** A Steam game's page has a second grid of four squares right of the feature squares
+(right of **Play** when the game has none of those): top left the game's **Steam store page** (the Steam logo), top
+right its **Steam Workshop** (a wrench), bottom left its **PCGamingWiki** page (an open book: fixes, settings, save
+locations) and bottom right its **Steam Guides** (a scroll). Other games have no such grid. The Workshop square stays
+empty when Steam says the game has no Workshop; a game PlayOut has not asked Steam about yet keeps the square until
+you press **Refresh metadata** on its page (nothing is looked up in the background for this). A square opens the
+page **inside PlayOut**, in a large panel over the game page:
+
+- The bar on top shows the page's title and site, with **Back**, **Forward**, **Reload**, **Open in browser** and
+  **Close**. Mouse, touch and keyboard work in the page as in a browser (Escape in the page goes back, or closes
+  on the first page; Alt + Left / Right go back / forward).
+- With a controller: **B** goes back (closes on the first page), **LB / RB** back / forward, **D-pad up / down** and
+  the **right stick** scroll the page, **X** reloads, **Y** opens the page in your default browser, and **A** presses
+  the bar's selected button. The controller cannot click links inside the page; use the mouse or touch, or **Y**.
+- The panel only shows Steam's store, the Steam community and PCGamingWiki. A link to any other site (YouTube,
+  a developer's site, Steam's sign-in or help pages) that you click opens in your default browser instead, and so
+  does a download you start. The page itself cannot open your browser: a pop-up, redirect or download it tries
+  without your click shows a line under the bar (**Open in browser** or **Dismiss**) and nothing opens until you
+  choose. The panel asks for no permissions or devices (camera, notifications, USB, Bluetooth, screen capture) and has
+  its own cookies, apart from PlayOut's and from the store sign-in windows, forgotten when PlayOut closes; signing in
+  to Steam there is not possible, so Workshop subscriptions and ratings need **Open in browser** or Steam itself.
+- It closes with the game page and when a game starts. While something of PlayOut's opens over it (the Quick panel,
+  a dialog), the page is hidden and comes back when that closes. PlayOut's toasts and on-screen keyboard cannot show
+  over the page.
 
 **What happens on Play.** A toast says _Launching <title>…_. Store games start through their client (the
 client itself starts first when it is not running; PlayOut waits up to 90 seconds for the game to appear).
@@ -1231,6 +1257,25 @@ once a day). Started offline, it uses the copy from last time and checks as soon
   with Co-Op or PeerParty, or outside PlayOut, are copied at their next start with Play; a game started again while
   it still runs copies nothing back; a game a paired PC streams starts even with the question open, which then waits
   for you here. **Settings → Library → Copy saves of games you added** turns it off for every game.
+- **Achievements (Xbox 360 recompilations):** an Xbox 360 recompilation built on ReXGlue keeps its own record of the
+  achievements you unlock in it, and PlayOut reads that record. When Play starts such a recompilation, the game page
+  shows an **Achievements x/y** stat in place of RetroAchievements. Expand it to see each achievement with its name,
+  description and gamerscore (**25 G**), when you unlocked it, and the ones still locked. Secret ones stay hidden
+  until you unlock them. The header shows your gamerscore out of the game's total.
+  - The names and gamerscore are the game's own Xbox 360 achievements, in PlayOut's language when the game has it.
+    PlayOut reads them from your copy of the game: the `default.xex` in the recompilation's folder, the game files you
+    chose for it, or your Xbox 360 disc image (.iso). When the recompilation ships its own achievement list, its
+    entries replace or add to the game's, as they do in the game. They are kept in
+    `%APPDATA%\PlayOut\recomp-achievements\` after the first read.
+  - A Steam (or other store) game keeps its store's achievements, even with a recompilation of it installed.
+  - Once the recompilation is uninstalled, its counts leave the game's card.
+  - If your copy cannot be read, the list shows only how many achievements you have unlocked.
+  - Until you unlock the first one, the list says to play the game once. Achievements appear after an unlock.
+  - The counts are read when you open the game's page and when you stop playing. PlayOut never checks them in the
+    background, and it does not show unlocks while you play.
+  - Only Xbox 360 recompilations for which the recompilation catalog gives the game's title id or user data folder
+    have this. A game whose recompilation does not have it shows what it showed before (RetroAchievements, where the
+    console has them).
 - **Where they go:** `<PlayOut folder>\Recompilations\<name>\` (next to PlayOut.exe), or
   `%APPDATA%\PlayOut\Recompilations\` when PlayOut is in Program Files or its folder cannot be written. Settings →
   Recompilations shows the folder.
@@ -2117,25 +2162,26 @@ not read) and is worth reporting with `logs\main.log` and `logs\store-import.log
 
 ## 11. Files and folders
 
-| Path                                    | Contents                                                                                                                                               |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `%APPDATA%\PlayOut\library.json`        | Every game PlayOut knows, with your edits, play times and media links                                                                                  |
-| `%APPDATA%\PlayOut\settings.json`       | All settings, including API keys and emulator overrides                                                                                                |
-| `%APPDATA%\PlayOut\sessions.json`       | Play sessions (newest 10,000)                                                                                                                          |
-| `%APPDATA%\PlayOut\accounts.json`       | Store account sessions, encrypted for your Windows user (section 3.4); delete it to sign out                                                           |
-| `%APPDATA%\PlayOut\metadata-cloud\`     | The metadata cloud: last `all.json` (`cache.json`), relay and encrypted maintainer token (`config.json`), edits waiting to be suggested (`queue.json`) |
-| `%APPDATA%\PlayOut\media\<game id>\`    | Cached artwork (`cover.<ext>`, `hero.<ext>`, `logo.<ext>`, `icon.<ext>`, `screenshot-<n>.<ext>`)                                                       |
-| `%APPDATA%\PlayOut\streaming\`          | Streaming (section 4.3): pairings (encrypted), the host certificate, Sunshine, Moonlight, host art                                                     |
-| `%APPDATA%\PlayOut\PeerParty\`          | PeerParty (section 4.2): `peerparty.exe`, its settings and player data (`peerparty-data\`), its logs (`logs\`)                                         |
-| `%APPDATA%\PlayOut\logs\main.log`       | Log file                                                                                                                                               |
-| `<Emulation folder>\PlayOut\Favorites\` | Your favourites, one list per PC (section 1); kept when PlayOut is uninstalled, read back after a reinstall                                            |
-| `%APPDATA%\PlayOut\Emulators\<name>\`   | Optional: emulators PlayOut should find without configuration                                                                                          |
-| `<PlayOut folder>\Emulators\<name>\`    | Same, next to the executable (portable builds)                                                                                                         |
-| `<PlayOut folder>\Recompilations\`      | Recompilations (section 4.5), one folder each; `.playout\recomps.json` lists them                                                                      |
-| `%APPDATA%\PlayOut\cache\recomp\`       | The recompilation catalogs, release lists and READMEs (fetched again daily)                                                                            |
-| `<PlayOut folder>\VR Mods\`             | VR mods (section 4.6), one folder each, beside the Recompilations folder; `%APPDATA%\PlayOut\vr-mods.json` lists them                                  |
-| `%APPDATA%\PlayOut\cache\vr-mods\`      | VR mods' GitHub release lists and READMEs                                                                                                              |
-| `<PlayOut folder>\resources\systems\`   | System definitions, emulator find rules, scraper platform ids, Battle.net product table                                                                |
+| Path                                     | Contents                                                                                                                                               |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `%APPDATA%\PlayOut\library.json`         | Every game PlayOut knows, with your edits, play times and media links                                                                                  |
+| `%APPDATA%\PlayOut\settings.json`        | All settings, including API keys and emulator overrides                                                                                                |
+| `%APPDATA%\PlayOut\sessions.json`        | Play sessions (newest 10,000)                                                                                                                          |
+| `%APPDATA%\PlayOut\accounts.json`        | Store account sessions, encrypted for your Windows user (section 3.4); delete it to sign out                                                           |
+| `%APPDATA%\PlayOut\metadata-cloud\`      | The metadata cloud: last `all.json` (`cache.json`), relay and encrypted maintainer token (`config.json`), edits waiting to be suggested (`queue.json`) |
+| `%APPDATA%\PlayOut\media\<game id>\`     | Cached artwork (`cover.<ext>`, `hero.<ext>`, `logo.<ext>`, `icon.<ext>`, `screenshot-<n>.<ext>`)                                                       |
+| `%APPDATA%\PlayOut\streaming\`           | Streaming (section 4.3): pairings (encrypted), the host certificate, Sunshine, Moonlight, host art                                                     |
+| `%APPDATA%\PlayOut\PeerParty\`           | PeerParty (section 4.2): `peerparty.exe`, its settings and player data (`peerparty-data\`), its logs (`logs\`)                                         |
+| `%APPDATA%\PlayOut\logs\main.log`        | Log file                                                                                                                                               |
+| `<Emulation folder>\PlayOut\Favorites\`  | Your favourites, one list per PC (section 1); kept when PlayOut is uninstalled, read back after a reinstall                                            |
+| `%APPDATA%\PlayOut\Emulators\<name>\`    | Optional: emulators PlayOut should find without configuration                                                                                          |
+| `<PlayOut folder>\Emulators\<name>\`     | Same, next to the executable (portable builds)                                                                                                         |
+| `<PlayOut folder>\Recompilations\`       | Recompilations (section 4.5), one folder each; `.playout\recomps.json` lists them                                                                      |
+| `%APPDATA%\PlayOut\cache\recomp\`        | The recompilation catalogs, release lists and READMEs (fetched again daily)                                                                            |
+| `%APPDATA%\PlayOut\recomp-achievements\` | Xbox 360 recompilations' achievement lists, one per game, read once from your copy (section 4.5)                                                       |
+| `<PlayOut folder>\VR Mods\`              | VR mods (section 4.6), one folder each, beside the Recompilations folder; `%APPDATA%\PlayOut\vr-mods.json` lists them                                  |
+| `%APPDATA%\PlayOut\cache\vr-mods\`       | VR mods' GitHub release lists and READMEs                                                                                                              |
+| `<PlayOut folder>\resources\systems\`    | System definitions, emulator find rules, scraper platform ids, Battle.net product table                                                                |
 
 Files are written atomically (temporary file, then rename) and a few hundred milliseconds after a change, so
 closing PlayOut right after an edit is safe.

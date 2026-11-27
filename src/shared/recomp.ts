@@ -146,6 +146,25 @@ export interface RecompEntry {
    * approved (the metadata cloud's all.json); 'user' = added on this PC (RecompBrowser's Add, not approved yet).
    */
   sources: ('decomp-buddy' | 'recomplauncher' | 'playout' | 'user')[]
+  /**
+   * The public catalog's facts (the `sources` entry 'recomplauncher') about the game's Xbox 360 user data (a
+   * single-game app only): `titleId` the
+   * game's title id (8 hex digits, upper case), `achievementsFolder` the folder template its unlock file is under
+   * ({game} = the install folder). `id` is the app's id in that catalog. Absent when the catalog gives neither.
+   */
+  rl?: { id: string; titleId?: string; achievementsFolder?: string }
+}
+
+/**
+ * Whether PlayOut can read the achievements of a recompilation (recomp/achievements): an Xbox 360 one built on
+ * ReXGlue, which keeps its own unlock file, known by the title id or user data folder the catalog gives.
+ */
+export function recompAchievementsSupported(
+  entry: Pick<RecompEntry, 'systemId' | 'rl'> | null | undefined
+): boolean {
+  return (
+    !!entry && entry.systemId === 'xbox360' && !!(entry.rl?.titleId || entry.rl?.achievementsFolder)
+  )
 }
 
 /**

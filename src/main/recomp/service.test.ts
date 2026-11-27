@@ -3227,3 +3227,49 @@ describe("a recompilation's own library card", () => {
     await until(async () => expect((await manifest())?.imageAskAfter).toBe(1))
   })
 })
+
+describe('recomp service: achievements', () => {
+  /** The catalog with Zelda as an Xbox 360 recompilation the catalog gives a title id and user data folder for. */
+  function x360Catalog(): RecompCatalog {
+    const c = catalogFixture()
+    const zelda = c.entries.get(ZELDA)!
+    c.entries.set(ZELDA, {
+      ...zelda,
+      systemId: 'xbox360',
+      rl: { id: 'zelda-x360', titleId: '4D5307E6', achievementsFolder: '{game}\\userdata' }
+    })
+    return c
+  }
+
+  it('marks the installed recompilations PlayOut reads achievements of, and says where to read them', async () => {
+    const afterPlayed = vi.fn()
+    const h = await harness({ over: { loadCatalog: async () => x360Catalog(), afterPlayed } })
+    await h.service.refreshRecompCatalog()
+    expect(h.game.metadata.recomp?.achievements).toBeUndefined()
+    await installAndWait(h, ZELDA)
+    await until(() => expect(h.game.metadata.recomp?.achievements).toEqual([ZELDA]))
+    const row = (await h.service.getRecompSettings()).rows[0]!
+    expect(await h.service.achievementSource(ZELDA)).toMatchObject({
+      recompId: ZELDA,
+      titleId: '4D5307E6',
+      folder: '{game}\\userdata',
+      install: row.installed.dir,
+      saveTemplates: [],
+      gameFiles: []
+    })
+    // Not installed, or no achievements PlayOut can read: nothing.
+    expect(await h.service.achievementSource(OTHER)).toBeNull()
+    // A play session's end has its achievements read again.
+    expect(await h.service.launchRecomp(h.game.id)).toEqual({ ok: true })
+    h.spawned[0]!.child.emit('exit', 0)
+    await until(() => expect(afterPlayed).toHaveBeenCalledWith(ZELDA))
+  })
+
+  it('leaves recompilations of other consoles unmarked', async () => {
+    const h = await harness()
+    await installAndWait(h, ZELDA)
+    await until(() => expect(h.game.metadata.recomp?.installed).toEqual([ZELDA]))
+    expect(h.game.metadata.recomp?.achievements).toBeUndefined()
+    expect(await h.service.achievementSource(ZELDA)).toBeNull()
+  })
+})

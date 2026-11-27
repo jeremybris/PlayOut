@@ -4,6 +4,8 @@ import { defaultSettings } from '../../shared/defaults'
 import {
   controlsOf,
   vacOf,
+  workshopOf,
+  workshopUnread,
   createSteamTags,
   fetchSteamTagIds,
   knownSteamAppId,
@@ -234,7 +236,8 @@ describe('fetchSteamTagIds', () => {
       tagIds: [1, 2],
       year: 1997,
       controls: { controller: null, vr: null },
-      vac: false
+      vac: false,
+      workshop: false
     })
     const input0 = JSON.parse(
       new URL(String((fetchMock.mock.calls as unknown[][])[0][0])).searchParams.get('input_json') ??
@@ -371,5 +374,74 @@ describe('createSteamTags', () => {
     expect(fetchTagIds).toHaveBeenCalledTimes(6)
     expect(deps.sleep).toHaveBeenCalledTimes(2)
     expect(deps.library.applyMetadata).not.toHaveBeenCalled()
+  })
+})
+
+describe('Steam Workshop flag (the game page Workshop link)', () => {
+  it("reads Steam's Workshop feature category", () => {
+    expect(workshopOf({ categories: { feature_categoryids: [2, 30, 22] } })).toBe(true)
+    expect(workshopOf({ categories: { feature_categoryids: [2, 8] } })).toBe(false)
+    expect(workshopOf({ categories: { feature_categoryids: 'x' } })).toBe(false)
+    expect(workshopOf({})).toBe(false)
+  })
+
+  it('marks only a read Steam app without the flag as unread', () => {
+    const read = { tags: ['Action'], appId: 100, updatedAt: iso(NOW) }
+    expect(workshopUnread(makeGame('a', {}, { steamTags: read }))).toBe(true)
+    expect(workshopUnread(makeGame('b', {}, { steamTags: { ...read, workshop: false } }))).toBe(
+      false
+    )
+    expect(workshopUnread(makeGame('c', {}, { steamTags: { tags: [], missedAt: iso(NOW) } }))).toBe(
+      false
+    )
+    expect(workshopUnread(makeGame('d'))).toBe(false)
+  })
+
+  it('writes the flag with the tags', async () => {
+    const game = makeGame('w', { externalId: '4000' })
+    const { deps } = setup([game])
+    const fetchTagIds = vi.fn(
+      async (ids: readonly number[]) =>
+        new Map<number, SteamTagItem>(
+          ids.map((id) => [id, { tagIds: [1], vac: false, workshop: true }])
+        )
+    )
+    const service = createSteamTags({ ...deps, fetchTagIds })
+    service.kick()
+    await service.idle()
+    expect(game.metadata.steamTags).toMatchObject({ appId: 4000, workshop: true })
+  })
+
+  it('reads a game again for the flag only when the user refreshes it, never in the background', async () => {
+    const read = {
+      tags: ['Action'],
+      appId: 4100,
+      updatedAt: iso(NOW),
+      controls: { controller: null, vr: null },
+      vac: false
+    }
+    const old = makeGame('old', { externalId: '4100' }, { steamTags: read })
+    const other = makeGame('other', { externalId: '4200' }, { steamTags: { ...read, appId: 4200 } })
+    const { deps } = setup([old, other])
+    const fetchTagIds = vi.fn(
+      async (ids: readonly number[]) =>
+        new Map<number, SteamTagItem>(
+          ids.map((id) => [id, { tagIds: [2], vac: false, workshop: false }])
+        )
+    )
+    const service = createSteamTags({ ...deps, fetchTagIds })
+    service.kick()
+    await service.idle()
+    expect(fetchTagIds).not.toHaveBeenCalled()
+    service.refreshed(['old', 'missing'])
+    await service.idle()
+    expect(fetchTagIds).toHaveBeenCalledTimes(1)
+    expect(fetchTagIds.mock.calls[0][0]).toEqual([4100])
+    expect(old.metadata.steamTags).toMatchObject({ workshop: false, tags: ['Action'] })
+    expect(other.metadata.steamTags?.workshop).toBeUndefined()
+    // Read now: a second refresh asks nothing.
+    service.refreshed(['old'])
+    await service.idle()
+    expect(fetchTagIds).toHaveBeenCalledTimes(1)
   })
 })

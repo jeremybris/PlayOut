@@ -1727,3 +1727,77 @@ describe("another region's name for the game (RecompLauncher's game record)", ()
     expect(entry(c, 'github:someone/prey2006').otherNames).toBeUndefined()
   })
 })
+
+describe('buildCatalog: Xbox 360 user data (achievements)', () => {
+  const x360 = (app: Record<string, unknown>): Record<string, unknown> =>
+    rlApp({
+      origin: 'x360',
+      size: '50 MB',
+      assets: { windows: 'game-*-windows.zip' },
+      tag: 'v1.0.0',
+      released: '2026-10-01',
+      ...app
+    })
+  const c = build({
+    finds: { games: [] },
+    plans: {},
+    rl: {
+      catalogVersion: 1,
+      platform: 'pc',
+      apps: [
+        x360({
+          id: 'both-recomp',
+          name: 'Both Recomp',
+          game: 'Game One',
+          repo: 'dev/both-recomp',
+          title_id: '4d5307e6',
+          achievements_folder: '{game}\\userdata'
+        }),
+        x360({
+          id: 'older-recomp',
+          name: 'Older Recomp',
+          game: 'Game Two',
+          repo: 'dev/older-recomp',
+          achievements: { title_id: '0x545107E0', folder: '%LOCALAPPDATA%\\GameTwo\\user' }
+        }),
+        x360({ id: 'plain-recomp', name: 'Plain', game: 'Game Three', repo: 'dev/plain-recomp' }),
+        x360({
+          id: 'bad-recomp',
+          name: 'Bad',
+          game: 'Game Four',
+          repo: 'dev/bad-recomp',
+          title_id: 'not-hex!',
+          achievements_folder: 'line one\nline two'
+        }),
+        x360({
+          id: 'collection',
+          name: 'Collection',
+          repo: 'dev/collection',
+          title_id: '11112222',
+          games: [{ name: 'Part One' }, { name: 'Part Two' }]
+        })
+      ]
+    }
+  })
+
+  it("carries the catalog's title id and user data folder onto the entry", () => {
+    expect(entry(c, 'github:dev/both-recomp').rl).toEqual({
+      id: 'both-recomp',
+      titleId: '4D5307E6',
+      achievementsFolder: '{game}\\userdata'
+    })
+    expect(entry(c, 'github:dev/older-recomp').rl).toEqual({
+      id: 'older-recomp',
+      titleId: '545107E0',
+      achievementsFolder: '%LOCALAPPDATA%\\GameTwo\\user'
+    })
+  })
+
+  it('leaves them out when the catalog has none, or none that is usable, and for a game of a collection', () => {
+    expect(entry(c, 'github:dev/plain-recomp').rl).toBeUndefined()
+    expect(entry(c, 'github:dev/bad-recomp').rl).toBeUndefined()
+    const parts = [...c.entries.values()].filter((e) => e.repo === 'dev/collection')
+    expect(parts).toHaveLength(2)
+    expect(parts.every((e) => e.rl === undefined)).toBe(true)
+  })
+})

@@ -1011,6 +1011,32 @@ steamapps / XboxGames), `collectionRefusal` (another library game inside, a stor
 levels, programs of different products by `sameProduct`) and a 200 GB cap, else `remove-only` (the existing Remove
 from library, with the reason).
 
+**Web viewer** (`web-viewer/*`, renderer `GameDetail/SteamLinksGrid.tsx` + `WebViewer.tsx`, shared `web-viewer.ts`):
+the Steam game page's second 2x2 grid (Store, Workshop, PCGamingWiki `api/appid.php?appid=`, Guides) opens its link in a
+`WebContentsView` added to the main window's `contentView`, laid over the empty body of the renderer's `WebViewer`
+modal (`setWebViewerBounds`, CSS pixels times the main webContents' zoom factor). Main builds the address from the
+kind and app id (`openWebViewer(kind, appId)`, zod-validated); the renderer never passes a URL. The view: in-memory
+partition `web-viewer` (no `persist:`: the sites' and their trackers' cookies, storage and cache go with PlayOut, and
+nobody signs in there; isolated from PlayOut's and the `persist:account-*` sign-in partitions), `sandbox`,
+`contextIsolation`, no Node, no preload, `webSecurity`, no devtools; permission requests and checks, device permissions,
+HID / USB / serial / Bluetooth choosers and `getDisplayMedia` denied; `will-download` cancelled. Main-frame
+`will-navigate`/`will-redirect` pass only https on the exact hosts `store.steampowered.com`, `steamcommunity.com`,
+`pcgamingwiki.com`, `www.pcgamingwiki.com` (`allow.ts webViewerDecision`, default port, no credentials); sub-frame
+redirects (ads, embeds) load as in a browser, unfiltered like sub-resources. Other http(s) addresses (navigation, the
+window-open handler, a download) go to `shell.openExternal` as the canonical `URL.href` (`externalHref`, at most
+4096 characters) only within 1.5 s of a mouse click (`before-mouse-event`) or key press (`before-input-event`) in the
+page, once per gesture and at most one launch per 3 s; otherwise the address is held in the state (`held`) and the
+renderer's bar offers it (`open-link` / `dismiss-link`). Any other scheme is blocked; the window-open handler always
+denies (allowed links load in the view itself). Escape / Alt+arrows are taken in `before-input-event`; scrolling runs
+`window.scrollBy` with a clamped number in an isolated world. The renderer hides the view (`setWebViewerVisible`)
+while its modal's action layer is not the top one (`addLayerListener`: the Quick panel or a dialog over it), since
+nothing it draws can cover the native view; hiding hands the keyboard back to the main window. State goes out as
+`web-viewer:state`; `session:started` closes the view, and so does the renderer's unmount (the game page closing).
+The renderer keeps the controller working while the view has the keyboard focus through `setGamepadActiveElsewhere`
+(fed by `window:focus`). The Workshop square reads `metadata.steamTags.workshop` (GetItems feature category 30, written
+by `scrapers/steam-tags.ts`); records from before it are read again only when the user refreshes the game's metadata
+(`SteamTagsService.refreshed`), never by the background pass.
+
 ### 4.9 App updates (`updates/index.ts`)
 
 `createUpdateService` wraps electron-updater's `autoUpdater` behind the injected `UpdaterLike`. The feed is the public
@@ -1054,6 +1080,26 @@ serves one game's list (`getAchievements`, cached 10 min, errors not cached).
   sync runs at startup, after a ROM scan and once a credential edit settles, and reports through
   `retroachievements:status` (`getRetroAchievementsStatus`, `syncRetroAchievements`). Clearing the credentials
   clears the ROMs' counts. Unlocking happens in the emulator; PlayOut only reads progress.
+- **Recompilations** (`recomp/achievements/`, provider `'recomp'`). For a game whose Play starts an installed
+  Xbox 360 recompilation the catalog gives a `title_id` or `achievements_folder` for (`RecompEntry.rl`,
+  `recompAchievementsSupported`; the match pass lists them in `GameRecompInfo.achievements`, the renderer asks
+  `recompAchievementsFor`, ROM cards only: a store card keeps its store's achievements), `load` reads that
+  recompilation before RetroAchievements through the reader `useRecomp` hands over
+  (`RecompService.achievementSource`). Unlocks come from the recompilation's own ReXGlue unlock file,
+  `<user_root>\achievements\<TITLE ID>.toml` (decimal `[unlocked.<id>]` + FILETIME, or the older `unlocked = [ids]`,
+  as ReXGlue writes and reads it), with the catalog folder (`{game}` = install; refused unless local and inside the
+  install, a save place or the profile: never UNC) or a save folder as user_root, else found below the install folder
+  (3 levels) or the user folders (2 levels); "not found" is kept until the next play session. Names and gamerscore
+  come from the XDBF XACH/XSTR tables of the game's `default.xex` (install folder, chosen game files, the card's disc
+  image via XDVDFS), decrypted with the public retail key and unpacked (basic / LZX, at most 128 MB and 64:1) by
+  clean-room readers in steps that yield to the event loop, in the UI language when the game has it; the
+  recompilation's own `achievements.toml` is laid over that list by id (ReXGlue's lookup: `<game data>\metadata`,
+  its parent's `metadata` while inside the install, `<game data>` itself; never the shared Recompilations folder).
+  What the executable gave, a "none" included, is kept per recompilation in `userData/recomp-achievements/` (a none
+  is retried when the files read change, or after a play session when no executable was found). Counts go to
+  `metadata.achievements` with `metadata.sources['recomp-achievements']` (left alone by the RetroAchievements clear;
+  taken off by `forgetStaleRecomp` once that recompilation no longer gives them). Read on page open (the 10-minute
+  cache) and after each play session (`afterPlayed` → `recompPlayed`); never in the background.
 
 ### 4.11 Install sizes (`services/install-size.ts`, `scrapers/store-sizes.ts`)
 

@@ -85,6 +85,8 @@ export interface SteamTagItem {
   controls?: SteamControls
   /** Steam lists Valve Anti-Cheat for the app (absent when Steam did not show the app). */
   vac?: boolean
+  /** Steam lists the Steam Workshop for the app (absent when Steam did not show the app). */
+  workshop?: boolean
 }
 
 /** Steam's controller categories (store "Full / Partial Controller Support"). */
@@ -92,6 +94,8 @@ const FULL_CONTROLLER = 28
 const PARTIAL_CONTROLLER = 18
 /** Steam's feature category "Valve Anti-Cheat enabled". */
 const VALVE_ANTI_CHEAT = 8
+/** Steam's feature category "Steam Workshop". */
+const STEAM_WORKSHOP = 30
 
 /** Whether an app's GetItems entry lists Valve Anti-Cheat. */
 export function vacOf(item: {
@@ -99,6 +103,12 @@ export function vacOf(item: {
 }): boolean {
   const ids = item.categories?.feature_categoryids
   return Array.isArray(ids) && ids.includes(VALVE_ANTI_CHEAT)
+}
+
+/** Whether an app's GetItems entry lists the Steam Workshop (the game page's Workshop link). */
+export function workshopOf(item: { categories?: { feature_categoryids?: unknown } }): boolean {
+  const ids = item.categories?.feature_categoryids
+  return Array.isArray(ids) && ids.includes(STEAM_WORKSHOP)
 }
 
 /** An app's controller and VR support from its GetItems entry. */
@@ -172,7 +182,8 @@ export async function fetchSteamTagIds(
       tagIds: weighted.length ? weighted : (item.tagids ?? []).filter((t) => typeof t === 'number'),
       ...(year !== undefined ? { year } : {}),
       controls: controlsOf(item),
-      vac: vacOf(item)
+      vac: vacOf(item),
+      workshop: workshopOf(item)
     })
   }
   return out
@@ -274,7 +285,23 @@ export interface SteamTagsService {
   kick(): void
   /** Resolves once no pass is running (tests). */
   idle(): Promise<void>
+  /**
+   * The user refreshed these games' metadata: one whose Steam answer predates the Workshop flag (workshopUnread) is
+   * read again in the next pass, so its game page learns whether it has a Workshop. Nothing reads it in the background.
+   */
+  refreshed(gameIds: readonly string[]): void
   dispose(): void
+}
+
+/**
+ * Whether a game's Steam answer was read before the Workshop flag was (the game page's Workshop link): it has a Steam
+ * app on record and no `workshop`. Read again only when the user refreshes the game's metadata (SteamTagsService
+ * refreshed), never by a background pass.
+ */
+export function workshopUnread(game: Game): boolean {
+  const record = game.metadata.steamTags
+  if (!record || record.appId === undefined || record.missedAt) return false
+  return record.workshop === undefined
 }
 
 export function createSteamTags(deps: SteamTagsDeps): SteamTagsService {
@@ -290,6 +317,10 @@ export function createSteamTags(deps: SteamTagsDeps): SteamTagsService {
   let again = false
   let disposed = false
   let names: { at: number; map: Map<number, string> } | null = null
+  // Games the user refreshed whose Steam answer predates the Workshop flag (refreshed / workshopUnread).
+  const refreshAsked = new Set<string>()
+  const isDue = (game: Game): boolean =>
+    steamTagsDue(game, now()) || (refreshAsked.has(game.id) && workshopUnread(game))
 
   const enabled = (): boolean => settings.get().scrapers.steamTags.enabled && !disposed
 
@@ -312,6 +343,7 @@ export function createSteamTags(deps: SteamTagsDeps): SteamTagsService {
   }
 
   function write(gameId: string, record: SteamTagsRecord): void {
+    refreshAsked.delete(gameId)
     if (!library.getGame(gameId)) return
     // Tags change what the game's page shows; a miss does not.
     library.applyMetadata(
@@ -323,7 +355,7 @@ export function createSteamTags(deps: SteamTagsDeps): SteamTagsService {
 
   async function pass(): Promise<void> {
     if (!enabled()) return
-    const due = library.games().filter((g) => steamTagsDue(g, now()))
+    const due = library.games().filter(isDue)
     if (!due.length) return
     log.info(`reading the Steam tags of ${due.length} game(s)`)
     failedInRow = 0
@@ -370,7 +402,8 @@ export function createSteamTags(deps: SteamTagsDeps): SteamTagsService {
               ...(tags.length ? { updatedAt: stamp } : { missedAt: stamp }),
               // Always recorded once read (a game Steam says nothing about plays with keyboard and mouse).
               controls: item.controls ?? { controller: null, vr: null },
-              ...(item.vac !== undefined ? { vac: item.vac } : {})
+              ...(item.vac !== undefined ? { vac: item.vac } : {}),
+              ...(item.workshop !== undefined ? { workshop: item.workshop } : {})
             })
             if (tags.length) tagged++
           }
@@ -400,7 +433,7 @@ export function createSteamTags(deps: SteamTagsDeps): SteamTagsService {
     for (const gameId of toSearch) {
       if (!enabled()) return
       const game = library.getGame(gameId)
-      if (!game || !steamTagsDue(game, now())) continue
+      if (!game || !isDue(game)) continue
       const title = titleOf(game)
       const record = game.metadata.steamTags
       const copies = steamCopies.get(sameGameKey(title))
@@ -450,17 +483,31 @@ export function createSteamTags(deps: SteamTagsDeps): SteamTagsService {
     })()
   }
 
+  function kick(): void {
+    if (disposed) return
+    if (running) {
+      again = true
+      return
+    }
+    start()
+  }
+
   return {
-    kick() {
-      if (disposed) return
-      if (running) {
-        again = true
-        return
-      }
-      start()
-    },
+    kick,
     async idle() {
       while (running) await running
+    },
+    refreshed(gameIds) {
+      if (disposed) return
+      let any = false
+      for (const id of gameIds) {
+        const game = library.getGame(id)
+        if (game && workshopUnread(game)) {
+          refreshAsked.add(id)
+          any = true
+        }
+      }
+      if (any) kick()
     },
     dispose() {
       disposed = true

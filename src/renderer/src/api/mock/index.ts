@@ -16,6 +16,7 @@ import {
   withoutMetadataEdit
 } from '@shared/metadata-edit'
 import { PC_PLATFORM, STORE_PLATFORMS } from '@shared/platforms'
+import { RECOMP_ACHIEVEMENTS_SOURCE, recompAchievementsFor } from '@shared/recomp-play'
 import {
   STORE_SOURCES,
   type AccountStatus,
@@ -80,6 +81,7 @@ import {
   discoverableGames,
   folderGames,
   sampleAchievements,
+  sampleRecompAchievements,
   sampleCandidates,
   sampleSessions,
   scrapeForTitle,
@@ -97,6 +99,7 @@ import { createStreamingMock } from './streaming'
 import { displayTitle } from '../../lib/library'
 import { createOverlayMock } from './overlay'
 import { createFriendsMock, type MockFriendsMode } from './friends'
+import { createWebViewerMock } from './webViewer'
 import {
   MOCK_SETUP_ROOT,
   SETUP_EMULATORS,
@@ -1335,6 +1338,9 @@ export function createMockApi(options: MockOptions = {}): PlayOutApi {
     log
   })
 
+  // The game page's Steam links (mock/webViewer.ts): the viewer opens a placeholder, no web page.
+  const webViewer = createWebViewerMock(emitter, log)
+
   if (flags.installing) {
     const [seeded, ...rest] = ownedGamesInOrder(games.values())
     if (seeded) {
@@ -1999,6 +2005,22 @@ export function createMockApi(options: MockOptions = {}): PlayOutApi {
         return shown ? sampleAchievements(shown, []) : null
       }
       const game = games.get(gameId)
+      // A recompilation whose achievements main reads (Burnout Revenge's Xerenge): its own list; the counts land on
+      // the card as main's writeCounts does.
+      const recompId = game ? recompAchievementsFor(game) : null
+      if (game && recompId) {
+        const info = sampleRecompAchievements(game)
+        const before = game.metadata.achievements
+        if (before?.unlocked !== info.unlocked || before?.total !== info.total) {
+          game.metadata = {
+            ...game.metadata,
+            achievements: { unlocked: info.unlocked, total: info.total, updatedAt: now() },
+            sources: { ...game.metadata.sources, [RECOMP_ACHIEVEMENTS_SOURCE]: recompId }
+          }
+          emitter.emit('library:changed', { reason: 'metadata', gameIds: [game.id] })
+        }
+        return info
+      }
       return game ? sampleAchievements(game, sessions) : null
     },
     async getSteamScreenshots(gameId) {
@@ -2233,6 +2255,7 @@ ${apiKey}`
     // --- home button, overlay, performance, display, media (mock/overlay.ts) ----------------
     ...overlay.api,
     ...friends.api,
+    ...webViewer.api,
 
     // --- Recompilations (mock/recomp.ts) ----------------------------------------------
     ...recomp.api,

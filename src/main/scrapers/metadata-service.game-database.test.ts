@@ -279,6 +279,36 @@ describe('the PlayOut database in the metadata pipeline', () => {
     })
   })
 
+  it('keeps the Workshop and VAC answers the Steam tags pass wrote while the Refresh ran', async () => {
+    library.mergeScan('steam', [scanned()])
+    library.applyMetadata(
+      'steam:620',
+      { metadata: { steamTags: { tags: ['Old'], appId: 620 } }, status: 'done' },
+      { overwrite: true }
+    )
+    const db = fakeDatabase()
+    db.rows.set('steam-620', ROW)
+    const scraper = textScraper()
+    const fetch = scraper.fetch.bind(scraper)
+    // The Steam tags pass (kicked by the same Refresh) writes its answer after the database row was taken.
+    scraper.fetch = async (...args) => {
+      const game = library.getGame('steam:620')!
+      library.applyMetadata(
+        'steam:620',
+        { metadata: { steamTags: { ...game.metadata.steamTags!, workshop: true, vac: false } } },
+        { overwrite: true }
+      )
+      return fetch(...args)
+    }
+    create(db, [scraper]).enqueue(['steam:620'], { force: true })
+    await untilDone('steam:620')
+    expect(library.getGame('steam:620')!.metadata.steamTags).toMatchObject({
+      tags: ['Co-op', 'Puzzle'],
+      workshop: true,
+      vac: false
+    })
+  })
+
   it('offers a game the database lacked once it is matched', async () => {
     library.mergeScan('steam', [scanned()])
     const db = fakeDatabase()

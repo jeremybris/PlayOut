@@ -378,6 +378,25 @@ function hltbConsolesOf(game: Game): string[] | undefined {
   return consoles.length ? consoles : undefined
 }
 
+type SteamTagsRecord = NonNullable<GameMetadata['steamTags']>
+
+/**
+ * A Steam tags record about to be stored with the Steam tags service's own answers (controls badge, VAC, Workshop)
+ * the game has now laid over it, so a run that started before that service wrote them does not drop them.
+ */
+export function withLiveSteamFacts(
+  record: SteamTagsRecord,
+  live: GameMetadata['steamTags'] | undefined
+): SteamTagsRecord {
+  if (!live) return record
+  return {
+    ...record,
+    ...(live.controls ? { controls: live.controls } : {}),
+    ...(live.vac !== undefined ? { vac: live.vac } : {}),
+    ...(live.workshop !== undefined ? { workshop: live.workshop } : {})
+  }
+}
+
 export function createMetadataService(
   deps: MetadataDeps,
   options: MetadataServiceOptions = {}
@@ -1268,6 +1287,10 @@ export function createMetadataService(
           }
         : {})
     }
+    // The Steam tags pass a Refresh kicks runs alongside this one: answers it wrote meanwhile (controls, VAC,
+    // Workshop) are the game's current ones, not those of the snapshot the database row was laid on.
+    if (metadata.steamTags)
+      metadata.steamTags = withLiveSteamFacts(metadata.steamTags, current.metadata.steamTags)
     library.applyMetadata(
       gameId,
       {
@@ -1363,6 +1386,10 @@ export function createMetadataService(
     if (metadata.steamTags && controls) metadata.steamTags = { ...metadata.steamTags, controls }
     const vac = game.metadata.steamTags?.vac
     if (metadata.steamTags && vac !== undefined) metadata.steamTags = { ...metadata.steamTags, vac }
+    // The Steam Workshop answer (the game page's Workshop link) is kept the same way.
+    const workshop = game.metadata.steamTags?.workshop
+    if (metadata.steamTags && workshop !== undefined)
+      metadata.steamTags = { ...metadata.steamTags, workshop }
     return { metadata, media: {} }
   }
 

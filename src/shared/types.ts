@@ -363,6 +363,11 @@ export interface GameMetadata {
      * files in the game's folder, so PeerParty reads it from here. Absent: not read yet (read again once).
      */
     vac?: boolean
+    /**
+     * Steam lists the Steam Workshop for the app (its feature category 30), from the same Steam answer: the game page
+     * leaves its Workshop link out when false. Absent: not read yet (read with the next Steam tags; shown meanwhile).
+     */
+    workshop?: boolean
   }
   /**
    * How hard the game is: the user's or the cloud's pick (MetadataEdit.difficulty), laid over the game as it leaves
@@ -1034,7 +1039,7 @@ export interface AchievementsInfo {
   provider?: AchievementsProvider
   total: number
   unlocked: number
-  /** RetroAchievements: points earned and possible. */
+  /** RetroAchievements: points earned and possible; recomp: gamerscore. */
   points?: { earned: number; total: number }
   /** RetroAchievements: the game's page. */
   url?: string
@@ -1053,7 +1058,8 @@ export interface AchievementsInfo {
   }[]
 }
 
-export type AchievementsProvider = 'steam' | 'retroachievements'
+/** 'recomp': an installed Xbox 360 recompilation's own unlock file and the game's own achievement table. */
+export type AchievementsProvider = 'steam' | 'retroachievements' | 'recomp'
 
 /** The RetroAchievements account of Settings > Emulators, as the last check or sync left it. */
 export interface RetroAchievementsStatus {
@@ -1144,6 +1150,11 @@ export interface GameRecompInfo {
   installed: string[]
   /** The user's chosen version, else the recommended one. */
   preferred: string
+  /**
+   * Installed entry ids whose achievements PlayOut can read (shared/recomp.ts recompAchievementsSupported): the game
+   * page shows them when Play starts one of these. Absent = none.
+   */
+  achievements?: string[]
   updatedAt: string
 }
 
@@ -1978,6 +1989,8 @@ export interface PlayOutEvents {
   'home:capture': import('./overlay').ComboCaptureEvent
   /** The overlay opened or closed (both windows). */
   'overlay:state': import('./overlay').OverlayState
+  /** The in-app web viewer of the game page's Steam links opened, navigated or closed (main/web-viewer). */
+  'web-viewer:state': import('./web-viewer').WebViewerState
   /** The pads, while the in-game overlay is open (its renderer navigates with them; it has no focus). */
   'overlay:pad': import('./overlay').OverlayPadState
   /** The in-game overlay was turned off for a game (it crashed, or the overlay faulted): a toast in the main window. */

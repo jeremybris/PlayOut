@@ -45,6 +45,7 @@ import { downloadFile, fetchJson, fetchText } from './emulator-setup/download'
 import { extractArchive } from './emulator-setup/archive'
 import { ensureSevenZip } from './emulator-setup/sevenzip'
 import { createHandlers } from './ipc/handlers'
+import { createWebViewer } from './web-viewer/viewer'
 import { registerIpc } from './ipc/register'
 import { createLauncher } from './launcher'
 import { createCoopService } from './coop/coop-service'
@@ -54,6 +55,7 @@ import { DATA_DIR_NAME } from './peerparty/prefs'
 import { PEERPARTY_FOLDER } from '../shared/peerparty'
 import { createIngameHelper } from './overlay/ingame/helper'
 import { createRecompService } from './recomp/service'
+import { createRecompAchievements } from './recomp/achievements'
 import { recompRootCandidates } from './recomp/state'
 import { createPcSavesService, type PcSavesService } from './pc-saves/service'
 import { emulatorRootCandidates } from './emulator-setup/service'
@@ -617,6 +619,14 @@ async function main(cli: CliOptions): Promise<void> {
   })
   mainWindow = window
 
+  // The game page's Steam links shown inside PlayOut (main/web-viewer); a game starting closes it.
+  const webViewer = createWebViewer({
+    window: () => window.get(),
+    emit: (state) => events.emit('web-viewer:state', state),
+    log: createLogger('web-viewer')
+  })
+  events.on('session:started', () => webViewer.close())
+
   // Settings > System > Minimize to tray (main/tray.ts). Never during a screenshot run, which must quit by itself.
   const closeToTray = createCloseToTray({
     enabled: () => !cli.screenshot && settings.get().system.minimizeToTray,
@@ -889,6 +899,8 @@ async function main(cli: CliOptions): Promise<void> {
       const failure = await shell.openPath(path)
       if (failure) throw new Error(failure)
     },
+    // A recompilation's play session ended: its achievements (recomp/achievements) are read again.
+    afterPlayed: (recompId) => void achievements.recompPlayed(recompId),
     // "Delete the original disc image?": the file work and its guards are Delete from this PC's (set up below).
     originalImage: {
       plan: (gameId, options) => localDelete.imagePlan(gameId, options),
@@ -1232,6 +1244,14 @@ async function main(cli: CliOptions): Promise<void> {
   upgradeBusy = (gameId) => upgrades.busyFor(gameId) !== null
   // Epic games are sized from Epic's own build manifests while Epic is signed in.
   installSizes.useEpicAccount((refresh) => accounts.epicAccessToken(refresh))
+  // Xbox 360 recompilations' own achievements: their unlock file and the game's own achievement table.
+  achievements.useRecomp(
+    createRecompAchievements({
+      dir: join(userData, 'recomp-achievements'),
+      source: (id) => recomp.achievementSource(id),
+      log: createLogger('recomp-achievements')
+    })
+  )
   achievements.useSteamAccount(async (refresh) => {
     const tokens = await accounts.steamCredential(refresh)
     if (!tokens) return null
@@ -1249,6 +1269,8 @@ async function main(cli: CliOptions): Promise<void> {
       emulatorSetup.prewarmPcsx2()
     }
     if (reason !== 'session' && reason !== 'remove') {
+      // A recompilation uninstalled (or Play switched away from it): its counts leave the card.
+      achievements.forgetStaleRecomp()
       ratings.kick()
       localPlayers.kick()
       steamTags.kick()
@@ -1543,6 +1565,8 @@ async function main(cli: CliOptions): Promise<void> {
       streaming,
       overlay,
       friends,
+      webViewer,
+      steamTags,
       accounts,
       achievements,
       installSizes,

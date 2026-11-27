@@ -282,7 +282,12 @@
     "unlockedOn": "Desbloqueado el {date}",
     "unlocked": "Desbloqueado",
     "hardcore": "Hardcore",
-    "locked": "Bloqueado"
+    "locked": "Bloqueado",
+    "gamerscore": "{earned}/{total} G",
+    "gamerscorePts": "{points} G",
+    "recompPlayOnce": "Aún no hay logros que mostrar. Juega al juego una vez; sus logros aparecerán aquí cuando desbloquees uno.",
+    "recompCountOnly_one": "{count} logro desbloqueado. No se pudo leer la lista de logros de tu copia del juego.",
+    "recompCountOnly_other": "{count} logros desbloqueados. No se pudo leer la lista de logros de tu copia del juego."
   },
   "coop": {
     "subtitle": "Configurar Co-Op",

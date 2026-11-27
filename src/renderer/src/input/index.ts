@@ -22,6 +22,7 @@ export {
   activeGamepad,
   isGamepadPaused,
   rumble,
+  setGamepadActiveElsewhere,
   setGamepadNeedsFocus,
   setGamepadPaused,
   startGamepadPolling
