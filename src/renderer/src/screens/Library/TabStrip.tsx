@@ -1,12 +1,16 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, type ReactElement } from 'react'
 import { useFocusableControl } from '../../hooks/useFocusableControl'
+import { useLayerId } from '../../hooks/useActionHandlers'
 import { FocusContext, useFocusable, type Direction } from '../../input/focus'
 import { useT } from '../../i18n'
 import { cx } from '../../lib/cx'
-import type { LibraryTab } from '../../lib/libraryView'
-import { useSettingsStore } from '../../state/settings'
+import { revealLeft } from '../../lib/hScroll'
+import { LIBRARY_SETTINGS_TAB, type LibraryTab } from '../../lib/libraryView'
+import { SettingsTabIcon } from '../../components/SettingsTabIcon'
 import { Plus } from 'lucide-react'
 import { ADD_TAB_KEY, TABS_KEY, tabFocusKey } from './keys'
+import { TabScrollBar } from './TabScrollBar'
+import { smoothScrolls, useStripOverflow, useStripScrolling } from './useTabScroll'
 
 export interface TabStripProps {
   tabs: LibraryTab[]
@@ -16,6 +20,8 @@ export interface TabStripProps {
   onUp: () => boolean
   /** The "+" after the last tab: adds a tab. */
   onAdd: () => void
+  /** The Library is the shown screen: the right stick's left / right scrolls the tabs when they do not fit. */
+  shown?: boolean
 }
 
 const UNDERLINE_ON = 'library__tab-underline--on'
@@ -25,14 +31,17 @@ const UNDERLINE_SLIDE = 'library__tab-underline--slide'
  * The centred tab strip of the Library band: an LB glyph, one tab per library tab, an RB glyph. The
  * active tab carries a 60u accent underline that slides to the new tab (transform transition). When the
  * tabs are wider than the band they scroll horizontally, keeping the active tab in view, while the glyphs
- * stay at the ends. A Norigin container that remembers its last focused tab.
+ * stay at the ends: a scroll bar shows under them only then (TabScrollBar.tsx), and the strip scrolls by dragging
+ * it (mouse or touch), the wheel and the right stick's left / right. A Norigin container that remembers its last
+ * focused tab.
  */
 export const TabStrip = memo(function TabStrip({
   tabs,
   active,
   onSelect,
   onUp,
-  onAdd
+  onAdd,
+  shown = true
 }: TabStripProps): ReactElement {
   const t = useT()
   const { ref, focusKey } = useFocusable<object, HTMLDivElement>({
@@ -41,8 +50,12 @@ export const TabStrip = memo(function TabStrip({
     saveLastFocusedChild: true,
     preferredChildFocusKey: tabFocusKey(active)
   })
+  const boxRef = useRef<HTMLDivElement>(null)
+  const viewportRef = useRef<HTMLDivElement>(null)
   const stripRef = useRef<HTMLDivElement>(null)
   const lineRef = useRef<HTMLSpanElement>(null)
+  const overflow = useStripOverflow(viewportRef, stripRef)
+  useStripScrolling(viewportRef, boxRef, overflow, useLayerId(), shown)
 
   // The underline follows the active tab's box. Its position is written straight to the element: the
   // first measurement is painted without a transition (otherwise every entrance slides it in from the
@@ -64,17 +77,24 @@ export const TabStrip = memo(function TabStrip({
     }
   }, [active])
 
+  // The tab LB / RB (or a click) makes active scrolls fully into view, clear of the strip's faded ends (the strip's
+  // 2.4rem side padding is the fade's width), so it and its underline are never half faded.
   useLayoutEffect(() => {
     measure()
+    const viewport = viewportRef.current
     const strip = stripRef.current
     const tab = strip?.querySelector<HTMLElement>(`[data-tab-id="${CSS.escape(active)}"]`)
-    if (!tab) return
-    const animations = useSettingsStore.getState().settings?.ui.animations ?? true
-    tab.scrollIntoView({
-      inline: 'nearest',
-      block: 'nearest',
-      behavior: animations ? 'smooth' : 'auto'
-    })
+    if (!viewport || !strip || !tab) return
+    const metrics = {
+      scrollWidth: viewport.scrollWidth,
+      clientWidth: viewport.clientWidth,
+      scrollLeft: viewport.scrollLeft
+    }
+    if (metrics.scrollWidth - metrics.clientWidth <= 0) return
+    const fade = parseFloat(getComputedStyle(strip).paddingLeft) || 0
+    const left = revealLeft(tab.offsetLeft, tab.offsetWidth, metrics, fade)
+    if (Math.abs(left - metrics.scrollLeft) < 1) return
+    viewport.scrollTo({ left, behavior: smoothScrolls() ? 'smooth' : 'auto' })
   }, [measure, active, tabs])
 
   useEffect(() => {
@@ -106,27 +126,30 @@ export const TabStrip = memo(function TabStrip({
     <FocusContext.Provider value={focusKey}>
       <div
         ref={ref}
-        className="library__tabs-group"
+        className={cx('library__tabs-group', overflow && 'library__tabs-group--scrolls')}
         role="tablist"
         aria-label={t('library.tabs.label')}
       >
         <span className="hint__glyph hint__glyph--lb library__tabs-glyph" aria-hidden="true">
           LB
         </span>
-        <div className="library__tabs">
-          <div ref={stripRef} className="library__tabs-strip">
-            {tabs.map((tab) => (
-              <Tab
-                key={tab.id}
-                tab={tab}
-                active={tab.id === active}
-                onSelect={onSelect}
-                onUp={onUp}
-              />
-            ))}
-            <AddTab onAdd={onAdd} onUp={onUp} />
-            <span ref={lineRef} className="library__tab-underline" aria-hidden="true" />
+        <div ref={boxRef} className="library__tabs-box">
+          <div ref={viewportRef} className="library__tabs">
+            <div ref={stripRef} className="library__tabs-strip">
+              {tabs.map((tab) => (
+                <Tab
+                  key={tab.id}
+                  tab={tab}
+                  active={tab.id === active}
+                  onSelect={onSelect}
+                  onUp={onUp}
+                />
+              ))}
+              <AddTab onAdd={onAdd} onUp={onUp} />
+              <span ref={lineRef} className="library__tab-underline" aria-hidden="true" />
+            </div>
           </div>
+          {overflow ? <TabScrollBar viewportRef={viewportRef} stripRef={stripRef} /> : null}
         </div>
         <span className="hint__glyph hint__glyph--rb library__tabs-glyph" aria-hidden="true">
           RB
@@ -164,8 +187,14 @@ const Tab = memo(function Tab({ tab, active, onSelect, onUp }: TabProps): ReactE
       className={cx('library__tab', active && 'library__tab--active')}
       data-tab-id={tab.id}
       {...controlProps}
+      // The Settings tab shows a gear and wrench instead of its word; its name stays for screen readers and the tooltip.
+      {...(tab.id === LIBRARY_SETTINGS_TAB ? { 'aria-label': tab.label, title: tab.label } : {})}
     >
-      {tab.label}
+      {tab.id === LIBRARY_SETTINGS_TAB ? (
+        <SettingsTabIcon className="library__tab-icon" />
+      ) : (
+        tab.label
+      )}
     </button>
   )
 })

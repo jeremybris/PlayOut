@@ -116,8 +116,18 @@
   font-size: 1.2rem;
 }
 
-.library__tabs {
+/* the strip's box and, only while the tabs do not fit, the scroll bar under it (TabScrollBar.tsx): a column the
+   group centres in the band, so the LB / RB glyphs stay centred whether or not the bar shows */
+.library__tabs-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   flex: 0 1 auto;
+  min-width: 0;
+}
+
+.library__tabs {
+  flex: none;
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
@@ -144,6 +154,82 @@
   display: none;
 }
 
+/* the tabs can be dragged sideways while they do not fit (useTabScroll.ts) */
+.library__tabs-group--scrolls .library__tabs {
+  cursor: grab;
+}
+
+/* dragged with the mouse or a finger (useTabScroll.ts): no hover colours or text selection on the way */
+.library__tabs-group--scrolls .library__tabs.library__tabs--dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* the Settings tab's gear and wrench (SettingsTabIcon), as tall as the tabs' text; the wrench in the buttons' blue */
+.library__tab-icon {
+  display: block;
+  width: calc(var(--library-tab-fs) * 1.25);
+  height: calc(var(--library-tab-fs) * 1.25);
+}
+
+.library__tab-icon .settings-tab-icon__wrench {
+  color: var(--color-accent);
+}
+
+.library__tabs--dragging .library__tab {
+  pointer-events: none;
+}
+
+/*
+ * While the bar shows, the band (72.5u) holds, top to bottom: the focus ring's room (4u, the strip's top padding),
+ * the tab with 4u padding (40.5u at 26u text), the underline (10u), a 3u gap and the 12u track = 69.5u, centred.
+ * The tabs only lose padding (nothing slides above the window's edge) and the ring is never cut.
+ */
+.library__tabs-group--scrolls .library__tabs-strip {
+  padding-top: var(--ring-w);
+}
+
+.library__tabs-group--scrolls .library__tab {
+  padding-block: 0.4rem;
+}
+
+/* a short, thick, fully rounded track (the bar under the tabs while they do not fit), lit on the dark band */
+.library__tabs-scrollbar {
+  position: relative;
+  flex: none;
+  margin: calc(3 * var(--u)) 2.4rem 0;
+  height: calc(12 * var(--u));
+  border-radius: calc(6 * var(--u));
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 calc(1 * var(--u)) calc(2 * var(--u)) rgba(0, 0, 0, 0.25),
+    0 calc(1 * var(--u)) calc(3 * var(--u)) rgba(0, 0, 0, 0.2);
+  touch-action: none;
+  cursor: pointer;
+}
+
+/* the pill: PlayOut's accent, like its buttons; TabScrollBar.tsx sets its width and translateX */
+.library__tabs-scrollbar-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: calc(6 * var(--u));
+  background: var(--color-accent);
+  box-shadow: 0 calc(1 * var(--u)) calc(2 * var(--u)) rgba(0, 0, 0, 0.3);
+  cursor: grab;
+  transition: background-color var(--dur-focus) var(--ease-linear);
+}
+
+.library__tabs-scrollbar-thumb:hover {
+  background: var(--color-accent-hover);
+}
+
+.library__tabs-scrollbar-thumb--dragging {
+  background: var(--color-accent-hover);
+  cursor: grabbing;
+}
+
 .library__tabs-strip {
   position: relative;
   display: flex;
@@ -158,6 +244,8 @@
 .library__tab {
   flex: none;
   padding: 1rem 0.4rem;
+  /* focus and LB / RB scroll a tab clear of the strip's faded ends (the mask's 2.4rem) */
+  scroll-margin-inline: 2.4rem;
   border-radius: var(--radius-button);
   font-family: var(--font-ui);
   font-size: var(--library-tab-fs);

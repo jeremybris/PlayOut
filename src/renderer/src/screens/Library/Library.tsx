@@ -679,7 +679,12 @@ export function LibraryScreen({ leaving, onLeft }: LibraryScreenProps): ReactEle
     // Any pushed layer (a modal, the floating on-screen keyboard) owns the input.
     const blocked = (): boolean => topLayer() !== ROOT_LAYER
     // `scroll` does not bubble and the viewport is re-keyed per tab: capture it on the root instead.
-    const onScroll = (): void => exit.scrolled(performance.now())
+    // The tab strip scrolling sideways (dragged, the wheel over it, the right stick) is not the grid moving.
+    const onScroll = (event: Event): void => {
+      if (event.target instanceof Element && event.target.classList.contains('library__tabs'))
+        return
+      exit.scrolled(performance.now())
+    }
     const onWheel = (event: WheelEvent): void => {
       if (event.shiftKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return
       const done = exit.wheel({
@@ -692,6 +697,14 @@ export function LibraryScreen({ leaving, onLeft }: LibraryScreenProps): ReactEle
     }
     const onPointerDown = (event: PointerEvent): void => {
       if (event.pointerType !== 'touch') return
+      // A finger on the tabs while they scroll sideways, or on their scroll bar, drags those: never a swipe Home.
+      if (
+        event.target instanceof Element &&
+        event.target.closest('.library__tabs-group--scrolls, .library__tabs-scrollbar')
+      ) {
+        touch = null
+        return
+      }
       // Only a swipe that starts at a resting top exits (not one finishing an inertial scroll up).
       touch = exit.restedAtTop(performance.now(), atTop())
         ? { id: event.pointerId, x: event.clientX, y: event.clientY }
@@ -801,7 +814,14 @@ export function LibraryScreen({ leaving, onLeft }: LibraryScreenProps): ReactEle
       >
         <LibraryBackdrop />
         <div className="library__band">
-          <TabStrip tabs={tabs} active={tab} onSelect={selectTab} onUp={close} onAdd={onAddTab} />
+          <TabStrip
+            tabs={tabs}
+            active={tab}
+            onSelect={selectTab}
+            onUp={close}
+            onAdd={onAddTab}
+            shown={active}
+          />
         </div>
 
         <div className="library__body">

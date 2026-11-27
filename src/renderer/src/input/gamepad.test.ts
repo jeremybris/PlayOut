@@ -9,6 +9,7 @@ vi.mock('./stickScroll', () => ({
   stickScroll: vi.fn(),
   stickScrollTarget: vi.fn(() => scrollBox)
 }))
+vi.mock('./stickScrollX', () => ({ dispatchStickX: vi.fn(() => true) }))
 vi.mock('../state/settings', () => ({ currentSettings: () => defaultSettings() }))
 vi.mock('../state/ui', () => ({
   useUiStore: { getState: () => ({ setInputMethod: vi.fn() }) }
@@ -28,6 +29,7 @@ import {
 } from './gamepad'
 import { pauseGamepadWhileOverlayOpen } from './overlayPause'
 import { stickScroll, stickScrollTarget } from './stickScroll'
+import { dispatchStickX } from './stickScrollX'
 
 /** One fake standard pad; `held` button indices are pressed, `axes` the sticks. */
 function makePad(): { pad: Gamepad; held: Set<number>; axes: number[] } {
@@ -145,6 +147,28 @@ describe('gamepad pause (the overlay open over PlayOut)', () => {
     frame()
     expect(dispatched()).toEqual(['rs-down'])
     expect(stickScroll).not.toHaveBeenCalled()
+  })
+
+  it('scrolls sideways every frame the right stick is held left / right (the Library tabs), never as a button', () => {
+    frame()
+    fake.axes[2] = 1
+    frame()
+    frame()
+    fake.axes[2] = -0.6
+    frame()
+    const calls = vi.mocked(dispatchStickX).mock.calls
+    expect(calls.length).toBe(3)
+    expect(calls[0]![0]).toBe(1)
+    // The first frame scrolls for one frame's time, not since the stick last moved.
+    expect(calls[0]![1]).toBe(16)
+    expect(calls[1]![0]).toBe(1)
+    expect(calls[2]![0]).toBeLessThan(0)
+    expect(dispatched()).toEqual([])
+    expect(stickScroll).not.toHaveBeenCalled()
+    // Let go: it stops.
+    fake.axes[2] = 0
+    frame()
+    expect(vi.mocked(dispatchStickX).mock.calls.length).toBe(3)
   })
 
   it('ignores the pads while the window is not the active one (a game in front), when asked to', () => {

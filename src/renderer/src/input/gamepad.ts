@@ -2,6 +2,7 @@ import type { PlayOutApi } from '@shared/api'
 import { PAD_BUTTONS, type PadInfo } from '@shared/overlay'
 import { createLog } from '../lib/log'
 import { stickScroll, stickScrollTarget } from './stickScroll'
+import { dispatchStickX } from './stickScrollX'
 import { currentSettings } from '../state/settings'
 import { useUiStore } from '../state/ui'
 import { dispatchAction, type Action, type Direction } from './actions'
@@ -226,7 +227,8 @@ function pressDirection(direction: Direction, fromDpad: boolean): boolean {
 
 /**
  * Right stick up / down: edge-triggered actions (Home / Library), never focus movement or repeat. When no screen takes
- * the press, the stick scrolls the menu instead, smoothly for as long as it is held (input/stickScroll.ts).
+ * the press, the stick scrolls the menu instead, smoothly for as long as it is held (input/stickScroll.ts). Held left /
+ * right, it scrolls sideways what the top layer registered for that (input/stickScrollX.ts: the Library's tab strip).
  */
 function pollRightStick(pad: Gamepad, state: PadState, deadzone: number, now: number): void {
   const y = pad.axes[3] ?? 0
@@ -234,6 +236,8 @@ function pollRightStick(pad: Gamepad, state: PadState, deadzone: number, now: nu
   if (next !== state.rightStick) {
     state.rightStick = next
     state.rightStickScrolls = null
+    // The first sideways frame scrolls for one frame's time, not for the time since the stick last moved.
+    state.rightStickAt = now - 16
     if (next === 'up' || next === 'down') {
       markActive(pad)
       const handled = dispatchAction(next === 'up' ? 'rs-up' : 'rs-down', 'gamepad')
@@ -242,6 +246,14 @@ function pollRightStick(pad: Gamepad, state: PadState, deadzone: number, now: nu
         state.rightStickAt = now - 16
       }
     }
+  }
+  if (state.rightStick === 'left' || state.rightStick === 'right') {
+    // Held sideways: what scrolls sideways (the Library's tab strip when its tabs do not fit) follows, smoothly.
+    const x = pad.axes[2] ?? 0
+    const past = Math.max(0, Math.abs(x) - deadzone) / Math.max(0.01, 1 - deadzone)
+    if (dispatchStickX(Math.sign(x) * past, now - state.rightStickAt)) markActive(pad)
+    state.rightStickAt = now
+    return
   }
   if (state.rightStickScrolls && (state.rightStick === 'up' || state.rightStick === 'down')) {
     // Past the dead zone, scaled to 0..1, so a light push scrolls slowly.

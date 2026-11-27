@@ -267,7 +267,7 @@ bottom left. Each store's card ends with its account: _Not signed in_ and a **Si
   | Ubisoft Connect        | No sign-in: Ubisoft offers none PlayOut can use, so only the games the Ubisoft Connect client has installed are listed                                                              |
 
 - **Greyed-out cards.** Imported games you have not installed appear greyed out, with a small download marker,
-  in _All Games_ and in a tab filtered by their store (and, on a PC paired with a host, in the Recent row once played on any of your PCs). The header counts them: _31 installed · 6
+  in _All_ and in a tab filtered by their store (and, on a PC paired with a host, in the Recent row once played on any of your PCs). The header counts them: _31 installed · 6
   not installed_. Settings → Library → _Show games that are not installed_ hides them.
 - **Install.** Open a greyed card: the detail panel is the usual one, with an **Install** button where Play
   normally sits. It hands the game to the store client (Steam, Epic Games, GOG Galaxy, EA app, Battle.net,
@@ -1611,12 +1611,12 @@ PlayOut stops asking it for an hour. Images are cached in `%APPDATA%\PlayOut\med
 ## 7. Settings reference
 
 Open Settings from the pill above the rows, the Menu (Start) button or `Tab`, or switch to the **Settings** tab of
-the Library (left of _All Games_), which shows the same menu in place of the games.
+the Library (the gear and wrench left of _All_), which shows the same menu in place of the games.
 
 - **Tabs**: the Library's tabs, left to right. Each row shows the tab's name and sort, with **‹ ›** to move it
   left or right, its **Sort** and **Filters** pills (the same menus as the Library header) and a bin to delete it
-  (the last tab cannot be deleted). **Add tab** adds All Games on A-Z with playable games first at the end and moves to its Filters pill. **Recommended tabs**
-  adds ready-made tabs with one press: _All Games_ (every store, A-Z, playable games first; it counts as added when a tab with no filters
+  (the last tab cannot be deleted). **Add tab** adds All on A-Z with playable games first at the end and moves to its Filters pill. **Recommended tabs**
+  adds ready-made tabs with one press: _All_ (every store, A-Z, playable games first; it counts as added when a tab with no filters
   exists, whatever its sort); more will follow. With **Sync Library tabs with the host / clients** on (Settings →
   Streaming), the tabs are kept the same on the PCs paired with this one, the newest change winning.
 - **Library → Co-Op** (section 4.1): **Download all handlers**, **Two-player split-screen** (top and bottom, or left
@@ -1808,6 +1808,7 @@ the main buttons do there.
 | Menu (Start)          | Settings                                                                                                                                                |
 | View (Back)           | Search                                                                                                                                                  |
 | Right stick up / down | Home / Library                                                                                                                                          |
+| Right stick L / R     | Library: scroll the tabs when they do not all fit                                                                                                       |
 
 The controller rumbles briefly on activation when _Vibration_ is on and the controller supports it.
 
@@ -1815,11 +1816,14 @@ The controller rumbles briefly on activation when _Vibration_ is on and the cont
 
 - **Tabs.** Each tab is a set of filters and a sort, and is named by its filters: every choice, the choices of one
   filter joined by "+" and the filters by "·" (_Epic · RPG · 2020-2025_, _Epic + G.O.G_); a tab with no filter is
-  _All Games_. Change a tab's filters or sort and its name follows. Every tab keeps its own filters, sort, search
+  _All_. Change a tab's filters or sort and its name follows. Every tab keeps its own filters, sort, search
   and the card you were on, and PlayOut reopens on the tab you used last, all between sessions. The **+** after the
-  last tab adds a tab (All Games on A-Z, playable games first); the **X** right of the Filters pill deletes the tab shown, after a
-  _Delete Tab_ prompt (**Yes** / **No**; not the last tab). Settings → Tabs reorders, edits, deletes and adds tabs. On the first start of this version your
-  old tabs become filter tabs: _All Games_ with no filter, each store's tab with that store picked under Filters → Platform (above the line), each
+  last tab adds a tab (All on A-Z, playable games first); the **X** right of the Filters pill deletes the tab shown, after a
+  _Delete Tab_ prompt (**Yes** / **No**; not the last tab). When the tabs do not all fit across the top, a scroll bar
+  shows under them (its pill, in PlayOut's accent colour, is shorter the more tabs are out of sight): drag the tabs
+  with the mouse or a finger, drag the pill, press the bar beside it, use the mouse wheel over the tabs or push the
+  right stick left / right; LB / RB bring the new tab into view. When they all fit, there is no bar. Settings → Tabs reorders, edits, deletes and adds tabs. On the first start of this version your
+  old tabs become filter tabs: _All_ with no filter, each store's tab with that store picked under Filters → Platform (above the line), each
   system's with Filters → Platform on it, and _Other_ with the stores and systems it held (as two tabs when it held
   both); all on A-Z with playable games first. On paired PCs the tabs stay the same on each (Settings →
   Streaming → **Sync Library tabs with the host / clients**); each tab's search stays per PC.
