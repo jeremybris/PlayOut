@@ -6,7 +6,12 @@
 import { XMLParser } from 'fast-xml-parser'
 import type { AchievementsInfo } from '../../shared/types'
 import { buildUrl, httpJson, HttpError, httpText, type HttpOptions } from '../scrapers/http'
-import { steamAchievements, webApiLimiter, WEB_API } from '../scrapers/steam-store'
+import {
+  steamAchievements,
+  steamStoreAchievementTotal,
+  webApiLimiter,
+  WEB_API
+} from '../scrapers/steam-store'
 import { tMain } from '../i18n'
 
 const ICON_BASE = 'https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps'
@@ -235,6 +240,33 @@ export async function steamAchievementsWithToken(
     unlocked: Math.max(listed, Math.min(progress?.unlocked ?? 0, list.length)),
     list
   }
+}
+
+/**
+ * How many achievements Steam lists for the app (archived ones left out), read without any credential. A game with
+ * achievements lists them in GetGameAchievements. That endpoint answers `{"response":{}}` both for an app without
+ * achievements (Call of Duty: United Offensive, 2640) and for one it cannot resolve right now, so an empty list is
+ * checked against the store page (appdetails `filters=achievements`): 0 only when the store also lists none, the
+ * store's count when it lists some, and null when the store does not know the app (nothing can be said). Throws
+ * when Steam cannot be asked (offline, a rate limit, an error status), which says nothing about the game.
+ */
+export async function steamAchievementCount(appId: number): Promise<number | null> {
+  await webApiLimiter.take()
+  const schema = await httpJson<GameAchievementsResponse>(
+    buildUrl(`${WEB_API}/IPlayerService/GetGameAchievements/v1/`, {
+      appid: appId,
+      language: 'english'
+    }),
+    {},
+    REQUEST
+  )
+  if (!schema || typeof schema !== 'object' || !schema.response)
+    throw new Error(`Steam sent no achievement list for ${appId}`)
+  const listed = (schema.response.achievements ?? []).filter(
+    (d) => d.internal_name && !d.archived
+  ).length
+  if (listed > 0) return listed
+  return steamStoreAchievementTotal(appId)
 }
 
 /** A game's achievements with whichever credential the user has: the Web API key's full list, or the token's. */

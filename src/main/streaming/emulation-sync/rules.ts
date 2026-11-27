@@ -8,8 +8,9 @@ import { safeEntryPath } from '../../util/zip'
  *
  * Left out:
  * - `roms` and `texturepacks` (the user's choice), with everything in them, at the top of the folder;
- * - `Updates and DLC` (the user's choice): games' updates and DLC, per console; a PS3 game's go with its download
- *   instead (ps3HddFiles). It is named in the manifest's exclusions too (UPDATES_DLC_KEY), so an older PlayOut on the
+ * - `Updates and DLC` (the user's choice): games' updates and DLC, per console; a game's go with its download
+ *   instead (PS3: ps3HddFiles; Switch / Xbox 360: updatesDlcFiles), and a game already downloaded gets the ones it
+ *   lacks after a refresh (streaming-service.ts fetchMissingUpdates). It is named in the manifest's exclusions too (UPDATES_DLC_KEY), so an older PlayOut on the
  *   other PC leaves it alone as well;
  * - the ROM folder, when it is another folder inside the Emulation folder;
  * - the leftovers of PlayOut's own work: a sync's files in progress (`.playout-sync`) and the emulator setup's

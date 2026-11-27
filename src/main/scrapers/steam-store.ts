@@ -321,6 +321,28 @@ export async function loadSteamAppDetails(appId: number): Promise<SteamAppDetail
   return data
 }
 
+/**
+ * How many achievements the Steam store page of the app lists (appdetails `filters=achievements`, no credential).
+ * Steam answers `"data":[]` for an app without achievements (Call of Duty: United Offensive, 2640: 0) and
+ * `"success":false` for an app it has no store page for (null: the store cannot say). Throws when the store cannot be
+ * asked (offline, a rate limit, an error status).
+ */
+export async function steamStoreAchievementTotal(appId: number): Promise<number | null> {
+  await storeLimiter.take()
+  const envelope = await httpJson<
+    Record<string, { success?: boolean; data?: { achievements?: { total?: number } } | unknown[] }>
+  >(`${STORE_API}?appids=${appId}&filters=achievements`, undefined, {
+    timeoutMs: 20_000,
+    retries: 1
+  })
+  const entry = envelope?.[String(appId)]
+  if (!entry || entry.success !== true) return null
+  const data = entry.data
+  if (!data || Array.isArray(data)) return 0
+  const total = Number(data.achievements?.total ?? 0)
+  return Number.isFinite(total) && total > 0 ? Math.floor(total) : 0
+}
+
 /** HEAD each URL in turn and return the first one the CDN serves; undefined when none exists. */
 export async function firstAvailableUrl(urls: string[]): Promise<string | undefined> {
   for (const url of urls) {

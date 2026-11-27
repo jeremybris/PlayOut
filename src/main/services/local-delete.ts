@@ -29,7 +29,7 @@ import {
 import { tokenizeArgs } from '../launcher/launcher'
 import type { Logger } from '../logger'
 import { romFileSet, romGamePath } from '../streaming/rom-transfer'
-import { hasUpdatesDlc, updatesDlcOf } from '../emulation/updates-dlc'
+import { hasUpdatesDlc, updatesDlcOf, type UpdatesDlcGame } from '../emulation/updates-dlc'
 import { readUninstallEntries, type UninstallEntry } from '../system/uninstall'
 import { displayTitle } from '../util/game-title'
 import { isInside, knownFolders, normalizePath } from '../util/paths'
@@ -154,6 +154,11 @@ export interface LocalDeleteDeps {
   forgetRomSet?(gameId: string): void
   /** The Emulation folder in use (its Updates and DLC holds the games' updates and DLC); absent = none offered. */
   emulationDir?(): string
+  /**
+   * Before a game's files go: a background fetch of its missing updates and DLC from a host stops (and none starts
+   * for it meanwhile), so none of them comes back once it is deleted (streaming-service.ts stopUpdatesFetch).
+   */
+  stopUpdatesFetch?(gameId: string): Promise<void>
   log: Logger
   io?: Partial<LocalDeleteIo>
 }
@@ -621,9 +626,15 @@ export function createLocalDeleteService(deps: LocalDeleteDeps): LocalDeleteServ
     const systemId = game.launch.kind === 'emulator' ? game.launch.systemId : null
     const emulationDir = deps.emulationDir?.()
     if (!systemId || !emulationDir || !hasUpdatesDlc(systemId)) return undefined
-    const asRef = (g: Game): { id: string; systemId: string; romPath: string } | null =>
+    const asRef = (g: Game): UpdatesDlcGame | null =>
       g.launch.kind === 'emulator' && g.source === 'rom' && !g.remote
-        ? { id: g.id, systemId: g.launch.systemId, romPath: romGamePath(g, root) }
+        ? {
+            id: g.id,
+            systemId: g.launch.systemId,
+            romPath: romGamePath(g, root),
+            // Its names too, as a host's download matches them (an update named after the card's title).
+            titles: [g.title, g.user?.titleOverride].filter((t): t is string => !!t)
+          }
         : null
     const self = asRef(game)
     if (!self) return undefined
@@ -946,6 +957,7 @@ export function createLocalDeleteService(deps: LocalDeleteDeps): LocalDeleteServ
   }
 
   async function run(id: string, options: LocalDeleteOptions = {}): Promise<LocalDeleteResult> {
+    await deps.stopUpdatesFetch?.(id).catch(() => undefined)
     // Planned again here: the renderer's preview is never trusted, and the game may have started meanwhile.
     const p = await plan(id)
     const game = deps.library.getGame(id)

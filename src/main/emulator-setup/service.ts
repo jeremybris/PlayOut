@@ -2005,7 +2005,15 @@ export function createEmulatorSetupService(deps: EmulatorSetupDeps): EmulatorSet
       const abort = new AbortController()
       launchRefreshes.add(abort)
       const refresh = Promise.resolve()
-        .then(() => refreshRyujinx({ emuDir: dirname(installed), run, log, signal: abort.signal }))
+        .then(() =>
+          refreshRyujinx({
+            emuDir: dirname(installed),
+            run,
+            log,
+            signal: abort.signal,
+            dataDir: dataDir()
+          })
+        )
         .then(
           () => 'done' as const,
           (err) => {

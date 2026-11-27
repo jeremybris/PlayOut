@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
-  CONTROLS_CHOICES,
-  controlsChoice,
-  controlsForChoice,
+  CONTROLS_OPTIONS,
+  controlsFromPicks,
+  controlsPicks,
+  sortControlsPicks,
+  type ControlsPick,
   editableValues,
   effectiveGame,
   gameMetadataKey,
@@ -296,21 +298,96 @@ describe('effective metadata: scraped < cloud < local edit', () => {
     })
   })
 
-  it.each(CONTROLS_CHOICES)('round-trips the Controls choice %s through the metadata', (choice) => {
-    const shown = effectiveGame(game(), { controls: controlsForChoice(choice) })
-    const back = editableValues(shown).controls!
-    expect(back).toEqual(controlsForChoice(choice))
-    expect(controlsChoice(back)).toBe(choice)
+  // Every set the Edit sheet's rows can pick (no repeats, Full and Partial never together: Full wins).
+  const ALL_PICKS: ControlsPick[][] = (() => {
+    const out: ControlsPick[][] = []
+    const picks = CONTROLS_OPTIONS.filter((o): o is ControlsPick => o !== 'none')
+    for (let mask = 1; mask < 1 << picks.length; mask++) {
+      const set = picks.filter((_, i) => mask & (1 << i))
+      if (set.includes('full') && set.includes('partial')) continue
+      out.push(set)
+    }
+    return out
+  })()
+
+  it.each(ALL_PICKS.map((p) => [p.join('+'), p] as const))(
+    'round-trips the Controls picks %s through the controls and the metadata',
+    (_name, picks) => {
+      const controls = controlsFromPicks(picks)
+      expect(controlsPicks(controls)).toEqual(picks)
+      const shown = effectiveGame(game(), { controls })
+      const back = editableValues(shown).controls!
+      expect(back).toEqual(controls)
+      expect(controlsPicks(back)).toEqual(picks)
+    }
+  )
+
+  it('maps picks to controls by the documented rule', () => {
+    const c = controlsFromPicks
+    expect(c(['keyboard'])).toEqual({ controller: 'none', vr: 'none' })
+    expect(c(['full'])).toEqual({ controller: 'full', vr: 'none' })
+    expect(c(['partial'])).toEqual({ controller: 'partial', vr: 'none' })
+    expect(c(['full', 'keyboard'])).toEqual({ controller: 'full', vr: 'none', keyboard: true })
+    expect(c(['full', 'keyboard', 'vr'])).toEqual({
+      controller: 'full',
+      vr: 'supported',
+      keyboard: true
+    })
+    expect(c(['vr'])).toEqual({ controller: 'none', vr: 'only' })
+    expect(c(['vr', 'touch'])).toEqual({ controller: 'none', vr: 'only', touch: true })
+    expect(c(['keyboard', 'vr'])).toEqual({ controller: 'none', vr: 'supported' })
+    expect(c(['full', 'vr'])).toEqual({ controller: 'full', vr: 'supported' })
+    expect(c(['touch'])).toEqual({ controller: 'none', vr: 'none', touch: true })
+    expect(c(['lightgun'])).toEqual({ controller: 'none', vr: 'none', lightgun: true })
+    expect(c(['keyboard', 'touch'])).toEqual({
+      controller: 'none',
+      vr: 'none',
+      touch: true,
+      keyboard: true
+    })
+    expect(c(['keyboard', 'lightgun'])).toEqual({
+      controller: 'none',
+      vr: 'none',
+      lightgun: true,
+      keyboard: true
+    })
+    expect(c(['keyboard', 'vr', 'touch'])).toEqual({
+      controller: 'none',
+      vr: 'supported',
+      touch: true
+    })
+    expect(c(['full', 'lightgun'])).toEqual({ controller: 'full', vr: 'none', lightgun: true })
+    // Repeats collapse and the order does not matter; Full and Partial together are Full.
+    expect(c(['vr', 'full', 'vr'])).toEqual(c(['full', 'vr']))
+    expect(c(['partial', 'full'])).toEqual(c(['full']))
+    expect(sortControlsPicks(['vr', 'full', 'vr', 'none'])).toEqual(['full', 'vr'])
   })
 
-  it('reads scraped controls as the nearest choice', () => {
-    expect(controlsChoice({ controller: 'full', vr: 'supported' })).toBe('full')
-    expect(controlsChoice({ controller: 'partial', vr: 'supported' })).toBe('partial')
-    expect(controlsChoice({ controller: 'none', vr: 'supported' })).toBe('vr')
-    // VR only wins: a headset is needed whatever else the entry says
-    expect(controlsChoice({ controller: 'full', vr: 'only', keyboard: true })).toBe('vr')
-    expect(controlsChoice({ controller: 'full', vr: 'none', touch: true })).toBe('full')
-    expect(controlsChoice({ controller: 'none', vr: 'none', touch: false })).toBe('keyboard')
+  it('reads every older controls shape as the picks it meant', () => {
+    const p = controlsPicks
+    // Scraped: full controller with VR supported, partial controller, keyboard and mouse games.
+    expect(p({ controller: 'full', vr: 'supported' })).toEqual(['full', 'vr'])
+    expect(p({ controller: 'partial', vr: 'none' })).toEqual(['partial'])
+    expect(p({ controller: 'partial', vr: 'supported' })).toEqual(['partial', 'vr'])
+    expect(p({ controller: 'none', vr: 'none' })).toEqual(['keyboard'])
+    expect(p({ controller: 'none', vr: 'supported' })).toEqual(['keyboard', 'vr'])
+    // The old 7 Edit sheet choices.
+    expect(p({ controller: 'none', vr: 'only' })).toEqual(['vr'])
+    expect(p({ controller: 'none', vr: 'none', touch: true })).toEqual(['touch'])
+    expect(p({ controller: 'full', vr: 'none' })).toEqual(['full'])
+    expect(p({ controller: 'full', vr: 'none', keyboard: true })).toEqual(['full', 'keyboard'])
+    expect(p({ controller: 'full', vr: 'supported', keyboard: true })).toEqual([
+      'full',
+      'keyboard',
+      'vr'
+    ])
+    // Odd cloud entries still read as something sensible.
+    expect(p({ controller: 'full', vr: 'only', keyboard: true })).toEqual([
+      'full',
+      'keyboard',
+      'vr'
+    ])
+    expect(p({ controller: 'none', vr: 'none', touch: false })).toEqual(['keyboard'])
   })
 
   it('keeps showing an edited field whatever the scrapers write later', () => {

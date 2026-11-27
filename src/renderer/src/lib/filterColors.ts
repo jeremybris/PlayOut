@@ -108,7 +108,8 @@ export const CONTROLS_COLORS: Readonly<Record<string, string>> = {
   vr: '#c39bff',
   controller: '#5fd068',
   keyboard: '#a0aec0',
-  touch: '#f687b3'
+  touch: '#f687b3',
+  lightgun: '#ffa94d'
 }
 
 /** Filters > Hidden's closed eye. */

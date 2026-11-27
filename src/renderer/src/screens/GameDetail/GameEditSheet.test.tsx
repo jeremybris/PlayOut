@@ -418,39 +418,48 @@ describe('Edit sheet > Difficulty of a tool (Steam tag Utilities)', () => {
 })
 
 describe('Edit sheet > Controls', () => {
-  const controls = (): HTMLElement =>
-    document.querySelector<HTMLElement>('[role="group"][aria-label="Controls"]')!
-  const shown = (): string => controls().querySelector('.select__value')!.textContent ?? ''
-  const next = (): HTMLElement =>
-    controls().querySelector<HTMLElement>(
+  const row = (n: number): HTMLElement =>
+    document.querySelector<HTMLElement>(`[role="group"][aria-label="Controls ${n}"]`)!
+  const shown = (n: number): string => row(n).querySelector('.select__value')!.textContent ?? ''
+  const next = (n: number): HTMLElement =>
+    row(n).querySelector<HTMLElement>(
       'button[aria-label="Next option"], button.select__arrow:last-of-type'
     )!
+  const pick = async (n: number, label: string): Promise<void> => {
+    for (let i = 0; i < 8 && shown(n) !== label; i++) await click(next(n))
+    expect(shown(n)).toBe(label)
+  }
 
-  it('is one list of the seven choices, and Save sends the picked one as the controls edit', async () => {
+  it('is three identical rows of the seven options, and Save sends the picks as the controls edit', async () => {
     await openSheet()
-    // No separate VR or Touch list any more.
-    expect(document.querySelector('[role="group"][aria-label="VR"]')).toBeNull()
-    expect(document.querySelector('[role="group"][aria-label="Touch"]')).toBeNull()
-    expect(document.querySelector('[role="group"][aria-label="Controller"]')).toBeNull()
-    // A game without controls data shows Mouse & Keyboard.
-    expect(shown()).toBe('Mouse & Keyboard')
-    const seen = [shown()]
-    for (let i = 0; i < 6; i++) {
-      await click(next())
-      seen.push(shown())
+    // One list per row, no other controls list.
+    expect(document.querySelector('[role="group"][aria-label="Controls"]')).toBeNull()
+    expect(row(4)).toBeNull()
+    // A game without controls data shows Mouse & Keyboard, then None.
+    expect([shown(1), shown(2), shown(3)]).toEqual(['Mouse & Keyboard', 'None', 'None'])
+    for (const n of [1, 2, 3]) {
+      const seen = [shown(n)]
+      for (let i = 0; i < 6; i++) {
+        await click(next(n))
+        seen.push(shown(n))
+      }
+      // The same seven options in every row, in the list's order (it wraps round after Lightgun).
+      const order = [
+        'None',
+        'Full Controller Support',
+        'Partial Controller Support',
+        'Mouse & Keyboard',
+        'VR',
+        'Touch',
+        'Lightgun'
+      ]
+      const start = order.indexOf(seen[0]!)
+      expect(seen).toEqual([...order.slice(start), ...order.slice(0, start)])
+      await click(next(n))
     }
-    // The list's order (VR first) read from Mouse & Keyboard on: it wraps round after All.
-    expect(seen).toEqual([
-      'Mouse & Keyboard',
-      'Mouse & Keyboard + Controller',
-      'All',
-      'VR',
-      'Touch',
-      'Full Controller Support',
-      'Partial Controller Support'
-    ])
-    // Round to All and save.
-    while (shown() !== 'All') await click(next())
+    await pick(1, 'Full Controller Support')
+    await pick(2, 'Mouse & Keyboard')
+    await pick(3, 'VR')
     await click(button('Save'))
     expect(api.setMetadataEdit).toHaveBeenCalledWith(
       'g1',
@@ -459,13 +468,115 @@ describe('Edit sheet > Controls', () => {
     )
   })
 
-  it('does not save controls the user left alone', async () => {
+  it('saves Lightgun alone as a light-gun game', async () => {
     await openSheet()
-    // Round the whole list back to where it started.
-    for (let i = 0; i < 7; i++) await click(next())
-    expect(shown()).toBe('Mouse & Keyboard')
+    await pick(1, 'Lightgun')
+    await click(button('Save'))
+    expect(api.setMetadataEdit).toHaveBeenCalledWith(
+      'g1',
+      { controls: { controller: 'none', vr: 'none', lightgun: true } },
+      []
+    )
+  })
+
+  it('does not save controls the user left alone, or only moved between rows', async () => {
+    await openSheet()
+    // Mouse & Keyboard moved from row 1 to row 3: the same set.
+    await pick(3, 'Mouse & Keyboard')
+    await pick(1, 'None')
     await click(button('Save'))
     for (const call of api.setMetadataEdit.mock.calls)
       expect((call[1] as Record<string, unknown>).controls).toBeUndefined()
+  })
+
+  it('says what three None rows do', async () => {
+    await openSheet()
+    expect(document.body.textContent).not.toContain('All three None')
+    await pick(1, 'None')
+    expect(document.body.textContent).toContain('All three None')
+  })
+
+  const origin = (): string =>
+    row(1).closest('.gedit__field')!.querySelector('.gedit__origin')!.textContent ?? ''
+
+  it('with no own controls edit, three None rows save nothing, say so and are not marked Changed', async () => {
+    await openSheet()
+    await pick(1, 'None')
+    expect(document.body.textContent).toContain('nothing is saved')
+    expect(document.body.textContent).not.toContain('Save removes your controls edit')
+    expect(origin()).not.toBe('Changed')
+    // Reset still brings the rows back.
+    expect(button('Reset controls')).toBeDefined()
+    await click(button('Save'))
+    expect(api.setMetadataEdit).not.toHaveBeenCalled()
+  })
+
+  it('with an own controls edit, three None rows are Changed and Save removes the edit', async () => {
+    api.getMetadataLayers.mockResolvedValue({
+      ...layers,
+      local: { controls: { controller: 'none', vr: 'none', lightgun: true } }
+    })
+    await openSheet()
+    expect([shown(1), shown(2), shown(3)]).toEqual(['Lightgun', 'None', 'None'])
+    await pick(1, 'None')
+    expect(document.body.textContent).toContain('Save removes your controls edit')
+    expect(origin()).toBe('Changed')
+    await click(button('Save'))
+    expect(api.setMetadataEdit).toHaveBeenCalledWith('g1', {}, ['controls'])
+  })
+
+  it('keeps each row named beside a long choice (the row class the sheet lays out)', async () => {
+    await openSheet()
+    for (const n of [1, 2, 3]) {
+      expect(row(n).classList.contains('gedit__controls-row')).toBe(true)
+      expect(row(n).querySelector('.control__label')!.textContent).toBe(`Controls ${n}`)
+    }
+  })
+})
+
+describe('Edit sheet > Controls of a console game', () => {
+  const rom = {
+    ...game,
+    id: 'r1',
+    title: 'Duck Hunt',
+    source: 'rom',
+    launch: { kind: 'emulator', systemId: 'nes', romPath: 'C:/roms/nes/Duck Hunt.nes' },
+    metadata: {}
+  } as unknown as Game
+  const row = (n: number): HTMLElement =>
+    document.querySelector<HTMLElement>(`[role="group"][aria-label="Controls ${n}"]`)!
+  const shown = (n: number): string => row(n).querySelector('.select__value')!.textContent ?? ''
+  const next = (n: number): HTMLElement =>
+    row(n).querySelector<HTMLElement>(
+      'button[aria-label="Next option"], button.select__arrow:last-of-type'
+    )!
+  const open = async (): Promise<void> => {
+    api.getMetadataLayers.mockResolvedValue({
+      key: 'rom-duck-hunt',
+      scraped: { title: 'Duck Hunt' },
+      cloud: null,
+      local: {}
+    })
+    act(() => root.render(<GameEditSheet game={rom} onClose={() => undefined} />))
+    await settle()
+  }
+
+  it('shows the three rows, starting on Full Controller Support, with the console note', async () => {
+    await open()
+    expect([shown(1), shown(2), shown(3)]).toEqual(['Full Controller Support', 'None', 'None'])
+    expect(document.body.textContent).toContain("A console game's badge always shows Pad")
+  })
+
+  it('saves Lightgun picked beside the controller, and nothing when left alone', async () => {
+    await open()
+    await click(button('Save'))
+    expect(api.setMetadataEdit).not.toHaveBeenCalled()
+    for (let i = 0; i < 8 && shown(2) !== 'Lightgun'; i++) await click(next(2))
+    await click(button('Save'))
+    expect(api.setMetadataEdit).toHaveBeenCalledWith(
+      'r1',
+      { controls: { controller: 'full', vr: 'none', lightgun: true } },
+      []
+    )
   })
 })

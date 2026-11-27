@@ -474,9 +474,11 @@ export function createHostClient(deps: HostClientDeps = {}): HostClient {
           agent.destroy()
         }
       },
-      // ?with=ps3-hdd,textures: this PlayOut puts a PS3 game's updates and DLC in its own PS3 HDD, and a game's texture
-      // packs in its own texturepacks (an older host ignores what it does not know).
-      romFiles: (gameId) => call<RomFileList>(`/v1/rom/${id(gameId)}/files?with=ps3-hdd,textures`),
+      // ?with=ps3-hdd,textures,updates-dlc: this PlayOut puts a PS3 game's updates and DLC in its own PS3 HDD, a game's
+      // texture packs in its own texturepacks, and a Switch / Xbox 360 game's updates and DLC in its own Updates and DLC
+      // (an older host ignores what it does not know).
+      romFiles: (gameId) =>
+        call<RomFileList>(`/v1/rom/${id(gameId)}/files?with=ps3-hdd,textures,updates-dlc`),
       async downloadFile(gameId, path, dest, options = {}) {
         const agent = new PinnedAgent(fingerprint)
         try {

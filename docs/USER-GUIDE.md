@@ -196,8 +196,8 @@ D:\ROMs\
   that runs the game, put in `roms\ps5` beside the game, starts like any other game.
 - **Updates and DLC**: `Emulation\Updates and DLC` holds games' updates and DLC, one folder per console: `Switch`,
   `PS3` and `Xbox360`. PlayOut makes it with the Emulation folder (also in an Emulation folder you chose, at the next
-  start). The Emulation folder sync never copies it between PCs; a PS3 game downloaded from a host brings its own part
-  (section 4.3).
+  start). The Emulation folder sync never copies it between PCs; a PS3, Switch or Xbox 360 game downloaded from a
+  host brings its own part (section 4.3).
 - **PS3 HDD**: RPCS3's hard drive is `Emulation\Updates and DLC\PS3\dev_hdd0`. PlayOut makes it with the Emulation folder
   (also in an Emulation folder you chose, at the next start) and points RPCS3 at it; game updates, DLC and games
   installed inside RPCS3 go there (`dev_hdd0\game\<serial>`). The PS3 HDD that earlier versions kept in
@@ -385,8 +385,11 @@ first:
   folders in `PS3\dev_hdd0\game` named after its serial (its updates, DLC, data folders); its DLC licenses in
   `exdata` are kept. For Switch and Xbox 360 games they are the files and folders in `Switch` / `Xbox360` that carry
   the game's title id (a Switch update `[0100…800]` or DLC belongs to the game `[0100…000]`) or, without one, a
-  similar name ("Metroid Dread [Update v2.1.0].nsp" for "Metroid Dread.nsp"). An item two library games could claim
-  goes to the closer name only, and one they match equally goes to neither. They go to the Recycle Bin too.
+  similar name to its ROM file or its title ("Metroid Dread [Update v2.1.0].nsp" for "Metroid Dread.nsp"; the rules
+  are those of a host download, section 4.3, but only the same id or the same name: a subtitle or a DLC with its own
+  name after the game's goes with a download, never with a delete). An item two library games could claim goes to
+  the closer name only, and one they match equally (two copies of a game with the same title id) goes to neither.
+  They go to the Recycle Bin too.
 - **Store games:** the store's own uninstall starts (Steam, Epic, Ubisoft, GOG Galaxy; EA and Battle.net through the
   game's uninstaller, or the store's library when none is found) and the store asks you itself. Xbox games have no
   uninstall link: **Open Windows Settings** opens Settings › Apps, and you uninstall the game there. The game stays in
@@ -466,10 +469,12 @@ _Released <date> · developer · publisher_ and the action bar:
   GB", "800 MB"); it is used instead.
 - **Controls**: at the top left of the page, left of the players badge, how the game is played: **Pad** (full
   controller support), **Partial** (partial controller support), **VR** (a VR game, or VR supported), **KB+M**
-  (keyboard and mouse), **Touch** (a touch screen only), **Pad+KB+M** (full controller and full mouse and keyboard
-  support) or **All** (VR, full controller and mouse and keyboard). PC games take this from Steam's store (its controller and VR support), read with the Steam
+  (keyboard and mouse), **Touch** (a touch screen only), **Gun** (a light gun only), **Pad+KB+M** (full controller
+  and full mouse and keyboard support) or **All** (VR, full controller and mouse and keyboard). PC games take this from Steam's store (its controller and VR support), read with the Steam
   tags, also for copies from other stores that PlayOut matches to a Steam app; a game Steam says nothing about, or
-  that PlayOut cannot match, shows keyboard and mouse. Console games (ROMs) always show a controller.
+  that PlayOut cannot match, shows keyboard and mouse. Console games (ROMs) always show a controller. A PlayOut from
+  before the three Controls rows (0.9.97 and earlier) shows a game picked as Mouse & Keyboard + Touch as Touch only,
+  and a Lightgun-only game as keyboard and mouse.
 - **Players**: at the top left of the page, a controller with a number above it shows how many people can play
   the game together, from the LaunchBox Games Database (gamesdb.launchbox-app.com). PlayOut downloads LaunchBox's
   public database (about 110 MB) in the background once a month and keeps only the player counts and genres;
@@ -530,13 +535,22 @@ about the game:
   exactly as ticking it in the dropdown would, and the box clears for the next search, one pick at a time. **Up** from
   the first match goes back to the box; **B** / `Esc` closes the matches (`Enter` then shows them again rather than
   adding one you cannot see).
-- **Players and controls**: how many players on one PC (the players badge), and for PC games one **Controls**
-  choice (the controls badge and Filters › Controls): **VR** (needs a headset), **Touch** (a touch screen only),
-  **Full Controller Support**, **Partial Controller Support** (a controller for some of it, mouse and keyboard for
-  the rest), **Mouse & Keyboard**, **Mouse & Keyboard + Controller** (plays fully with either) or **All** (VR, a full
-  controller and mouse and keyboard). Console games always show a controller and have no Controls choice. A game
-  whose scraped controls are not exactly one of these shows the nearest (full controller with VR as an option shows
-  as Full Controller Support) and is left as it is unless you pick another choice.
+- **Players and controls**: how many players on one PC (the players badge), and three identical
+  **Controls** rows (the controls badge and Filters › Controls). Each row is one of **None**, **Full Controller
+  Support**, **Partial Controller Support** (a controller for some of it, mouse and keyboard for the rest), **Mouse &
+  Keyboard**, **VR**, **Touch** or **Lightgun**; together the rows say every way the game is played (Full Controller
+  Support + Mouse & Keyboard = plays fully with either; Full Controller Support + Mouse & Keyboard + VR = all three).
+  The order of the rows does not matter and picking the same thing twice counts once; Full and Partial together count
+  as Full. **VR** with no controller and no Mouse & Keyboard means a headset is needed (VR only); next to either, VR
+  is an option. **Touch** or **Lightgun** without Mouse & Keyboard means the game plays only that way. The rows show
+  what the game has now (scraped full controller with VR as an option shows Full Controller Support and VR), and the
+  controls are only saved when the set of picks changes. All three rows on **None** is the same as **Reset**: Save
+  removes your own controls edit and the game shows the cloud's or scraped controls again; with no controls edit of
+  your own there is nothing to remove, so the note under the rows says nothing is saved and the field is not marked
+  changed. A long choice wraps onto a second line, so each row keeps its name (Controls 1, 2, 3). Console games
+  (ROMs) have the rows too, starting on Full Controller Support: their badge always shows Pad, and their picks put
+  them under Filters › Controls (Lightgun for a light-gun game such as Duck Hunt or Time Crisis, Touch, VR). When the
+  only picks are Touch and Lightgun the badge shows Touch; the game is under both filters.
 - **Time to beat, review score and difficulty**: the How Long to Beat hours (main story, main + extras, completionist,
   solo), the review score (0-100), shown as Steam's percent positive or IGDB's rating, and the difficulty for Filters ›
   Difficulty: **Default** or Story, Easy, Medium, Hard or Impossible. Default is the level the game's Steam tags give
@@ -854,6 +868,40 @@ host and **Moonlight** on the client (both open source, GPL-3, separate from Pla
   (game folder or `.iso`), in a `.ps3` serial file or RPCS3 shortcut, or in the name (`Game [BLUS30443]`); a game
   without one is downloaded without its updates and DLC. DLC RPCS3 installed under another serial is not included. Both PCs need PlayOut 0.1.109 or later: a host
   does not send these files to an older PlayOut.
+- A **Switch or Xbox 360 game** brings its updates and DLC along the same way: the files and folders in the host's
+  `Emulation\Updates and DLC\Switch` / `Xbox360` that belong to it, also inside plain sorting folders there
+  (`Switch\Updates`, `Switch\DLC\Part 1`, up to three levels; a folder named after a game or carrying a title id is
+  an item itself): by title id when both carry one (a Switch update `[0100F2C0115B6800]` or DLC belongs to the game
+  `[0100F2C0115B6000]`; a different id is never the game's, even with the same name). The game's id is read from its
+  ROM file name, its folder's name (`TotK [0100F2C0115B6000]\game.xci`) or, for Xbox 360, a folder named after the
+  id. An Xbox 360 ROM's 8-digit tag may be a collection's checksum: then an item with another id still matches by the
+  very same name. Without ids, by a similar name: the name is compared with the game's ROM file name and its title in
+  the library, without tags in brackets, versions, numbered updates (TU2, TU 2, Title Update 2, Update 3), the words
+  Update / DLC / Patch, and region, language and format words (US, EU, NSP, XCI...): "The Legend of Zelda Tears of
+  the Kingdom [Update] v1.2.1.nsp" goes with "The Legend of Zelda Tears of the Kingdom.xci". Two looser matches only
+  ever come with a download: the subtitle of a title with a colon or a dash ("Tears of the Kingdom Update v1.2.1.nsp"
+  and "Zelda - Tears of the Kingdom (US) DLC.nsp" for "The Legend of Zelda: Tears of the Kingdom", when that is the
+  game's title in the library), and a DLC whose own name follows the game's, when it says DLC ("Xenoblade Chronicles
+  3 Future Redeemed DLC.nsp" for "Xenoblade Chronicles 3"; without the word DLC it would be another game, as "Mario
+  Kart 8 Deluxe" is not "Mario Kart 8"). Words in front are always another game ("Super Street Fighter IV" is not
+  "Street Fighter IV"), and abbreviations ("TotK") do not match: name such files with the title id or the game's
+  name. An item two games of the host's library could claim goes to the closer name only, and one they match
+  equally to neither, except copies of one game with the same title id, which each get it. They land in this PC's
+  `Emulation\Updates and DLC\Switch` / `Xbox360` under the same name and path, after the game, and count in the
+  download's size and progress; one that cannot come (no room left for it, the host still writing it) is skipped,
+  never the game, and the catch-up below brings it later. A file this PC already has at the same size, or newer, is
+  kept; an older one of another size is replaced. Ryujinx loads the Switch ones: PlayOut adds
+  `Emulation\Updates and DLC\Switch` to its autoload folders (when it sets Ryujinx up, and before a launch of a
+  Ryujinx it set up earlier). Other Switch emulators and Xenia do not read that folder: install the update there
+  yourself (Xenia wants a TU in its own `content\<title id>` layout). Both PCs need PlayOut 0.9.98 or later: a host
+  does not send them to an older PlayOut, and an older host sends none.
+- **A game downloaded before** (or one you already had that the host also has) gets the updates and DLC it lacks on its
+  own: after a refresh that reaches the host, PlayOut compares each PS3, Switch and Xbox 360 ROM game with the host's
+  copy (at most every 6 hours per game, 20 games per refresh; again after 10 minutes when the host could not be
+  reached) and downloads, in the background, only the update and DLC files missing here, never the game again; a
+  notice says what came (or why it could not). A file already here is never replaced, and one this PC had once and
+  you deleted is not brought back. Nothing is deleted. It stops when a download starts (and goes on at a later
+  refresh), and when you delete the game from this PC.
 - A game's **texture packs** come along too: the folders in the host's `Emulation\texturepacks` named after the game's
   serial or id, in the folder of the emulator that plays it: `pcsx2` (PS2, e.g. `SLUS-20777`), `duckstation`
   (PlayStation, `SLUS-00594`), `ppsspp` (PSP, `ULUS10336`), `dolphin` (GameCube / Wii, the GameID `GALE01` or the
@@ -1520,9 +1568,25 @@ and password are checked together with them.
 **Steam achievements** (your unlocked achievements for Steam games)
 
 Signing in to Steam in the Library's **Settings** tab (section 3.4) is enough: PlayOut fills the achievement
-counts of every Steam game right after the sign-in and after every import. A Web API key is optional; it adds
-unlock dates to every list. Either way, Steam only shares achievements when your profile's **Game details**
-are public (step 3).
+counts of your Steam games in the background, a few requests a second, starting a minute after PlayOut opens. A Web
+API key is optional; it adds unlock dates to every list. Either way, Steam only shares achievements when your
+profile's **Game details** are public (step 3).
+
+- Each Steam game is read once when it joins your library (the first import of a whole Steam library included),
+  then again only after you play it: a play session started from PlayOut, a session played on a paired PC reaching
+  this one, or Steam's last played time or play time moving on. Games you do not play are not asked about again.
+  Play through Steam itself, outside PlayOut, is noticed the next time PlayOut imports your Steam library (when it
+  scans Steam, or when you sign in).
+- Nothing is read while a game is running; the scan goes on when it ends.
+- Games waiting while you are signed out are read once you sign in (or add a key). If Steam refuses your sign-in or
+  key, the scan stops until you sign in again or change the key. A failed read waits a few minutes, longer after
+  each failure in a row (or as long as Steam asks); after five failures in a row a game waits until you play it,
+  sign in again or restart PlayOut.
+- A game Steam lists no achievements for (Call of Duty: United Offensive, for one) has no **Achievements** stat on
+  its page at all. PlayOut takes that only when both Steam's achievement list and the game's Steam store page list
+  none. Being signed out, or Steam not answering, is not taken as "no achievements": the stat stays and its list
+  says how to sign in. A game Steam later adds achievements to gets them back the next time you play it.
+- The record of when each game was read is `%APPDATA%\PlayOut\retroachievements\steam-scans.json`.
 
 1. Key: https://steamcommunity.com/dev/apikey (the account must not be limited; enter any domain name as the
    label).
@@ -1627,6 +1691,8 @@ the Library (the gear and wrench left of _All_), which shows the same menu in pl
   each; the ROM folder; _Import from ES-DE_ and the ES-DE home folder; _Show hidden_ and _Show games that are
   not installed_ (on by default: owned and previously installed games stay visible, greyed out). Store accounts
   are signed in and out in the Library's **Library Import** (section 3.4).
+- **Convert**: changes a game's file format (CHD, CSO, RVZ, XISO, PS3 ISO and more) one platform and direction at a
+  time, with each file's progress. At the top, under **New games**, two switches for games new to this PC:
   - **Trim Games** (off by default): ROM games are converted to their smaller format by themselves. When you turn it
     on, the ROM games already in your library are checked once (only at that switch, not at every start; turning it
     off and on again checks them again); after that, each ROM game added to the library is trimmed: PS2 ISO to CHD, Xbox and Xbox 360 ISO to XISO (trimmed: the video partition and padding are removed;
@@ -1641,8 +1707,25 @@ the Library (the gear and wrench left of _All_), which shows the same menu in pl
     changing for two minutes and no other program has one open (a game still being copied in waits). Wii games need your Wii common key (in the
     Emulation folder's bios\wii) or Dolphin installed, as Convert does; without either they are skipped with a
     toast. Games downloaded from another PC keep their format, so both PCs still see one game.
-- **Convert**: changes a game's file format (CHD, CSO, RVZ, XISO, PS3 ISO and more) one platform and direction at a
-  time, with each file's progress. **Library → Trim Games** sends ROM games through it automatically.
+  - **Compress games automatically** (off by default; right under Trim Games): each PC game (a store game or one you
+    added) is compressed a few minutes after it has finished installing, with the game page's **Upgrade → Compress
+    game** (Windows' own compression, XPRESS8K): the game takes less space on the drive and can take a little longer
+    to load. Only games installed from then on, while PlayOut is open: the games already installed when you turn it on,
+    and games installed while PlayOut was closed, are left as they are (compress them from their Upgrade menu). An
+    install counts when PlayOut's install tracking ends, when a game goes from not installed to installed in a store
+    PlayOut has already scanned since it started (installed straight in its store, with a new install folder), or when
+    a later scan finds a new installed game whose folder was made since (old games on a drive you plug in later do not
+    count). One game at a time; it waits (up to a day, looking again every minute) while a game is running, while the
+    store is still downloading or updating it, until the game's files have stopped changing for a few minutes, while
+    the Emulation folder moves, and while a Convert run or another upgrade runs. Starting a game from PlayOut, or Steam
+    starting to update the game, stops a running automatic compress; it goes on later. Games started outside PlayOut
+    are not noticed. Pressing Play on the game while it is compressed says so; stop it with **Stop** in its Upgrade
+    menu. It skips what Compress game would refuse (a game of another PC, a drive that cannot compress), games already
+    compressed or partly so, and games with anti-cheat (online or competitive games: the Upgrade menu warns of a ban
+    risk first, so compress those yourself). ROM games are never compressed: Trim Games is theirs, and Trim Games
+    waits while a compress runs. The progress shows in the game's Upgrade menu and a toast says when it is done or
+    failed. After a game update, **Compress again** in its Upgrade menu compresses the new files as before (not done
+    automatically).
   - **Xbox and Xbox 360** conversions are done by PlayOut itself (its Xbox helper, built on XISOSharp and CHDSharp,
     the engine of XISO Studio), with nothing to download: full dump (ISO) to trimmed XISO, for Xbox and for Xbox 360
     (for Xenia and modded consoles; the video partition and padding are removed), ISO ↔ game folder, ISO ↔ CHD, and
@@ -2007,17 +2090,20 @@ The controller rumbles briefly on activation when _Vibration_ is on and the cont
   holds its lower number and not its upper one (a 90 is in 90-95, a 94.9 too; 100 is in 95-100). A card with several
   copies uses the score of the copy shown, else another copy's. Games without a review score are left out while a band
   is picked.
-- **Filters → Controls** (its left arrow opens the list): **VR**, **Controller**, **Mouse and Keyboard** and **Touch**, from the
-  same facts as the controls badge on a game's page (Steam's controller and VR support, or the game's **Controls**
-  choice in its Edit sheet; console games play with a controller). A game can be under more than one: partial
-  controller support counts as Controller and as Mouse and Keyboard, **Mouse & Keyboard + Controller** too, **All**
-  as VR, Controller and Mouse and Keyboard, and a game where VR is an option (not required) as VR and as Mouse and
-  Keyboard. VR-only games are only under VR, and **Touch** games (the Edit sheet's Touch choice) only under Touch; a
-  PC game Steam says nothing about counts as Mouse and Keyboard. No metadata source says which games support touch
-  yet, so a game is under Touch once you or the PlayOut cloud set its Controls to Touch. The list offers only the
-  choices at least one game in the list falls under (plus any you have picked, so it can be turned off); **All
-  Controls** is always there. With no games under any choice, only All Controls shows, and Touch stays hidden until a
-  game supports touch.
+- **Filters → Controls** (its left arrow opens the list): **VR**, **Controller**, **Mouse and Keyboard**, **Touch**
+  and **Lightgun**, from the same facts as the controls badge on a game's page (Steam's controller and VR support, or
+  the game's **Controls** rows in its Edit sheet; console games play with a controller). A game can be under more
+  than one: partial controller support counts as Controller and as Mouse and Keyboard, Full Controller Support + Mouse
+  & Keyboard too, Full Controller Support + Mouse & Keyboard + VR as VR, Controller and Mouse and Keyboard, and a game
+  where VR is an option (not required) as VR and as Mouse and Keyboard; VR as an option next to a controller (Full or
+  Partial Controller Support + VR) puts the game under VR too. VR-only games are only under VR; **Touch** and
+  **Lightgun** games (the Edit sheet's Touch and Lightgun picks) are under Touch / Lightgun as well as anything else
+  picked beside them, and only there when nothing else is. A PC game Steam says nothing about counts as Mouse and
+  Keyboard. A console game is under Controller, plus the Lightgun, Touch or VR its Controls rows pick. No metadata
+  source says which games support touch or a light gun yet, so a game is under Touch or
+  Lightgun once you or the PlayOut cloud pick it in its Controls rows. The list offers only the choices at least one
+  game in the list falls under (plus any you have picked, so it can be turned off); **All Controls** is always there.
+  With no games under any choice, only All Controls shows, and Touch and Lightgun stay hidden until a game has them.
 
 **Touch and mouse**
 

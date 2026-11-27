@@ -19,6 +19,7 @@ vi.mock('../scrapers/http', async (importOriginal) => {
 import {
   PROGRESS_BATCH,
   SteamAuthError,
+  steamAchievementCount,
   steamAchievementsProgress,
   steamAchievementsWithToken,
   steamGameAchievements
@@ -69,6 +70,7 @@ const PROGRESS = 'https://api.steampowered.com/IPlayerService/GetAchievementsPro
 const GAME_ACHIEVEMENTS = 'https://api.steampowered.com/IPlayerService/GetGameAchievements/v1/'
 const TOP_ACHIEVEMENTS =
   'https://api.steampowered.com/IPlayerService/GetTopAchievementsForGames/v1/'
+const STORE_DETAILS = 'https://store.steampowered.com/api/appdetails'
 const COMMUNITY = `https://steamcommunity.com/profiles/${STEAM_ID}/stats/620/achievements/`
 const ICONS = 'https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/620'
 
@@ -438,5 +440,52 @@ describe('steamGameAchievements', () => {
     const info = await steamGameAchievements(620, TOKEN)
     expect(info).toMatchObject({ provider: 'steam', total: 3, unlocked: 0 })
     expect(stub.calls.some((c) => c.url.includes('/ISteamUserStats/'))).toBe(false)
+  })
+})
+
+describe('steamAchievementCount', () => {
+  it("counts the live achievements without any credential, and 0 is Steam's answer for a game without any", async () => {
+    const stub = stubFetch({ [GAME_ACHIEVEMENTS]: DEFS })
+    expect(await steamAchievementCount(620)).toBe(3)
+    expect(stub.calls[0].url).not.toMatch(/key=|access_token=/)
+    // Call of Duty: United Offensive (2640): an empty response, and the store page lists none either.
+    const cod = stubFetch({
+      [GAME_ACHIEVEMENTS]: { status: 200, body: { response: {} } },
+      [STORE_DETAILS]: { status: 200, body: { '2640': { success: true, data: [] } } }
+    })
+    expect(await steamAchievementCount(2640)).toBe(0)
+    expect(cod.calls[1].url).toContain('filters=achievements')
+    expect(cod.calls[1].url).not.toMatch(/key=|access_token=/)
+  })
+
+  it('does not take one empty answer for "none": the store page has the last word', async () => {
+    // GetGameAchievements answers empty for an app it cannot resolve right now; the store lists 51.
+    stubFetch({
+      [GAME_ACHIEVEMENTS]: { status: 200, body: { response: {} } },
+      [STORE_DETAILS]: {
+        status: 200,
+        body: { '620': { success: true, data: { achievements: { total: 51 } } } }
+      }
+    })
+    expect(await steamAchievementCount(620)).toBe(51)
+    // An app the store does not know: nothing can be said.
+    stubFetch({
+      [GAME_ACHIEVEMENTS]: { status: 200, body: { response: {} } },
+      [STORE_DETAILS]: { status: 200, body: { '9999999': { success: false } } }
+    })
+    expect(await steamAchievementCount(9999999)).toBeNull()
+    // The store could not be asked: a failure, not "none".
+    stubFetch({
+      [GAME_ACHIEVEMENTS]: { status: 200, body: { response: {} } },
+      [STORE_DETAILS]: { status: 503 }
+    })
+    await expect(steamAchievementCount(2640)).rejects.toThrow()
+  })
+
+  it('throws when Steam could not be asked, which says nothing about the game', async () => {
+    stubFetch({ [GAME_ACHIEVEMENTS]: { status: 429 } })
+    await expect(steamAchievementCount(2640)).rejects.toThrow()
+    stubFetch({ [GAME_ACHIEVEMENTS]: { status: 200, body: {} } })
+    await expect(steamAchievementCount(2640)).rejects.toThrow()
   })
 })

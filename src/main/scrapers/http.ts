@@ -75,10 +75,18 @@ export class HttpError extends Error {
   readonly url: string
   /** Up to 500 characters of the response body, for callers that inspect API error texts. */
   readonly body?: string
+  /** The wait the server asked for in a Retry-After header (ms), when it sent one. */
+  readonly retryAfterMs?: number
 
   constructor(
     message: string,
-    info: { status: number; url: string; body?: string; statusText?: string }
+    info: {
+      status: number
+      url: string
+      body?: string
+      statusText?: string
+      retryAfterMs?: number
+    }
   ) {
     super(message)
     this.name = 'HttpError'
@@ -86,6 +94,7 @@ export class HttpError extends Error {
     if (info.statusText) this.statusText = info.statusText
     this.url = redactUrl(info.url)
     this.body = info.body
+    if (info.retryAfterMs !== undefined) this.retryAfterMs = info.retryAfterMs
   }
 }
 
@@ -324,7 +333,8 @@ async function request(url: string, init: RequestInit, options: HttpOptions): Pr
       status: res.status,
       statusText: res.statusText || undefined,
       url,
-      body: decodeText(data).slice(0, BODY_EXCERPT_CHARS)
+      body: decodeText(data).slice(0, BODY_EXCERPT_CHARS),
+      retryAfterMs: parseRetryAfter(retryAfter ?? null)
     })
   }
 }

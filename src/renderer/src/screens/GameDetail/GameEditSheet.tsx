@@ -7,7 +7,7 @@ import {
   tagDifficulty
 } from '@shared/difficulty'
 import { effectiveEmulatorCommand, findEmulatorCommand } from '@shared/emulators'
-import type { MetadataEditField, MetadataLayers } from '@shared/metadata-edit'
+import type { ControlsOption, MetadataEditField, MetadataLayers } from '@shared/metadata-edit'
 import type { Game, GameUserPatch, SystemInfo } from '@shared/types'
 import { Image as ImageIcon, ImagePlus, RotateCcw } from 'lucide-react'
 import { useEffect, useState, type ReactElement, type ReactNode } from 'react'
@@ -28,13 +28,16 @@ import { displayTitle } from '../../lib/library'
 import { createLog } from '../../lib/log'
 import {
   FIELD_FORM_KEYS,
+  controlsAllNoneKeeps,
   fallbackForm,
   fieldChanged,
   fieldMatches,
   fieldOrigin,
   formSave,
   layersAfterSave,
+  noControlsPicked,
   shownForm,
+  withConsoleControls,
   type MetadataForm
 } from '../../lib/metadataForm'
 import { formatBytes } from '../../state/installs'
@@ -132,16 +135,19 @@ function playerOptionsOf(t: Translate): SelectOption[] {
     }))
   ]
 }
-/** The Controls choices (CONTROLS_CHOICES, in its order): what each saves is controlsForChoice's. */
-function controlsOptions(t: Translate): SelectOption<MetadataForm['controls']>[] {
+/**
+ * The options of each Controls row (CONTROLS_OPTIONS, in its order): the rows' non-None picks are the game's controls
+ * (shared/metadata-edit.ts controlsFromPicks).
+ */
+function controlsOptions(t: Translate): SelectOption<ControlsOption>[] {
   return [
-    { value: 'vr', label: t('gameDetail.edit.fields.controls.vr') },
-    { value: 'touch', label: t('gameDetail.edit.fields.controls.touch') },
+    { value: 'none', label: t('gameDetail.edit.fields.controls.none') },
     { value: 'full', label: t('gameDetail.edit.fields.controls.full') },
     { value: 'partial', label: t('gameDetail.edit.fields.controls.partial') },
     { value: 'keyboard', label: t('gameDetail.edit.fields.controls.keyboard') },
-    { value: 'both', label: t('gameDetail.edit.fields.controls.both') },
-    { value: 'all', label: t('gameDetail.edit.fields.controls.all') }
+    { value: 'vr', label: t('gameDetail.edit.fields.controls.vr') },
+    { value: 'touch', label: t('gameDetail.edit.fields.controls.touch') },
+    { value: 'lightgun', label: t('gameDetail.edit.fields.controls.lightgun') }
   ]
 }
 function scoreSourceOptions(t: Translate): SelectOption<MetadataForm['scoreSource']>[] {
@@ -254,7 +260,11 @@ function EditForm({
 }): ReactElement {
   // The layers the form compares with: updated once a Save's metadata part went through, so a retry after a later
   // step failed does not send the same edit (and cloud suggestion) again.
-  const [layers, setLayers] = useState(openedLayers)
+  // A console game's controls rows start on Full Controller Support (its Pad badge) when nothing was scraped.
+  const consoleGame = game.source === 'rom' || game.launch.kind === 'emulator'
+  const [layers, setLayers] = useState(() =>
+    consoleGame ? withConsoleControls(openedLayers) : openedLayers
+  )
   const remote = !!game.remote
   const applyLocalGame = useLibraryStore((s) => s.applyGame)
   const applyRemoteGame = useStreamingStore((s) => s.applyRemoteGame)
@@ -336,7 +346,12 @@ function EditForm({
     const fields: readonly MetadataEditField[] =
       typeof fieldOrFields === 'string' ? [fieldOrFields] : fieldOrFields
     const fallback = fallbackForm(layers)
-    const changed = fields.some((field) => fieldChanged(form, layers, field))
+    // Three None Controls rows with no own edit save nothing: not a change (the note under the rows says so).
+    const changed = fields.some(
+      (field) =>
+        fieldChanged(form, layers, field) &&
+        !(field === 'controls' && controlsAllNoneKeeps(form, layers))
+    )
     const origins = fields.map((field) => fieldOrigin(layers, field))
     const origin = origins.includes('local')
       ? 'local'
@@ -359,7 +374,11 @@ function EditForm({
         : origin === 'scraped' && fields.every((field) => layers.scraped[field] === undefined)
           ? t('gameDetail.edit.origin.notSet')
           : originText[origin]
-    const canReset = !resetPending && (changed || origin === 'local')
+    const canReset =
+      !resetPending &&
+      (changed ||
+        origin === 'local' ||
+        fields.some((field) => field === 'controls' && controlsAllNoneKeeps(form, layers)))
     return (
       <div className="gedit__head">
         <span className="gedit__label">{label}</span>
@@ -534,8 +553,8 @@ function EditForm({
     },
     ...DIFFICULTIES.map((d) => ({ value: d.id, label: d.label }))
   ]
-  // A console game always shows the controller badge (lib/controls.ts): its controls are not editable.
-  const showControls = game.source !== 'rom' && game.launch.kind !== 'emulator'
+  // Every game's controls are editable. A console game's badge always shows Pad (lib/controls.ts), but its picks
+  // still file it under Filters > Controls: Lightgun (a light-gun game such as Duck Hunt or Time Crisis), Touch, VR.
   const basePlayerOptions = playerOptionsOf(t)
   const playerOptions =
     form.localPlayers === '' || basePlayerOptions.some((o) => o.value === form.localPlayers)
@@ -680,22 +699,38 @@ function EditForm({
             onChange={set('localPlayers')}
           />
         </div>
-        {showControls ? (
-          <div className="gedit__field">
-            {head(
-              'controls',
-              t('gameDetail.edit.fields.controls.label'),
-              t('gameDetail.edit.fields.controls.reset')
-            )}
+        <div className="gedit__field">
+          {head(
+            'controls',
+            t('gameDetail.edit.fields.controls.label'),
+            t('gameDetail.edit.fields.controls.reset')
+          )}
+          {form.controls.map((pick, row) => (
             <SelectField
-              focusKey={fk('controls')}
-              label={t('gameDetail.edit.fields.controls.label')}
-              value={form.controls}
+              key={row}
+              className="gedit__controls-row"
+              focusKey={fk(row === 0 ? 'controls' : `controls:${row}`)}
+              label={t('gameDetail.edit.fields.controls.row', { n: row + 1 })}
+              value={pick}
               options={controlsOptions(t)}
-              onChange={set('controls')}
+              onChange={(value) =>
+                setForm((f) => ({
+                  ...f,
+                  controls: f.controls.map((p, i) => (i === row ? value : p))
+                }))
+              }
             />
-          </div>
-        ) : null}
+          ))}
+          {noControlsPicked(form.controls) ? (
+            <p className="gsheet__note">
+              {controlsAllNoneKeeps(form, layers)
+                ? t('gameDetail.edit.fields.controls.allNoneKeep')
+                : t('gameDetail.edit.fields.controls.allNone')}
+            </p>
+          ) : consoleGame ? (
+            <p className="gsheet__note">{t('gameDetail.edit.fields.controls.console')}</p>
+          ) : null}
+        </div>
       </div>
 
       <div className="gsheet__section">

@@ -72,13 +72,29 @@ describe('remoteFor', () => {
 })
 
 describe('useStreamingStore', () => {
-  it('subscribes to the five streaming events at import', () => {
+  it('subscribes to the six streaming events at import', () => {
     expect([...listeners.keys()].filter((e) => e.startsWith('streaming:')).sort()).toEqual([
       'streaming:download',
       'streaming:library',
       'streaming:logins',
       'streaming:session',
-      'streaming:status'
+      'streaming:status',
+      'streaming:updates'
+    ])
+  })
+
+  it('toasts the updates and DLC a host sent for a game already here, and a failure', () => {
+    emit('streaming:updates', { title: 'TotK', hostName: 'Den', files: 2, bytes: 1.5 * 1024 ** 3 })
+    emit('streaming:updates', {
+      title: 'TotK',
+      hostName: 'Den',
+      files: 0,
+      bytes: 0,
+      error: 'Not enough space'
+    })
+    expect(toasts()).toEqual([
+      'success:TotK: 2 update and DLC file(s) (1.5 GB) downloaded from Den',
+      'error:TotK: its updates and DLC could not be downloaded from Den: Not enough space'
     ])
   })
 

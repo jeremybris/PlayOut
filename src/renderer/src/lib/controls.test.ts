@@ -1,9 +1,4 @@
-import {
-  CONTROLS_CHOICES,
-  applyEditToMetadata,
-  controlsForChoice,
-  type ControlsChoice
-} from '@shared/metadata-edit'
+import { applyEditToMetadata, controlsFromPicks, type ControlsPick } from '@shared/metadata-edit'
 import type { Game } from '@shared/types'
 import { describe, expect, it } from 'vitest'
 import {
@@ -19,11 +14,20 @@ const pc = (controls?: {
   vr: 'only' | 'supported' | null
   touch?: 'supported'
   keyboard?: 'full'
+  lightgun?: 'supported'
 }): Game =>
   ({
     source: 'steam',
     launch: { kind: 'uri', uri: '' },
     metadata: controls ? { steamTags: { tags: [], controls } } : {}
+  }) as unknown as Game
+
+/** A PC game whose Edit sheet rows picked these controls. */
+const picked = (...picks: ControlsPick[]): Game =>
+  ({
+    source: 'steam',
+    launch: { kind: 'uri', uri: '' },
+    metadata: applyEditToMetadata({}, { controls: controlsFromPicks(picks) })
   }) as unknown as Game
 
 describe('gameControls', () => {
@@ -51,13 +55,15 @@ describe('gameControls', () => {
 })
 
 describe('Controls filter', () => {
-  it('lists VR, Controller, Mouse and Keyboard and Touch, in that order', () => {
+  it('lists VR, Controller, Mouse and Keyboard, Touch and Lightgun, in that order', () => {
     expect(CONTROLS_FILTERS.map((c) => c.label)).toEqual([
       'VR',
       'Controller',
       'Mouse and Keyboard',
-      'Touch'
+      'Touch',
+      'Lightgun'
     ])
+    expect(controlsFilterLabel('lightgun')).toBe('Lightgun')
     expect(controlsFilterLabel('touch')).toBe('Touch')
     expect(controlsFilterLabel('keyboard')).toBe('Mouse and Keyboard')
   })
@@ -121,57 +127,86 @@ describe('libraryControlsFilters', () => {
   })
 })
 
-describe('the Edit sheet Controls choices', () => {
-  // The game as the choice saved in the Edit sheet leaves it (the edit laid over its metadata).
-  const chosen = (choice: ControlsChoice): Game =>
+describe('the Edit sheet Controls rows', () => {
+  // The game as the picks saved in the Edit sheet leave it (the edit laid over its metadata).
+  const chosen = (...picks: ControlsPick[]): Game =>
     ({
       source: 'steam',
       launch: { kind: 'uri', uri: '' },
-      metadata: applyEditToMetadata({}, { controls: controlsForChoice(choice) })
+      metadata: applyEditToMetadata({}, { controls: controlsFromPicks(picks) })
     }) as unknown as Game
 
-  it('gives each choice its badge', () => {
-    expect(CONTROLS_CHOICES.map((c) => gameControls(chosen(c)).kind)).toEqual([
+  // The old 7 choices' picks, and the new single picks.
+  const SETS: ControlsPick[][] = [
+    ['vr'],
+    ['touch'],
+    ['full'],
+    ['partial'],
+    ['keyboard'],
+    ['full', 'keyboard'],
+    ['full', 'keyboard', 'vr'],
+    ['lightgun']
+  ]
+
+  it('gives each set its badge', () => {
+    expect(SETS.map((p) => gameControls(chosen(...p)).kind)).toEqual([
       'vr-only',
       'touch',
       'controller',
       'partial',
       'keyboard',
       'both',
-      'all'
+      'all',
+      'lightgun'
     ])
-    expect(CONTROLS_CHOICES.map((c) => gameControls(chosen(c)).label)).toEqual([
+    expect(SETS.map((p) => gameControls(chosen(...p)).label)).toEqual([
       'VR',
       'Touch',
       'Pad',
       'Partial',
       'KB+M',
       'Pad+KB+M',
-      'All'
+      'All',
+      'Gun'
     ])
-    expect(gameControls(chosen('both')).text).toBe(
+    expect(gameControls(chosen('full', 'keyboard')).text).toBe(
       'Full controller support and full mouse and keyboard support'
     )
     expect(gameControls(chosen('touch')).text).toBe('Touch screen')
+    expect(gameControls(chosen('lightgun')).text).toBe('Played with a light gun')
+    // With other controls a light gun only adds to Filters > Controls, like touch.
+    expect(gameControls(chosen('full', 'lightgun')).kind).toBe('controller')
+    expect(gameControls(chosen('keyboard', 'lightgun')).kind).toBe('keyboard')
+    expect(gameControls(chosen('keyboard', 'touch')).kind).toBe('keyboard')
+    expect(gameControls(chosen('touch', 'lightgun')).kind).toBe('touch')
   })
 
-  it('puts each choice under its Filters > Controls choices', () => {
-    expect(CONTROLS_CHOICES.map((c) => controlsFilterIds(chosen(c)))).toEqual([
+  it('puts each set under its Filters > Controls choices', () => {
+    expect(SETS.map((p) => controlsFilterIds(chosen(...p)))).toEqual([
       ['vr'],
       ['touch'],
       ['controller'],
       ['controller', 'keyboard'],
       ['keyboard'],
       ['controller', 'keyboard'],
-      ['vr', 'controller', 'keyboard']
+      ['vr', 'controller', 'keyboard'],
+      ['lightgun']
+    ])
+    expect(controlsFilterIds(chosen('full', 'lightgun'))).toEqual(['controller', 'lightgun'])
+    expect(controlsFilterIds(chosen('keyboard', 'lightgun'))).toEqual(['keyboard', 'lightgun'])
+    expect(controlsFilterIds(chosen('vr', 'touch', 'lightgun'))).toEqual([
+      'vr',
+      'touch',
+      'lightgun'
     ])
     expect(libraryControlsFilters([chosen('touch')])).toEqual(['touch'])
-    expect(libraryControlsFilters([chosen('all'), chosen('touch')])).toEqual([
-      'vr',
-      'controller',
-      'keyboard',
-      'touch'
-    ])
+    expect(
+      libraryControlsFilters([
+        chosen('full', 'keyboard', 'vr'),
+        chosen('touch'),
+        chosen('lightgun')
+      ])
+    ).toEqual(['vr', 'controller', 'keyboard', 'touch', 'lightgun'])
   })
 
   it('lets VR only win over full controller and keyboard support', () => {
@@ -182,10 +217,99 @@ describe('the Edit sheet Controls choices', () => {
 
   it('keeps a console game on Pad whatever its metadata says', () => {
     const rom = {
-      ...chosen('touch'),
+      ...chosen('lightgun'),
       source: 'rom',
       launch: { kind: 'emulator', systemId: 'ps2', romPath: 'x' }
     } as unknown as Game
     expect(gameControls(rom).kind).toBe('controller')
+  })
+})
+
+describe('Controls filter: lightgun', () => {
+  const rom = { source: 'rom', launch: { kind: 'emulator' }, metadata: {} } as unknown as Game
+
+  it('has no Lightgun while no game is played with one, and Lightgun once one is', () => {
+    const today = [
+      pc({ controller: 'full', vr: 'supported' }),
+      pc({ controller: null, vr: null, touch: 'supported' }),
+      pc(),
+      rom
+    ]
+    expect(libraryControlsFilters(today)).not.toContain('lightgun')
+    expect(
+      libraryControlsFilters([...today, pc({ controller: null, vr: null, lightgun: 'supported' })])
+    ).toEqual(['vr', 'controller', 'keyboard', 'touch', 'lightgun'])
+  })
+})
+
+describe('Controls filter: VR next to a controller', () => {
+  it('lists Full + VR and Partial + VR (and with Touch / Lightgun) under VR too', () => {
+    expect(controlsFilterIds(picked('full', 'vr')).sort()).toEqual(['controller', 'vr'])
+    expect(controlsFilterIds(picked('partial', 'vr')).sort()).toEqual([
+      'controller',
+      'keyboard',
+      'vr'
+    ])
+    expect(controlsFilterIds(picked('full', 'vr', 'lightgun')).sort()).toEqual([
+      'controller',
+      'lightgun',
+      'vr'
+    ])
+    expect(controlsFilterIds(picked('full', 'vr', 'touch')).sort()).toEqual([
+      'controller',
+      'touch',
+      'vr'
+    ])
+    // Scraped Steam data reads the same way.
+    expect(controlsFilterIds(pc({ controller: 'full', vr: 'supported' })).sort()).toEqual([
+      'controller',
+      'vr'
+    ])
+    // The badge is unchanged.
+    expect(gameControls(picked('full', 'vr')).kind).toBe('controller')
+  })
+
+  it('offers VR in Filters > Controls once a Full + VR game is in the list', () => {
+    expect(libraryControlsFilters([picked('full', 'vr')])).toEqual(['vr', 'controller'])
+  })
+})
+
+describe('Controls on a console game', () => {
+  const romWith = (...picks: ControlsPick[]): Game =>
+    ({
+      ...picked(...picks),
+      source: 'rom',
+      launch: { kind: 'emulator', systemId: 'nes', romPath: 'x' }
+    }) as unknown as Game
+
+  it('files a ROM picked Lightgun under Controller and Lightgun, its badge still Pad', () => {
+    expect(controlsFilterIds(romWith('full', 'lightgun')).sort()).toEqual([
+      'controller',
+      'lightgun'
+    ])
+    expect(controlsFilterIds(romWith('lightgun')).sort()).toEqual(['controller', 'lightgun'])
+    expect(gameControls(romWith('lightgun')).kind).toBe('controller')
+    expect(libraryControlsFilters([romWith('lightgun')])).toEqual(['controller', 'lightgun'])
+  })
+
+  it('adds Touch and VR picks for a ROM the same way', () => {
+    expect(controlsFilterIds(romWith('full', 'touch', 'vr')).sort()).toEqual([
+      'controller',
+      'touch',
+      'vr'
+    ])
+  })
+
+  it('keeps a ROM with no controls under Controller alone', () => {
+    const rom = { source: 'rom', launch: { kind: 'emulator' }, metadata: {} } as unknown as Game
+    expect(controlsFilterIds(rom)).toEqual(['controller'])
+  })
+})
+
+describe('Touch + Lightgun badge', () => {
+  it('shows Touch for Touch + Lightgun alone, under both filters', () => {
+    const game = picked('touch', 'lightgun')
+    expect(gameControls(game).kind).toBe('touch')
+    expect(controlsFilterIds(game).sort()).toEqual(['lightgun', 'touch'])
   })
 })

@@ -54,6 +54,18 @@ export interface RomArea {
    * client's own edits of a pack stay). Default: replaced when it is not the host's copy.
    */
   keepExisting?: boolean
+  /**
+   * A file of this area already on this PC with the host's size is kept whatever its time (a Switch update copied
+   * here by hand); otherwise the file's time decides as usual (a newer copy kept, an older one replaced).
+   */
+  keepSameSize?: boolean
+  /** The folder's name in a "not enough free space" message (default: `name`). */
+  label?: string
+  /**
+   * Extras of the game (a Switch game's updates and DLC): fetched after the game's own files, and a file that cannot be
+   * fetched (the host still writing it, no room left for it) is skipped (onSkipped) instead of failing the download.
+   */
+  optional?: boolean
 }
 
 /**
@@ -345,6 +357,8 @@ export interface DownloadRomSetOptions {
    * host's per-client limit; 1: one after another).
    */
   concurrency?: number
+  /** A file of an `optional` area that was not fetched, and why; the download goes on without it. */
+  onSkipped?: (path: string, reason: string) => void
 }
 
 /** Files this small (texture pack images, a game folder's data) are fetched several at once. */
@@ -473,7 +487,13 @@ export async function downloadRomSet(options: DownloadRomSetOptions): Promise<st
     return (options.areas ?? []).find((a) => a.name.toLowerCase() === first)
   }
   const inArea = (f: RomFile): boolean => areaOf(f) !== undefined
-  const files = [...ordered.filter(inArea), ...ordered.filter((f) => !inArea(f))]
+  const isOptional = (f: RomFile): boolean => areaOf(f)?.optional === true
+  // ...but an optional area's files (extras: a Switch game's updates) after the game, so they never hold it up.
+  const files = [
+    ...ordered.filter((f) => inArea(f) && !isOptional(f)),
+    ...ordered.filter((f) => !inArea(f)),
+    ...ordered.filter(isOptional)
+  ]
   const now = options.now ?? Date.now
   const root = resolve(options.destRoot)
 
@@ -528,26 +548,54 @@ export async function downloadRomSet(options: DownloadRomSetOptions): Promise<st
         bytesDone += file.size
         continue
       }
-      const existing = await currentSize(target, file)
+      const existing =
+        areaOf(file)?.keepSameSize && (await sizeOf(target)) === file.size
+          ? file.size
+          : await currentSize(target, file)
       present.push(existing)
       const part = existing === file.size ? 0 : ((await sizeOf(partOf(target, file))) ?? 0)
       partial.push(part <= file.size ? part : 0)
       bytesDone += existing === file.size ? file.size : part <= file.size ? part : 0
     }
 
-    // Checked per drive: the PS3 HDD (an area) may be on another drive than the ROM folder.
+    // Checked per drive: the PS3 HDD (an area) may be on another drive than the ROM folder. The optional files are
+    // checked after the others: when they do not fit as well, they are skipped, never the game.
+    const skipped = new Set<number>()
+    const skip = (i: number, reason: string): void => {
+      skipped.add(i)
+      options.onSkipped?.(plan[i].file.path, reason)
+    }
     const byDrive = new Map<string, { needed: number; dir: string; label: string }>()
+    const optionalByDrive = new Map<
+      string,
+      { needed: number; dir: string; label: string; at: number[] }
+    >()
     for (let i = 0; i < plan.length; i++) {
       const { file, target } = plan[i]
       const missing = present[i] === file.size ? 0 : file.size - partial[i]
       if (missing <= 0) continue
+      if (isOptional(file)) {
+        const area = areaOf(file)!
+        const dir = resolve(area.dir)
+        const drive = parse(dir).root.toLowerCase()
+        const at = optionalByDrive.get(drive) ?? {
+          needed: 0,
+          dir,
+          label: area.label ?? area.name,
+          at: []
+        }
+        at.needed += missing
+        at.at.push(i)
+        optionalByDrive.set(drive, at)
+        continue
+      }
       const area = options.areas?.find((a) => isInside(resolve(a.dir), target))
       const dir = area ? resolve(area.dir) : root
       const drive = parse(dir).root.toLowerCase()
       const at = byDrive.get(drive) ?? {
         needed: 0,
         dir,
-        label: area ? area.name : tMain('mainStreaming.download.romFolder')
+        label: area ? (area.label ?? area.name) : tMain('mainStreaming.download.romFolder')
       }
       at.needed += missing
       byDrive.set(drive, at)
@@ -562,6 +610,18 @@ export async function downloadRomSet(options: DownloadRomSetOptions): Promise<st
             free: formatBytes(free)
           })
         )
+    }
+    for (const [drive, extra] of optionalByDrive) {
+      const free = await (options.freeBytes ?? defaultFreeBytes)(await existingAncestor(extra.dir))
+      const needed = (byDrive.get(drive)?.needed ?? 0) + extra.needed
+      if (free !== null && free < needed) {
+        const reason = tMain('mainStreaming.download.noSpace', {
+          place: extra.label,
+          needed: formatBytes(needed),
+          free: formatBytes(free)
+        })
+        for (const i of extra.at) skip(i, reason)
+      }
     }
     // A dumped game's executable (eboot.bin) already here while the rest of its folder is not: moved aside to its part
     // name before anything is fetched, and put back in place last (it counts as done, nothing is fetched again). A ROM
@@ -583,6 +643,17 @@ export async function downloadRomSet(options: DownloadRomSetOptions): Promise<st
     const result: string[] = new Array<string>(plan.length)
     /** One file, under `sig` (the download's signal, or a batch's that also stops when a sibling failed). */
     const fetchOne = async (i: number, sig: AbortSignal | undefined): Promise<void> => {
+      if (skipped.has(i)) return
+      if (!isOptional(plan[i].file)) return fetchFileAt(i, sig)
+      try {
+        await fetchFileAt(i, sig)
+      } catch (err) {
+        // An extra that failed (not a cancel) is skipped: the game itself still comes.
+        if (sig?.aborted || signal?.aborted || err instanceof RomDownloadCancelled) throw err
+        skip(i, err instanceof Error ? err.message : String(err))
+      }
+    }
+    const fetchFileAt = async (i: number, sig: AbortSignal | undefined): Promise<void> => {
       const { file, target } = plan[i]
       if (sig?.aborted) throw new RomDownloadCancelled()
       if (aside.has(i)) {
@@ -724,7 +795,7 @@ export async function downloadRomSet(options: DownloadRomSetOptions): Promise<st
     }
     bytesDone = bytesTotal
     emit(plan.length, undefined, true)
-    return result
+    return skipped.size ? result.filter((_, i) => !skipped.has(i)) : result
   } catch (err) {
     if (signal?.aborted && options.removePartsOnCancel)
       await Promise.all(

@@ -86,5 +86,16 @@
     "experimental": "Experimental.",
     "decryptedForEmulators": "Decrypted games only; for emulators and custom firmware.",
     "decryptedOnly": "Decrypted games only."
+  },
+  "newGames": {
+    "title": "New games",
+    "trimGames": {
+      "label": "Trim Games",
+      "description": "Shrink your ROM games: PS2 ISO to CHD, Xbox and Xbox 360 ISO to XISO (trimmed), PlayStation BIN/CUE to CHD, PSP ISO to CSO, PS3 disc folders to ISO (not HDD or PSN games), Wii and GameCube ISO to RVZ. When you turn it on, the games already in your library are checked once; after that, each game you add is trimmed. Each original goes to the Recycle Bin only once its result is verified; the progress shows below. Wii games need your Wii common key in the Emulation folder (bios\\wii\\common-key.bin) or Dolphin installed, as for a Convert run below. Games downloaded from another PC keep their format."
+    },
+    "autoCompress": {
+      "label": "Compress games automatically",
+      "description": "Compress each PC game a few minutes after it has finished installing, with the game page's Upgrade › Compress game (Windows compression), one game at a time. Games already installed, and games with anti-cheat, are not touched. Compressed games take less space but can take a little longer to load."
+    }
   }
 }

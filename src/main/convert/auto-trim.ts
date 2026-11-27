@@ -17,7 +17,7 @@ import { isHeldDirName } from '../services/held-files'
 import { tMain } from '../i18n'
 
 /**
- * Trim Games (Settings › Library): every ROM game new to the library is converted to its smaller format through
+ * Trim Games (Settings › Convert): every ROM game new to the library is converted to its smaller format through
  * Settings › Convert's runs, one direction at a time. PS2 ISO → CHD, Xbox and Xbox 360 full dumps → XISO (PlayOut's Xbox helper), PlayStation CUE/BIN → CHD,
  * PSP ISO → CSO, PS3 disc folder → ISO, Wii and GameCube ISO → RVZ. The convert service verifies each result before
  * the original goes to the Recycle Bin and moves the game's library record to the new file.

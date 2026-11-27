@@ -1,11 +1,13 @@
 // Achievements for the whole library (ARCHITECTURE.md §4.10): Steam games from the Steam Web API, ROMs from
-// RetroAchievements. A pass after every Steam owned import (sign-in included) and every ROM scan fills each game's
-// unlocked / total counts, which the game detail screen shows; a game's full list is fetched when it is opened.
+// RetroAchievements. Steam games are read in the background once when they join the library and again only after
+// they were played since their last read (the Steam scan below); a pass after every ROM scan fills the ROMs. The
+// counts show on the cards and the game detail screen; a game's full list is fetched when it is opened.
 import { mkdir, readFile, rename, stat, writeFile } from 'node:fs/promises'
 import { basename, extname, join } from 'node:path'
 import type { AchievementsInfo, Game, RetroAchievementsStatus } from '../../shared/types'
 import type { EventBus } from '../events'
 import type { Logger } from '../logger'
+import { HttpError } from '../scrapers/http'
 import { describeError, steamAppIdOf } from '../scrapers/steam-store'
 import type { LibraryService } from '../services/library-service'
 import type { SettingsStore } from '../store/settings-store'
@@ -24,6 +26,8 @@ import {
   type RaProgress
 } from './retroachievements'
 import {
+  PROGRESS_BATCH,
+  steamAchievementCount,
   steamAchievementsProgress,
   steamGameAchievements,
   SteamAuthError,
@@ -33,6 +37,11 @@ import {
 import { mainLanguage, tMain } from '../i18n'
 import { RECOMP_ACHIEVEMENTS_SOURCE, recompAchievementsFor } from '../../shared/recomp-play'
 import type { RecompAchievementsReader } from '../recomp/achievements'
+import {
+  knownWithoutSteamAchievements,
+  STEAM_ACHIEVEMENTS_NONE,
+  STEAM_ACHIEVEMENTS_SOURCE
+} from '../../shared/steam-achievements'
 
 /** A game's list is fetched again after this long. */
 const LIVE_TTL_MS = 10 * 60 * 1000
@@ -43,6 +52,22 @@ const RA_LIST_TTL_MS = 7 * 24 * 60 * 60 * 1000
  * have the ROM's hash.
  */
 const RA_LIST_WHOLE_MS = 24 * 60 * 60 * 1000
+/** The Steam scan waits this long after the app starts before its first pass (the start-up work goes first). */
+const STEAM_START_DELAY_MS = 60 * 1000
+/** Library changes and play sessions settle this long before the Steam scan looks at them. */
+const STEAM_KICK_DELAY_MS = 5 * 1000
+/** Between two one-game Steam requests of the scan: a few a second at most. */
+const STEAM_SCAN_GAP_MS = 400
+/** A failed Steam scan step waits this long, doubled each failure in a row, up to STEAM_BACKOFF_MAX_MS. */
+const STEAM_BACKOFF_MS = 2 * 60 * 1000
+const STEAM_BACKOFF_MAX_MS = 6 * 60 * 60 * 1000
+/** A game whose read failed this many times in a row is no longer retried on a timer (only after a play, etc.). */
+const STEAM_PARK_AFTER = 5
+/** The one-game reads of a pass write their marks and the record this often (games, or ms), not after every game. */
+const STEAM_FLUSH_EVERY = 25
+const STEAM_FLUSH_MS = 5 * 1000
+/** A page open's keyless check that found achievements is not repeated for this long (unless the game is played). */
+const KEYLESS_CHECK_TTL_MS = 6 * 60 * 60 * 1000
 /** A Settings edit settles before the account is checked again. */
 const RA_SETTINGS_DELAY_MS = 800
 /** The `metadata.sources` key of a ROM's RetroAchievements game id. */
@@ -50,23 +75,40 @@ export const RA_SOURCE = 'retroachievements'
 
 export interface AchievementsDeps {
   settings: Pick<SettingsStore, 'get' | 'onChange'>
-  library: Pick<LibraryService, 'games' | 'getGame' | 'applyMetadata' | 'clearAchievements'>
+  library: Pick<
+    LibraryService,
+    'games' | 'getGame' | 'applyMetadata' | 'clearAchievements' | 'getSessions' | 'allSessions'
+  >
   events: Pick<EventBus, 'emit'>
   log: Logger
-  /** RetroAchievements' game lists and the ROM hash cache live in `<cacheDir>`. */
+  /**
+   * RetroAchievements' game lists and the ROM hash cache live in `<cacheDir>`, and so does the Steam scan's record
+   * (steam-scans.json: when each Steam game was last read).
+   */
   cacheDir: string
+  /** A game is running: the Steam scan holds its requests until it ends. */
+  gameRunning?: () => boolean
 }
 
 /** Network calls, injectable for tests. */
 export interface AchievementsOptions {
   steamProgress?: typeof steamAchievementsProgress
   steamGame?: typeof steamGameAchievements
+  steamCount?: typeof steamAchievementCount
   raProfile?: typeof raProfile
   raGameList?: typeof raGameList
   raCompletion?: typeof raCompletionProgress
   raGame?: typeof raGameProgress
   hashRom?: typeof raHashRom
   settingsDelayMs?: number
+  /** The Steam scan's first pass after start (0: none until syncSteam or kickSteam). */
+  steamStartDelayMs?: number
+  /** How long kickSteam waits for more changes. */
+  steamKickDelayMs?: number
+  /** Between two one-game Steam requests of the scan. */
+  steamScanGapMs?: number
+  /** The first wait after a failed Steam scan step. */
+  steamBackoffMs?: number
 }
 
 /** The signed-in Steam account's credential; `refresh` mints a new access token first. */
@@ -89,8 +131,17 @@ export interface AchievementsService {
   forgetStaleRecomp(): void
   /** A game's achievements with the user's unlocks; null when there are none or no account to read them with. */
   get(gameId: string): Promise<AchievementsInfo | null>
-  /** Unlocked / total for every Steam game in the library. */
+  /**
+   * The Steam scan: read unlocked / total (or Steam's "no achievements") for the Steam games that are due, a few
+   * requests a second: games never read (new to the library), and games played since they were last read (a PlayOut
+   * session ended after it, or Steam's last played / playtime moved past it). Nothing else is read again. Without a
+   * Settings key or a signed-in account the due games wait for one. Resolves when the pass is over.
+   */
   syncSteam(): Promise<void>
+  /** The library changed (games added, Steam's playtime imported): run the Steam scan once things settle. */
+  kickSteam(): void
+  /** A PlayOut play session of the game ended: it is read again by the Steam scan. */
+  steamPlayed(gameId: string, endedAt: string): void
   /**
    * The Steam account was signed out (or replaced): its counts leave the cards unless the Settings key still
    * covers them, and a sync still running for it writes nothing.
@@ -122,6 +173,31 @@ interface ListCacheFile {
 
 const isRom = (g: Game): boolean => g.source === 'rom' && !!g.romPath
 
+/** A Steam game's line in steam-scans.json: when the Steam scan last read it. */
+interface SteamScanEntry {
+  /** When Steam last answered for the game (epoch ms); absent while its reads only failed. */
+  at?: number
+  /** The game's last played then (null: none): a later one since = played since (through Steam, a paired PC). */
+  seen?: string | null
+  /** Steam's playtime (minutes) then: more since = played through Steam since. */
+  storeMinutes?: number
+  /** That read followed a PlayOut session: Steam's playtime growing next only catches up with that session. */
+  afterSession?: boolean
+  /** The app id it was read by (another one since = a new match, read again). */
+  appId?: number
+  /** Steam said then that the game has no achievements (the mark is put back if a new match dropped it). */
+  none?: boolean
+  /** When a pass asked for its counts and got none; Steam's own list is still to be asked. */
+  countOnlyAt?: number
+  /** When a PlayOut play session of the game ended (epoch ms): after `at` = read again. */
+  playedAt?: number
+  /** Failed reads in a row, and when the next one may run. */
+  fails?: number
+  retryAt?: number
+  /** Failed STEAM_PARK_AFTER times in a row (epoch ms): no timed retry, only after a play, an import or a restart. */
+  parkedAt?: number
+}
+
 export function createAchievementsService(
   deps: AchievementsDeps,
   options: AchievementsOptions = {}
@@ -129,6 +205,7 @@ export function createAchievementsService(
   const { library, settings, events, log } = deps
   const fetchSteamProgress = options.steamProgress ?? steamAchievementsProgress
   const fetchSteamGame = options.steamGame ?? steamGameAchievements
+  const fetchSteamCount = options.steamCount ?? steamAchievementCount
   const fetchRaProfile = options.raProfile ?? raProfile
   const fetchRaGameList = options.raGameList ?? raGameList
   const fetchRaCompletion = options.raCompletion ?? raCompletionProgress
@@ -221,46 +298,480 @@ export function createAchievementsService(
     if (gameIds.length && !disposed) events.emit('library:changed', { reason: 'metadata', gameIds })
   }
 
-  let steamRun: Promise<void> | null = null
-  let steamAgain = false
+  // --- the Steam scan ---------------------------------------------------------------
+  // Each Steam game (a store game with a Steam app id) is read once when it joins the library, then again only once it
+  // was played after its last read. Never on a timer otherwise: a failed read waits out a growing pause and, after
+  // STEAM_PARK_AFTER failures in a row, waits for a play, an owned import or sign-in, or the next start; games waiting
+  // for a Steam account (or for one Steam accepts) wait for the next sign-in, owned import or Settings key. Nothing is
+  // read while a game runs.
 
-  async function runSteamSync(): Promise<void> {
-    const byApp = new Map<number, string[]>()
-    for (const game of library.games()) {
-      if (game.source === 'rom') continue
-      const appId = steamAppIdOf(game)
-      if (!appId) continue
-      const ids = byApp.get(appId) ?? []
-      ids.push(game.id)
-      byApp.set(appId, ids)
-    }
-    if (!byApp.size) return
-    const generation = steamGeneration
-    for (const [id, entry] of cache) if (entry.key === 'steam') cache.delete(id)
-    let progress: Map<number, SteamProgress> | null
-    try {
-      progress = await withSteam((credential) => fetchSteamProgress([...byApp.keys()], credential))
-    } catch (err) {
-      log.warn(`steam: achievements sync failed: ${describeError(err)}`)
-      return
-    }
-    if (!progress || disposed || generation !== steamGeneration) return
-    const changed: string[] = []
-    let withAchievements = 0
-    for (const [appId, ids] of byApp) {
-      const p = progress.get(appId)
-      if (!p || p.total <= 0) continue
-      withAchievements++
-      for (const id of ids) if (writeCounts(id, p)) changed.push(id)
-    }
-    announce(changed)
-    log.info(
-      `steam: achievements for ${withAchievements} of ${byApp.size} game(s), ${changed.length} changed`
+  const steamStartDelayMs = options.steamStartDelayMs ?? STEAM_START_DELAY_MS
+  const steamKickDelayMs = options.steamKickDelayMs ?? STEAM_KICK_DELAY_MS
+  const steamScanGapMs = options.steamScanGapMs ?? STEAM_SCAN_GAP_MS
+  const steamBackoffMs = options.steamBackoffMs ?? STEAM_BACKOFF_MS
+  const gameRunning = (): boolean => deps.gameRunning?.() ?? false
+  /** Until the start-up delay has passed, the scan waits (the delay's pass reads whatever is due). */
+  let steamStarted = steamStartDelayMs <= 0
+  let steamStartTimer: NodeJS.Timeout | null = null
+  let steamScanTimer: NodeJS.Timeout | null = null
+  /** When steamScanTimer fires (epoch ms). */
+  let steamScanAt = 0
+  /** No Steam request of the scan before this (epoch ms): its last step failed. */
+  let steamPausedUntil = 0
+  let steamPauseFails = 0
+  /** Steam refused every credential: nothing is read until the credential changes (or an import / sign-in). */
+  let steamAuthBlocked = false
+  /** A pass stopped for a running game: the next session change (or play) picks it up. */
+  let steamDeferred = false
+  /** An owned import or sign-in asked: parked games get one more try. */
+  let steamUnparkPending = false
+  /** Page opens whose keyless check found achievements this account has no progress in: app id -> when. */
+  const keylessChecked = new Map<number, number>()
+
+  const scanFile = join(deps.cacheDir, 'steam-scans.json')
+  let scans: Record<string, SteamScanEntry> | null = null
+  let scansLoading: Promise<Record<string, SteamScanEntry>> | null = null
+  /** A reset (sign-out, another key) came before the record was read: applied to it once read. */
+  let scansResetPending = false
+
+  function loadScans(): Promise<Record<string, SteamScanEntry>> {
+    if (scans) return Promise.resolve(scans)
+    scansLoading ??= (async () => {
+      let table: Record<string, SteamScanEntry> = {}
+      try {
+        const parsed = JSON.parse(await readFile(scanFile, 'utf8')) as unknown
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed))
+          table = parsed as Record<string, SteamScanEntry>
+      } catch {
+        // No record yet: every Steam game is new to the scan.
+      }
+      // A new start: games parked after failing again and again get one more try.
+      for (const entry of Object.values(table)) unpark(entry)
+      scans = table
+      if (scansResetPending) {
+        scansResetPending = false
+        forgetSteamScans(table)
+      }
+      return table
+    })()
+    return scansLoading
+  }
+
+  function unpark(entry: SteamScanEntry): void {
+    if (entry.parkedAt === undefined) return
+    delete entry.parkedAt
+    delete entry.fails
+  }
+
+  async function saveScans(): Promise<void> {
+    if (!scans) return
+    // Games that left the library leave the record: one added again is new to the scan.
+    for (const id of Object.keys(scans)) if (!library.getGame(id)) delete scans[id]
+    await writeJson(scanFile, scans).catch((err) =>
+      log.warn(`steam: could not save the achievements scan record: ${describeError(err)}`)
     )
   }
 
-  function syncSteam(): Promise<void> {
+  /** The counts went with the account: every game is read again, except those Steam said have none. */
+  function forgetSteamScans(table: Record<string, SteamScanEntry>): void {
+    for (const id of Object.keys(table)) {
+      const game = library.getGame(id)
+      if (!game || !(table[id].none || knownWithoutSteamAchievements(game))) delete table[id]
+    }
+  }
+
+  /** The Steam app id the scan reads a game by; null for ROMs, a paired host's games and games without one. */
+  function scanAppId(game: Game): number | null {
+    if (game.source === 'rom' || game.remote) return null
+    return steamAppIdOf(game)
+  }
+
+  /**
+   * When each game's newest play session reached this PC (epoch ms, this PC's clock): a session from a paired PC
+   * counts from when it was synced here, one played here from its end.
+   */
+  function lastSessions(gameId?: string): Map<string, number> {
+    const out = new Map<string, number>()
+    const sessions = gameId ? library.getSessions(gameId) : library.allSessions()
+    for (const s of sessions) {
+      const when = Date.parse(s.syncedAt ?? s.endedAt ?? '')
+      if (!Number.isFinite(when)) continue
+      if (when > (out.get(s.gameId) ?? 0)) out.set(s.gameId, when)
+    }
+    return out
+  }
+
+  /**
+   * Played after `since`: a PlayOut session ended (or a paired PC's session arrived) after it, Steam's last played
+   * changed to a later time than the one seen at the last read and after it (compared with the value seen, so a
+   * clock ahead of this PC's cannot keep the game due), or Steam's playtime grew (not when that only caught up with
+   * the PlayOut session the last read already followed).
+   */
+  function playedSince(
+    game: Game,
+    entry: SteamScanEntry,
+    since: number,
+    lastSession: number | undefined
+  ): boolean {
+    if (entry.playedAt && entry.playedAt > since) return true
+    if (lastSession !== undefined && lastSession > since) return true
+    const lastPlayed = game.lastPlayed ? Date.parse(game.lastPlayed) : Number.NaN
+    if (
+      Number.isFinite(lastPlayed) &&
+      lastPlayed > since &&
+      (game.lastPlayed ?? null) !== (entry.seen ?? null)
+    ) {
+      const seen = entry.seen ? Date.parse(entry.seen) : Number.NaN
+      if (!Number.isFinite(seen) || lastPlayed > seen) return true
+    }
+    return !entry.afterSession && (game.storePlaytimeMinutes ?? 0) > (entry.storeMinutes ?? 0)
+  }
+
+  /**
+   * Never read, read for another app id (a new match), a failed read whose wait is over, or played after its last
+   * read (here, on a paired PC or through Steam). A parked game waits for a play.
+   */
+  function steamDue(
+    game: Game,
+    entry: SteamScanEntry | undefined,
+    now: number,
+    lastSession: number | undefined
+  ): boolean {
+    if (!entry) return true
+    if (entry.appId !== undefined && entry.appId !== scanAppId(game)) return true
+    if (entry.parkedAt !== undefined)
+      return playedSince(game, entry, Math.max(entry.parkedAt, entry.at ?? 0), lastSession)
+    if (entry.retryAt && now < entry.retryAt) return false
+    if (entry.at === undefined) return true
+    return playedSince(game, entry, entry.at, lastSession)
+  }
+
+  /** Steam answered for these games at `at` (a session that ended after it still makes them due). */
+  function recordScan(
+    table: Record<string, SteamScanEntry>,
+    ids: string[],
+    at: number,
+    none = false
+  ): void {
+    for (const id of ids) {
+      const game = library.getGame(id)
+      if (!game) continue
+      const playedAt = table[id]?.playedAt
+      const appId = scanAppId(game)
+      table[id] = {
+        at,
+        seen: game.lastPlayed ?? null,
+        storeMinutes: game.storePlaytimeMinutes ?? 0,
+        ...(appId ? { appId } : {}),
+        ...(none ? { none: true } : {}),
+        // This read followed a PlayOut session: Steam's playtime catching up with it later is no new play.
+        ...(playedAt && playedAt <= at ? { afterSession: true } : {}),
+        ...(playedAt && playedAt > at ? { playedAt } : {})
+      }
+    }
+  }
+
+  const backoff = (fails: number): number =>
+    Math.min(steamBackoffMs * 2 ** Math.max(0, fails - 1), STEAM_BACKOFF_MAX_MS)
+
+  /** A rate limit, a network failure or a Retry-After: everything waits, not just the game asked about. */
+  const sharedFailure = (err: unknown): boolean =>
+    err instanceof HttpError &&
+    (err.status === 429 || err.status === 0 || err.retryAfterMs !== undefined)
+
+  /**
+   * A scan step failed. Steam refusing the credential stops the scan until the credential changes (no game is held
+   * back for it). Otherwise its games wait, longer after each failure in a row, and after STEAM_PARK_AFTER failures
+   * wait for a play (or an import, a sign-in, the next start); with `everyone` (a batch request, a rate limit, no
+   * network) the whole scan pauses too, as long as Steam asked when it said.
+   */
+  function scanFailed(
+    table: Record<string, SteamScanEntry>,
+    ids: string[],
+    err: unknown,
+    everyone: boolean
+  ): void {
+    if (err instanceof SteamAuthError) {
+      steamAuthBlocked = true
+      log.warn(
+        `steam: achievements scan stopped (${describeError(err)}); it goes on once the Steam account or key changes`
+      )
+      return
+    }
+    const now = Date.now()
+    const asked = err instanceof HttpError ? (err.retryAfterMs ?? 0) : 0
+    let retry = Number.POSITIVE_INFINITY
+    for (const id of ids) {
+      const entry: SteamScanEntry = { ...table[id] }
+      const fails = (entry.fails ?? 0) + 1
+      delete entry.retryAt
+      if (fails >= STEAM_PARK_AFTER) {
+        table[id] = { ...entry, fails, parkedAt: now }
+        continue
+      }
+      const retryAt = now + Math.max(backoff(fails), asked)
+      table[id] = { ...entry, fails, retryAt }
+      retry = Math.min(retry, retryAt)
+    }
+    const limited = err instanceof HttpError && err.status === 429
+    if (!everyone && !sharedFailure(err)) {
+      log.warn(`steam: achievements of ${ids.join(', ')} could not be read: ${describeError(err)}`)
+      // Only these games wait; the scan reads them once their wait is over.
+      if (Number.isFinite(retry)) scheduleSteam(retry - now)
+      return
+    }
+    steamPauseFails++
+    const wait = Math.max(backoff(steamPauseFails), asked)
+    steamPausedUntil = now + wait
+    log.warn(
+      `steam: achievements scan ${limited ? 'rate limited' : 'failed'} (${describeError(err)}); next try in ${Math.round(wait / 1000)} s`
+    )
+    scheduleSteam(wait)
+  }
+
+  /** Run the scan in `ms`, unless it is already set to run sooner. */
+  function scheduleSteam(ms: number): void {
+    if (disposed || !steamStarted) return
+    const fireAt = Date.now() + Math.max(0, ms)
+    if (steamScanTimer && steamScanAt <= fireAt) return
+    if (steamScanTimer) clearTimeout(steamScanTimer)
+    steamScanAt = fireAt
+    steamScanTimer = setTimeout(
+      () => {
+        steamScanTimer = null
+        void runSteam()
+      },
+      Math.max(0, ms)
+    )
+    steamScanTimer.unref?.()
+  }
+
+  /** Steam said the game has no achievements: the mark goes on, Steam counts read before go (a recompilation's stay). */
+  function markSteamNone(gameId: string, changed: string[]): void {
+    const game = library.getGame(gameId)
+    if (!game || game.remote) return
+    if (game.metadata.sources?.[STEAM_ACHIEVEMENTS_SOURCE] === STEAM_ACHIEVEMENTS_NONE) return
+    if (!game.metadata.sources?.[RECOMP_ACHIEVEMENTS_SOURCE]) library.clearAchievements([gameId])
+    library.applyMetadata(
+      gameId,
+      { metadata: { sources: { [STEAM_ACHIEVEMENTS_SOURCE]: STEAM_ACHIEVEMENTS_NONE } } },
+      { overwrite: true, quiet: true }
+    )
+    changed.push(gameId)
+  }
+
+  /**
+   * The record says Steam answered "none" for the game's app id, but the mark is gone (a new metadata match replaced
+   * the game's sources): put it back without asking Steam again.
+   */
+  function restoreNone(game: Game, entry: SteamScanEntry | undefined, changed: string[]): boolean {
+    if (!entry?.none || game.metadata.achievements || knownWithoutSteamAchievements(game))
+      return false
+    if (entry.appId !== undefined && entry.appId !== scanAppId(game)) return false
+    markSteamNone(game.id, changed)
+    return true
+  }
+
+  /** Counts from Steam, replacing a "no achievements" mark (the game got achievements since). */
+  function writeSteamCounts(gameId: string, counts: SteamProgress, changed: string[]): void {
+    const marked = !!library.getGame(gameId)?.metadata.sources?.[STEAM_ACHIEVEMENTS_SOURCE]
+    if (marked) library.clearAchievements([gameId], STEAM_ACHIEVEMENTS_SOURCE)
+    if (writeCounts(gameId, counts) || marked) changed.push(gameId)
+  }
+
+  /** A page open read the game: the scan counts it as read then. */
+  async function noteSteamRead(gameId: string, at: number, none = false): Promise<void> {
+    const table = await loadScans()
+    recordScan(table, [gameId], at, none)
+    await saveScans()
+  }
+
+  const pause = (ms: number): Promise<void> =>
+    ms > 0 ? new Promise((resolve) => setTimeout(resolve, ms)) : Promise.resolve()
+
+  async function runSteamScan(): Promise<void> {
+    const table = await loadScans()
+    if (disposed) return
+    if (steamUnparkPending) {
+      steamUnparkPending = false
+      for (const entry of Object.values(table)) unpark(entry)
+    }
+    if (steamAuthBlocked) {
+      log.debug('steam: achievements scan waits for a Steam account or key Steam accepts')
+      return
+    }
+    if (gameRunning()) {
+      steamDeferred = true
+      return
+    }
+    steamDeferred = false
+    const now = Date.now()
+    if (now < steamPausedUntil) {
+      scheduleSteam(steamPausedUntil - now)
+      return
+    }
+    const sessions = lastSessions()
+    const byApp = new Map<number, string[]>()
+    /** Apps whose counts the last pass already asked for (none came): only Steam's own list is left to ask. */
+    const countOnly = new Set<number>()
+    const restored: string[] = []
+    let recordChanged = false
+    let nextRetry = Number.POSITIVE_INFINITY
+    for (const game of library.games()) {
+      const appId = scanAppId(game)
+      if (!appId) continue
+      const entry = table[game.id]
+      if (!steamDue(game, entry, now, sessions.get(game.id))) {
+        if (entry?.retryAt && entry.retryAt > now) nextRetry = Math.min(nextRetry, entry.retryAt)
+        restoreNone(game, entry, restored)
+        // Steam's playtime caught up with the PlayOut session the last read followed: that is the new baseline.
+        if (entry?.afterSession && (game.storePlaytimeMinutes ?? 0) > (entry.storeMinutes ?? 0)) {
+          entry.storeMinutes = game.storePlaytimeMinutes ?? 0
+          delete entry.afterSession
+          recordChanged = true
+        }
+        continue
+      }
+      const ids = byApp.get(appId) ?? []
+      ids.push(game.id)
+      byApp.set(appId, ids)
+      if (entry?.countOnlyAt !== undefined && entry.at === undefined) countOnly.add(appId)
+    }
+    announce(restored)
+    if (recordChanged) await saveScans()
+    if (byApp.size && !(await scanSteamApps(table, byApp, countOnly))) return
+    // A failed game's wait ends: it is read then (nothing else is on a timer).
+    if (Number.isFinite(nextRetry)) scheduleSteam(nextRetry - Date.now())
+  }
+
+  /**
+   * Read the due games: their counts a hundred apps per request, then, one at a time, Steam's own list for the apps
+   * that got no counts (`countOnly`: those a stopped pass already asked counts for). false when the pass stopped
+   * (a failure, no account, a sign-out or a game started meanwhile).
+   */
+  async function scanSteamApps(
+    table: Record<string, SteamScanEntry>,
+    byApp: Map<number, string[]>,
+    countOnly: Set<number>
+  ): Promise<boolean> {
+    const generation = steamGeneration
+    const current = (): boolean => !disposed && generation === steamGeneration
+    const stopForGame = (): boolean => {
+      if (!gameRunning()) return false
+      steamDeferred = true
+      return true
+    }
+    const apps = [...byApp.keys()].filter((a) => !countOnly.has(a))
+    const unanswered: number[] = [...countOnly]
+    let counted = 0
+    let none = 0
+    for (let i = 0; i < apps.length; i += PROGRESS_BATCH) {
+      if (!current() || stopForGame()) return false
+      const batch = apps.slice(i, i + PROGRESS_BATCH)
+      const at = Date.now()
+      let progress: Map<number, SteamProgress> | null
+      try {
+        progress = await withSteam((credential) => fetchSteamProgress(batch, credential))
+      } catch (err) {
+        if (current()) {
+          scanFailed(
+            table,
+            batch.flatMap((a) => byApp.get(a) ?? []),
+            err,
+            true
+          )
+          await saveScans()
+        }
+        return false
+      }
+      if (!current()) return false
+      if (!progress) {
+        // No Settings key and no signed-in account: the games wait for one (a sign-in imports the library and asks).
+        log.debug(`steam: ${byApp.size} game(s) wait for a Steam account to read achievements`)
+        return false
+      }
+      const changed: string[] = []
+      for (const appId of batch) {
+        const p = progress.get(appId)
+        const ids = byApp.get(appId) ?? []
+        if (!p || p.total <= 0) {
+          unanswered.push(appId)
+          // Asked: a pass stopped before Steam's own list was read asks only that next time.
+          for (const id of ids) table[id] = { ...table[id], countOnlyAt: at }
+          continue
+        }
+        counted++
+        for (const id of ids) {
+          writeSteamCounts(id, p, changed)
+          cache.delete(id)
+        }
+        recordScan(table, ids, at)
+      }
+      announce(changed)
+      await saveScans()
+    }
+    // No counts: Steam's own list (no credential needed) tells a game without achievements from one this account
+    // has no progress in (another account owns it, a private profile), which is read again only once played. The
+    // marks and the record are written in batches, not after every game.
+    let marked: string[] = []
+    let dirty = false
+    let flushedAt = Date.now()
+    const flush = async (): Promise<void> => {
+      announce(marked)
+      marked = []
+      if (dirty) await saveScans()
+      dirty = false
+      flushedAt = Date.now()
+    }
+    for (let i = 0; i < unanswered.length; i++) {
+      const appId = unanswered[i]
+      if (i > 0) await pause(steamScanGapMs)
+      if (!current() || stopForGame()) {
+        if (current()) await flush()
+        return false
+      }
+      const ids = byApp.get(appId) ?? []
+      const asked = Date.now()
+      let total: number | null
+      try {
+        total = await fetchSteamCount(appId)
+      } catch (err) {
+        if (!current()) return false
+        const everyone = sharedFailure(err)
+        scanFailed(table, ids, err, false)
+        dirty = true
+        if (everyone) {
+          await flush()
+          return false
+        }
+        continue
+      }
+      if (!current()) return false
+      if (total === 0) {
+        none++
+        for (const id of ids) markSteamNone(id, marked)
+      }
+      recordScan(table, ids, asked, total === 0)
+      dirty = true
+      if (marked.length >= STEAM_FLUSH_EVERY || Date.now() - flushedAt >= STEAM_FLUSH_MS)
+        await flush()
+    }
+    await flush()
+    // The whole pass went through: the next failure starts the pause over.
+    steamPauseFails = 0
+    log.info(
+      `steam: achievements scan read ${byApp.size} game(s): ${counted} with counts, ${none} without achievements`
+    )
+    return true
+  }
+
+  let steamRun: Promise<void> | null = null
+  let steamAgain = false
+
+  function runSteam(): Promise<void> {
     if (disposed) return Promise.resolve()
+    // Before the start-up delay is over: its pass reads what is due.
+    if (!steamStarted) return Promise.resolve()
     if (steamRun) {
       steamAgain = true
       return steamRun
@@ -269,7 +780,11 @@ export function createAchievementsService(
       try {
         do {
           steamAgain = false
-          await runSteamSync()
+          try {
+            await runSteamScan()
+          } catch (err) {
+            log.warn(`steam: achievements scan failed: ${describeError(err)}`)
+          }
         } while (steamAgain && !disposed)
       } finally {
         steamRun = null
@@ -278,24 +793,66 @@ export function createAchievementsService(
     return steamRun
   }
 
+  /** An owned import or a sign-in: a refused credential and parked games get another try. */
+  function syncSteam(): Promise<void> {
+    steamAuthBlocked = false
+    steamUnparkPending = true
+    return runSteam()
+  }
+
+  function kickSteam(): void {
+    if (disposed || !steamStarted) return
+    // A pause after a failure is not cut short.
+    scheduleSteam(Math.max(steamKickDelayMs, steamPausedUntil - Date.now()))
+  }
+
+  function steamPlayed(gameId: string, endedAt: string): void {
+    if (disposed) return
+    const game = library.getGame(gameId)
+    const appId = game ? scanAppId(game) : null
+    if (!appId) {
+      // Another game ended: a pass held back while it ran goes on.
+      if (steamDeferred) kickSteam()
+      return
+    }
+    keylessChecked.delete(appId)
+    const ended = Date.parse(endedAt)
+    void loadScans()
+      .then(async (table) => {
+        table[gameId] = { ...table[gameId], playedAt: Number.isFinite(ended) ? ended : Date.now() }
+        await saveScans()
+        kickSteam()
+      })
+      .catch((err) => log.warn(`steam: could not note a play session: ${describeError(err)}`))
+  }
+
   /**
    * The credential the Steam counts were read with went away or changed: fence the work still running for it,
    * take its counts off the cards and read them again with whatever credential is left (none: they stay empty).
+   * Steam's "no achievements" marks stay: they are no account's.
    */
   function resetSteam(): void {
     steamGeneration++
+    steamAuthBlocked = false
+    keylessChecked.clear()
     for (const [id, entry] of cache) if (entry.key === 'steam') cache.delete(id)
     const ids = library
       .games()
       .filter((g) => g.source !== 'rom' && steamAppIdOf(g) && g.metadata.achievements)
       .map((g) => g.id)
     announce(library.clearAchievements(ids))
+    steamPausedUntil = 0
+    steamPauseFails = 0
+    if (scans) {
+      forgetSteamScans(scans)
+      void saveScans()
+    } else scansResetPending = true
   }
 
   function steamSignedOut(): void {
     resetSteam()
     // The Settings key may still sign Steam in (for this account or another one): its own counts come back.
-    if (keyCredential()) void syncSteam()
+    if (keyCredential()) void runSteam()
   }
 
   // --- RetroAchievements --------------------------------------------------------
@@ -752,12 +1309,56 @@ export function createAchievementsService(
     }
     const appId = steamAppIdOf(game)
     if (!appId) return null
+    // Steam said the game has none: nothing to ask (the Steam scan asks again once it is played).
+    if (knownWithoutSteamAchievements(game)) return null
+    const scanned = scanAppId(game)
+    const entry = scanned ? (await loadScans())[game.id] : undefined
+    // A new metadata match dropped the mark, but nothing changed since Steam said "none": it goes back on.
+    if (
+      entry?.none &&
+      !game.metadata.achievements &&
+      !steamDue(game, entry, Date.now(), lastSessions(game.id).get(game.id))
+    ) {
+      const restored: string[] = []
+      if (restoreNone(game, entry, restored)) {
+        announce(restored)
+        return null
+      }
+    }
     const generation = steamGeneration
+    const asked = Date.now()
     const info = await withSteam((credential) => fetchSteamGame(appId, credential))
     if (generation !== steamGeneration) return null
-    if (info && writeCounts(game.id, { unlocked: info.unlocked, total: info.total }))
-      announce([game.id])
-    return info
+    if (info) {
+      const changed: string[] = []
+      writeSteamCounts(game.id, { unlocked: info.unlocked, total: info.total }, changed)
+      announce(changed)
+      if (scanned) void noteSteamRead(game.id, asked)
+      return info
+    }
+    // Nothing with the account (or no account): Steam's own list, read without one, says whether the game has
+    // achievements at all. Only its "none" is kept; signed out or a failed request leave the page as it was.
+    // A check that found achievements is not repeated on every open while the game is not played.
+    const checked = keylessChecked.get(appId)
+    if (checked !== undefined && Date.now() - checked < KEYLESS_CHECK_TTL_MS) return null
+    let total: number | null
+    try {
+      total = await fetchSteamCount(appId)
+    } catch (err) {
+      log.debug(`steam: could not check whether ${appId} has achievements: ${describeError(err)}`)
+      return null
+    }
+    if (generation !== steamGeneration) return null
+    if (total === 0 && !game.remote) {
+      const changed: string[] = []
+      markSteamNone(game.id, changed)
+      announce(changed)
+      if (scanned) void noteSteamRead(game.id, asked, true)
+    } else if (total) {
+      // Remembered here only: the scan still reads the game's counts once an account can.
+      keylessChecked.set(appId, Date.now())
+    }
+    return null
   }
 
   async function get(gameId: string): Promise<AchievementsInfo | null> {
@@ -791,9 +1392,20 @@ export function createAchievementsService(
     return task
   }
 
+  // The Steam scan's first pass waits for the start-up work (the library scans, the store imports) to settle.
+  if (!steamStarted) {
+    steamStartTimer = setTimeout(() => {
+      steamStartTimer = null
+      steamStarted = true
+      void runSteam()
+    }, steamStartDelayMs)
+    steamStartTimer.unref?.()
+  }
+
   return {
     useSteamAccount(credential) {
       steamAccount = credential
+      steamAuthBlocked = false
     },
     useRecomp(reader) {
       recompReader = reader
@@ -818,6 +1430,8 @@ export function createAchievementsService(
     forgetStaleRecomp,
     get,
     syncSteam,
+    kickSteam,
+    steamPlayed,
     steamSignedOut,
     syncRetro,
     retroStatus: () => status,
@@ -826,6 +1440,8 @@ export function createAchievementsService(
       offSettings()
       if (settingsTimer) clearTimeout(settingsTimer)
       if (steamTimer) clearTimeout(steamTimer)
+      if (steamStartTimer) clearTimeout(steamStartTimer)
+      if (steamScanTimer) clearTimeout(steamScanTimer)
     }
   }
 }

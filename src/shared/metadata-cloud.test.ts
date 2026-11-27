@@ -8,7 +8,7 @@ import {
   unsafeMetadataFields
 } from './metadata-cloud'
 import { createTranslator } from './i18n'
-import { CONTROLS_CHOICES, controlsForChoice } from './metadata-edit'
+import { controlsFromPicks, type ControlsEdit } from './metadata-edit'
 
 // The words around the values in English, as the tests read them.
 const t = createTranslator('en')
@@ -71,27 +71,40 @@ describe('describeMetadataValue', () => {
 })
 
 describe('describeMetadataValue: controls', () => {
-  it('names each Controls choice as the Edit sheet does, and other controls by their parts', () => {
+  it('names the picks the Edit sheet rows show, in their order', () => {
+    const d = (controls: ControlsEdit, tr = t): string =>
+      describeMetadataValue({ controls }, 'controls', tr)
     expect(
-      CONTROLS_CHOICES.map((c) =>
-        describeMetadataValue({ controls: controlsForChoice(c) }, 'controls', t)
+      (['full', 'partial', 'keyboard', 'vr', 'touch', 'lightgun'] as const).map((p) =>
+        d(controlsFromPicks([p]))
       )
     ).toEqual([
-      'VR',
-      'Touch',
       'Full Controller Support',
       'Partial Controller Support',
       'Mouse & Keyboard',
-      'Mouse & Keyboard + Controller',
-      'All'
+      'VR only',
+      'Touch',
+      'Lightgun'
     ])
-    expect(
-      describeMetadataValue({ controls: { controller: 'full', vr: 'supported' } }, 'controls', t)
-    ).toBe('Full controller, VR supported')
-    const es = createTranslator('es')
-    expect(describeMetadataValue({ controls: controlsForChoice('both') }, 'controls', es)).toBe(
-      'Ratón y teclado + mando'
+    expect(d(controlsFromPicks(['vr', 'keyboard', 'full']))).toBe(
+      'Full Controller Support, Mouse & Keyboard, VR'
     )
+    expect(d({ controller: 'full', vr: 'supported' })).toBe('Full Controller Support, VR')
+    expect(d(controlsFromPicks(['lightgun', 'keyboard']))).toBe('Mouse & Keyboard, Lightgun')
+    const es = createTranslator('es')
+    expect(d(controlsFromPicks(['full', 'keyboard']), es)).toBe(
+      'Compatibilidad total con mando, Ratón y teclado'
+    )
+    expect(d(controlsFromPicks(['lightgun']), es)).toBe('Pistola de luz')
+  })
+
+  it('reads a hand-written VR-only entry with a keyboard or controller as plain VR, not "VR only"', () => {
+    const d = (controls: ControlsEdit): string => describeMetadataValue({ controls }, 'controls', t)
+    expect(d({ controller: 'none', vr: 'only', keyboard: true })).toBe('Mouse & Keyboard, VR')
+    expect(d({ controller: 'full', vr: 'only' })).toBe('Full Controller Support, VR')
+    // VR only with nothing else that plays it, or beside Touch / Lightgun only, stays "VR only".
+    expect(d({ controller: 'none', vr: 'only' })).toBe('VR only')
+    expect(d({ controller: 'none', vr: 'only', touch: true })).toBe('VR only, Touch')
   })
 
   it('takes a false touch or keyboard as the same as none', () => {
@@ -118,7 +131,7 @@ describe('describeMetadataValue: controls', () => {
         field: 'controls',
         label: 'Controls',
         before: 'Full Controller Support',
-        after: 'Mouse & Keyboard + Controller'
+        after: 'Full Controller Support, Mouse & Keyboard'
       }
     ])
   })

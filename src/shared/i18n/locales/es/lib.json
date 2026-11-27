@@ -40,7 +40,8 @@
       "vr": "VR",
       "controller": "Mando",
       "keyboard": "Teclado y ratón",
-      "touch": "Táctil"
+      "touch": "Táctil",
+      "lightgun": "Pistola de luz"
     },
     "badge": {
       "pad": "Mando",
@@ -48,6 +49,7 @@
       "partial": "Parcial",
       "keyboard": "T+R",
       "touch": "Táctil",
+      "lightgun": "Pistola",
       "both": "Mando+TR",
       "all": "Todo"
     },
@@ -60,6 +62,7 @@
     "vrSupported": "Compatible con VR; si no, teclado y ratón",
     "keyboard": "Teclado y ratón",
     "touch": "Pantalla táctil",
+    "lightgun": "Se juega con pistola de luz",
     "both": "Compatibilidad total con mando y con ratón y teclado",
     "all": "Compatible con VR, compatibilidad total con mando y con ratón y teclado"
   },
@@ -123,6 +126,7 @@
   },
   "metadataForm": {
     "enterTitle": "Escribe un título",
+    "pickControls": "Elige al menos un control",
     "releaseDate": "Escribe la fecha de lanzamiento como AAAA-MM-DD, AAAA-MM o AAAA (mes 01-12, día 01-31)"
   },
   "upgrades": {

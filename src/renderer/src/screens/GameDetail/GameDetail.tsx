@@ -21,6 +21,7 @@ import {
 import { api } from '../../api/client'
 import { ButtonHints } from '../../components/ButtonHints'
 import { Chip } from '../../components/Chip'
+import { LightgunIcon } from '../../components/ControlsIcon'
 import { IconButton } from '../../components/IconButton'
 import { SimilarIcon } from '../../components/SimilarIcon'
 import { Modal } from '../../components/Modal'
@@ -1214,7 +1215,7 @@ function CoopBadge({ maxPlayers }: { maxPlayers?: number }): ReactElement {
 
 /**
  * How the game is played (lib/controls.ts): a controller (full or partial support, Steam's categories; every console
- * game; also full controller with full mouse and keyboard), VR, touch (a pointing hand), all of them (layers), else
+ * game; also full controller with full mouse and keyboard), VR, touch (a pointing hand), a light gun, all of them (layers), else
  * keyboard and mouse. The word above its icon, left of the players badge.
  */
 function ControlsBadge({ game }: { game: Game }): ReactElement {
@@ -1226,6 +1227,8 @@ function ControlsBadge({ game }: { game: Game }): ReactElement {
       <Keyboard className="gdetail__players-icon" aria-hidden="true" />
     ) : controls.kind === 'touch' ? (
       <Pointer className="gdetail__players-icon" aria-hidden="true" />
+    ) : controls.kind === 'lightgun' ? (
+      <LightgunIcon className="gdetail__players-icon" bold />
     ) : controls.kind === 'all' ? (
       <Layers className="gdetail__players-icon" aria-hidden="true" />
     ) : (

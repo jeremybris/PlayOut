@@ -7,6 +7,8 @@ import {
   gameWords,
   hasUpdatesDlc,
   switchGameKey,
+  updatesDlcEntriesFor,
+  updatesDlcFiles,
   updatesDlcOf,
   type UpdatesDlcGame
 } from './updates-dlc'
@@ -286,6 +288,269 @@ describe('updatesDlcOf: Switch and Xbox 360', () => {
     await put(join(switchDir(), 'DLC.nsp'))
     expect(await updatesDlcOf(await rom('switch', 'AB.nsp'), emu, [])).toEqual([])
     expect(await updatesDlcOf(await rom('switch', 'DLC.nsp'), emu, [])).toEqual([])
+  })
+
+  describe('similar names (a host download sends these with the game)', () => {
+    const TOTK_ROM =
+      'The Legend of Zelda Tears of the Kingdom [0100F2C0115B6000]+[v1.2.1][US](nsw2u.com).xci'
+    const TOTK_TITLE = 'The Legend of Zelda: Tears of the Kingdom'
+    async function totk(name = TOTK_ROM, titles = [TOTK_TITLE]): Promise<UpdatesDlcGame> {
+      return { ...(await rom('switch', name)), titles }
+    }
+
+    it("matches Tears of the Kingdom's update by id or by its title, whichever of the game's names", async () => {
+      await put(join(switchDir(), 'The Legend of Zelda Tears of the Kingdom [Update] v1.2.1.nsp'))
+      await put(join(switchDir(), '[0100F2C0115B6800][v1.2.1].nsp'))
+      await put(join(switchDir(), 'Tears of the Kingdom Update v1.2.1.nsp'))
+      await put(join(switchDir(), 'Zelda - Tears of the Kingdom (US) NSP DLC.nsp'))
+      await put(join(switchDir(), 'The Legend of Zelda Tears of the Kingdom US NSP Update.nsp'))
+      // An abbreviation is not the game's name.
+      await put(join(switchDir(), 'Zelda TotK Update.nsp'))
+      const want = [
+        'The Legend of Zelda Tears of the Kingdom US NSP Update.nsp',
+        'The Legend of Zelda Tears of the Kingdom [Update] v1.2.1.nsp',
+        'Zelda - Tears of the Kingdom (US) NSP DLC.nsp',
+        '[0100F2C0115B6800][v1.2.1].nsp',
+        'Tears of the Kingdom Update v1.2.1.nsp'
+      ].sort()
+      expect(sorted(await updatesDlcEntriesFor(await totk(), emu, []))).toEqual(want)
+      // Without the card's subtitle, the shortened names are not the game's (a series name in front is not known).
+      expect(sorted(await updatesDlcEntriesFor(await totk(TOTK_ROM, []), emu, []))).toEqual(
+        want.filter((n) => !n.startsWith('Tears') && !n.startsWith('Zelda -'))
+      )
+      // "Delete from this PC" takes the exact matches only.
+      expect(sorted(await updatesDlcOf(await totk(), emu, []))).toEqual(
+        want.filter((n) => !n.startsWith('Tears') && !n.startsWith('Zelda -'))
+      )
+      // A ROM named only by its id gets them through its card title.
+      const byTitle = await totk('0100F2C0115B6000.xci', [
+        'The Legend of Zelda Tears of the Kingdom+',
+        'The Legend of Zelda: Tears of the Kingdom'
+      ])
+      expect(sorted(await updatesDlcEntriesFor(byTitle, emu, []))).toEqual(want)
+      const short = await totk('TotK.xci', ['The Legend of Zelda: Tears of the Kingdom'])
+      expect(sorted(await updatesDlcEntriesFor(short, emu, []))).toEqual(
+        want.filter((n) => n !== '[0100F2C0115B6800][v1.2.1].nsp')
+      )
+    })
+
+    it('lets the title id decide over the name', async () => {
+      // The same name with another game's id (another region's) is not this game's.
+      await put(
+        join(switchDir(), 'The Legend of Zelda Tears of the Kingdom [0100AAAA00000800].nsp')
+      )
+      // An id of the game under any name is.
+      await put(join(switchDir(), 'Something else [0100F2C0115B6800].nsp'))
+      expect(sorted(await updatesDlcEntriesFor(await totk(), emu, []))).toEqual([
+        'Something else [0100F2C0115B6800].nsp'
+      ])
+    })
+
+    it('never mixes Breath of the Wild and Tears of the Kingdom', async () => {
+      await put(join(switchDir(), 'Zelda Breath of the Wild [Update v1.6.0].nsp'))
+      await put(join(switchDir(), 'Breath of the Wild DLC.nsp'))
+      await put(join(switchDir(), 'Tears of the Kingdom Update.nsp'))
+      const t = {
+        ...(await rom('switch', 'The Legend of Zelda Tears of the Kingdom.xci')),
+        titles: ['The Legend of Zelda: Tears of the Kingdom']
+      }
+      const b = {
+        ...(await rom('switch', 'The Legend of Zelda Breath of the Wild.xci')),
+        titles: ['The Legend of Zelda: Breath of the Wild']
+      }
+      expect(sorted(await updatesDlcEntriesFor(t, emu, [b]))).toEqual([
+        'Tears of the Kingdom Update.nsp'
+      ])
+      expect(sorted(await updatesDlcEntriesFor(t, emu, []))).toEqual([
+        'Tears of the Kingdom Update.nsp'
+      ])
+      expect(sorted(await updatesDlcEntriesFor(b, emu, [t]))).toEqual([
+        'Breath of the Wild DLC.nsp',
+        'Zelda Breath of the Wild [Update v1.6.0].nsp'
+      ])
+    })
+
+    it('keeps sequels, spin-offs and editions apart', async () => {
+      await put(join(switchDir(), 'Halo 3 ODST Update.nsp'))
+      await put(join(switchDir(), 'DOOM Eternal Update.nsp'))
+      await put(join(switchDir(), 'Mario Kart 8 Deluxe US Update.nsp'))
+      await put(join(switchDir(), 'Super Mario Party Update.nsp'))
+      for (const name of ['Halo 3.xci', 'Doom.xci', 'Mario Kart 8.xci', 'Mario Party.xci'])
+        expect(await updatesDlcEntriesFor(await rom('switch', name), emu, [])).toEqual([])
+      // ...and the shorter name never claims the longer game's own update the other way round either.
+      await fs.rm(switchDir(), { recursive: true })
+      await put(join(switchDir(), 'Halo 3 Update.nsp'))
+      await put(join(switchDir(), 'Mario Party Update.nsp'))
+      expect(await updatesDlcEntriesFor(await rom('switch', 'Halo 3 ODST.xci'), emu, [])).toEqual(
+        []
+      )
+      expect(
+        await updatesDlcEntriesFor(await rom('switch', 'Super Mario Party.xci'), emu, [])
+      ).toEqual([])
+    })
+
+    it('gives a shortened name to the closest game of the library', async () => {
+      await put(join(switchDir(), 'Tears of the Kingdom Update.nsp'))
+      const full = await rom('switch', 'The Legend of Zelda Tears of the Kingdom.xci')
+      const exact = await rom('switch', 'Tears of the Kingdom.nsp')
+      expect(await updatesDlcEntriesFor(full, emu, [exact])).toEqual([])
+      expect(sorted(await updatesDlcEntriesFor(exact, emu, [full]))).toEqual([
+        'Tears of the Kingdom Update.nsp'
+      ])
+    })
+
+    it('never matches a bare "DLC" or "Update" name', async () => {
+      await put(join(switchDir(), 'DLC.nsp'))
+      await put(join(switchDir(), 'Update v1.2.1.nsp'))
+      await put(join(switchDir(), 'US NSP.nsp'))
+      expect(await updatesDlcEntriesFor(await totk(), emu, [])).toEqual([])
+    })
+
+    it('matches Xbox 360 folders by title id and by name, and lists nothing for PS3', async () => {
+      await put(join(xboxDir(), '4D5307E6', '000B0000', 'TU.bin'))
+      await put(join(xboxDir(), 'Halo 3 ODST', 'TU.bin'))
+      const halo = await rom('xbox360', 'Halo 3 [4D5307E6].iso')
+      const entries = await updatesDlcEntriesFor(halo, emu, [])
+      expect(entries).toEqual([
+        { path: join(xboxDir(), '4D5307E6'), name: '4D5307E6', isFile: false }
+      ])
+      expect(
+        await updatesDlcEntriesFor({ id: 'p', systemId: 'ps3', romPath: join(roms, 'x') }, emu, [])
+      ).toEqual([])
+    })
+
+    it('never claims a game whose name has other words in front', async () => {
+      await put(join(xboxDir(), 'Super Street Fighter IV [TU1].bin'))
+      await put(join(xboxDir(), 'Ultra Street Fighter IV TU'))
+      await put(join(xboxDir(), 'Lightning Returns Final Fantasy XIII [TU1]'))
+      await put(join(xboxDir(), 'Ultimate Marvel vs. Capcom 3 [TU2]'))
+      for (const name of [
+        'Street Fighter IV (USA).iso',
+        'Final Fantasy XIII (USA).iso',
+        'Marvel vs. Capcom 3 (USA).iso'
+      ])
+        expect(await updatesDlcEntriesFor(await rom('xbox360', name), emu, [])).toEqual([])
+    })
+
+    it('sends a subtitle match but never deletes it', async () => {
+      await put(join(xboxDir(), 'Final Fantasy XIII [TU1]'))
+      const lr = await rom('xbox360', 'Lightning Returns - Final Fantasy XIII (USA).iso')
+      expect(sorted(await updatesDlcEntriesFor(lr, emu, []))).toEqual(['Final Fantasy XIII [TU1]'])
+      expect(await updatesDlcOf(lr, emu, [])).toEqual([])
+      // With Final Fantasy XIII in the library, it is that game's.
+      const ff = await rom('xbox360', 'Final Fantasy XIII (USA).iso')
+      expect(await updatesDlcEntriesFor(lr, emu, [ff])).toEqual([])
+      expect(sorted(await updatesDlcOf(ff, emu, [lr]))).toEqual(['Final Fantasy XIII [TU1]'])
+    })
+
+    it('reads the Xbox 360 title update spellings', async () => {
+      for (const n of [
+        'Street Fighter IV TU2',
+        'Street Fighter IV TU 2',
+        'Street Fighter IV - Title Update 2',
+        'Street Fighter IV [TU2]'
+      ])
+        await put(join(xboxDir(), n, 'tu.bin'))
+      const sf = await rom('xbox360', 'Street Fighter IV (USA).iso')
+      expect(sorted(await updatesDlcEntriesFor(sf, emu, []))).toEqual(
+        [
+          'Street Fighter IV - Title Update 2',
+          'Street Fighter IV TU 2',
+          'Street Fighter IV TU2',
+          'Street Fighter IV [TU2]'
+        ].sort()
+      )
+      expect(gameWords('Dead Rising 2 TU3', false)).toEqual(['dead', 'rising', '2'])
+      expect(gameWords('Halo 3 Update 2.nsp', true)).toEqual(['halo', '3'])
+    })
+
+    it("lets the names decide when an Xbox 360 ROM's 8-digit tag is not the update's id", async () => {
+      await put(join(xboxDir(), 'Dead Rising 2 [TU3] [434307DE]', 'tu.bin'))
+      await put(join(xboxDir(), 'Dead Rising [TU1] [434307DE]', 'tu.bin'))
+      // A CRC tag on the ROM looks like a title id.
+      const dr2 = await rom('xbox360', 'Dead Rising 2 (USA) [AB12CD34].iso')
+      expect(sorted(await updatesDlcEntriesFor(dr2, emu, []))).toEqual([
+        'Dead Rising 2 [TU3] [434307DE]'
+      ])
+      // A bare title id folder goes with a game whose id is known (read from its image, or its folder's name).
+      await put(join(xboxDir(), '4D5307E6', '000B0000', 'TU.bin'))
+      const halo = { ...(await rom('xbox360', 'Halo 3 (USA).iso')), ids: ['4d5307e6'] }
+      expect(sorted(await updatesDlcEntriesFor(halo, emu, []))).toEqual(['4D5307E6'])
+      const inFolder = await rom('xbox360', join('4D5307E6', 'default.xex'))
+      expect(sorted(await updatesDlcEntriesFor(inFolder, emu, []))).toEqual(['4D5307E6'])
+    })
+
+    it("takes a Switch title id from the ROM's folder name", async () => {
+      await put(join(switchDir(), '0100F2C0115B6800.nsp'))
+      const g = await rom('switch', join('TotK [0100F2C0115B6000]', 'game.xci'))
+      expect(sorted(await updatesDlcEntriesFor(g, emu, []))).toEqual(['0100F2C0115B6800.nsp'])
+      const known = { ...(await rom('switch', 'TotK.xci')), ids: ['0100F2C0115B6000'] }
+      expect(sorted(await updatesDlcEntriesFor(known, emu, []))).toEqual(['0100F2C0115B6800.nsp'])
+    })
+
+    it('sends a DLC named after the game with its own name after it', async () => {
+      await put(join(switchDir(), 'Xenoblade Chronicles 3 Future Redeemed DLC.nsp'))
+      await put(join(switchDir(), 'Mario Kart 8 Deluxe Booster Course Pass.nsp'))
+      const xc3 = await rom('switch', 'Xenoblade Chronicles 3.xci')
+      expect(sorted(await updatesDlcEntriesFor(xc3, emu, []))).toEqual([
+        'Xenoblade Chronicles 3 Future Redeemed DLC.nsp'
+      ])
+      expect(await updatesDlcOf(xc3, emu, [])).toEqual([])
+      // The standalone game in the library keeps it.
+      const fr = await rom('switch', 'Xenoblade Chronicles 3 Future Redeemed.xci')
+      expect(await updatesDlcEntriesFor(xc3, emu, [fr])).toEqual([])
+      // Without "DLC" the words after the name are another game's.
+      expect(
+        await updatesDlcEntriesFor(await rom('switch', 'Mario Kart 8 Deluxe.xci'), emu, [])
+      ).toEqual([])
+    })
+
+    it('gives an update to every copy of one game (same title id) to send, and to none to delete', async () => {
+      await put(join(switchDir(), 'TotK [0100F2C0115B6800][v1.2.1].nsp'))
+      const a = await rom('switch', 'Zelda [0100F2C0115B6000].xci')
+      const b = await rom('switch', join('Super XCI', 'Zelda [0100F2C0115B6000][v1.2.1].xci'))
+      expect(sorted(await updatesDlcEntriesFor(a, emu, [b]))).toEqual([
+        'TotK [0100F2C0115B6800][v1.2.1].nsp'
+      ])
+      expect(sorted(await updatesDlcEntriesFor(b, emu, [a]))).toEqual([
+        'TotK [0100F2C0115B6800][v1.2.1].nsp'
+      ])
+      expect(await updatesDlcOf(a, emu, [b])).toEqual([])
+      expect(sorted(await updatesDlcOf(a, emu, []))).toEqual([
+        'TotK [0100F2C0115B6800][v1.2.1].nsp'
+      ])
+    })
+
+    it("looks into organizing subfolders, never into another game's folder", async () => {
+      await put(join(switchDir(), 'Updates', 'Zelda [0100F2C0115B6800].nsp'))
+      await put(join(switchDir(), 'Non Super XCI Switch', 'Part 1', 'TotK [0100F2C0115B6800].nsp'))
+      await put(join(switchDir(), 'DLC', 'Metroid Dread', 'Zelda [0100F2C0115B6800].nsp'))
+      await put(join(switchDir(), 'a', 'b', 'c', 'd', 'Zelda [0100F2C0115B6800].nsp'))
+      const z = await rom('switch', 'Zelda [0100F2C0115B6000].xci')
+      const metroid = await rom('switch', 'Metroid Dread.xci')
+      const entries = await updatesDlcEntriesFor(z, emu, [metroid])
+      expect(entries.map((e) => e.name).sort()).toEqual([
+        'Non Super XCI Switch/Part 1/TotK [0100F2C0115B6800].nsp',
+        'Updates/Zelda [0100F2C0115B6800].nsp'
+      ])
+      expect(entries[0]!.path).toBe(join(switchDir(), ...entries[0]!.name.split('/')))
+      const files = await updatesDlcFiles(z, emu, [metroid])
+      expect(files.map((f) => f.path).sort()).toEqual([
+        'Switch/Non Super XCI Switch/Part 1/TotK [0100F2C0115B6800].nsp',
+        'Switch/Updates/Zelda [0100F2C0115B6800].nsp'
+      ])
+    })
+
+    it('leaves out a whole entry that has too many files, and says so', async () => {
+      await put(join(switchDir(), 'Zelda [0100F2C0115B6800].nsp'))
+      for (const n of ['1', '2', '3']) await put(join(switchDir(), 'Zelda DLC', `${n}.bin`))
+      const z = await rom('switch', 'Zelda.xci')
+      const warnings: string[] = []
+      const files = await updatesDlcFiles(z, emu, [], (m) => warnings.push(m), 2)
+      expect(files.map((f) => f.path)).toEqual(['Switch/Zelda [0100F2C0115B6800].nsp'])
+      expect(warnings).toHaveLength(1)
+      expect(warnings[0]).toContain('Switch/Zelda DLC')
+    })
   })
 
   it('lists nothing for other systems or a missing folder', async () => {

@@ -1400,11 +1400,18 @@ export interface Settings {
      */
     coopTwoPlayerLayout: CoopTwoPlayerLayout
     /**
-     * Trim Games: every ROM game new to the library is converted to its smaller format through Settings › Convert's
-     * runs (PS2 ISO → CHD, Xbox ISO → XISO, PlayStation CUE/BIN → CHD, PSP ISO → CSO, PS3 disc folder → ISO, Wii and
-     * GameCube ISO → RVZ; main/convert/auto-trim.ts). Games already in the library are not touched. Default false.
+     * Trim Games (Settings › Convert): every ROM game new to the library is converted to its smaller format through
+     * Settings › Convert's runs (PS2 ISO → CHD, Xbox ISO → XISO, PlayStation CUE/BIN → CHD, PSP ISO → CSO, PS3 disc
+     * folder → ISO, Wii and GameCube ISO → RVZ; main/convert/auto-trim.ts). Games already in the library are not
+     * touched. Default false.
      */
     trimGames: boolean
+    /**
+     * Compress games automatically (Settings › Convert): a PC game that has just finished installing is compressed with
+     * the game page's Upgrade › Compress game (Windows compact.exe; main/upgrades/auto-compress.ts), one game at a time.
+     * Games already installed when it is switched on are not touched. Default false.
+     */
+    autoCompressGames: boolean
     /**
      * PC Saves: the saves of PC games the user added are copied to <Emulation folder>/PC Saves before and after play,
      * for each game whose save folder was chosen (its Edit sheet). Default true.
@@ -1967,6 +1974,17 @@ export interface PlayOutEvents {
   'recomp:progress': import('./recomp').RecompProgress
   /** This PC took a paired host's logins for these services (it had none of its own). */
   'streaming:logins': { hostName: string; services: string[] }
+  /**
+   * A game this PC already has got its missing updates and DLC from a host in the background (files > 0), or could
+   * not (error; shown once per game and run).
+   */
+  'streaming:updates': {
+    title: string
+    hostName: string
+    files: number
+    bytes: number
+    error?: string
+  }
   /** The metadata cloud's sync, token or queue changed (Settings › Metadata › Cloud metadata). */
   'metadata-cloud:status': import('./metadata-cloud').MetadataCloudStatus
   /** A saved edit was published, suggested, queued or refused (a toast). */
@@ -2106,15 +2124,21 @@ export interface SteamControls {
   vr: 'only' | 'supported' | null
   /**
    * Touch screen support (Filters > Controls > Touch). Optional: no scraper sets it yet (Steam's store data read in
-   * main/scrapers/steam-tags.ts is where a future source would); the Edit sheet's Touch choice (a local edit or a
+   * main/scrapers/steam-tags.ts is where a future source would); the Edit sheet's Touch pick (a local edit or a
    * cloud entry, MetadataEdit.controls.touch) does.
    */
   touch?: 'supported'
   /**
-   * Full mouse and keyboard support alongside the controller (the Edit sheet's "Mouse & Keyboard + Controller" and
-   * "All"; MetadataEdit.controls.keyboard). Optional: no scraper sets it.
+   * Full mouse and keyboard support where it is not implied: alongside the controller, or beside touch / a light gun
+   * with no controller or VR (the Edit sheet's Mouse & Keyboard pick; MetadataEdit.controls.keyboard). Optional: no
+   * scraper sets it.
    */
   keyboard?: 'full'
+  /**
+   * Played with a light gun (Filters > Controls > Lightgun; the Edit sheet's Lightgun pick,
+   * MetadataEdit.controls.lightgun). Optional: no scraper sets it. An older PlayOut drops it.
+   */
+  lightgun?: 'supported'
 }
 
 /** One PS3 game's update work, as the renderer shows it. */

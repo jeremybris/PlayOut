@@ -207,6 +207,8 @@
     "cancelFailed": "Could not cancel the download",
     "noRomFolder": "Choose an Emulation folder in Settings > Library to download ROMs",
     "logins": "Using {host}'s logins for {services}",
+    "updatesFetched": "{title}: {count} update and DLC file(s) ({size}) downloaded from {host}",
+    "updatesFailed": "{title}: its updates and DLC could not be downloaded from {host}: {error}",
     "paired": "{name} is now paired",
     "sessionFailed": "Could not stream from {host}",
     "hostDownloadFailed": "The download from the host failed",

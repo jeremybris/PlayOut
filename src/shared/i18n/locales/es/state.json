@@ -207,6 +207,8 @@
     "cancelFailed": "No se pudo cancelar la descarga",
     "noRomFolder": "Elige una carpeta Emulation en Ajustes > Biblioteca para descargar ROM",
     "logins": "Usando los inicios de sesión de {host} para {services}",
+    "updatesFetched": "{title}: {count} archivo(s) de actualizaciones y DLC ({size}) descargados de {host}",
+    "updatesFailed": "{title}: no se han podido descargar sus actualizaciones y DLC de {host}: {error}",
     "paired": "{name} ya está emparejado",
     "sessionFailed": "No se pudo transmitir desde {host}",
     "hostDownloadFailed": "Falló la descarga desde el host",

@@ -84,6 +84,38 @@ describe('metadata edit schema', () => {
     ).toThrow()
   })
 
+  it('accepts the controls lightgun flag, keeping it only when true', () => {
+    expect(
+      parseMetadataEdit({
+        controls: { controller: 'none', vr: 'none', lightgun: true, keyboard: true }
+      })
+    ).toEqual({ controls: { controller: 'none', vr: 'none', lightgun: true, keyboard: true } })
+    expect(
+      parseMetadataEdit({ controls: { controller: 'full', vr: 'none', lightgun: false } })
+    ).toEqual({ controls: { controller: 'full', vr: 'none' } })
+    expect(() =>
+      parseMetadataEdit({ controls: { controller: 'none', vr: 'none', lightgun: 'yes' } })
+    ).toThrow()
+  })
+
+  it("PlayOut 0.9.97's controls schema (no lightgun) drops lightgun instead of refusing the entry", () => {
+    const previous = z.object({
+      controls: z
+        .object({
+          controller: z.enum(['full', 'partial', 'none']),
+          vr: z.enum(['only', 'supported', 'none']),
+          touch: z.boolean().optional(),
+          keyboard: z.boolean().optional()
+        })
+        .optional()
+    })
+    const parsed = previous.safeParse({
+      controls: { controller: 'none', vr: 'none', lightgun: true, keyboard: true }
+    })
+    expect(parsed.success).toBe(true)
+    expect(parsed.data).toEqual({ controls: { controller: 'none', vr: 'none', keyboard: true } })
+  })
+
   it("an older PlayOut's controls schema drops touch and keyboard instead of refusing the entry", () => {
     // The controls object of PlayOut 0.9.90 and before (src/main/metadata-edits/schema.ts): zod strips unknown keys.
     const old = z.object({

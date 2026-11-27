@@ -149,7 +149,7 @@ function meta(m: MetaInput): GameMetadata {
       tags: [...m.genres, ...m.tags],
       updatedAt: daysAgo(3),
       // Steam's controller support (the game page's controls badge): the action games play with a pad, the action
-      // shooters fully with mouse and keyboard too (Mouse & Keyboard + Controller), the card games by touch.
+      // shooters fully with mouse and keyboard too (Full Controller Support + Mouse & Keyboard), the card games by touch.
       controls: {
         controller: m.genres.includes('Action') ? 'full' : null,
         vr: null,

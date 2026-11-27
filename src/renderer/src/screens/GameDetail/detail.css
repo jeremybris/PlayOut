@@ -1587,6 +1587,27 @@ html[data-animations='off'] .gdetail__feature--busy > svg {
   padding: 0 1.2rem;
 }
 
+/*
+ * The three Controls rows: the row's name ("Controls 1") never shrinks away beside a long choice ("Compatibilidad
+ * total con mando"); the choice takes the rest of the row and wraps onto a second line when it does not fit.
+ */
+.gedit__controls-row .control__text {
+  flex: none;
+}
+
+.gedit__controls-row .control__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.gedit__controls-row .select__value {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 /* Genres & Tags (GenresTagsField.tsx): what is ticked, then the chevron that opens the checklist. */
 .gedit__tags .control__label {
   color: var(--color-text-secondary);

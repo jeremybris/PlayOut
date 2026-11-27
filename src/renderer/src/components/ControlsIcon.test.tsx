@@ -1,30 +1,19 @@
-// @vitest-environment jsdom
-import { act } from 'react'
-import { createRoot } from 'react-dom/client'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { CONTROLS_FILTERS } from '../lib/controls'
-import { ControlsIcon } from './ControlsIcon'
+import { LightgunIcon } from './ControlsIcon'
 
-;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+/** The light gun picture: thin strokes in the filter menu (like the touch hand), lucide's 2px on the page's badge. */
+describe('LightgunIcon', () => {
+  const widths = (html: string): string[] =>
+    [...html.matchAll(/stroke-width="([\d.]+)"/g)].map((m) => m[1]!)
 
-function render(id: string): HTMLElement {
-  const host = document.createElement('div')
-  const root = createRoot(host)
-  act(() => root.render(<ControlsIcon controlsId={id} />))
-  return host
-}
-
-describe('ControlsIcon', () => {
-  it('has a picture for every Controls choice', () => {
-    for (const c of CONTROLS_FILTERS) {
-      expect(
-        render(c.id).querySelector(`svg.controls-icon[data-controls="${c.id}"]`),
-        c.id
-      ).not.toBeNull()
-    }
+  it("draws the badge with the lucide icons' 2px body stroke", () => {
+    const html = renderToStaticMarkup(<LightgunIcon className="gdetail__players-icon" bold />)
+    expect(html).toContain('gdetail__players-icon')
+    expect(widths(html)).toEqual(['2', '1.8', '1.8'])
   })
 
-  it('shows nothing for an unknown id', () => {
-    expect(render('nope').innerHTML).toBe('')
+  it('keeps the thinner strokes in the filter menu', () => {
+    expect(widths(renderToStaticMarkup(<LightgunIcon />))).toEqual(['1.5', '1.3', '1.3'])
   })
 })

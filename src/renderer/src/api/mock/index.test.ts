@@ -74,6 +74,20 @@ describe('mock api', () => {
     expect(cleared.metadata.genres).toEqual(before.scraped.genres)
   })
 
+  it('saves a Lightgun controls edit and reads it back as its layer', async () => {
+    const api = createMockApi({ search: '' })
+    const [first] = (await api.getLibrary()).games
+    const controls = { controller: 'none', vr: 'none', lightgun: true, keyboard: true } as const
+    const shown = await api.setMetadataEdit(first.id, { controls })
+    expect(shown.metadata.steamTags?.controls).toEqual({
+      controller: null,
+      vr: null,
+      keyboard: 'full',
+      lightgun: 'supported'
+    })
+    expect((await api.getMetadataLayers(first.id)).local.controls).toEqual(controls)
+  })
+
   it('returns the shown copy (local edits laid over) from every method that returns a game', async () => {
     const api = createMockApi({ search: '' })
     // A game of this mock alone (the sample games' objects are shared between mocks).

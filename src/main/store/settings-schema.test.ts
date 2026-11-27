@@ -146,6 +146,23 @@ describe('normalizeSettings', () => {
     expect(() => parseSettingsPatch({ library: { trimGames: 1 } })).toThrow()
   })
 
+  it('Compress games automatically is off by default and for files from before it existed', () => {
+    expect(defaultSettings().library.autoCompressGames).toBe(false)
+    expect(normalizeSettings({ library: { trimGames: true } })!.library.autoCompressGames).toBe(
+      false
+    )
+    expect(
+      normalizeSettings({ library: { autoCompressGames: true } })!.library.autoCompressGames
+    ).toBe(true)
+    expect(
+      normalizeSettings({ library: { autoCompressGames: 'yes' } })!.library.autoCompressGames
+    ).toBe(false)
+    expect(parseSettingsPatch({ library: { autoCompressGames: true } })).toEqual({
+      library: { autoCompressGames: true }
+    })
+    expect(() => parseSettingsPatch({ library: { autoCompressGames: 1 } })).toThrow()
+  })
+
   it('copying the saves of games you added is on by default and for files from before it existed', () => {
     expect(defaultSettings().library.copyPcSaves).toBe(true)
     expect(normalizeSettings({ library: { romsRoot: null } })!.library.copyPcSaves).toBe(true)

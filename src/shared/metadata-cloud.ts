@@ -2,11 +2,9 @@ import { difficultyLabel } from './difficulty'
 import type { Translate } from './i18n'
 import {
   METADATA_EDIT_FIELDS,
-  controlsChoice,
-  controlsForChoice,
-  normalizeControls,
-  type ControlsChoice,
+  controlsPicks,
   type ControlsEdit,
+  type ControlsPick,
   type MetadataEdit,
   type MetadataEditField
 } from './metadata-edit'
@@ -235,64 +233,43 @@ export function metadataFieldLabel(field: MetadataEditField, t: Translate): stri
   }
 }
 
-function controllerText(controller: string, t: Translate): string {
-  switch (controller) {
-    case 'full':
-      return t('metadataCloud.values.controllerFull')
-    case 'partial':
-      return t('metadataCloud.values.controllerPartial')
-    case 'none':
-      return t('metadataCloud.values.controllerNone')
-    default:
-      return controller
-  }
-}
-
-function vrText(vr: string, t: Translate): string {
-  switch (vr) {
-    case 'only':
-      return t('metadataCloud.values.vrOnly')
-    case 'supported':
-      return t('metadataCloud.values.vrSupported')
-    case 'none':
-      return t('metadataCloud.values.vrNone')
-    default:
-      return vr
-  }
-}
-
-/** An Edit sheet Controls choice's name (the same 7 as the sheet's Controls list). */
-function controlsChoiceText(choice: ControlsChoice, t: Translate): string {
-  switch (choice) {
-    case 'vr':
-      return t('metadataCloud.values.controlsVr')
-    case 'touch':
-      return t('metadataCloud.values.controlsTouch')
+/**
+ * One Controls pick's name (the Edit sheet's rows); VR reads "VR only" when a headset is needed and nothing else in
+ * `picks` plays it (a hand-written `{ vr: 'only', keyboard: true }` reads "Mouse & Keyboard, VR", not "VR only").
+ */
+function controlsPickText(
+  pick: ControlsPick,
+  c: ControlsEdit,
+  picks: readonly ControlsPick[],
+  t: Translate
+): string {
+  switch (pick) {
     case 'full':
       return t('metadataCloud.values.controlsFull')
     case 'partial':
       return t('metadataCloud.values.controlsPartial')
     case 'keyboard':
       return t('metadataCloud.values.controlsKeyboard')
-    case 'both':
-      return t('metadataCloud.values.controlsBoth')
-    case 'all':
-      return t('metadataCloud.values.controlsAll')
+    case 'vr':
+      return c.vr === 'only' &&
+        picks.every((p) => p !== 'full' && p !== 'partial' && p !== 'keyboard')
+        ? t('metadataCloud.values.vrOnly')
+        : t('metadataCloud.values.controlsVr')
+    case 'touch':
+      return t('metadataCloud.values.controlsTouch')
+    case 'lightgun':
+      return t('metadataCloud.values.controlsLightgun')
   }
 }
 
 /**
- * Controls as text: the Controls choice's name when they are exactly what that choice saves (everything the Edit sheet
- * writes), else the parts (scraped controls like full controller with VR supported), so a change always reads as one.
+ * Controls as text: the names of what the Edit sheet's rows show for them (controlsPicks), in the rows' order
+ * ("Full Controller Support, Mouse & Keyboard, VR"). Any controls (scraped ones and older entries too) read as their
+ * picks, and two controls with the same picks save the same, so a change always reads as one.
  */
 function controlsText(c: ControlsEdit, t: Translate): string {
-  const choice = controlsChoice(c)
-  if (sameMetadataValue(normalizeControls(c), controlsForChoice(choice)))
-    return controlsChoiceText(choice, t)
-  const parts = [controllerText(c.controller, t), vrText(c.vr, t)]
-  if (c.touch) parts.push(t('metadataCloud.values.touchSupported'))
-  if (c.keyboard) parts.push(t('metadataCloud.values.keyboardFull'))
-  return parts.join(', ')
+  const picks = controlsPicks(c)
+  return picks.map((pick) => controlsPickText(pick, c, picks, t)).join(', ')
 }
 
 const hours = (h: number): string => `${Math.round(h * 10) / 10}`

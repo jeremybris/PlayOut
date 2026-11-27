@@ -40,14 +40,16 @@ export interface MetadataFields {
   /** Most local players; 0 = none shown. */
   localPlayers?: number | null
   /**
-   * The controls badge. `touch` = touch screen support, `keyboard` = full mouse and keyboard support alongside a
-   * controller: each only present when true (a false one is dropped).
+   * The controls badge. `touch` = touch screen support, `keyboard` = full mouse and keyboard support where it is not
+   * implied (beside a controller, or beside touch / a light gun), `lightgun` = played with a light gun: each only
+   * present when true (a false one is dropped).
    */
   controls?: {
     controller: ControllerSupport
     vr: VrSupport
     touch?: boolean
     keyboard?: boolean
+    lightgun?: boolean
   } | null
   /** HowLongToBeat hours; a time left out has none. */
   hltb?: { main?: number; extra?: number; completionist?: number; solo?: number } | null
@@ -195,15 +197,17 @@ const FIELD_VALIDATORS: { [K in keyof MetadataFields]-?: FieldValidator } = {
   tags: (v) => checkList('tags', v, 30, 60),
   localPlayers: (v) => checkNumber('localPlayers', v, 0, 64, true),
   controls: (v) => {
-    const o = checkObject('controls', v, ['controller', 'vr', 'touch', 'keyboard'])
+    const o = checkObject('controls', v, ['controller', 'vr', 'touch', 'keyboard', 'lightgun'])
     const out: NonNullable<MetadataFields['controls']> = {
       controller: checkEnum('controls.controller', o.controller, CONTROLLER),
       vr: checkEnum('controls.vr', o.vr, VR)
     }
-    // Touch screen / full mouse and keyboard support: stored only when true.
+    // Touch screen / full mouse and keyboard / light gun support: stored only when true.
     if (o.touch !== undefined && checkBoolean('controls.touch', o.touch)) out.touch = true
     if (o.keyboard !== undefined && checkBoolean('controls.keyboard', o.keyboard))
       out.keyboard = true
+    if (o.lightgun !== undefined && checkBoolean('controls.lightgun', o.lightgun))
+      out.lightgun = true
     return out
   },
   hltb: (v) => {

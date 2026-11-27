@@ -384,6 +384,39 @@ describe('upgradeStatus', () => {
     )
     expect(calls).toBe(1)
   })
+
+  it('freshMeasure waits for a measure of the folder now instead of a kept one (a reinstall)', async () => {
+    let answer: unknown = {
+      size: 2 * GB,
+      onDisk: GB,
+      compressedFiles: 1,
+      eligible: 1,
+      eligibleCompressed: 1,
+      changed: null
+    }
+    let calls = 0
+    const t = setup({
+      measure: () => {
+        calls++
+        return new Promise((r) => setTimeout(() => r(answer), 50))
+      },
+      deps: { measureWaitMs: 1000 }
+    })
+    expect((await t.service.upgradeStatus(t.game.id)).compress.state).toBe('compressed')
+    // Uninstalled and installed again: nothing is compressed now. A plain status keeps the measure it has.
+    answer = {
+      size: 2 * GB,
+      onDisk: 2 * GB,
+      compressedFiles: 0,
+      eligible: 1,
+      eligibleCompressed: 0,
+      changed: null
+    }
+    expect((await t.service.upgradeStatus(t.game.id)).compress.state).toBe('compressed')
+    const fresh = await t.service.upgradeStatus(t.game.id, { freshMeasure: true })
+    expect(fresh.compress).toMatchObject({ state: 'none', onDisk: 2 * GB })
+    expect(calls).toBe(2)
+  })
 })
 
 describe('runUpgrade', () => {

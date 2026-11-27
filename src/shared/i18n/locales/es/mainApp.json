@@ -7,8 +7,21 @@
   },
   "trimWait": {
     "gameRunning": "hay un juego en ejecución",
-    "romDownloading": "se está descargando una ROM de otro PC"
+    "romDownloading": "se está descargando una ROM de otro PC",
+    "upgradeRunning": "una mejora está cambiando los archivos de un juego"
   },
+  "autoCompressWait": {
+    "gameRunning": "hay un juego en ejecución",
+    "emulationMoving": "se está moviendo la carpeta Emulation",
+    "upgradeRunning": "hay otra mejora en curso",
+    "convertRunning": "hay una conversión en curso",
+    "installTracked": "su instalación sigue en curso",
+    "downloading": "se está descargando",
+    "steamWriting": "Steam lo está descargando o actualizando",
+    "folderMissing": "no se puede leer su carpeta",
+    "filesChanging": "sus archivos siguen cambiando"
+  },
+  "autoCompressRunning": "PlayOut está comprimiendo este juego automáticamente (Ajustes › Convertir › Comprimir juegos automáticamente). Espera a que termine o detenlo en el menú Mejoras del juego.",
   "tray": {
     "open": "Abrir PlayOut",
     "quit": "Salir"

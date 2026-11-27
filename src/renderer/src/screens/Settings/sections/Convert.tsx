@@ -7,6 +7,7 @@ import {
   type ConvertMissing
 } from '@shared/convert'
 import {
+  Archive,
   ArrowLeft,
   ArrowRight,
   CircleAlert,
@@ -16,6 +17,7 @@ import {
   FolderOpen,
   Gamepad2,
   Repeat,
+  Scissors,
   Square,
   Wand2
 } from 'lucide-react'
@@ -26,12 +28,13 @@ import { PlatformBadge } from '../../../components/PlatformBadge'
 import { SelectField } from '../../../components/SelectField'
 import { systemIconSlug } from '@shared/platform-icons'
 import { Spinner } from '../../../components/Spinner'
+import { Toggle } from '../../../components/Toggle'
 import { useT, type Translate } from '../../../i18n'
 import { cx } from '../../../lib/cx'
 import { ipcErrorMessage } from '../../../state/coop'
 import { refreshConvertStatus, useConvertStore } from '../../../state/convert'
 import { useUiStore } from '../../../state/ui'
-import { fk, log, shortPath } from '../common'
+import { fk, log, shortPath, type SectionProps } from '../common'
 
 const SECTION = 'convert'
 
@@ -74,9 +77,11 @@ function stateWord(t: Translate, state: ConvertItem['state']): string {
 /**
  * Settings › Convert: ROM and emulated games converted from one format to another by Game Format Converter
  * (downloaded on first use). A platform, one of its format pairs, the arrow for the direction, the files (several of
- * one format), Convert. Results land next to the originals, which go to the Recycle Bin once verified.
+ * one format), Convert. Results land next to the originals, which go to the Recycle Bin once verified. Above it, what
+ * happens to new games by itself: Trim Games (new ROM games through these runs) and Compress games automatically (a PC
+ * game that just finished installing, through the Upgrade menu's Compress game).
  */
-export function ConvertSection(): ReactElement {
+export function ConvertSection({ settings, patch }: SectionProps): ReactElement {
   const t = useT()
   const toast = useUiStore((s) => s.toast)
   const status = useConvertStore((s) => s.status)
@@ -224,6 +229,26 @@ export function ConvertSection(): ReactElement {
 
   return (
     <>
+      <div className="section">
+        <div className="section__title">{t('settingsConvert.newGames.title')}</div>
+        <Toggle
+          focusKey={fk(SECTION, 'trimGames')}
+          icon={<Scissors />}
+          label={t('settingsConvert.newGames.trimGames.label')}
+          description={t('settingsConvert.newGames.trimGames.description')}
+          checked={settings.library.trimGames}
+          onChange={(v) => patch({ library: { trimGames: v } })}
+        />
+        <Toggle
+          focusKey={fk(SECTION, 'autoCompressGames')}
+          icon={<Archive />}
+          label={t('settingsConvert.newGames.autoCompress.label')}
+          description={t('settingsConvert.newGames.autoCompress.description')}
+          checked={settings.library.autoCompressGames}
+          onChange={(v) => patch({ library: { autoCompressGames: v } })}
+        />
+      </div>
+
       <div className="section">
         <div className="section__title">{t('settingsConvert.title')}</div>
         <p className="settings-note">

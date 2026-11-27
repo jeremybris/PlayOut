@@ -82,12 +82,5 @@
       "label": "Mostrar duplicados",
       "description": "Muestra cada copia de un juego que tengas en varias consolas (PS2, Xbox, GameCube...). Las copias de tiendas de PC siguen compartiendo una tarjeta. Desactivado: una tarjeta por juego, que muestra la recompilación, si no Steam, GOG, Epic, PS3, PS2, GameCube, Xbox 360, Xbox y luego las demás tiendas de PC."
     }
-  },
-  "newGames": {
-    "title": "Juegos nuevos",
-    "trimGames": {
-      "label": "Recortar juegos",
-      "description": "Reduce tus juegos ROM: ISO de PS2 a CHD, ISO de Xbox y Xbox 360 a XISO (recortado), BIN/CUE de PlayStation a CHD, ISO de PSP a CSO, carpetas de disco de PS3 a ISO (no juegos de HDD ni de PSN), ISO de Wii y GameCube a RVZ. Al activarlo, los juegos que ya están en tu biblioteca se revisan una vez; después, cada juego que añadas se recorta. Cada original va a la Papelera de reciclaje solo cuando su resultado está verificado; Ajustes › Convertir muestra el progreso. Los juegos de Wii necesitan tu clave común de Wii en la carpeta Emulation (bios\\wii\\common-key.bin) o Dolphin instalado, como en Convertir. Los juegos descargados desde otro PC conservan su formato."
-    }
   }
 }

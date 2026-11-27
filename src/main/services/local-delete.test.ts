@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
 import { promises as fs } from 'fs'
 import { tmpdir } from 'os'
-import { join, parse } from 'path'
+import { basename, join, parse } from 'path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Game } from '../../shared/types'
 import { upgradeRunningMessage } from '../../shared/upgrades'
@@ -1343,6 +1343,19 @@ describe('createLocalDeleteService', () => {
         join(gameDir(), 'BLUS30443DATA')
       ])
       expect(d.library.removeGame).toHaveBeenCalledWith('rom:ps3')
+
+      // A background fetch of its missing updates and DLC stops first (nothing comes back once it is deleted).
+      trash.mockClear()
+      await ps3()
+      const order: string[] = []
+      trash.mockImplementation(async (path: string) => void order.push(`trash ${basename(path)}`))
+      const stopUpdatesFetch = vi.fn(async (id: string) => void order.push(`stop ${id}`))
+      await createLocalDeleteService(deps({ emulationDir: emu, stopUpdatesFetch })).run('rom:ps3', {
+        updatesDlc: true
+      })
+      expect(order[0]).toBe('stop rom:ps3')
+      expect(order.length).toBe(4)
+      trash.mockImplementation(async () => undefined)
 
       trash.mockClear()
       await ps3()

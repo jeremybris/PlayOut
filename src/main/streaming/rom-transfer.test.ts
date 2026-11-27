@@ -1,13 +1,15 @@
 import { promises as fs } from 'fs'
 import { tmpdir } from 'os'
-import { join, resolve } from 'path'
+import { basename, join, resolve } from 'path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   downloadRomSet,
   openRomFile,
   parseGdiFiles,
   romFileSet,
+  RomDownloadCancelled,
   romTarget,
+  type RomArea,
   type RomFetchRequest,
   type RomDownloadStep,
   type RomFile,
@@ -650,6 +652,115 @@ describe('a keep-existing area (texture packs)', () => {
       freeBytes: async () => null
     })
     expect(fetched).toEqual(['Texture Packs/pcsx2/SLUS-20777/a.png'])
+  })
+
+  it('keepSameSize: keeps a copy of the same size whatever its time, a newer one too, and replaces an older one', async () => {
+    const dest = join(dir, 'client')
+    const upd = join(dir, 'Updates and DLC')
+    const area = { name: 'Updates and DLC', dir: upd, keepSameSize: true }
+    const sw = join(upd, 'Switch')
+    await fs.mkdir(sw, { recursive: true })
+    const host = Date.parse('2026-06-01T00:00:00Z')
+    // Same size, older: copied by hand. Other size, newer: installed here. Other size, older: replaced.
+    await fs.writeFile(join(sw, 'same.nsp'), 'abc')
+    await fs.utimes(join(sw, 'same.nsp'), new Date(host - 86_400_000), new Date(host - 86_400_000))
+    await fs.writeFile(join(sw, 'newer.nsp'), 'mine!')
+    await fs.utimes(join(sw, 'newer.nsp'), new Date(host + 86_400_000), new Date(host + 86_400_000))
+    await fs.writeFile(join(sw, 'older.nsp'), 'x')
+    await fs.utimes(join(sw, 'older.nsp'), new Date(host - 86_400_000), new Date(host - 86_400_000))
+    const fetched: string[] = []
+    await downloadRomSet({
+      files: ['same', 'newer', 'older', 'missing'].map((n) => ({
+        path: `Updates and DLC/Switch/${n}.nsp`,
+        size: 3,
+        mtimeMs: host
+      })),
+      destRoot: dest,
+      areas: [area],
+      fetchFile: async (req) => {
+        fetched.push(req.path)
+        await fs.appendFile(req.dest, Buffer.from('new'))
+        req.onBytes(req.size)
+      },
+      freeBytes: async () => null
+    })
+    expect(fetched.sort()).toEqual([
+      'Updates and DLC/Switch/missing.nsp',
+      'Updates and DLC/Switch/older.nsp'
+    ])
+    expect(await fs.readFile(join(sw, 'same.nsp'), 'utf8')).toBe('abc')
+    expect(await fs.readFile(join(sw, 'newer.nsp'), 'utf8')).toBe('mine!')
+    expect(await fs.readFile(join(sw, 'older.nsp'), 'utf8')).toBe('new')
+  })
+})
+
+describe('an optional area (a Switch game updates)', () => {
+  const upd = (): string => join(dir, 'Updates and DLC')
+  const area = (): RomArea => ({ name: 'Updates and DLC', dir: upd(), optional: true })
+  const files = [
+    { path: 'Updates and DLC/Switch/a.nsp', size: 3 },
+    { path: 'switch/Game.xci', size: 4 },
+    { path: 'Updates and DLC/Switch/b.nsp', size: 3 }
+  ]
+
+  it('comes after the game, and a file that fails is skipped, never the game', async () => {
+    const order: string[] = []
+    const skipped: string[] = []
+    const written = await downloadRomSet({
+      files,
+      destRoot: join(dir, 'client'),
+      areas: [area()],
+      concurrency: 1,
+      fetchFile: async (req) => {
+        order.push(req.path)
+        if (req.path.endsWith('a.nsp')) throw new Error('the host is still writing it')
+        await fs.appendFile(req.dest, Buffer.alloc(req.size))
+        req.onBytes(req.size)
+      },
+      onSkipped: (path, reason) => skipped.push(`${path}: ${reason}`),
+      freeBytes: async () => null
+    })
+    expect(order[0]).toBe('switch/Game.xci')
+    expect(skipped).toEqual(['Updates and DLC/Switch/a.nsp: the host is still writing it'])
+    expect(written.map((p) => basename(p)).sort()).toEqual(['Game.xci', 'b.nsp'])
+    await expect(fs.stat(join(upd(), 'Switch', 'a.nsp'))).rejects.toThrow()
+  })
+
+  it('is left out when there is room for the game but not for it too', async () => {
+    const skipped: string[] = []
+    const fetched: string[] = []
+    await downloadRomSet({
+      files,
+      destRoot: join(dir, 'client'),
+      areas: [area()],
+      fetchFile: async (req) => {
+        fetched.push(req.path)
+        await fs.appendFile(req.dest, Buffer.alloc(req.size))
+        req.onBytes(req.size)
+      },
+      onSkipped: (path) => skipped.push(path),
+      freeBytes: async () => 6
+    })
+    expect(fetched).toEqual(['switch/Game.xci'])
+    expect(skipped.sort()).toEqual(['Updates and DLC/Switch/a.nsp', 'Updates and DLC/Switch/b.nsp'])
+  })
+
+  it('a cancel still cancels', async () => {
+    const ac = new AbortController()
+    await expect(
+      downloadRomSet({
+        files,
+        destRoot: join(dir, 'client'),
+        areas: [area()],
+        signal: ac.signal,
+        fetchFile: async (req) => {
+          if (req.path.endsWith('.nsp')) ac.abort()
+          await fs.appendFile(req.dest, Buffer.alloc(req.size))
+          req.onBytes(req.size)
+        },
+        freeBytes: async () => null
+      })
+    ).rejects.toBeInstanceOf(RomDownloadCancelled)
   })
 })
 

@@ -89,11 +89,13 @@ export interface HostHandlers {
    * 0.1.109 and later); an older client is not sent them, as it would store them where its RPCS3 never looks.
    * `textures`: the client takes a game's texture packs ('Texture Packs/...', `?with=textures`, PlayOut 0.1.134 and
    * later); an older client would put them inside its ROM folder, so it is not sent them either.
+   * `updatesDlc`: the client takes a Switch / Xbox 360 game's updates and DLC ('Updates and DLC/Switch/...',
+   * `?with=updates-dlc`, PlayOut 0.9.98 and later); an older client would put them inside its ROM folder too.
    */
   romFiles(
     ctx: RequestContext,
     gameId: string,
-    options?: { ps3Hdd?: boolean; textures?: boolean }
+    options?: { ps3Hdd?: boolean; textures?: boolean; updatesDlc?: boolean }
   ): Promise<RomFileList | null>
   /** Absolute path of one file of the game's ROM set, or null when `path` is not one of its files. */
   romFile(ctx: RequestContext, gameId: string, path: string): Promise<string | null>
@@ -332,7 +334,8 @@ export function createHostServer(deps: HostServerDeps): HostServer {
       const takes = (url.searchParams.get('with') ?? '').split(',')
       const list = await handlers.romFiles(ctx, route[1], {
         ps3Hdd: takes.includes('ps3-hdd'),
-        textures: takes.includes('textures')
+        textures: takes.includes('textures'),
+        updatesDlc: takes.includes('updates-dlc')
       })
       if (!list) throw new HttpError(404, 'not-found')
       return sendJson(res, 200, list)

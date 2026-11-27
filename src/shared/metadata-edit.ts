@@ -40,73 +40,111 @@ export type ReviewSource = 'steam' | 'igdb'
 
 /**
  * A game's controls as an edit sets them (MetadataEdit.controls): Steam's controller and VR support, plus `touch`
- * (touch screen support) and `keyboard` (full mouse and keyboard support alongside a controller), each only present
- * when true. An entry without them (one an older PlayOut wrote) has neither.
+ * (touch screen support), `lightgun` (played with a light gun) and `keyboard` (full mouse and keyboard support where
+ * it is not already implied: beside a controller, or beside touch / a light gun), each only present when true. An
+ * entry without them (one an older PlayOut wrote) has none.
  */
 export interface ControlsEdit {
   controller: ControllerSupport
   vr: VrSupport
   touch?: boolean
   keyboard?: boolean
+  lightgun?: boolean
 }
 
 /**
- * The Edit sheet's Controls choices, in its order: VR, Touch, Full Controller Support, Partial Controller Support,
- * Mouse & Keyboard, Mouse & Keyboard + Controller ('both') and All (VR, full controller and mouse and keyboard).
+ * The options of each of the Edit sheet's three Controls rows, in their order ('none' = the row picks nothing). The
+ * rows together pick a set of controls (ControlsPick, the non-None picks; repeats collapse and the rows' order does
+ * not matter).
  */
-export const CONTROLS_CHOICES = [
-  'vr',
-  'touch',
+export const CONTROLS_OPTIONS = [
+  'none',
   'full',
   'partial',
   'keyboard',
-  'both',
-  'all'
+  'vr',
+  'touch',
+  'lightgun'
 ] as const
-export type ControlsChoice = (typeof CONTROLS_CHOICES)[number]
+export type ControlsOption = (typeof CONTROLS_OPTIONS)[number]
+/** One control the rows can pick. */
+export type ControlsPick = Exclude<ControlsOption, 'none'>
+/** How many Controls rows the Edit sheet has. */
+export const CONTROLS_ROWS = 3
 
-/** The controls a choice saves (always the same for a choice, so it reads back as that choice). */
-export function controlsForChoice(choice: ControlsChoice): ControlsEdit {
-  switch (choice) {
-    case 'vr':
-      return { controller: 'none', vr: 'only' }
-    case 'touch':
-      return { controller: 'none', vr: 'none', touch: true }
-    case 'full':
-      return { controller: 'full', vr: 'none' }
-    case 'partial':
-      return { controller: 'partial', vr: 'none' }
-    case 'keyboard':
-      return { controller: 'none', vr: 'none' }
-    case 'both':
-      return { controller: 'full', vr: 'none', keyboard: true }
-    case 'all':
-      return { controller: 'full', vr: 'supported', keyboard: true }
-  }
+/** A set of picks in CONTROLS_OPTIONS order, repeats left out (the canonical form the form keeps and compares). */
+export function sortControlsPicks(picks: readonly string[]): ControlsPick[] {
+  return CONTROLS_OPTIONS.filter((o): o is ControlsPick => o !== 'none' && picks.includes(o))
 }
 
 /**
- * The choice that describes a game's controls best (any controls: scraped ones too, like full controller with VR
- * supported, which shows as Full Controller Support).
+ * Whether mouse and keyboard play goes without saying for these controls (no `keyboard` flag needed): a game with no
+ * controller that is not VR only and not a touch-screen / light-gun game (a plain keyboard and mouse game, or one
+ * with VR as an option, as the controls badge has always read them).
  */
-export function controlsChoice(c: ControlsEdit): ControlsChoice {
-  if (c.touch && c.controller === 'none' && c.vr === 'none') return 'touch'
-  // VR only (a headset is needed) wins over the rest, as on the badge (renderer lib/controls.ts).
-  if (c.vr === 'only') return 'vr'
-  if (c.controller === 'full' && c.keyboard) return c.vr === 'supported' ? 'all' : 'both'
-  if (c.controller === 'full') return 'full'
-  if (c.controller === 'partial') return 'partial'
-  if (c.vr === 'supported') return 'vr'
-  return 'keyboard'
+function keyboardImplied(c: ControlsEdit): boolean {
+  if (c.controller !== 'none' || c.vr === 'only') return false
+  return !(c.vr === 'none' && (c.touch || c.lightgun))
 }
 
-/** Controls with `touch` / `keyboard` only when true (a false one says the same as none). */
+/**
+ * The controls a set of picks saves (the Edit sheet's rows). Every set reads back as itself (controlsPicks), except
+ * that Full and Partial Controller Support together are Full, and no picks at all is not saved (the sheet treats
+ * three None rows as Reset):
+ *
+ * - controller: 'full' with Full, else 'partial' with Partial, else 'none';
+ * - vr: with VR, 'only' when neither a controller nor Mouse & Keyboard is picked (a headset is needed), else
+ *   'supported'; without it 'none';
+ * - touch / lightgun: picked or not;
+ * - keyboard: Mouse & Keyboard is picked and not already implied (keyboardImplied): beside a controller (the old
+ *   "Mouse & Keyboard + Controller"), or beside Touch / Lightgun without a controller or VR.
+ */
+export function controlsFromPicks(picks: readonly string[]): ControlsEdit {
+  const set = new Set(picks)
+  const controller: ControllerSupport = set.has('full')
+    ? 'full'
+    : set.has('partial')
+      ? 'partial'
+      : 'none'
+  const vr: VrSupport = !set.has('vr')
+    ? 'none'
+    : controller === 'none' && !set.has('keyboard')
+      ? 'only'
+      : 'supported'
+  const c: ControlsEdit = {
+    controller,
+    vr,
+    ...(set.has('touch') ? { touch: true } : {}),
+    ...(set.has('lightgun') ? { lightgun: true } : {})
+  }
+  return set.has('keyboard') && !keyboardImplied(c) ? { ...c, keyboard: true } : c
+}
+
+/**
+ * The picks that describe a game's controls (any controls: scraped ones and entries older PlayOuts wrote too), in
+ * CONTROLS_OPTIONS order: Full / Partial from the controller, VR when it is supported or needed, Touch, Lightgun,
+ * and Mouse & Keyboard when the `keyboard` flag says so or it is implied (keyboardImplied). Partial support alone
+ * shows Partial (Filters > Controls still counts it as mouse and keyboard too, as before).
+ */
+export function controlsPicks(c: ControlsEdit): ControlsPick[] {
+  const picks: string[] = []
+  if (c.controller === 'full') picks.push('full')
+  if (c.controller === 'partial') picks.push('partial')
+  if (c.keyboard || keyboardImplied(c)) picks.push('keyboard')
+  if (c.vr !== 'none') picks.push('vr')
+  if (c.touch) picks.push('touch')
+  if (c.lightgun) picks.push('lightgun')
+  return sortControlsPicks(picks)
+}
+
+/** Controls with `touch` / `keyboard` / `lightgun` only when true (a false one says the same as none). */
 export function normalizeControls(c: ControlsEdit): ControlsEdit {
   return {
     controller: c.controller,
     vr: c.vr,
     ...(c.touch ? { touch: true } : {}),
-    ...(c.keyboard ? { keyboard: true } : {})
+    ...(c.keyboard ? { keyboard: true } : {}),
+    ...(c.lightgun ? { lightgun: true } : {})
   }
 }
 
@@ -128,8 +166,8 @@ export interface MetadataEdit {
   /** Most local players (metadata.localPlayers.max); 0 = none shown. */
   localPlayers?: number
   /**
-   * The controls badge and Filters > Controls (metadata.steamTags.controls): one of the Edit sheet's Controls choices
-   * (controlsForChoice). A console game (ROM) always shows "Pad".
+   * The controls badge and Filters > Controls (metadata.steamTags.controls): what the Edit sheet's three Controls rows
+   * pick (controlsFromPicks). A console game (ROM) always shows "Pad".
    */
   controls?: ControlsEdit
   /** HowLongToBeat hours; a time left out has none. */
@@ -423,7 +461,8 @@ export function editableValues(game: Pick<Game, 'source' | 'title' | 'metadata'>
       controller: c.controller ?? 'none',
       vr: c.vr ?? 'none',
       ...(c.touch === 'supported' ? { touch: true } : {}),
-      ...(c.keyboard === 'full' ? { keyboard: true } : {})
+      ...(c.keyboard === 'full' ? { keyboard: true } : {}),
+      ...(c.lightgun === 'supported' ? { lightgun: true } : {})
     }
   const h = meta.hltb
   if (h && (h.main || h.extra || h.completionist || h.solo)) {
@@ -527,9 +566,10 @@ export function applyEditToMetadata(
       st.controls = {
         controller: edit.controls.controller === 'none' ? null : edit.controls.controller,
         vr: edit.controls.vr === 'none' ? null : edit.controls.vr,
-        // Touch and full mouse and keyboard come from the edit too: an edit without them clears them.
+        // Touch, light gun and full mouse and keyboard come from the edit too: an edit without them clears them.
         ...(edit.controls.touch ? { touch: 'supported' as const } : {}),
-        ...(edit.controls.keyboard ? { keyboard: 'full' as const } : {})
+        ...(edit.controls.keyboard ? { keyboard: 'full' as const } : {}),
+        ...(edit.controls.lightgun ? { lightgun: 'supported' as const } : {})
       }
     m.steamTags = st
   }

@@ -115,9 +115,12 @@ describe('metadata-repo scripts', () => {
     expect(s.validateGameFile('steam-abc.json', record('steam-abc', {})).errors).not.toEqual([])
   })
 
-  it('accepts the controls touch and keyboard flags, and no other controls keys', () => {
+  it('accepts the controls touch, keyboard and lightgun flags, and no other controls keys', () => {
     for (const controls of [
       { controller: 'none', vr: 'none', touch: true },
+      { controller: 'none', vr: 'none', lightgun: true },
+      { controller: 'none', vr: 'none', lightgun: true, keyboard: true },
+      { controller: 'full', vr: 'only', touch: true, lightgun: true },
       { controller: 'full', vr: 'none', keyboard: true },
       { controller: 'full', vr: 'supported', keyboard: true }
     ] as const) {
@@ -133,6 +136,13 @@ describe('metadata-repo scripts', () => {
     expect(
       s.validateGameFile('steam-620.json', record('steam-620', notBool as unknown as MetadataEdit))
         .errors
+    ).not.toEqual([])
+    const gunNotBool = { controls: { controller: 'none', vr: 'none', lightgun: 1 } }
+    expect(
+      s.validateGameFile(
+        'steam-620.json',
+        record('steam-620', gunNotBool as unknown as MetadataEdit)
+      ).errors
     ).not.toEqual([])
   })
 

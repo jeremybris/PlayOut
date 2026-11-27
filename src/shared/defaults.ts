@@ -44,8 +44,10 @@ export function defaultSettings(): Settings {
       emulationDir: null,
       coopKeyboardMouse: false,
       coopTwoPlayerLayout: 'stacked',
-      // New ROM games keep their format (Settings > Library "Trim Games" off).
+      // New ROM games keep their format (Settings > Convert "Trim Games" off).
       trimGames: false,
+      // Newly installed PC games are not compressed (Settings > Convert "Compress games automatically" off).
+      autoCompressGames: false,
       copyPcSaves: true,
       // No filters of the user's own yet (a game's options menu > Create a filter).
       customFilters: []

@@ -402,13 +402,17 @@
       "controls": {
         "label": "Controls",
         "reset": "Reset controls",
+        "row": "Controls {n}",
+        "none": "None",
         "vr": "VR",
         "touch": "Touch",
+        "lightgun": "Lightgun",
+        "allNone": "All three None: Save removes your controls edit, and the game shows its earlier controls again",
+        "allNoneKeep": "All three None: nothing is saved, and the game keeps the controls it shows",
+        "console": "A console game's badge always shows Pad: these picks place it under Filters > Controls (Lightgun, Touch, VR)",
         "full": "Full Controller Support",
         "partial": "Partial Controller Support",
-        "keyboard": "Mouse & Keyboard",
-        "both": "Mouse & Keyboard + Controller",
-        "all": "All"
+        "keyboard": "Mouse & Keyboard"
       },
       "hltb": {
         "label": "How Long to Beat (hours)",

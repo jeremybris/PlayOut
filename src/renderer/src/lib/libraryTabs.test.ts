@@ -86,6 +86,14 @@ describe('a saved tab with the Touch controls choice', () => {
   })
 })
 
+describe('a saved tab with the Lightgun controls choice', () => {
+  it('loads with Lightgun still picked and names the tab by it', () => {
+    const f = tabFiltersOf({ controls: ['lightgun', 'keyboard'] })
+    expect(f.controls).toEqual(['lightgun', 'keyboard'])
+    expect(tabName(tabFiltersOf({ controls: ['lightgun'] }))).toBe('Lightgun')
+  })
+})
+
 describe('tabName', () => {
   it('is All Games with no filter', () => {
     expect(tabName(emptyTabFilters())).toBe(ALL_GAMES_NAME)

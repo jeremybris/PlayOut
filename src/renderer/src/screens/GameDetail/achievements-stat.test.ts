@@ -95,4 +95,28 @@ describe('achievementsStat', () => {
       label: 'achievements'
     })
   })
+
+  it('leaves out a Steam game Steam says has no achievements (Call of Duty: United Offensive)', () => {
+    const none = game({
+      source: 'steam',
+      platformId: 'steam',
+      metadata: { sources: { 'steam-achievements': 'none' } }
+    })
+    expect(achievementsStat(none).show).toBe(false)
+  })
+
+  it('keeps the stat of a Steam game not read yet, or read while signed out (no mark), and counts beat a mark', () => {
+    expect(
+      achievementsStat(game({ source: 'steam', platformId: 'steam', metadata: {} })).show
+    ).toBe(true)
+    const counted = game({
+      source: 'steam',
+      platformId: 'steam',
+      metadata: {
+        achievements: { unlocked: 1, total: 5, updatedAt: '' },
+        sources: { 'steam-achievements': 'none' }
+      }
+    })
+    expect(achievementsStat(counted).show).toBe(true)
+  })
 })

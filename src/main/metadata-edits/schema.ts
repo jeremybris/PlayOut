@@ -40,13 +40,15 @@ export const metadataEditSchema = z.object({
   tags: list.optional(),
   localPlayers: z.number().int().min(0).max(64).optional(),
   // Not strict, like the whole object: unknown keys are dropped, never refused. An older PlayOut (whose controls had
-  // only controller and vr) reads a cloud entry with touch / keyboard the same way, as controller and vr.
+  // only controller and vr) reads a cloud entry with touch / keyboard / lightgun the same way, as controller and vr;
+  // one without lightgun (0.9.97 and earlier) drops just that.
   controls: z
     .object({
       controller: z.enum(['full', 'partial', 'none']),
       vr: z.enum(['only', 'supported', 'none']),
       touch: z.boolean().optional(),
-      keyboard: z.boolean().optional()
+      keyboard: z.boolean().optional(),
+      lightgun: z.boolean().optional()
     })
     .optional(),
   hltb: z.object({ main: hours, extra: hours, completionist: hours, solo: hours }).optional(),
@@ -67,7 +69,7 @@ function compact(edit: MetadataEdit): MetadataEdit {
   const out: MetadataEdit = {}
   for (const field of METADATA_EDIT_FIELDS)
     if (edit[field] !== undefined) (out as Record<string, unknown>)[field] = edit[field]
-  // touch / keyboard only when true (a false one says the same as none).
+  // touch / keyboard / lightgun only when true (a false one says the same as none).
   if (out.controls) out.controls = normalizeControls(out.controls)
   if (out.hltb) {
     const h = { ...out.hltb }

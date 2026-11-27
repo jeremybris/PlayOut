@@ -82,12 +82,5 @@
       "label": "Show duplicates",
       "description": "Show every copy of a game you have on several consoles (PS2, Xbox, GameCube...). Copies from PC stores still share one card. Off: one card per game, showing the recompilation, else Steam, GOG, Epic, PS3, PS2, GameCube, Xbox 360, Xbox, then the other PC stores."
     }
-  },
-  "newGames": {
-    "title": "New games",
-    "trimGames": {
-      "label": "Trim Games",
-      "description": "Shrink your ROM games: PS2 ISO to CHD, Xbox and Xbox 360 ISO to XISO (trimmed), PlayStation BIN/CUE to CHD, PSP ISO to CSO, PS3 disc folders to ISO (not HDD or PSN games), Wii and GameCube ISO to RVZ. When you turn it on, the games already in your library are checked once; after that, each game you add is trimmed. Each original goes to the Recycle Bin only once its result is verified; Settings › Convert shows the progress. Wii games need your Wii common key in the Emulation folder (bios\\wii\\common-key.bin) or Dolphin installed, as in Convert. Games downloaded from another PC keep their format."
-    }
   }
 }

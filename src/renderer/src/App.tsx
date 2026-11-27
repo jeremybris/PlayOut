@@ -59,6 +59,7 @@ import { useSettingsStore } from './state/settings'
 import { useStreamingStore } from './state/streaming'
 import { useSystemStore } from './state/system'
 import { useUiStore, type OpenModal } from './state/ui'
+import { startUpgradeProgress } from './state/upgrades'
 
 const log = createLog('app')
 
@@ -171,6 +172,9 @@ export default function App(): ReactElement {
   )
 
   useEffect(() => {
+    // Upgrade toasts from the start, not only once an Upgrade menu was opened: Compress games automatically runs
+    // without one.
+    startUpgradeProgress()
     const stopInput = initInput()
     // Only while PlayOut is the active window: a game in front (or on the other screen) gets the pads to itself.
     setGamepadNeedsFocus(true)

@@ -10,6 +10,7 @@ import { useMemo } from 'react'
 import { create } from 'zustand'
 import { api } from '../api/client'
 import { t, useLanguageStore } from '../i18n'
+import { formatBytes } from '../lib/format'
 import { displayTitle } from '../lib/library'
 import { hostOfflineWait } from '../lib/streaming'
 import { createLog } from '../lib/log'
@@ -189,6 +190,21 @@ api.on('streaming:logins', ({ hostName, services }) =>
       t('state.streaming.logins', { host: hostName, services: services.join(', ') }),
       'success'
     )
+)
+
+// A game already on this PC got its missing updates and DLC from a host (main/streaming: the background catch-up).
+api.on('streaming:updates', ({ title, hostName, files, bytes, error }) =>
+  useUiStore.getState().toast(
+    error
+      ? t('state.streaming.updatesFailed', { title, host: hostName, error })
+      : t('state.streaming.updatesFetched', {
+          title,
+          host: hostName,
+          count: files,
+          size: formatBytes(bytes)
+        }),
+    error ? 'error' : 'success'
+  )
 )
 
 api.on('streaming:status', (status) => {

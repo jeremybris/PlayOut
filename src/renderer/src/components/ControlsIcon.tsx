@@ -116,7 +116,41 @@ function Touch(): ReactElement {
 }
 
 /**
- * A Filters > Controls choice's picture before its name (the user's VR, controller and mouse and keyboard pictures and a touch hand,
+ * The light gun picture (lucide has none): a pistol pointing right, its trigger in a guard, with light rays leaving
+ * the muzzle. Also the game page's controls badge icon for a light-gun game (with that badge's className and `bold`:
+ * the 2px strokes of the lucide icons beside it; the filter menu's picture keeps the thinner strokes of its touch hand).
+ */
+export function LightgunIcon({
+  className = 'controls-icon',
+  bold = false
+}: {
+  className?: string
+  bold?: boolean
+}): ReactElement {
+  const body = bold ? '2' : '1.5'
+  const detail = bold ? '1.8' : '1.3'
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      data-controls="lightgun"
+      fill="none"
+      aria-hidden="true"
+    >
+      <g stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+        <path
+          d="M2.6 6.6h16.6a.9.9 0 0 1 .9.9v2.6a.9.9 0 0 1-.9.9h-8.4l-.8 1.6H8.4L6.9 19a.9.9 0 0 1-.9.7H3.6a.8.8 0 0 1-.8-1L4.4 11H2.6a.9.9 0 0 1-.9-.9V7.5a.9.9 0 0 1 .9-.9Z"
+          strokeWidth={body}
+        />
+        <path d="M8.4 12.6c.1 1.6 1 2.4 2.5 2.4l.6-1.4" strokeWidth={detail} />
+        <path d="M21.4 5.6l1.4-1.2M21.6 8.8h1.8M21.4 12l1.4 1.2" strokeWidth={detail} />
+      </g>
+    </svg>
+  )
+}
+
+/**
+ * A Filters > Controls choice's picture before its name (the user's VR, controller and mouse and keyboard pictures, a touch hand and a light gun,
  * drawn in the text colour like Size's pies and H.L.T.B.'s stopwatches), in the box Platform's console pictures use so
  * the rows line up; nothing for an id it does not know.
  */
@@ -130,6 +164,8 @@ export function ControlsIcon({ controlsId }: { controlsId: string }): ReactEleme
       <KeyboardMouse />
     ) : controlsId === 'touch' ? (
       <Touch />
+    ) : controlsId === 'lightgun' ? (
+      <LightgunIcon />
     ) : null
   if (!picture) return null
   return (

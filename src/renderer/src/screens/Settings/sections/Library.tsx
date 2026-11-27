@@ -1,16 +1,6 @@
 import type { EmulationMoveRequest } from '@shared/emulation-move'
 import type { HomeRowMode, ScanProgress, SourceId, SourceStatus } from '@shared/types'
-import {
-  Copy,
-  Download,
-  Eye,
-  FolderTree,
-  House,
-  Package,
-  RefreshCw,
-  Save,
-  Scissors
-} from 'lucide-react'
+import { Copy, Download, Eye, FolderTree, House, Package, RefreshCw, Save } from 'lucide-react'
 import { useCallback, useEffect, useState, type ReactElement } from 'react'
 import { api } from '../../../api/client'
 import { Button } from '../../../components/Button'
@@ -408,18 +398,6 @@ export function LibrarySection({ settings, patch }: SectionProps): ReactElement 
           description={t('settingsLibrary.visibility.showDuplicates.description')}
           checked={settings.library.showDuplicates}
           onChange={(v) => patch({ library: { showDuplicates: v } })}
-        />
-      </div>
-
-      <div className="section">
-        <div className="section__title">{t('settingsLibrary.newGames.title')}</div>
-        <Toggle
-          focusKey={fk(SECTION, 'trimGames')}
-          icon={<Scissors />}
-          label={t('settingsLibrary.newGames.trimGames.label')}
-          description={t('settingsLibrary.newGames.trimGames.description')}
-          checked={settings.library.trimGames}
-          onChange={(v) => patch({ library: { trimGames: v } })}
         />
       </div>
 

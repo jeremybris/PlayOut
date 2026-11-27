@@ -38,6 +38,7 @@ describe('tabPartIcon', () => {
     expect(markup(part('difficulty', 'hard'))).toContain('console-icon__img')
     expect(markup(part('reviews', 'r95'))).toContain('review-star')
     expect(markup(part('controls', 'touch'))).toContain('controls-icon')
+    expect(markup(part('controls', 'lightgun'))).toContain('data-controls="lightgun"')
     expect(markup(part('players', '3-4'))).toContain('players-art')
     expect(markup(part('players', 'party'))).toContain('console-icon__generic')
     expect(markup(part('players', 'lan-party'))).toContain('console-icon__generic')

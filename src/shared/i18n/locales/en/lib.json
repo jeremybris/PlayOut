@@ -40,7 +40,8 @@
       "vr": "VR",
       "controller": "Controller",
       "keyboard": "Mouse and Keyboard",
-      "touch": "Touch"
+      "touch": "Touch",
+      "lightgun": "Lightgun"
     },
     "badge": {
       "pad": "Pad",
@@ -48,6 +49,7 @@
       "partial": "Partial",
       "keyboard": "KB+M",
       "touch": "Touch",
+      "lightgun": "Gun",
       "both": "Pad+KB+M",
       "all": "All"
     },
@@ -60,6 +62,7 @@
     "vrSupported": "VR supported; keyboard and mouse otherwise",
     "keyboard": "Keyboard and mouse",
     "touch": "Touch screen",
+    "lightgun": "Played with a light gun",
     "both": "Full controller support and full mouse and keyboard support",
     "all": "VR supported, full controller support and full mouse and keyboard support"
   },
@@ -123,6 +126,7 @@
   },
   "metadataForm": {
     "enterTitle": "Enter a title",
+    "pickControls": "Pick at least one control",
     "releaseDate": "Enter the release date as YYYY-MM-DD, YYYY-MM or YYYY (month 01-12, day 01-31)"
   },
   "upgrades": {

@@ -3,12 +3,12 @@ import { t } from '../i18n'
 
 /**
  * How a game is played, for the controls badge on its page (left of the players badge): Steam's controller and VR
- * support (GameMetadata.steamTags.controls, read with the Steam tags, or set by the Edit sheet's Controls choice); a
+ * support (GameMetadata.steamTags.controls, read with the Steam tags, or set by the Edit sheet's Controls rows); a
  * console game (a ROM) plays with a controller; anything else, keyboard and mouse. 'touch' = touch screen only,
- * 'both' = full controller and full mouse and keyboard support, 'all' = those and VR.
+ * 'lightgun' = light gun only, 'both' = full controller and full mouse and keyboard support, 'all' = those and VR.
  */
 export type ControlsKind =
-  'controller' | 'partial' | 'vr-only' | 'vr' | 'keyboard' | 'touch' | 'both' | 'all'
+  'controller' | 'partial' | 'vr-only' | 'vr' | 'keyboard' | 'touch' | 'lightgun' | 'both' | 'all'
 
 export interface Controls {
   kind: ControlsKind
@@ -43,6 +43,12 @@ export const CONTROLS_FILTERS = [
     get label(): string {
       return t('lib.controls.filters.touch')
     }
+  },
+  {
+    id: 'lightgun',
+    get label(): string {
+      return t('lib.controls.filters.lightgun')
+    }
   }
 ] as const
 
@@ -55,14 +61,19 @@ export function controlsFilterLabel(id: string): string {
  * = full or partial controller support (and every console game); Mouse and Keyboard = keyboard and mouse games, plus
  * those with only partial controller support, full mouse and keyboard support beside the controller or VR as an
  * option, which are played with them too; Touch = games with touch screen support
- * (GameMetadata.steamTags.controls.touch), as well as their other choices (a touch-only game is under Touch alone).
+ * (GameMetadata.steamTags.controls.touch), as well as their other choices (a touch-only game is under Touch alone);
+ * Lightgun = games played with a light gun (controls.lightgun), the same way. VR, Touch and Lightgun add to a game's
+ * other choices whatever its badge shows (a Full Controller + VR game is under Controller and VR; a console game,
+ * whose badge is always Pad, under Controller plus the Lightgun / Touch / VR its Edit sheet rows pick).
  */
 export function controlsFilterIds(game: Pick<Game, 'source' | 'launch' | 'metadata'>): string[] {
   const ids = playIds(game)
-  // Touch, on top of how else the game plays.
-  return game.metadata.steamTags?.controls?.touch === 'supported' && !ids.includes('touch')
-    ? [...ids, 'touch']
-    : ids
+  const c = game.metadata.steamTags?.controls
+  // VR as an option, touch and light gun, on top of how else the game plays.
+  if (c?.vr === 'supported' && !ids.includes('vr')) ids.push('vr')
+  if (c?.touch === 'supported' && !ids.includes('touch')) ids.push('touch')
+  if (c?.lightgun === 'supported' && !ids.includes('lightgun')) ids.push('lightgun')
+  return ids
 }
 
 /**
@@ -94,6 +105,8 @@ function playIds(game: Pick<Game, 'source' | 'launch' | 'metadata'>): string[] {
       return ['keyboard']
     case 'touch':
       return ['touch']
+    case 'lightgun':
+      return ['lightgun']
     case 'both':
       return ['controller', 'keyboard']
     case 'all':
@@ -110,7 +123,8 @@ export function gameControls(game: Pick<Game, 'source' | 'launch' | 'metadata'>)
   const vr = c?.vr === 'supported'
   // VR only (a headset is needed) wins over anything else the entry says.
   if (c?.vr === 'only') return { kind: 'vr-only', label: vrBadge(), text: t('lib.controls.vrOnly') }
-  // Full controller and full mouse and keyboard (the Edit sheet's Mouse & Keyboard + Controller, and All with VR).
+  // Full controller and full mouse and keyboard (the Edit sheet's Full Controller Support + Mouse & Keyboard picks,
+  // with VR too: All).
   if (c?.controller === 'full' && c.keyboard === 'full')
     return vr
       ? { kind: 'all', label: t('lib.controls.badge.all'), text: t('lib.controls.all') }
@@ -128,9 +142,17 @@ export function gameControls(game: Pick<Game, 'source' | 'launch' | 'metadata'>)
       text: vr ? t('lib.controls.partialVr') : t('lib.controls.partial')
     }
   if (vr) return { kind: 'vr', label: vrBadge(), text: t('lib.controls.vrSupported') }
-  // Touch screen only (no controller, no VR): with either, touch only adds to Filters > Controls.
-  if (c?.touch === 'supported')
+  // Touch screen / light gun only (no controller, no VR, no mouse and keyboard picked beside them): with any of
+  // those, touch and light gun only add to Filters > Controls. Touch and Lightgun picked together (and nothing else)
+  // show Touch, the older of the two badges; the game is still under both filters.
+  if (c?.touch === 'supported' && c.keyboard !== 'full')
     return { kind: 'touch', label: t('lib.controls.badge.touch'), text: t('lib.controls.touch') }
+  if (c?.lightgun === 'supported' && c.keyboard !== 'full')
+    return {
+      kind: 'lightgun',
+      label: t('lib.controls.badge.lightgun'),
+      text: t('lib.controls.lightgun')
+    }
   return {
     kind: 'keyboard',
     label: t('lib.controls.badge.keyboard'),

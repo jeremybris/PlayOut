@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs'
-import { join } from 'path'
+import { join, resolve } from 'path'
+import { updatesDlcDir } from '../../emulation/ps3-hdd'
 import type { Logger, Runner } from '../types'
 import { detectSdlPads, RYUJINX_SDL_HINTS, type SdlPad } from './sdl-pads'
 import { PresetDeferredError, type ApplyPresets, type PresetContext } from './types'
@@ -18,6 +19,8 @@ import { PresetDeferredError, type ApplyPresets, type PresetContext } from './ty
  *   one GamepadSDL2 entry per pad (players 1-4) only while it is still the untouched default (the single keyboard on
  *   player 1) and a pad was found. The ids PlayOut wrote are kept in `E\portable\playout-controllers.json`, so
  *   {@link refreshRyujinxControllers} (before each launch) can follow pad changes in those entries only.
+ * - Updates and DLC: Emulation\Updates and DLC\Switch (where a host's download puts a game's updates and DLC) is one of
+ *   `autoload_dirs`, so Ryujinx applies them; the folders the user added there stay.
  */
 
 /** The Config.json format this module knows. */
@@ -305,6 +308,44 @@ async function configPath(E: string): Promise<string> {
 const statePath = (E: string): string => join(E, 'portable', 'playout-controllers.json')
 
 /** Whether a Ryujinx.exe process is running (tasklist; false when tasklist itself fails). */
+/** Emulation\Updates and DLC\Switch of the Emulation folder `dataDir`. */
+export function ryujinxUpdatesDir(dataDir: string): string {
+  return join(updatesDlcDir(dataDir), 'Switch')
+}
+
+/**
+ * Adds `dir` to Config.json's `autoload_dirs` (Ryujinx loads the updates and DLC it finds there) when it is not one
+ * of them yet; the user's other folders stay. A config without the key gets it only in the format this module knows.
+ * Returns whether it changed.
+ */
+export function addAutoloadDir(data: Record<string, unknown>, dir: string): boolean {
+  const list = data.autoload_dirs
+  const same = (p: unknown): boolean =>
+    typeof p === 'string' && resolve(p).toLowerCase() === resolve(dir).toLowerCase()
+  if (Array.isArray(list)) {
+    if (list.some(same)) return false
+    data.autoload_dirs = [...list, dir]
+    return true
+  }
+  if (list !== undefined || data.version !== RYUJINX_CONFIG_VERSION) return false
+  data.autoload_dirs = [dir]
+  return true
+}
+
+/** addAutoloadDir for Updates and DLC\Switch, the folder made first (Ryujinx skips one that does not exist). */
+async function autoloadUpdates(
+  cfg: ConfigFile,
+  dataDir: string | undefined,
+  log: Logger
+): Promise<boolean> {
+  if (!dataDir) return false
+  const dir = ryujinxUpdatesDir(dataDir)
+  if (!addAutoloadDir(cfg.data, dir)) return false
+  await fs.mkdir(dir, { recursive: true }).catch(() => undefined)
+  log.info(`Ryujinx loads the updates and DLC in ${dir}`)
+  return true
+}
+
 export async function isRyujinxRunning(run: Runner): Promise<boolean> {
   const r = await run('tasklist', ['/FI', `IMAGENAME eq ${RYUJINX_EXE}`, '/NH', '/FO', 'CSV'], {
     timeoutMs: 15_000
@@ -450,6 +491,8 @@ export const applyPresets: ApplyPresets = async (ctx) => {
   if (ctx.firstTime && (!isNewerFormat(cfg) || 'start_fullscreen' in cfg.data))
     cfg.data.start_fullscreen = true
 
+  await autoloadUpdates(cfg, ctx.dataDir, log)
+
   const state = (await readState(statePath(E))) ?? { ids: [] }
   const nextState = await mergeInto(E, cfg, run, log, state)
   // Ryujinx may have been started while the pads were detected: it would overwrite the file on exit.
@@ -472,6 +515,8 @@ export async function refreshRyujinxControllers(ctx: {
   log: Logger
   /** Aborted when the launch stopped waiting (or PlayOut quits): nothing is written then. */
   signal?: AbortSignal
+  /** The Emulation folder: its Updates and DLC\Switch is made one of Ryujinx's autoload_dirs (an older setup's too). */
+  dataDir?: string
 }): Promise<void> {
   const { emuDir: E, run, log, signal } = ctx
   const state = await readState(statePath(E))
@@ -480,13 +525,14 @@ export async function refreshRyujinxControllers(ctx: {
   const cfg = await readConfig(file)
   if (!cfg) return
   if (signal?.aborted || (await isRyujinxRunning(run))) return
+  const autoload = await autoloadUpdates(cfg, ctx.dataDir, log)
   const nextState = await mergeInto(E, cfg, run, log, state)
-  if (!nextState) return
+  if (!nextState && !autoload) return
   // The launch may have gone ahead meanwhile: never rewrite Config.json under a starting Ryujinx.
   if (signal?.aborted || (await isRyujinxRunning(run)) || signal?.aborted) {
     log.info('Ryujinx controller refresh abandoned; it applies at the next launch')
     return
   }
   await writeConfig(file, cfg)
-  await writeState(statePath(E), nextState)
+  if (nextState) await writeState(statePath(E), nextState)
 }

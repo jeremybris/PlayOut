@@ -405,13 +405,17 @@
       "controls": {
         "label": "Controles",
         "reset": "Restablecer controles",
+        "row": "Controles {n}",
+        "none": "Ninguno",
         "vr": "VR",
         "touch": "Táctil",
+        "lightgun": "Pistola de luz",
+        "allNone": "Los tres en Ninguno: al guardar se quita tu edición de los controles y el juego vuelve a mostrar los anteriores",
+        "allNoneKeep": "Los tres en Ninguno: no se guarda nada y el juego conserva los controles que muestra",
+        "console": "La insignia de un juego de consola siempre muestra Mando: estas opciones lo colocan en Filtros > Controles (Pistola de luz, Táctil, VR)",
         "full": "Compatibilidad total con mando",
         "partial": "Compatibilidad parcial con mando",
-        "keyboard": "Ratón y teclado",
-        "both": "Ratón y teclado + mando",
-        "all": "Todo"
+        "keyboard": "Ratón y teclado"
       },
       "hltb": {
         "label": "How Long to Beat (horas)",

@@ -1,9 +1,11 @@
 import { isDifficultyId } from '@shared/difficulty'
 import {
   METADATA_EDIT_FIELDS,
-  controlsChoice,
-  controlsForChoice,
-  type ControlsChoice,
+  CONTROLS_ROWS,
+  controlsFromPicks,
+  controlsPicks,
+  sortControlsPicks,
+  type ControlsOption,
   type MetadataEdit,
   type MetadataEditField,
   type MetadataLayers,
@@ -29,10 +31,12 @@ export interface MetadataForm {
   /** '' = not known, '0' = none, '1'..: the count. */
   localPlayers: string
   /**
-   * The Controls choice (CONTROLS_CHOICES). Compared by choice, so controls that show as a choice (a scraped full
-   * controller with VR supported shows as Full Controller Support) are only rewritten when another choice is picked.
+   * The Controls rows (CONTROLS_ROWS of them, more only when the controls have more picks): each a CONTROLS_OPTIONS
+   * value. Compared as the set of non-None picks (sortControlsPicks), so repeats and the rows' order change nothing
+   * and controls are only rewritten when the set changes. Three None rows = back to the cloud's / scraped value
+   * (formSave).
    */
-  controls: ControlsChoice
+  controls: ControlsOption[]
   hltbMain: string
   hltbExtra: string
   hltbCompletionist: string
@@ -61,6 +65,34 @@ export const FIELD_FORM_KEYS: Record<MetadataEditField, readonly (keyof Metadata
   difficulty: ['difficulty']
 }
 
+/** The Controls rows that show a set of picks: one per pick, then None up to CONTROLS_ROWS rows. */
+export function controlsRows(picks: readonly ControlsOption[]): ControlsOption[] {
+  const set: ControlsOption[] = sortControlsPicks(picks)
+  while (set.length < CONTROLS_ROWS) set.push('none')
+  return set
+}
+
+/** Whether every Controls row is None. */
+export const noControlsPicked = (rows: readonly ControlsOption[]): boolean =>
+  rows.every((r) => r === 'none')
+
+/**
+ * Three None Controls rows with no controls edit of this PC's own: Save has nothing to remove and sends nothing, so
+ * the game keeps the controls it shows (the sheet says so and does not mark the field changed).
+ */
+export const controlsAllNoneKeeps = (form: MetadataForm, layers: MetadataLayers): boolean =>
+  noControlsPicked(form.controls) && layers.local.controls === undefined
+
+/**
+ * A console game's layers for the Edit sheet: with no controls scraped, its rows start on Full Controller Support (how
+ * its Pad badge reads it, lib/controls.ts) rather than the PC default (Mouse & Keyboard), so adding Lightgun / Touch /
+ * VR keeps the controller and an untouched field is still not saved.
+ */
+export function withConsoleControls(layers: MetadataLayers): MetadataLayers {
+  if (layers.scraped.controls !== undefined) return layers
+  return { ...layers, scraped: { ...layers.scraped, controls: { controller: 'full', vr: 'none' } } }
+}
+
 export const EMPTY_FORM: MetadataForm = {
   title: '',
   description: '',
@@ -71,7 +103,8 @@ export const EMPTY_FORM: MetadataForm = {
   genres: '',
   tags: '',
   localPlayers: '',
-  controls: 'keyboard',
+  // No controls known: the badge shows Mouse & Keyboard.
+  controls: controlsRows(['keyboard']),
   hltbMain: '',
   hltbExtra: '',
   hltbCompletionist: '',
@@ -98,7 +131,7 @@ export function formFromEdit(edit: MetadataEdit, base: MetadataForm = EMPTY_FORM
   if (edit.genres !== undefined) f.genres = joinList(edit.genres)
   if (edit.tags !== undefined) f.tags = joinList(edit.tags)
   if (edit.localPlayers !== undefined) f.localPlayers = String(edit.localPlayers)
-  if (edit.controls !== undefined) f.controls = controlsChoice(edit.controls)
+  if (edit.controls !== undefined) f.controls = controlsRows(controlsPicks(edit.controls))
   if (edit.hltb !== undefined) {
     f.hltbMain = num(edit.hltb.main)
     f.hltbExtra = num(edit.hltb.extra)
@@ -181,7 +214,9 @@ export function fieldEdit(form: MetadataForm, field: MetadataEditField): Metadat
       return { localPlayers: n === undefined || Number.isNaN(n) ? 0 : Math.round(n) }
     }
     case 'controls':
-      return { controls: controlsForChoice(form.controls) }
+      // Three None rows are never an edit: formSave turns them into Reset.
+      if (noControlsPicked(form.controls)) throw new Error(t('lib.metadataForm.pickControls'))
+      return { controls: controlsFromPicks(form.controls) }
     case 'hltb': {
       const hltb: NonNullable<MetadataEdit['hltb']> = {}
       const pairs = [
@@ -221,7 +256,11 @@ export function fieldEdit(form: MetadataForm, field: MetadataEditField): Metadat
 /** Whether two forms hold the same value for a field. */
 export function fieldMatches(a: MetadataForm, b: MetadataForm, field: MetadataEditField): boolean {
   const norm = (k: keyof MetadataForm, v: unknown): string =>
-    LIST_KEYS.has(k) ? splitList(String(v)).join('\n') : String(v).trim()
+    k === 'controls'
+      ? sortControlsPicks(v as ControlsOption[]).join('\n')
+      : LIST_KEYS.has(k)
+        ? splitList(String(v)).join('\n')
+        : String(v).trim()
   return FIELD_FORM_KEYS[field].every((k) => norm(k, a[k]) === norm(k, b[k]))
 }
 const LIST_KEYS = new Set<keyof MetadataForm>(['developers', 'publishers', 'genres', 'tags'])
@@ -255,6 +294,12 @@ export function formSave(
     // there is nothing to remove, and an empty title is never saved or sent to the cloud.
     if (field === 'title' && !form.title.trim()) {
       if (layers.local.title !== undefined) clear.push('title')
+      continue
+    }
+    // Three None Controls rows are Reset: the user's own controls go (the cloud's / scraped ones show again), and
+    // without them there is nothing to save.
+    if (field === 'controls' && noControlsPicked(form.controls)) {
+      if (layers.local.controls !== undefined) clear.push('controls')
       continue
     }
     if (

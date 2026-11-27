@@ -16,6 +16,7 @@
     "closing": "PlayOut is closing",
     "cancelled": "Download cancelled",
     "romFolder": "ROM folder",
+    "updatesDlcFolder": "Updates and DLC folder",
     "noSpace": "Not enough free space in the {place} ({needed} needed, {free} free)",
     "tooMuchDataFor": "The host sent more data than expected for {file}",
     "stoppedEarly": "The download of {file} stopped before the end"

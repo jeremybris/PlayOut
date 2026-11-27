@@ -118,6 +118,7 @@ const library = {
   coopKeyboardMouse: z.boolean(),
   coopTwoPlayerLayout: z.enum(['stacked', 'sideBySide']),
   trimGames: z.boolean(),
+  autoCompressGames: z.boolean(),
   copyPcSaves: z.boolean(),
   customFilters
 }

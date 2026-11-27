@@ -82,6 +82,7 @@ import { createImageCache, createMetadataService } from './scrapers'
 import { createLocalPlayers } from './scrapers/launchbox-players'
 import { createReviewScores, igdbCredentialsKey } from './scrapers/review-scores'
 import { createSteamScreenshots } from './scrapers/steam-screenshots'
+import { steamAppIdOf } from './scrapers/steam-store'
 import { createScreenshotMirror } from './scrapers/screenshot-mirror'
 import { createSteamTags } from './scrapers/steam-tags'
 import { runArtBench } from './scrapers/art-bench'
@@ -129,6 +130,12 @@ import { followCustomFilters } from './favorites/custom-filters-follow'
 import { hostname } from 'os'
 import { createConvertService } from './convert/convert-service'
 import { createAutoTrimService, helperXboxInfo } from './convert/auto-trim'
+import { createAutoCompressService, type AutoCompressService } from './upgrades/auto-compress'
+import {
+  createAutoCompressChecks,
+  folderActivity,
+  folderCreatedAt
+} from './upgrades/auto-compress-checks'
 import { chdRead, HELPER_EXE, sweepPartials } from './convert/xbox-helper'
 import { LibraryStore } from './store/library-store'
 import { SessionsStore } from './store/sessions-store'
@@ -587,7 +594,9 @@ async function main(cli: CliOptions): Promise<void> {
     library,
     events,
     cacheDir: join(userData, 'retroachievements'),
-    log: createLogger('achievements')
+    log: createLogger('achievements'),
+    // The Steam scan holds its requests while a game runs; the session's end picks it up again.
+    gameRunning: () => launcherRef?.running() != null
   })
   let recompDirOf: (id: string) => Promise<string | null | undefined> = async () => undefined
   const installSizes = createInstallSizeService({
@@ -641,6 +650,14 @@ async function main(cli: CliOptions): Promise<void> {
 
   // Whether an Upgrade menu action runs for a game; set once the upgrades service exists (created further down).
   let upgradeBusy: (gameId: string) => boolean = () => false
+  // Compress games automatically (set further down): Play's refusal names a compress it started, and how to stop it.
+  let autoCompressRef: AutoCompressService | null = null
+  const upgradeBlocked = (gameId: string): string | null =>
+    upgradeBusy(gameId)
+      ? autoCompressRef?.compressing(gameId)
+        ? tMain('mainApp.autoCompressRunning')
+        : upgradeRunningMessage(tMain)
+      : null
   // PC Saves (main/pc-saves): set once its service exists (further down); a launch reaches it only later.
   let pcSavesRef: PcSavesService | null = null
   const launcher = createLauncher({
@@ -654,7 +671,7 @@ async function main(cli: CliOptions): Promise<void> {
     beforeLaunch: (emulatorId, exe, rom, context) =>
       emulatorSetup.beforeLaunch(emulatorId, exe, rom, context),
     // An upgrade rewriting the game's files (the Upgrade menu): every start of it waits until it ends.
-    launchBlocked: (game) => (upgradeBusy(game.id) ? upgradeRunningMessage(tMain) : null),
+    launchBlocked: (game) => upgradeBlocked(game.id),
     // A game the user added: a newer copy of its saves in the Emulation folder comes back first (PC Saves).
     beforeGameLaunch: (game, context) =>
       pcSavesRef?.beforePlay(game, context) ?? Promise.resolve(null)
@@ -662,6 +679,8 @@ async function main(cli: CliOptions): Promise<void> {
   launcherRef = launcher
   // PCSX2 scans the PS2 games it does not list yet once nothing runs: after a game, and when the library gained games.
   events.on('session:ended', () => emulatorSetup.prewarmPcsx2())
+  // A Steam game played here is read again by the achievements scan (nothing else reads it again).
+  events.on('session:ended', ({ gameId, endedAt }) => achievements.steamPlayed(gameId, endedAt))
 
   // The home button and the in-game overlay (docs/home-overlay.md): the controller reader, the overlay window, power
   // profiles, display and media. Started with the deferred start-up work below.
@@ -792,7 +811,7 @@ async function main(cli: CliOptions): Promise<void> {
     log: createLogger('peerparty'),
     userData,
     processes: async () => (await launcher.processes?.()) ?? [],
-    launchBlocked: (game) => (upgradeBusy(game.id) ? upgradeRunningMessage(tMain) : null),
+    launchBlocked: (game) => upgradeBlocked(game.id),
     openExternal: (url) => shell.openExternal(url)
   })
   // The overlay's PeerParty tab (docs/home-overlay.md, "PeerParty"): read only while the tab is open; the LAN invite
@@ -1269,6 +1288,10 @@ async function main(cli: CliOptions): Promise<void> {
       void installSizes.measure()
       emulatorSetup.prewarmPcsx2()
     }
+    // New Steam games, Steam's imported last played times and play sessions (here, or synced from a paired PC)
+    // reach the achievements scan once things settle.
+    if (reason === 'scan' || reason === 'import' || reason === 'update' || reason === 'session')
+      achievements.kickSteam()
     if (reason !== 'session' && reason !== 'remove') {
       // A recompilation uninstalled (or Play switched away from it): its counts leave the card.
       achievements.forgetStaleRecomp()
@@ -1335,7 +1358,7 @@ async function main(cli: CliOptions): Promise<void> {
     log: createLogger('convert')
   })
 
-  // Trim Games (Settings › Library): new ROM games go through Convert's runs, one direction at a time.
+  // Trim Games (Settings › Convert): new ROM games go through Convert's runs, one direction at a time.
   const autoTrim = createAutoTrimService({
     enabled: () => settings.get().library.trimGames,
     library,
@@ -1344,6 +1367,8 @@ async function main(cli: CliOptions): Promise<void> {
       if (launcher.running()) return tMain('mainApp.trimWait.gameRunning')
       if (installQueue.list().some((e) => e.kind === 'host-rom' && e.state === 'active'))
         return tMain('mainApp.trimWait.romDownloading')
+      // A compress (Compress games automatically, or the Upgrade menu) reads and writes a whole game folder.
+      if (upgrades.anyBusy()) return tMain('mainApp.trimWait.upgradeRunning')
       return null
     },
     events,
@@ -1406,6 +1431,10 @@ async function main(cli: CliOptions): Promise<void> {
     upgradeRunning: (gameId) => upgrades.busyFor(gameId) !== null,
     // A ROM a paired PC is downloading from this one is never moved meanwhile.
     filesBeingSent: () => streaming.filesBeingSent?.() ?? [],
+    // A background fetch of the game's missing updates and DLC stops before its files go.
+    stopUpdatesFetch: async (gameId) => {
+      await streaming.stopUpdatesFetch?.(gameId)
+    },
     storeName: (source) => accounts.account(source).storeName,
     client: (source) => scan.client(source),
     rescan: (source) => scan.run([source]),
@@ -1529,6 +1558,41 @@ async function main(cli: CliOptions): Promise<void> {
   })
   pcSavesRef = pcSaves
 
+  // Compress games automatically (Settings › Convert): a PC game that just finished installing goes through the Upgrade
+  // menu's Compress game, one at a time, once nothing else is busy (main/upgrades/auto-compress.ts).
+  const autoCompressChecks = createAutoCompressChecks({
+    runningGameId: () => launcher.running()?.gameId ?? null,
+    trackedGameIds: () => installs.trackedGameIds(),
+    downloadingGameIds: () =>
+      installQueue
+        .list()
+        .filter((e) => e.state === 'active')
+        .map((e) => e.gameId),
+    emulationMoving: () => emulationMove.moving(),
+    upgradeRunning: () => upgrades.anyBusy(),
+    convertRunning: async () => (await convert.status()).running,
+    steamAppId: (game) => steamAppIdOf(game)
+  })
+  const autoCompress = createAutoCompressService({
+    enabled: () => settings.get().library.autoCompressGames,
+    library,
+    upgrades,
+    ...autoCompressChecks,
+    folderActivity,
+    folderCreatedAt,
+    log: createLogger('auto-compress')
+  })
+  autoCompressRef = autoCompress
+  events.on('install:progress', (p) => {
+    if (p.state === 'done') autoCompress.installFinished(p.gameId)
+  })
+  events.on('library:changed', ({ reason }) => {
+    if (reason === 'scan' || reason === 'update' || reason === 'import')
+      autoCompress.libraryChanged()
+  })
+  scan.onNewGames((id, gameIds) => autoCompress.newGames(id, gameIds))
+  scan.onSourceScanned((id) => autoCompress.sourceScanned(id))
+
   // A move of the Emulation folder that PlayOut closed during is finished or undone before anything can start a new one:
   // started before the window can ask (moving() is true meanwhile: a move, the offer and launches wait or refuse).
   const emulationRecovered = cli.mock
@@ -1637,6 +1701,7 @@ async function main(cli: CliOptions): Promise<void> {
     vrMods.dispose()
     ps3Updates.dispose()
     autoTrim.dispose()
+    autoCompress.dispose()
     // A move of the Emulation folder under way stops (a copy is undone; a rename switches or goes back) and is waited
     // for below; one cut short anyway is finished or undone at the next start (its journal).
     emulationMove.cancel()

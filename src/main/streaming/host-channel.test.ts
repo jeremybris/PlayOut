@@ -635,8 +635,9 @@ describe('host channel', () => {
       files: [{ path: 'snes/Mario World.sfc', size: 4096 }],
       totalBytes: 4096
     })
-    // This PlayOut takes a PS3 game's PS3 HDD files and a game's texture packs (an older client asks for neither).
-    expect(host.romOptions.at(-1)).toEqual({ ps3Hdd: true, textures: true })
+    // This PlayOut takes a PS3 game's PS3 HDD files, a game's texture packs and a Switch / Xbox 360 game's updates and
+    // DLC (an older client asks for none of them).
+    expect(host.romOptions.at(-1)).toEqual({ ps3Hdd: true, textures: true, updatesDlc: true })
 
     const whole = join(root, 'whole.part')
     let reported = 0

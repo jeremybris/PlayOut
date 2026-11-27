@@ -3204,6 +3204,442 @@ describe("a PS3 game's updates and DLC", () => {
   )
 })
 
+describe("a Switch / Xbox 360 game's updates and DLC", () => {
+  const ctx = { client: { id: 'client-1', name: 'Laptop' }, address: '192.168.1.30' }
+  const TOTK = 'The Legend of Zelda Tears of the Kingdom [0100F2C0115B6000][v0].xci'
+  const romGame = (id: string, systemId: string, file: string, title: string, roms = ''): Game =>
+    game({
+      id,
+      source: 'rom',
+      title,
+      externalId: `${systemId}/${file}`,
+      platformId: systemId,
+      launch: { kind: 'emulator', systemId, romPath: join(roms, systemId, file) }
+    })
+
+  it('the host offers the game its updates and DLC by title id or a similar name, to a client that takes them', async () => {
+    const calls: string[] = []
+    const { io, server } = hostIo(calls)
+    const emu = await tempDir()
+    const roms = join(emu, 'roms')
+    await fs.mkdir(join(roms, 'switch'), { recursive: true })
+    await fs.writeFile(join(roms, 'switch', TOTK), 'game')
+    await fs.writeFile(join(roms, 'switch', 'Zelda Breath of the Wild.xci'), 'botw')
+    const sw = join(emu, 'Updates and DLC', 'Switch')
+    await fs.mkdir(join(sw, 'TotK DLC folder [0100F2C0115B7001]'), { recursive: true })
+    await fs.writeFile(join(sw, '[0100F2C0115B6800][v1.2.1].nsp'), 'upd')
+    await fs.writeFile(join(sw, 'Tears of the Kingdom Update v1.2.1.nsp'), 'upd2')
+    await fs.writeFile(join(sw, 'TotK DLC folder [0100F2C0115B7001]', 'dlc.nca'), 'dlc')
+    await fs.writeFile(join(sw, 'Zelda Breath of the Wild [Update v1.6.0].nsp'), 'botw-upd')
+    // A half-downloaded copy is not sent.
+    await fs.writeFile(join(sw, 'Tears of the Kingdom Update v1.2.1.nsp.part'), 'u')
+    const totk = romGame(
+      'rom:switch:totk',
+      'switch',
+      TOTK,
+      'The Legend of Zelda: Tears of the Kingdom',
+      roms
+    )
+    const botw = romGame('rom:switch:botw', 'switch', 'Zelda Breath of the Wild.xci', 'BOTW', roms)
+    const s = await setup({
+      io,
+      calls,
+      games: [totk, botw],
+      emulationDir: emu,
+      settings: (x) => {
+        x.streaming.hostEnabled = true
+        x.library.romsRoot = roms
+      }
+    })
+    await s.service.start()
+    await s.service.idle()
+    const handlers = server.deps!.handlers
+    const set = await handlers.romFiles(ctx, 'rom:switch:totk', {
+      ps3Hdd: true,
+      textures: true,
+      updatesDlc: true
+    })
+    expect(set?.files.map((f) => f.path).sort()).toEqual(
+      [
+        `switch/${TOTK}`,
+        'Updates and DLC/Switch/[0100F2C0115B6800][v1.2.1].nsp',
+        'Updates and DLC/Switch/Tears of the Kingdom Update v1.2.1.nsp',
+        'Updates and DLC/Switch/TotK DLC folder [0100F2C0115B7001]/dlc.nca'
+      ].sort()
+    )
+    expect(set?.files[0]?.path).toBe(`switch/${TOTK}`)
+    expect(set?.totalBytes).toBe(4 + 3 + 4 + 3)
+    expect(set?.files.find((f) => f.path.endsWith('.nca'))?.mtimeMs).toEqual(expect.any(Number))
+    // An older client (no ?with=updates-dlc) gets the game alone.
+    expect(
+      (await handlers.romFiles(ctx, 'rom:switch:totk', { ps3Hdd: true, textures: true }))?.files
+    ).toEqual([{ path: `switch/${TOTK}`, size: 4 }])
+    expect(
+      await handlers.romFile(
+        ctx,
+        'rom:switch:totk',
+        'Updates and DLC/Switch/[0100F2C0115B6800][v1.2.1].nsp'
+      )
+    ).toBe(join(sw, '[0100F2C0115B6800][v1.2.1].nsp'))
+    // Another game's update, a PS3 path in this area or a file outside the list are never served.
+    for (const path of [
+      'Updates and DLC/Switch/Zelda Breath of the Wild [Update v1.6.0].nsp',
+      'Updates and DLC/PS3/dev_hdd0/game/X/EBOOT.BIN',
+      'Updates and DLC/Switch/Tears of the Kingdom Update v1.2.1.nsp.part'
+    ])
+      expect(await handlers.romFile(ctx, 'rom:switch:totk', path)).toBeNull()
+    expect(
+      (await handlers.romFiles(ctx, 'rom:switch:botw', { updatesDlc: true }))?.files.map(
+        (f) => f.path
+      )
+    ).toEqual([
+      'switch/Zelda Breath of the Wild.xci',
+      'Updates and DLC/Switch/Zelda Breath of the Wild [Update v1.6.0].nsp'
+    ])
+  })
+
+  async function client(options: {
+    offer: Game[]
+    files: Record<string, string>
+    local?: Game[]
+    /** The host's time of every file (default: none sent). */
+    mtimeMs?: number
+    /** Before each file is sent (may throw, or wait). */
+    beforeFile?: (path: string, signal?: AbortSignal) => Promise<void>
+    /** The files of each host game (default: files, for all). */
+    filesFor?: (gameId: string) => Record<string, string>
+    /** Before each file list is answered (may throw). */
+    beforeList?: () => Promise<void>
+    clock?: { t: number }
+  }): Promise<{
+    s: Setup
+    emu: string
+    romsRoot: string
+    fetched: string[]
+    games: Game[]
+    lists: { count: number }
+  }> {
+    const dir = await tempDir()
+    const emu = join(dir, 'Emulation')
+    const romsRoot = join(emu, 'roms')
+    const secrets = await pairedSecrets(dir, [{ id: 'host-1', address: '192.168.1.5' }])
+    const offer = options.offer.map((g) => ({ ...g, mediaKinds: [], sizeBytes: 1 }))
+    const fetched: string[] = []
+    const lists = { count: 0 }
+    const conn = fakeConnection({
+      library: async () => JSON.parse(JSON.stringify(offer)),
+      romFiles: async (gameId) => {
+        lists.count++
+        await options.beforeList?.()
+        const own = options.filesFor?.(gameId) ?? options.files
+        const files = Object.entries(own).map(([path, c]) => ({
+          path,
+          size: c.length,
+          ...(options.mtimeMs !== undefined ? { mtimeMs: options.mtimeMs } : {})
+        }))
+        return { files, totalBytes: files.reduce((n, f) => n + f.size, 0) }
+      },
+      downloadFile: async (_id, path, dest, opts) => {
+        await options.beforeFile?.(path, opts?.signal)
+        fetched.push(path)
+        const part = Buffer.from(options.files[path]!).subarray(opts?.from ?? 0)
+        await fs.appendFile(dest, part)
+        opts?.onBytes?.(part.length)
+      }
+    })
+    const games: Game[] = [...(options.local ?? [])]
+    const s = await setup({
+      games,
+      secrets,
+      emulationDir: emu,
+      settings: (st) => {
+        st.library.romsRoot = romsRoot
+      },
+      io: {
+        hostClient: clientIo({ '192.168.1.5': conn }),
+        ...(options.clock ? { now: () => options.clock!.t } : {})
+      }
+    })
+    return { s, emu, romsRoot, fetched, games, lists }
+  }
+
+  it('the client puts them in its own Updates and DLC with the game, and skips a copy it already has', async () => {
+    const files: Record<string, string> = {
+      'switch/TotK.xci': 'game',
+      'Updates and DLC/Switch/TotK Update [0100F2C0115B6800].nsp': 'update',
+      'Updates and DLC/Switch/TotK DLC [0100F2C0115B7001].nsp': 'dlc',
+      'Updates and DLC/Xbox360/4D5307E6/000B0000/TU.bin': 'tu'
+    }
+    const { s, emu, romsRoot, fetched, games } = await client({
+      offer: [
+        game({
+          id: 'rom:switch:g',
+          source: 'rom',
+          title: 'TotK',
+          externalId: 'switch/TotK.xci',
+          platformId: 'switch'
+        })
+      ],
+      files,
+      // The host's copies are newer than the one copied here by hand: only its same size keeps it.
+      mtimeMs: Date.now() + 24 * 60 * 60_000
+    })
+    const sw = join(emu, 'Updates and DLC', 'Switch')
+    // Already here (copied by hand): the same size, kept whatever its time.
+    await fs.mkdir(sw, { recursive: true })
+    await fs.writeFile(join(sw, 'TotK DLC [0100F2C0115B7001].nsp'), 'DLC')
+    s.scan.run.mockImplementation(async () => {
+      games.push(
+        game({
+          id: 'rom:switch:local',
+          source: 'rom',
+          title: 'TotK',
+          externalId: 'switch/TotK.xci'
+        })
+      )
+    })
+    const progress = recorder(s.events, 'streaming:download')
+    await s.service.start()
+    await s.service.refreshRemoteLibrary()
+    await s.service.downloadRemoteRom('remote:host-1:rom:switch:g')
+    await until(() => progress.some((p) => p.state !== 'downloading'))
+    expect(progress[progress.length - 1]).toMatchObject({ state: 'done' })
+    // The progress counts the updates too.
+    expect(progress.find((p) => p.state === 'downloading' && p.bytesTotal)?.bytesTotal).toBe(
+      4 + 6 + 3 + 2
+    )
+    expect(await fs.readFile(join(romsRoot, 'switch', 'TotK.xci'), 'utf8')).toBe('game')
+    expect(await fs.readFile(join(sw, 'TotK Update [0100F2C0115B6800].nsp'), 'utf8')).toBe('update')
+    expect(await fs.readFile(join(sw, 'TotK DLC [0100F2C0115B7001].nsp'), 'utf8')).toBe('DLC')
+    expect(
+      await fs.readFile(
+        join(emu, 'Updates and DLC', 'Xbox360', '4D5307E6', '000B0000', 'TU.bin'),
+        'utf8'
+      )
+    ).toBe('tu')
+    expect(fetched).not.toContain('Updates and DLC/Switch/TotK DLC [0100F2C0115B7001].nsp')
+    await expect(fs.stat(join(romsRoot, 'Updates and DLC'))).rejects.toThrow()
+  })
+
+  it('a game downloaded before gets the updates and DLC it lacks after a refresh, without the game again', async () => {
+    const clock = { t: Date.now() }
+    const { s, target, fetched, lists } = await catchUp({ clock })
+    const notices = recorder(s.events, 'streaming:updates')
+    await s.service.start()
+    await s.service.refreshRemoteLibrary()
+    await vi.waitFor(async () => expect(await fs.readFile(target, 'utf8')).toBe('update'))
+    expect(fetched).toEqual(['Updates and DLC/Switch/TotK Update [0100F2C0115B6800].nsp'])
+    await vi.waitFor(() =>
+      expect(notices).toEqual([expect.objectContaining({ title: 'TotK', files: 1 })])
+    )
+    // Checked once in a while, not on every refresh: the host is not even asked.
+    await vi.waitFor(() => expect(lists.count).toBe(1))
+    await s.service.refreshRemoteLibrary()
+    await new Promise((r) => setTimeout(r, 50))
+    expect(lists.count).toBe(1)
+    expect(fetched).toHaveLength(1)
+    // Deleted here on purpose: a later check does not bring it back.
+    await fs.rm(target)
+    clock.t += 7 * 60 * 60_000
+    await s.service.refreshRemoteLibrary()
+    await vi.waitFor(() => expect(lists.count).toBe(2))
+    await new Promise((r) => setTimeout(r, 50))
+    expect(fetched).toHaveLength(1)
+    await expect(fs.stat(target)).rejects.toThrow()
+  })
+
+  it('a catch-up the host dropped is tried again at a later refresh, not hours later', async () => {
+    const clock = { t: Date.now() }
+    let down = true
+    const { s, target, lists } = await catchUp({
+      clock,
+      beforeList: async () => {
+        if (down) throw Object.assign(new Error('connect ECONNREFUSED'), { code: 'ECONNREFUSED' })
+      }
+    })
+    const notices = recorder(s.events, 'streaming:updates')
+    await s.service.start()
+    await s.service.refreshRemoteLibrary()
+    await vi.waitFor(() => expect(lists.count).toBe(1))
+    await new Promise((r) => setTimeout(r, 50))
+    await expect(fs.stat(target)).rejects.toThrow()
+    // Back a minute later: within the retry wait nothing is asked; after it the update comes.
+    down = false
+    clock.t += 60_000
+    await s.service.refreshRemoteLibrary()
+    await new Promise((r) => setTimeout(r, 50))
+    expect(lists.count).toBe(1)
+    clock.t += 10 * 60_000
+    await s.service.refreshRemoteLibrary()
+    await vi.waitFor(async () => expect(await fs.readFile(target, 'utf8')).toBe('update'))
+    // A host gone offline is no notice; the update that came is.
+    await vi.waitFor(() => expect(notices.map((n) => n.error)).toEqual([undefined]))
+  })
+
+  it('a catch-up gives way to a download that starts, and resumes at a later refresh', async () => {
+    let hold = true
+    let started = false
+    const { s, target, fetched, games } = await catchUp({
+      beforeFile: async (path, signal) => {
+        if (!path.startsWith('Updates and DLC/')) return
+        started = true
+        if (hold) await blockUntilAborted(signal)
+      }
+    })
+    s.scan.run.mockImplementation(async () => {
+      if (!games.some((g) => g.id === 'rom:switch:other-local'))
+        games.push(
+          game({
+            id: 'rom:switch:other-local',
+            source: 'rom',
+            title: 'Other',
+            externalId: 'switch/Other.xci'
+          })
+        )
+    })
+    await s.service.start()
+    await s.service.refreshRemoteLibrary()
+    await vi.waitFor(() => expect(started).toBe(true))
+    const progress = recorder(s.events, 'streaming:download')
+    await s.service.downloadRemoteRom('remote:host-1:rom:switch:other')
+    await until(() => progress.some((p) => p.state !== 'downloading'))
+    expect(progress[progress.length - 1]).toMatchObject({ state: 'done' })
+    await expect(fs.stat(target)).rejects.toThrow()
+    expect(fetched).toEqual(['switch/Other.xci'])
+    // Not marked as checked: the next refresh fetches it.
+    hold = false
+    await s.service.refreshRemoteLibrary()
+    await vi.waitFor(async () => expect(await fs.readFile(target, 'utf8')).toBe('update'))
+  })
+
+  it('a catch-up stops when its game is deleted from this PC, and its half-fetched file goes', async () => {
+    let started = false
+    const { s, target } = await catchUp({
+      beforeFile: async (path, signal) => {
+        if (!path.startsWith('Updates and DLC/')) return
+        started = true
+        await blockUntilAborted(signal)
+      }
+    })
+    await s.service.start()
+    await s.service.refreshRemoteLibrary()
+    await vi.waitFor(() => expect(started).toBe(true))
+    await s.service.stopUpdatesFetch!('rom:switch:local')
+    expect((await fs.readdir(join(target, '..'))).filter((n) => n.startsWith('TotK'))).toEqual([])
+    // Not fetched again meanwhile.
+    started = false
+    await s.service.refreshRemoteLibrary()
+    await new Promise((r) => setTimeout(r, 50))
+    expect(started).toBe(false)
+  })
+
+  it('PlayOut quitting stops a catch-up in progress', async () => {
+    let started = false
+    const { s, target } = await catchUp({
+      beforeFile: async (path, signal) => {
+        if (!path.startsWith('Updates and DLC/')) return
+        started = true
+        await blockUntilAborted(signal)
+      }
+    })
+    await s.service.start()
+    await s.service.refreshRemoteLibrary()
+    await vi.waitFor(() => expect(started).toBe(true))
+    await s.service.dispose()
+    await expect(fs.stat(target)).rejects.toThrow()
+  })
+
+  it("an update that cannot be fetched never fails the game's download", async () => {
+    const files: Record<string, string> = {
+      'switch/TotK.xci': 'game',
+      'Updates and DLC/Switch/TotK Update [0100F2C0115B6800].nsp': 'update'
+    }
+    const { s, romsRoot, games } = await client({
+      offer: [
+        game({
+          id: 'rom:switch:g',
+          source: 'rom',
+          title: 'TotK',
+          externalId: 'switch/TotK.xci',
+          platformId: 'switch'
+        })
+      ],
+      files,
+      beforeFile: async (path) => {
+        if (path.startsWith('Updates and DLC/')) throw new Error('the host refused the file')
+      }
+    })
+    s.scan.run.mockImplementation(async () => {
+      games.push(
+        game({
+          id: 'rom:switch:local',
+          source: 'rom',
+          title: 'TotK',
+          externalId: 'switch/TotK.xci'
+        })
+      )
+    })
+    const progress = recorder(s.events, 'streaming:download')
+    await s.service.start()
+    await s.service.refreshRemoteLibrary()
+    await s.service.downloadRemoteRom('remote:host-1:rom:switch:g')
+    await until(() => progress.some((p) => p.state !== 'downloading'))
+    expect(progress[progress.length - 1]).toMatchObject({ state: 'done' })
+    expect(await fs.readFile(join(romsRoot, 'switch', 'TotK.xci'), 'utf8')).toBe('game')
+  })
+
+  /** A game of this PC the host also has (and another it has alone), with one update this PC lacks. */
+  async function catchUp(
+    over: Omit<Parameters<typeof client>[0], 'offer' | 'files' | 'local' | 'filesFor'> = {}
+  ): Promise<Awaited<ReturnType<typeof client>> & { target: string }> {
+    const totk: Record<string, string> = {
+      'switch/TotK.xci': 'game',
+      'Updates and DLC/Switch/TotK Update [0100F2C0115B6800].nsp': 'update'
+    }
+    const other: Record<string, string> = { 'switch/Other.xci': 'other' }
+    const local = game({
+      id: 'rom:switch:local',
+      source: 'rom',
+      title: 'TotK',
+      externalId: 'switch/TotK.xci',
+      platformId: 'switch',
+      launch: { kind: 'emulator', systemId: 'switch', romPath: '' }
+    })
+    const offer = [
+      game({
+        id: 'rom:switch:g',
+        source: 'rom',
+        title: 'TotK',
+        externalId: 'switch/TotK.xci',
+        platformId: 'switch'
+      }),
+      game({
+        id: 'rom:switch:other',
+        source: 'rom',
+        title: 'Other',
+        externalId: 'switch/Other.xci',
+        platformId: 'switch'
+      })
+    ]
+    const c = await client({
+      offer,
+      files: { ...totk, ...other },
+      filesFor: (gameId) => (gameId === 'rom:switch:other' ? other : totk),
+      local: [local],
+      ...over
+    })
+    const target = join(c.emu, 'Updates and DLC', 'Switch', 'TotK Update [0100F2C0115B6800].nsp')
+    return { ...c, target }
+  }
+
+  /** Waits until `signal` aborts (or forever), then rejects. */
+  const blockUntilAborted = (signal?: AbortSignal): Promise<void> =>
+    new Promise((_, reject) => {
+      if (signal?.aborted) return reject(new Error('aborted'))
+      signal?.addEventListener('abort', () => reject(new Error('aborted')), { once: true })
+    })
+})
+
 describe("a game's texture packs", () => {
   const ctx = { client: { id: 'client-1', name: 'Laptop' }, address: '192.168.1.30' }
   const cnf = `BOOT2 = cdrom0:${String.fromCharCode(92)}SLUS_209.99;1\r\nVER = 1.00\r\n`

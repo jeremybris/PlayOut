@@ -133,9 +133,11 @@ import {
   openRomFile,
   romFileSet,
   romGamePath,
+  romTarget,
   type RomArea,
   type RomDownloadStep,
   type RomFetchRequest,
+  type RomFile,
   type RomFileSet
 } from './rom-transfer'
 import {
@@ -143,8 +145,15 @@ import {
   PS3_HDD_AREA,
   activePs3HddDir,
   ps3HddFiles,
-  ps3TitleIds
+  ps3TitleIds,
+  updatesDlcDir
 } from '../emulation/ps3-hdd'
+import {
+  isUpdatesDlcTransferPath,
+  UPDATES_DLC_AREA,
+  updatesDlcFiles,
+  type UpdatesDlcGame
+} from '../emulation/updates-dlc'
 import { createGameIdReader, idsFromName, type ChdReader } from '../emulation/disc-id'
 import {
   gameIdKindOf,
@@ -453,6 +462,11 @@ export interface StreamingService {
   /** Files a paired client is downloading from this PC right now (absolute paths). */
   filesBeingSent?(): string[]
   /**
+   * "Delete from this PC" of this game: a background fetch of its missing updates and DLC stops (its half-fetched
+   * files go), and none starts for it for a while, so nothing comes back once it is deleted.
+   */
+  stopUpdatesFetch?(gameId: string): Promise<void>
+  /**
    * The Emulation folder is being moved (Settings › Library): no sync pass starts (one under way stops) and the host
    * refuses its clients' sync requests (busy) until the returned function is called.
    */
@@ -476,6 +490,16 @@ const ARM_MS = 2 * 60_000
 /** Moonlight finishes its side of the pairing a moment after the host reports it done. */
 const PAIR_SETTLE_MS = 2_000
 const ROM_SET_CACHE_MS = 5 * 60_000
+/** The systems whose games' updates and DLC a game already downloaded fetches when they are missing. */
+const UPDATES_SYSTEMS = ['ps3', 'switch', 'xbox360']
+/** How often each such game is checked against its host (a check lists its files, cheap when nothing is missing). */
+const UPDATES_CHECK_MS = 6 * 60 * 60_000
+/** A check that failed (the host went offline, no room) is tried again after this long. */
+const UPDATES_RETRY_MS = 10 * 60_000
+/** Games checked per refresh at most (each check has the host list the game's files). */
+const UPDATES_CHECKS_PER_RUN = 20
+/** A game being deleted from this PC is not fetched for this long. */
+const UPDATES_HOLD_MS = 10 * 60_000
 /** A set whose game id lookup was cut short (the deadline, the CHD helper not answering) is built again sooner. */
 const ROM_SET_INCOMPLETE_CACHE_MS = 60_000
 /** A download resumed after a restart waits this long at most for the hosts' first answer before it looks the game up. */
@@ -1233,7 +1257,11 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
       const built = await withTexturePacks(
         game,
         romsRoot,
-        await withPs3Hdd(game, romsRoot, await romFileSet(game, romsRoot))
+        await withUpdatesDlc(
+          game,
+          romsRoot,
+          await withPs3Hdd(game, romsRoot, await romFileSet(game, romsRoot))
+        )
       )
       let set = built.set
       // A set that lost its texture packs only because the id could not be read this time keeps the last set's.
@@ -1267,6 +1295,15 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
     return f.path.toLowerCase().startsWith(`${TEXTURE_AREA.toLowerCase()}/`)
   }
 
+  /** A game's updates or DLC in a host's list: its PS3 HDD files, or its Switch / Xbox 360 Updates and DLC files. */
+  function isUpdatesEntry(f: { path: string }): boolean {
+    const path = f.path.toLowerCase()
+    return (
+      path.startsWith(`${PS3_HDD_AREA.toLowerCase()}/`) ||
+      path.startsWith(`${UPDATES_DLC_AREA.toLowerCase()}/`)
+    )
+  }
+
   /**
    * The PS3 HDD (Emulation\Updates and DLC\PS3), as a set's files outside the ROM folder are named on the wire
    * ('PS3 HDD/dev_hdd0/...', PS3_HDD_AREA): a client puts them in its own Updates and DLC\PS3\dev_hdd0 (or in its
@@ -1286,9 +1323,74 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
             allows: isTexturePackTransferPath,
             // A texture file already on this PC (its own pack, or one edited here) is never replaced.
             keepExisting: true
+          },
+          {
+            // A Switch / Xbox 360 game's updates and DLC ('Updates and DLC/Switch/...'): this PC's own Updates and DLC.
+            name: UPDATES_DLC_AREA,
+            dir: updatesDlcDir(deps.emulationDir()),
+            allows: isUpdatesDlcTransferPath,
+            // A copy of the same size already here (copied by hand) is kept; a newer one too (mtimeMs).
+            keepSameSize: true,
+            label: tMain('mainStreaming.download.updatesDlcFolder'),
+            // Extras: after the game, and one that cannot come (no room, the host still writing it) never fails the
+            // game's download (the catch-up below fetches it later).
+            optional: true
           }
         ]
       : []
+  }
+
+  /** A ROM game as updates-dlc.ts matches it: its system, its ROM, its names. */
+  function updatesDlcRef(g: Game, romsRoot: string): UpdatesDlcGame | null {
+    if (g.launch.kind !== 'emulator' || g.source !== 'rom' || g.remote || g.romRemoved) return null
+    return {
+      id: g.id,
+      systemId: g.launch.systemId,
+      romPath: romGamePath(g, romsRoot),
+      titles: [g.title, g.user?.titleOverride].filter((t): t is string => !!t)
+    }
+  }
+
+  /**
+   * A Switch or Xbox 360 game's set also holds its updates and DLC: the entries of Emulation\Updates and DLC\Switch /
+   * \Xbox360 that belong to it by title id or by a similar name (updates-dlc.ts; the library's other games of the
+   * system keep theirs), sent as 'Updates and DLC/Switch/...' for the client's own Updates and DLC.
+   */
+  async function withUpdatesDlc(
+    game: Game,
+    romsRoot: string,
+    set: RomFileSet
+  ): Promise<RomFileSet> {
+    const self = updatesDlcRef(game, romsRoot)
+    if (!self || (self.systemId !== 'switch' && self.systemId !== 'xbox360') || !deps.emulationDir)
+      return set
+    try {
+      const others = library
+        .games()
+        .filter((g) => g.id !== game.id)
+        .map((g) => updatesDlcRef(g, romsRoot))
+        .filter((g): g is UpdatesDlcGame => !!g && g.systemId === self.systemId)
+      const extra = await updatesDlcFiles(self, deps.emulationDir(), others, (m) =>
+        log.warn(`updates and DLC of ${game.title}: ${m}`)
+      )
+      if (!extra.length) return set
+      const seen = new Set(set.files.map((f) => f.path.toLowerCase()))
+      const files = [...set.files]
+      for (const file of extra) {
+        const path = `${UPDATES_DLC_AREA}/${file.path}`
+        if (seen.has(path.toLowerCase())) continue
+        seen.add(path.toLowerCase())
+        files.push({ path, size: file.size, mtimeMs: file.mtimeMs })
+      }
+      if (files.length > set.files.length)
+        log.info(
+          `updates and DLC: ${files.length - set.files.length} file(s) go with ${game.title}`
+        )
+      return { files, totalBytes: files.reduce((sum, f) => sum + f.size, 0) }
+    } catch (err) {
+      log.warn(`updates and DLC of ${game.title}: ${message(err)}`)
+      return set
+    }
   }
 
   /**
@@ -1553,7 +1655,8 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
         // inside its ROM folder.
         const unknown = [
           ...(options.ps3Hdd ? [] : [PS3_HDD_AREA]),
-          ...(options.textures ? [] : [TEXTURE_AREA])
+          ...(options.textures ? [] : [TEXTURE_AREA]),
+          ...(options.updatesDlc ? [] : [UPDATES_DLC_AREA])
         ].map((area) => `${area.toLowerCase()}/`)
         if (!unknown.length) return set
         const files = set.files.filter((f) => {
@@ -3004,6 +3107,7 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
     refreshedOnce()
     if (online.length) {
       syncFromHosts()
+      fetchMissingUpdates()
       syncEmulation()
       // After rebuild(): the favourites and the play time need the hosts' fresh offers.
       exchangeFavoritesNow()
@@ -3227,6 +3331,209 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
           syncFromHosts()
         }
       })
+  }
+
+  // --- missing updates and DLC of games already downloaded -----------------------------------------------------------
+
+  /**
+   * What the catch-up remembers across restarts (userData/streaming/updates-catch-up.json), so a start neither checks
+   * every game against its host at once nor brings back an update the user deleted: when each (game of this PC, host,
+   * host game) was last checked, and per game of this PC the host's files (paths on the wire, lower case) that it
+   * already had or fetched once.
+   */
+  interface UpdatesMemory {
+    checked: Record<string, number>
+    known: Record<string, string[]>
+  }
+  const updatesMemoryFile = join(deps.dataDir, 'updates-catch-up.json')
+  let updatesMemory: UpdatesMemory | null = null
+  let updatesMemorySave: Promise<void> = Promise.resolve()
+
+  async function loadUpdatesMemory(): Promise<UpdatesMemory> {
+    if (updatesMemory) return updatesMemory
+    const memory: UpdatesMemory = { checked: {}, known: {} }
+    try {
+      const raw = JSON.parse(await fs.readFile(updatesMemoryFile, 'utf8')) as Partial<UpdatesMemory>
+      for (const [k, v] of Object.entries(raw.checked ?? {}))
+        if (typeof v === 'number' && Number.isFinite(v)) memory.checked[k] = v
+      for (const [k, v] of Object.entries(raw.known ?? {}))
+        if (Array.isArray(v)) memory.known[k] = v.filter((p): p is string => typeof p === 'string')
+    } catch {
+      // None yet, or unreadable: every game is checked once more.
+    }
+    updatesMemory ??= memory
+    return updatesMemory
+  }
+
+  /** Writes the memory (the games no longer in the library dropped), one write after another. */
+  function saveUpdatesMemory(): void {
+    const memory = updatesMemory
+    if (!memory) return
+    for (const id of Object.keys(memory.known)) if (!library.getGame(id)) delete memory.known[id]
+    for (const key of Object.keys(memory.checked))
+      if (!library.getGame(key.split('|')[0]!)) delete memory.checked[key]
+    const text = JSON.stringify(memory)
+    updatesMemorySave = updatesMemorySave.then(async () => {
+      try {
+        await fs.mkdir(deps.dataDir, { recursive: true })
+        const tmp = `${updatesMemoryFile}.tmp`
+        await fs.writeFile(tmp, text)
+        await fs.rename(tmp, updatesMemoryFile)
+      } catch (err) {
+        log.warn(`updates and DLC catch-up: not saved: ${message(err)}`)
+      }
+    })
+  }
+
+  let updatesRun: Promise<void> | null = null
+  /** The catch-up fetch in progress: its game, and how to stop it (dropParts: its .part files go too). */
+  let updatesFetch: { gameId: string; ac: AbortController; dropParts: boolean } | null = null
+  /** Games being deleted from this PC (stopUpdatesFetch): not fetched for a while, so nothing comes back meanwhile. */
+  const updatesHeld = new Map<string, number>()
+  /** Games whose catch-up failure was already shown this run (one notice each; the log has the rest). */
+  const updatesFailureShown = new Set<string>()
+
+  /**
+   * A PS3 / Switch / Xbox 360 ROM game this PC already has, which a host also has, gets the updates and DLC the host
+   * has for it and this PC lacks (a game downloaded before the host had them, or before PlayOut sent them along):
+   * after each refresh that reached a host, each such game at most once per UPDATES_CHECK_MS (a failed check again
+   * after UPDATES_RETRY_MS), UPDATES_CHECKS_PER_RUN games per refresh at most, in the background, one game at a time.
+   * Only what is missing comes: a file already here is never replaced, and one this PC had once (deleted since) is not
+   * fetched again. Nothing is ever deleted. It gives way to a download (stopped when one starts, resumed later), and a
+   * notice says what came ('streaming:updates').
+   */
+  function fetchMissingUpdates(): void {
+    if (disposed || updatesRun || !deps.emulationDir) return
+    updatesRun = runMissingUpdates()
+      .catch((err) => log.warn(`updates and DLC from the hosts: ${message(err)}`))
+      .finally(() => {
+        updatesRun = null
+      })
+  }
+
+  async function runMissingUpdates(): Promise<void> {
+    const romsRoot = settings.get().library.romsRoot
+    if (!romsRoot) return
+    const memory = await loadUpdatesMemory()
+    let checks = 0
+    for (const [gameId, infos] of Object.entries(remote.alsoOnHost)) {
+      if (disposed || downloads.size) return
+      if (gameId.startsWith('remote:')) continue
+      if (now() - (updatesHeld.get(gameId) ?? -Infinity) < UPDATES_HOLD_MS) continue
+      const mine = library.getGame(gameId)
+      if (!mine || mine.source !== 'rom' || mine.romRemoved || mine.launch.kind !== 'emulator')
+        continue
+      const systemId = mine.launch.systemId
+      if (!UPDATES_SYSTEMS.includes(systemId)) continue
+      const info = infos.find(
+        (i) => runtimes.get(i.hostId)?.online && i.hostGameId.startsWith(`rom:${systemId}:`)
+      )
+      const h = info && storedHost(info.hostId)
+      if (!info || !h || !hostGameOf(info.hostId, info.hostGameId)) continue
+      const key = `${gameId}|${info.hostId}|${info.hostGameId}`
+      if (now() - (memory.checked[key] ?? -Infinity) < UPDATES_CHECK_MS) continue
+      // A few games per refresh: the host builds each game's whole file list for it.
+      if (++checks > UPDATES_CHECKS_PER_RUN) return
+      const outcome = await fetchUpdatesOf(mine, h, info.hostGameId, romsRoot, memory)
+      // Stopped (a download started, the game is being deleted): not recorded, so it is checked again later.
+      if (outcome === 'stopped') return
+      memory.checked[key] = outcome === 'done' ? now() : now() - UPDATES_CHECK_MS + UPDATES_RETRY_MS
+      saveUpdatesMemory()
+    }
+  }
+
+  /** One game's missing updates and DLC from host `h` (see fetchMissingUpdates). Never throws. */
+  async function fetchUpdatesOf(
+    mine: Game,
+    h: StoredHost,
+    hostGameId: string,
+    romsRoot: string,
+    memory: UpdatesMemory
+  ): Promise<'done' | 'failed' | 'stopped'> {
+    const run = { gameId: mine.id, ac: new AbortController(), dropParts: false }
+    updatesFetch = run
+    const title = displayTitle(mine)
+    try {
+      const { conn } = await reach(h)
+      const list = await conn.romFiles(hostGameId)
+      if (run.ac.signal.aborted) return 'stopped'
+      // Only adds: a file already here is kept as it is (keepExisting), whatever its size or time.
+      const areas = (await romAreas()).map((a) => ({ ...a, keepExisting: true, optional: false }))
+      const known = new Set(memory.known[mine.id] ?? [])
+      const want: RomFile[] = []
+      for (const f of list.files.filter(isUpdatesEntry)) {
+        const target = romTarget(romsRoot, f.path, areas)
+        if (!target) continue
+        const key = f.path.toLowerCase()
+        const here = await fs.stat(target).then(
+          () => true,
+          () => false
+        )
+        if (here) known.add(key)
+        // Here once and gone since: deleted on purpose, not fetched again.
+        else if (!known.has(key)) want.push(f)
+      }
+      if (want.length) {
+        await downloadRomSet({
+          files: want,
+          destRoot: romsRoot,
+          areas,
+          signal: run.ac.signal,
+          // Stopped for a delete: its half-fetched files go too (otherwise they stay, to resume from).
+          get removePartsOnCancel() {
+            return run.dropParts
+          },
+          fetchFile: fetcher((...args) => conn.downloadFile(...args), hostGameId)
+        })
+        for (const f of want) known.add(f.path.toLowerCase())
+        const bytes = want.reduce((sum, f) => sum + f.size, 0)
+        log.info(
+          `${title}: fetched ${want.length} missing update and DLC file(s) (${(bytes / 1024 ** 2).toFixed(1)} MB) from ${h.name}`
+        )
+        if (!disposed)
+          events.emit('streaming:updates', { title, hostName: h.name, files: want.length, bytes })
+      }
+      memory.known[mine.id] = [...known]
+      return 'done'
+    } catch (err) {
+      if (run.ac.signal.aborted) return 'stopped'
+      log.warn(`missing updates and DLC of ${title} from ${h.name}: ${message(err)}`)
+      // A host gone offline is retried quietly; anything else (no room, a refused file) is shown once.
+      if (!disposed && !isHostUnreachable(err) && !updatesFailureShown.has(mine.id)) {
+        updatesFailureShown.add(mine.id)
+        events.emit('streaming:updates', {
+          title,
+          hostName: h.name,
+          files: 0,
+          bytes: 0,
+          error: message(err)
+        })
+      }
+      return 'failed'
+    } finally {
+      if (updatesFetch === run) updatesFetch = null
+    }
+  }
+
+  /**
+   * Stops the catch-up fetch in progress (any, or only `gameId`'s) and waits for it to let go of its files.
+   * `forDelete`: the game is being deleted from this PC: its half-fetched files go too, it is not fetched for a while,
+   * and what the catch-up remembered of it is forgotten.
+   */
+  async function stopUpdatesFetch(gameId?: string, forDelete = false): Promise<void> {
+    if (gameId && forDelete) {
+      updatesHeld.set(gameId, now())
+      if (updatesMemory) {
+        delete updatesMemory.known[gameId]
+        for (const key of Object.keys(updatesMemory.checked))
+          if (key.startsWith(`${gameId}|`)) delete updatesMemory.checked[key]
+      }
+    }
+    const run = updatesFetch
+    if (!run || (gameId && run.gameId !== gameId)) return
+    run.dropParts = forDelete
+    run.ac.abort()
+    await updatesRun
   }
 
   /** An image that failed lately is not asked for on every refresh (the host lists it but cannot serve it). */
@@ -3917,6 +4224,13 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
               `${job.title}: ${textures.length} texture pack file(s) (${mb.toFixed(1)} MB) come along to texturepacks`
             )
           }
+          const updates = list.files.filter(isUpdatesEntry)
+          if (updates.length && attempt === 1) {
+            const mb = updates.reduce((sum, f) => sum + f.size, 0) / 1024 ** 2
+            log.info(
+              `${job.title}: ${updates.length} update and DLC file(s) (${mb.toFixed(1)} MB) come along to Updates and DLC`
+            )
+          }
           // downloadRomSet writes the game's sheets (.cue, .m3u, ...) last, so no scan meanwhile imports half a game.
           await downloadRomSet({
             files: list.files,
@@ -3924,6 +4238,8 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
             // A PS3 game's updates and DLC go to this PC's PS3 HDD, its texture packs to this PC's texturepacks.
             areas: await romAreas(),
             signal: job.ac.signal,
+            onSkipped: (path, reason) =>
+              log.warn(`${job.title}: ${path} skipped (fetched later): ${reason}`),
             // The progress events are spaced out; counting the bytes as they arrive too keeps `lastStep` exact for
             // the 'paused' event (the next progress event replaces it with the same count).
             fetchFile: (req) =>
@@ -4131,6 +4447,8 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
       }
       downloads.set(job.gameId, job)
       jobs.add(job)
+      // A catch-up fetch of missing updates gives way (its .part files stay; it resumes at a later refresh).
+      void stopUpdatesFetch()
       emitDownload(job, 'downloading')
       job.settled = runDownload(job, target.h, target.romsRoot)
       // Stops this job only, never a newer download of the same game. Paused or cancelled alike, the .part files stay
@@ -4232,6 +4550,7 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
 
   return {
     filesBeingSent: () => server?.filesBeingSent?.() ?? [],
+    stopUpdatesFetch: (gameId) => stopUpdatesFetch(gameId, true),
     holdEmulationSync() {
       emuHolds++
       emuAbort?.abort()
@@ -4548,6 +4867,7 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
         emitStatus()
         if (!ok) return
         syncFromHosts()
+        fetchMissingUpdates()
         // The Emulation folder at once (BIOS, saves, ...: everything but roms, Updates and DLC and texturepacks), not
         // at the next refresh: on a new PC its first pass downloads the host's folder.
         syncEmulation()
@@ -4697,6 +5017,7 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
       ])
         if (t) clearTimeout(t)
       emuAbort?.abort()
+      updatesFetch?.ac.abort()
       if (refreshTimer) clearInterval(refreshTimer)
       for (const job of jobs) job.ac.abort()
       offersLoadedOnce()
@@ -4722,6 +5043,9 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
       await Promise.all(offerSaves)
       await tabsSync?.flush()
       await recencyRelay.flush()
+      // A fetch of missing updates and DLC (aborted above) has let go of its files, and what it remembers is saved.
+      await updatesRun
+      await updatesMemorySave
       // A start in progress may be waiting on the router: give it a moment, so a mapping it gets now is released below
       // (one that comes even later is deleted by mapPort itself, which sees the service disposed).
       await withTimeout(hostTask, MAPPING_DELETE_WAIT_MS, 'host start').catch(() => undefined)

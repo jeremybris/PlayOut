@@ -16,6 +16,7 @@
     "closing": "PlayOut se está cerrando",
     "cancelled": "Descarga cancelada",
     "romFolder": "carpeta de ROM",
+    "updatesDlcFolder": "carpeta Updates and DLC",
     "noSpace": "No hay suficiente espacio libre en la {place} (se necesitan {needed}, hay {free} libres)",
     "tooMuchDataFor": "El host envió más datos de los esperados para {file}",
     "stoppedEarly": "La descarga de {file} se detuvo antes de terminar"

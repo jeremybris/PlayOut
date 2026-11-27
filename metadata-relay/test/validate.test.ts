@@ -116,6 +116,14 @@ describe('validateSuggestion', () => {
       'controls.keyboard'
     ],
     [
+      { fields: { controls: { controller: 'none', vr: 'none', lightgun: 'yes' } } },
+      'controls.lightgun'
+    ],
+    [
+      { fields: { controls: { controller: 'none', vr: 'none', lightGun: true } } },
+      'not an editable field'
+    ],
+    [
       { fields: { controls: { controller: 'full', vr: 'none', mouse: true } } },
       'not an editable field'
     ],
@@ -150,7 +158,7 @@ describe('validateSuggestion', () => {
   })
 })
 
-describe('controls: touch and keyboard', () => {
+describe('controls: touch, keyboard and lightgun', () => {
   it('accepts touch and keyboard, keeping them only when true', () => {
     const all = suggest({
       fields: { controls: { controller: 'full', vr: 'supported', keyboard: true } }
@@ -168,6 +176,22 @@ describe('controls: touch and keyboard', () => {
     })
     const off = suggest({
       fields: { controls: { controller: 'full', vr: 'none', touch: false, keyboard: false } }
+    })
+    expect(off.ok && off.value.fields.controls).toEqual({ controller: 'full', vr: 'none' })
+  })
+
+  it('accepts lightgun, keeping it only when true', () => {
+    const gun = suggest({
+      fields: { controls: { controller: 'none', vr: 'none', lightgun: true, keyboard: true } }
+    })
+    expect(gun.ok && gun.value.fields.controls).toEqual({
+      controller: 'none',
+      vr: 'none',
+      lightgun: true,
+      keyboard: true
+    })
+    const off = suggest({
+      fields: { controls: { controller: 'full', vr: 'none', lightgun: false } }
     })
     expect(off.ok && off.value.fields.controls).toEqual({ controller: 'full', vr: 'none' })
   })

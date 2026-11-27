@@ -14,7 +14,13 @@ import type {
   Settings
 } from '../../shared/types'
 import { RA_NONE } from '../../shared/ra-consoles'
+import {
+  knownWithoutSteamAchievements,
+  STEAM_ACHIEVEMENTS_NONE,
+  STEAM_ACHIEVEMENTS_SOURCE
+} from '../../shared/steam-achievements'
 import { EventBus } from '../events'
+import { HttpError } from '../scrapers/http'
 import { LibraryService } from '../services/library-service'
 import { LibraryStore } from '../store/library-store'
 import { SessionsStore } from '../store/sessions-store'
@@ -22,6 +28,7 @@ import { SettingsStore } from '../store/settings-store'
 import {
   createAchievementsService,
   RA_SOURCE,
+  type AchievementsDeps,
   type AchievementsOptions,
   type AchievementsService
 } from './achievements-service'
@@ -143,10 +150,22 @@ const setRaCreds = (username = 'Jeremy', apiKey = 'ra-key'): void =>
     s.scrapers.retroachievements = { username, apiKey }
   })
 
-function createService(options: AchievementsOptions = {}): AchievementsService {
+function createService(
+  options: AchievementsOptions = {},
+  extraDeps: Pick<AchievementsDeps, 'gameRunning'> = {}
+): AchievementsService {
   service = createAchievementsService(
-    { settings, library, events, log, cacheDir: join(dir, 'achievements') },
-    { settingsDelayMs: 5, ...options }
+    { settings, library, events, log, cacheDir: join(dir, 'achievements'), ...extraDeps },
+    {
+      settingsDelayMs: 5,
+      // The Steam scan runs when a test asks (syncSteam), without its start-up wait or request gaps. Steam's own list
+      // says every game has achievements unless a test says otherwise.
+      steamStartDelayMs: 0,
+      steamKickDelayMs: 5,
+      steamScanGapMs: 0,
+      steamCount: vi.fn(async () => 5),
+      ...options
+    }
   )
   return service
 }
@@ -222,7 +241,8 @@ afterEach(async () => {
   expect(fetchStub).not.toHaveBeenCalled()
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
-  await fs.rm(dir, { recursive: true, force: true })
+  // A scan record still being saved by the disposed service: removing the folder tries again.
+  await fs.rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 20 })
 })
 
 // ---------------------------------------------------------------------------
@@ -280,19 +300,21 @@ describe('syncSteam', () => {
     expect(changed).toHaveLength(1)
     expect([...changed[0]].sort()).toEqual(['epic:hades', 'steam:620'])
 
-    // Unchanged counts are not written again.
+    // Nothing was played since: nothing is read again.
     const before = library.getGame('steam:620')?.metadata.achievements?.updatedAt
     await sleep(5)
     await svc.syncSteam()
-    expect(steamProgress).toHaveBeenCalledTimes(2)
+    expect(steamProgress).toHaveBeenCalledTimes(1)
     expect(changed).toHaveLength(1)
     expect(library.getGame('steam:620')?.metadata.achievements?.updatedAt).toBe(before)
 
-    // A changed count is.
+    // A PlayOut session of one game ended: that game alone is read again, and its changed count written.
     answers.set(620, { unlocked: 4, total: 51 })
-    await svc.syncSteam()
+    svc.steamPlayed('steam:620', new Date().toISOString())
+    await until(() => library.getGame('steam:620')?.metadata.achievements?.unlocked === 4)
+    expect(steamProgress).toHaveBeenCalledTimes(2)
+    expect(steamProgress.mock.calls[1][0]).toEqual([620])
     expect(changed).toEqual([changed[0], ['steam:620']])
-    expect(library.getGame('steam:620')?.metadata.achievements?.unlocked).toBe(4)
   })
 
   it("uses the signed-in account's access token without a Settings key", async () => {
@@ -333,8 +355,9 @@ describe('syncSteam', () => {
     expect(steamProgress).toHaveBeenCalledTimes(2)
     expect(library.getGame('steam:620')?.metadata.achievements?.unlocked).toBe(2)
 
-    // Refused again with the fresh token: given up (no third try), nothing written, nothing thrown.
-    library.clearAchievements(['steam:620'])
+    // Refused again with the fresh token: given up (no third try), nothing written, nothing thrown. (The sign-out
+    // takes the counts off and makes the game due again.)
+    svc.steamSignedOut()
     account.mockClear()
     steamProgress.mockClear()
     steamProgress.mockRejectedValue(new SteamAuthError())
@@ -777,20 +800,27 @@ describe('Steam account changes', () => {
       .mockResolvedValueOnce(new Map([[620, { unlocked: 2, total: 51 }]]))
       .mockImplementationOnce(async () => {
         await gate
-        return new Map([[620, { unlocked: 8, total: 51 }]])
+        return new Map([[440, { unlocked: 8, total: 51 }]])
       })
     const svc = createService({ steamProgress })
     svc.useSteamAccount(token())
     await svc.syncSteam()
     expect(library.getGame('steam:620')?.metadata.achievements?.unlocked).toBe(2)
 
+    // A game added since is read; the account signs out meanwhile.
+    library.mergeScan('steam', [
+      scanned(),
+      scanned({ externalId: '440', title: 'Team Fortress 2', extra: { steamAppId: 440 } })
+    ])
     const running = svc.syncSteam()
     await until(() => steamProgress.mock.calls.length === 2)
+    expect(steamProgress.mock.calls[1][0]).toEqual([440])
     svc.steamSignedOut()
     expect(library.getGame('steam:620')?.metadata.achievements).toBeUndefined()
     release()
     await running
     expect(library.getGame('steam:620')?.metadata.achievements).toBeUndefined()
+    expect(library.getGame('steam:440')?.metadata.achievements).toBeUndefined()
   })
 
   it('reads the counts again with the Settings key after a sign-out', async () => {
@@ -1072,5 +1102,557 @@ describe('recompilation achievements', () => {
     )
     expect(await svc.get(id)).toBeNull()
     expect(library.getGame(id)?.metadata.achievements).toBeUndefined()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Steam: games without achievements, and the background scan
+// ---------------------------------------------------------------------------
+
+describe("Steam's 'no achievements'", () => {
+  const COD_UO = scanned({
+    externalId: '2640',
+    title: 'Call of Duty: United Offensive',
+    extra: { steamAppId: 2640 }
+  })
+  const token = (): (() => Promise<SteamCredential>) =>
+    vi.fn(async () => ({ steamId64: '7656119', accessToken: 'stored' }))
+
+  it('marks a game Steam lists no achievements for, and its page asks nothing more', async () => {
+    library.mergeScan('steam', [COD_UO])
+    changed = []
+    const steamGame = vi.fn<Opt<'steamGame'>>(async () => null)
+    const steamCount = vi.fn<Opt<'steamCount'>>(async () => 0)
+    const svc = createService({ steamGame, steamCount })
+    svc.useSteamAccount(token())
+    await expect(svc.get('steam:2640')).resolves.toBeNull()
+    expect(steamCount).toHaveBeenCalledWith(2640)
+    expect(library.getGame('steam:2640')?.metadata.sources?.[STEAM_ACHIEVEMENTS_SOURCE]).toBe(
+      STEAM_ACHIEVEMENTS_NONE
+    )
+    expect(knownWithoutSteamAchievements(library.getGame('steam:2640')!)).toBe(true)
+    expect(changed).toContainEqual(['steam:2640'])
+    await svc.get('steam:2640')
+    expect(steamGame).toHaveBeenCalledTimes(1)
+    expect(steamCount).toHaveBeenCalledTimes(1)
+  })
+
+  it('is not taken from signing out, a failed check or a game with achievements', async () => {
+    library.mergeScan('steam', [COD_UO])
+    // Signed out, and Steam's own list could not be read: nothing is known.
+    const steamGame = vi.fn<Opt<'steamGame'>>(async () => null)
+    const steamCount = vi.fn<Opt<'steamCount'>>(async () => {
+      throw new Error('HTTP 503')
+    })
+    const svc = createService({ steamGame, steamCount })
+    await expect(svc.get('steam:2640')).resolves.toBeNull()
+    expect(knownWithoutSteamAchievements(library.getGame('steam:2640')!)).toBe(false)
+    // Signed out, and Steam lists achievements: the page keeps its sign-in hint.
+    steamCount.mockResolvedValue(12)
+    await expect(svc.get('steam:2640')).resolves.toBeNull()
+    expect(library.getGame('steam:2640')?.metadata.sources?.[STEAM_ACHIEVEMENTS_SOURCE]).toBe(
+      undefined
+    )
+    // Signed in, the list came: no check needed.
+    steamGame.mockResolvedValue(listInfo(1, 12))
+    steamCount.mockClear()
+    svc.useSteamAccount(token())
+    await expect(svc.get('steam:2640')).resolves.toMatchObject({ unlocked: 1, total: 12 })
+    expect(steamCount).not.toHaveBeenCalled()
+  })
+
+  it('replaces the mark with counts once Steam has achievements for the game', async () => {
+    library.mergeScan('steam', [COD_UO])
+    library.applyMetadata('steam:2640', {
+      metadata: { sources: { [STEAM_ACHIEVEMENTS_SOURCE]: STEAM_ACHIEVEMENTS_NONE } }
+    })
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(
+      async () => new Map([[2640, { unlocked: 0, total: 3 }]])
+    )
+    const svc = createService({ steamProgress })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    const game = library.getGame('steam:2640')!
+    expect(game.metadata.achievements).toMatchObject({ unlocked: 0, total: 3 })
+    expect(game.metadata.sources?.[STEAM_ACHIEVEMENTS_SOURCE]).toBeUndefined()
+  })
+})
+
+describe('Steam achievements scan', () => {
+  const token = (): (() => Promise<SteamCredential>) =>
+    vi.fn(async () => ({ steamId64: '7656119', accessToken: 'stored' }))
+  const TF2 = scanned({ externalId: '440', title: 'Team Fortress 2', extra: { steamAppId: 440 } })
+  const COD = scanned({ externalId: '2640', title: 'CoD UO', extra: { steamAppId: 2640 } })
+  const scanRecord = async (): Promise<Record<string, { at?: number; retryAt?: number }>> =>
+    JSON.parse(await fs.readFile(join(dir, 'achievements', 'steam-scans.json'), 'utf8'))
+
+  it('reads new games once (counts, or Steam\'s "none"), records them, and reads nothing again without play', async () => {
+    library.mergeScan('steam', [scanned(), COD])
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(
+      async () => new Map([[620, { unlocked: 3, total: 51 }]])
+    )
+    const steamCount = vi.fn<Opt<'steamCount'>>(async () => 0)
+    const svc = createService({ steamProgress, steamCount })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    expect(library.getGame('steam:620')?.metadata.achievements?.total).toBe(51)
+    // CoD had no counts: Steam's own list was asked, for it alone.
+    expect(steamCount.mock.calls).toEqual([[2640]])
+    expect(knownWithoutSteamAchievements(library.getGame('steam:2640')!)).toBe(true)
+    expect(Object.keys(await scanRecord()).sort()).toEqual(['steam:2640', 'steam:620'])
+
+    await svc.syncSteam()
+    svc.kickSteam()
+    await sleep(30)
+    expect(steamProgress).toHaveBeenCalledTimes(1)
+    expect(steamCount).toHaveBeenCalledTimes(1)
+
+    // A game added later is read alone.
+    library.mergeScan('steam', [scanned(), COD, TF2])
+    await svc.syncSteam()
+    expect(steamProgress).toHaveBeenCalledTimes(2)
+    expect(steamProgress.mock.calls[1][0]).toEqual([440])
+  })
+
+  it("reads a game again once Steam's last played or playtime moves past its last read", async () => {
+    library.mergeScan('steam', [scanned({ storePlaytimeMinutes: 10 }), TF2])
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(
+      async () =>
+        new Map([
+          [620, { unlocked: 1, total: 51 }],
+          [440, { unlocked: 1, total: 520 }]
+        ])
+    )
+    const svc = createService({ steamProgress })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    expect(steamProgress).toHaveBeenCalledTimes(1)
+    await sleep(5)
+
+    // An older last played changes nothing; a newer one (Steam's import) does, for that game only.
+    library.mergeScan('steam', [
+      scanned({ storePlaytimeMinutes: 10, lastPlayed: '2020-01-01T00:00:00.000Z' }),
+      { ...TF2, lastPlayed: new Date().toISOString() }
+    ])
+    await svc.syncSteam()
+    expect(steamProgress).toHaveBeenCalledTimes(2)
+    expect(steamProgress.mock.calls[1][0]).toEqual([440])
+
+    // More playtime on Steam: read again.
+    library.mergeScan('steam', [scanned({ storePlaytimeMinutes: 25 }), TF2])
+    await svc.syncSteam()
+    expect(steamProgress.mock.calls[2][0]).toEqual([620])
+    await svc.syncSteam()
+    expect(steamProgress).toHaveBeenCalledTimes(3)
+  })
+
+  it('keeps games waiting while nothing can read them, and reads them once an account appears', async () => {
+    library.mergeScan('steam', [scanned(), TF2])
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(
+      async () => new Map([[620, { unlocked: 2, total: 51 }]])
+    )
+    const steamCount = vi.fn<Opt<'steamCount'>>(async () => 5)
+    const svc = createService({ steamProgress, steamCount })
+    await svc.syncSteam()
+    svc.useSteamAccount(async () => null)
+    await svc.syncSteam()
+    expect(steamProgress).not.toHaveBeenCalled()
+    expect(steamCount).not.toHaveBeenCalled()
+
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    expect(library.getGame('steam:620')?.metadata.achievements?.unlocked).toBe(2)
+    // TF2: achievements, but none in this account's progress (another account owns it): read, nothing written.
+    expect(steamCount.mock.calls).toEqual([[440]])
+    expect(library.getGame('steam:440')?.metadata.achievements).toBeUndefined()
+    expect(knownWithoutSteamAchievements(library.getGame('steam:440')!)).toBe(false)
+    await svc.syncSteam()
+    expect(steamProgress).toHaveBeenCalledTimes(1)
+  })
+
+  it('asks for a hundred apps per request and resumes after a restart from its record', async () => {
+    const many = Array.from({ length: 150 }, (_, i) =>
+      scanned({ externalId: String(1000 + i), title: `Game ${i}`, extra: { steamAppId: 1000 + i } })
+    )
+    library.mergeScan('steam', many)
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(async (ids) => {
+      // The second request fails: those games are left for later.
+      if (steamProgress.mock.calls.length === 2) throw new Error('HTTP 502')
+      return new Map(ids.map((id) => [id, { unlocked: 0, total: 10 }]))
+    })
+    const first = createService({ steamProgress, steamBackoffMs: 60 * 60 * 1000 })
+    first.useSteamAccount(token())
+    await first.syncSteam()
+    expect(steamProgress.mock.calls.map((c) => c[0].length)).toEqual([100, 50])
+    first.dispose()
+    const record = await scanRecord()
+    expect(Object.values(record).filter((e) => e.at !== undefined)).toHaveLength(100)
+    expect(Object.values(record).filter((e) => e.retryAt)).toHaveLength(50)
+
+    // A restart: the record holds; the failed games wait out their pause, then only they are read.
+    steamProgress.mockClear()
+    const clock = vi.spyOn(Date, 'now')
+    const second = createService({ steamProgress, steamBackoffMs: 60 * 60 * 1000 })
+    second.useSteamAccount(token())
+    await second.syncSteam()
+    expect(steamProgress).not.toHaveBeenCalled()
+    clock.mockReturnValue(Date.now() + 2 * 60 * 60 * 1000)
+    await second.syncSteam()
+    expect(steamProgress).toHaveBeenCalledTimes(1)
+    expect(steamProgress.mock.calls[0][0]).toHaveLength(50)
+    clock.mockRestore()
+  })
+
+  it('backs off after a failure (a rate limit) and tries again by itself once the pause is over', async () => {
+    library.mergeScan('steam', [scanned()])
+    const steamProgress = vi
+      .fn<Opt<'steamProgress'>>()
+      .mockRejectedValueOnce(
+        new HttpError('HTTP 429', { status: 429, url: 'https://api.steampowered.com/x' })
+      )
+      .mockResolvedValue(new Map([[620, { unlocked: 6, total: 51 }]]))
+    const svc = createService({ steamProgress, steamBackoffMs: 80 })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    expect(steamProgress).toHaveBeenCalledTimes(1)
+    // Asked again at once (an import, a kick): the pause holds.
+    await svc.syncSteam()
+    svc.kickSteam()
+    expect(steamProgress).toHaveBeenCalledTimes(1)
+    expect(log.warn).toHaveBeenCalledWith(expect.stringContaining('rate limited'))
+    await until(() => library.getGame('steam:620')?.metadata.achievements?.unlocked === 6)
+    expect(steamProgress).toHaveBeenCalledTimes(2)
+  })
+
+  it('waits for the start-up delay before its first pass', async () => {
+    library.mergeScan('steam', [scanned()])
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(
+      async () => new Map([[620, { unlocked: 1, total: 51 }]])
+    )
+    const svc = createService({ steamProgress, steamStartDelayMs: 60 })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    svc.kickSteam()
+    expect(steamProgress).not.toHaveBeenCalled()
+    await until(() => steamProgress.mock.calls.length === 1)
+    expect(library.getGame('steam:620')?.metadata.achievements?.unlocked).toBe(1)
+  })
+
+  it('reads a game the page already read only after it is played again', async () => {
+    library.mergeScan('steam', [scanned()])
+    const steamGame = vi.fn<Opt<'steamGame'>>(async () => listInfo(4, 51))
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(
+      async () => new Map([[620, { unlocked: 5, total: 51 }]])
+    )
+    const svc = createService({ steamGame, steamProgress })
+    svc.useSteamAccount(token())
+    await svc.get('steam:620')
+    await svc.syncSteam()
+    expect(steamProgress).not.toHaveBeenCalled()
+    await sleep(5)
+    svc.steamPlayed('steam:620', new Date().toISOString())
+    await until(() => steamProgress.mock.calls.length === 1)
+    await until(() => library.getGame('steam:620')?.metadata.achievements?.unlocked === 5)
+  })
+})
+
+describe('Steam achievements scan: what it reads again, and when', () => {
+  const token = (): (() => Promise<SteamCredential>) =>
+    vi.fn(async () => ({ steamId64: '7656119', accessToken: 'stored' }))
+  const TF2 = scanned({ externalId: '440', title: 'Team Fortress 2', extra: { steamAppId: 440 } })
+  const COD = scanned({ externalId: '2640', title: 'CoD UO', extra: { steamAppId: 2640 } })
+  const scanRecord = async (): Promise<
+    Record<string, { at?: number; retryAt?: number; parkedAt?: number; none?: boolean }>
+  > => JSON.parse(await fs.readFile(join(dir, 'achievements', 'steam-scans.json'), 'utf8'))
+  const counts = (unlocked = 1): Mock<Opt<'steamProgress'>> =>
+    vi.fn<Opt<'steamProgress'>>(
+      async (ids) =>
+        new Map(ids.filter((id) => id !== 2640).map((id) => [id, { unlocked, total: 51 }]))
+    )
+  const known = (id: string): boolean => knownWithoutSteamAchievements(library.getGame(id)!)
+
+  it('keeps no mark when the store cannot say, and reads that game again only once played', async () => {
+    library.mergeScan('steam', [COD])
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(async () => new Map())
+    const steamCount = vi.fn<Opt<'steamCount'>>(async () => null)
+    const svc = createService({ steamProgress, steamCount })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    expect(known('steam:2640')).toBe(false)
+    expect((await scanRecord())['steam:2640'].at).toBeDefined()
+    await svc.syncSteam()
+    expect(steamCount).toHaveBeenCalledTimes(1)
+  })
+
+  it('puts the "none" mark back after a new metadata match dropped it, without asking Steam', async () => {
+    library.mergeScan('steam', [COD])
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(async () => new Map())
+    const steamCount = vi.fn<Opt<'steamCount'>>(async () => 0)
+    const steamGame = vi.fn<Opt<'steamGame'>>(async () => null)
+    const svc = createService({ steamProgress, steamCount, steamGame })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    expect(known('steam:2640')).toBe(true)
+    const rematch = (): void => {
+      library.applyMetadata(
+        'steam:2640',
+        { metadata: { sources: { steam: '2640' } } },
+        { overwrite: true, replaceSources: true }
+      )
+    }
+    // The page opens after the match: the stat stays hidden.
+    rematch()
+    expect(known('steam:2640')).toBe(false)
+    await expect(svc.get('steam:2640')).resolves.toBeNull()
+    expect(known('steam:2640')).toBe(true)
+    // Or the scan's next pass puts it back.
+    rematch()
+    await svc.syncSteam()
+    expect(known('steam:2640')).toBe(true)
+    expect(steamProgress).toHaveBeenCalledTimes(1)
+    expect(steamCount).toHaveBeenCalledTimes(1)
+    expect(steamGame).not.toHaveBeenCalled()
+  })
+
+  it('reads a game played here once, not again when Steam catches up with that session', async () => {
+    library.mergeScan('steam', [scanned({ storePlaytimeMinutes: 10 })])
+    const steamProgress = counts()
+    const svc = createService({ steamProgress })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    await sleep(5)
+    const session = library.beginSession('steam:620')
+    await sleep(5)
+    library.endSession(session, 30)
+    svc.steamPlayed('steam:620', new Date().toISOString())
+    await until(() => steamProgress.mock.calls.length === 2)
+    await sleep(20)
+    // Steam's import: the same session's playtime and Steam's own last played (its launch, just after).
+    const steamLaunch = new Date(Date.parse(session.startedAt) + 1).toISOString()
+    library.mergeScan('steam', [scanned({ storePlaytimeMinutes: 40, lastPlayed: steamLaunch })])
+    await svc.syncSteam()
+    await svc.syncSteam()
+    expect(steamProgress).toHaveBeenCalledTimes(2)
+    // A later play through Steam itself is new.
+    library.mergeScan('steam', [
+      scanned({ storePlaytimeMinutes: 70, lastPlayed: new Date(Date.now() + 1000).toISOString() })
+    ])
+    await svc.syncSteam()
+    expect(steamProgress).toHaveBeenCalledTimes(3)
+  })
+
+  it('reads a game again once a session played on a paired PC arrives', async () => {
+    library.mergeScan('steam', [scanned()])
+    const steamProgress = counts()
+    const svc = createService({ steamProgress })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    await sleep(5)
+    // Played there before this PC read it, but it only arrives now.
+    library.addSyncedSessions(
+      [
+        {
+          id: 'remote-1',
+          gameId: 'steam:620',
+          startedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+          endedAt: new Date(Date.now() - 60 * 1000).toISOString(),
+          minutes: 59
+        }
+      ],
+      'pc-2'
+    )
+    await svc.syncSteam()
+    expect(steamProgress).toHaveBeenCalledTimes(2)
+    await svc.syncSteam()
+    expect(steamProgress).toHaveBeenCalledTimes(2)
+  })
+
+  it('reads a last played ahead of this clock once, not on every pass', async () => {
+    library.mergeScan('steam', [scanned()])
+    const steamProgress = counts()
+    const svc = createService({ steamProgress })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    const ahead = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+    library.mergeScan('steam', [scanned({ lastPlayed: ahead })])
+    await svc.syncSteam()
+    expect(steamProgress).toHaveBeenCalledTimes(2)
+    await svc.syncSteam()
+    svc.kickSteam()
+    await sleep(30)
+    expect(steamProgress).toHaveBeenCalledTimes(2)
+  })
+
+  it('stops on a refused credential without holding the games back, until an import or sign-in', async () => {
+    library.mergeScan('steam', [scanned()])
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(async () => {
+      throw new SteamAuthError()
+    })
+    const svc = createService({ steamProgress, steamBackoffMs: 5 })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    const tries = steamProgress.mock.calls.length
+    expect(tries).toBeGreaterThan(0)
+    expect((await scanRecord())['steam:620']?.retryAt).toBeUndefined()
+    // Library changes do not ask again, nor does any timer.
+    svc.kickSteam()
+    await sleep(60)
+    expect(steamProgress).toHaveBeenCalledTimes(tries)
+    // The owned import after a sign-in does.
+    steamProgress.mockResolvedValue(new Map([[620, { unlocked: 2, total: 51 }]]))
+    await svc.syncSteam()
+    expect(library.getGame('steam:620')?.metadata.achievements?.unlocked).toBe(2)
+  })
+
+  it("doubles the pause while Steam's own list keeps refusing, and asks only that list again", async () => {
+    library.mergeScan('steam', [COD])
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(async () => new Map())
+    const times: number[] = []
+    const steamCount = vi.fn<Opt<'steamCount'>>(async () => {
+      times.push(Date.now())
+      throw new HttpError('HTTP 429', { status: 429, url: 'https://api.steampowered.com/x' })
+    })
+    const svc = createService({ steamProgress, steamCount, steamBackoffMs: 40 })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    await until(() => times.length === 3)
+    expect(times[2] - times[1]).toBeGreaterThanOrEqual(75)
+    expect(steamProgress).toHaveBeenCalledTimes(1)
+    svc.dispose()
+  })
+
+  it('waits as long as Steam asked in its Retry-After', async () => {
+    library.mergeScan('steam', [COD])
+    const times: number[] = []
+    const steamCount = vi.fn<Opt<'steamCount'>>(async () => {
+      times.push(Date.now())
+      if (times.length === 1)
+        throw new HttpError('HTTP 429', {
+          status: 429,
+          url: 'https://api.steampowered.com/x',
+          retryAfterMs: 150
+        })
+      return 0
+    })
+    const svc = createService({
+      steamProgress: vi.fn<Opt<'steamProgress'>>(async () => new Map()),
+      steamCount,
+      steamBackoffMs: 10
+    })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    await until(() => known('steam:2640'))
+    expect(times[1] - times[0]).toBeGreaterThanOrEqual(140)
+  })
+
+  it('stops retrying a game that keeps failing until it is played, imported or signed in again', async () => {
+    library.mergeScan('steam', [TF2])
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(async () => new Map())
+    const steamCount = vi.fn<Opt<'steamCount'>>(async () => {
+      throw new Error('Steam sent no achievement list for 440')
+    })
+    const svc = createService({ steamProgress, steamCount, steamBackoffMs: 5 })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    await until(() => steamCount.mock.calls.length === 5)
+    await sleep(120)
+    expect(steamCount).toHaveBeenCalledTimes(5)
+    const entry = (await scanRecord())['steam:440']
+    expect(entry.parkedAt).toBeDefined()
+    expect(entry.retryAt).toBeUndefined()
+    steamCount.mockResolvedValue(12)
+    await svc.syncSteam()
+    expect(steamCount).toHaveBeenCalledTimes(6)
+    expect((await scanRecord())['steam:440'].at).toBeDefined()
+  })
+
+  it("keeps a sooner kick when a pass ends with a failed game's later retry", async () => {
+    library.mergeScan('steam', [scanned(), TF2])
+    const steamCount = vi.fn<Opt<'steamCount'>>(async () => {
+      throw new Error('HTTP 500')
+    })
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(
+      async (ids) =>
+        new Map(ids.filter((id) => id === 620).map((id) => [id, { unlocked: 1, total: 51 }]))
+    )
+    const svc = createService({
+      steamProgress,
+      steamCount,
+      steamBackoffMs: 60 * 60 * 1000,
+      steamKickDelayMs: 80
+    })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    expect((await scanRecord())['steam:440'].retryAt).toBeGreaterThan(Date.now() + 30 * 60 * 1000)
+    // A new game's pass: Portal 2's session ends meanwhile, and its kick is due long before TF2's retry.
+    library.mergeScan('steam', [
+      scanned(),
+      TF2,
+      scanned({ externalId: '400', title: 'Portal', extra: { steamAppId: 400 } })
+    ])
+    steamProgress.mockImplementationOnce(async () => {
+      svc.steamPlayed('steam:620', new Date(Date.now() + 1).toISOString())
+      await sleep(20)
+      return new Map([[400, { unlocked: 0, total: 15 }]])
+    })
+    await svc.syncSteam()
+    await until(() => steamProgress.mock.calls.some((c) => c[0].length === 1 && c[0][0] === 620))
+  })
+
+  it('writes the marks of a long pass in batches', async () => {
+    const many = Array.from({ length: 30 }, (_, i) =>
+      scanned({ externalId: String(5000 + i), title: `Old ${i}`, extra: { steamAppId: 5000 + i } })
+    )
+    library.mergeScan('steam', many)
+    changed = []
+    const svc = createService({
+      steamProgress: vi.fn<Opt<'steamProgress'>>(async () => new Map()),
+      steamCount: vi.fn<Opt<'steamCount'>>(async () => 0)
+    })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    expect(changed.flat()).toHaveLength(30)
+    expect(changed.length).toBeLessThanOrEqual(2)
+  })
+
+  it('reads nothing while a game runs, and goes on once it ends', async () => {
+    library.mergeScan('steam', [scanned()])
+    library.mergeScan('epic', [EPIC_NO_APPID])
+    let running = true
+    const steamProgress = counts()
+    const svc = createService({ steamProgress }, { gameRunning: () => running })
+    svc.useSteamAccount(token())
+    await svc.syncSteam()
+    svc.kickSteam()
+    await sleep(30)
+    expect(steamProgress).not.toHaveBeenCalled()
+    running = false
+    // Another store's game ended: the held pass goes on.
+    const epic = library.games().find((g) => g.source === 'epic')!
+    svc.steamPlayed(epic.id, new Date().toISOString())
+    await until(() => steamProgress.mock.calls.length === 1)
+  })
+
+  it("asks Steam's own list once per page while signed out, again only after a play", async () => {
+    library.mergeScan('steam', [scanned()])
+    const steamCount = vi.fn<Opt<'steamCount'>>(async () => 51)
+    const svc = createService({
+      steamGame: vi.fn<Opt<'steamGame'>>(async () => null),
+      steamCount
+    })
+    await svc.get('steam:620')
+    await svc.get('steam:620')
+    expect(steamCount).toHaveBeenCalledTimes(1)
+    svc.steamPlayed('steam:620', new Date().toISOString())
+    await svc.get('steam:620')
+    expect(steamCount).toHaveBeenCalledTimes(2)
+    // Not recorded as read: once an account appears, the scan still reads the game's counts.
+    await sleep(20)
+    svc.dispose()
+    const steamProgress = counts(7)
+    const signedIn = createService({ steamProgress })
+    signedIn.useSteamAccount(token())
+    await signedIn.syncSteam()
+    expect(library.getGame('steam:620')?.metadata.achievements?.unlocked).toBe(7)
   })
 })

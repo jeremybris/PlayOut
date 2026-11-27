@@ -5,6 +5,7 @@ import { join } from 'path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Runner } from '../types'
 import {
+  addAutoloadDir,
   applyPresets,
   gamepadEntry,
   generateRyujinxConfig,
@@ -14,6 +15,7 @@ import {
   refreshRyujinxControllers,
   ryujinxPadId,
   ryujinxPadIds,
+  ryujinxUpdatesDir,
   type InputConfigEntry
 } from './ryujinx'
 import { parseSdlPads, RYUJINX_SDL_HINTS, sdlPadsScript, type SdlPad } from './sdl-pads'
@@ -61,6 +63,7 @@ function defaultConfig(extra: Record<string, unknown> = {}): Record<string, unkn
     input_config: [keyboard()],
     graphics_backend: 'Vulkan',
     dirty_hacks: [],
+    autoload_dirs: [],
     ...extra
   }
 }
@@ -310,7 +313,14 @@ describe('ryujinx presets', () => {
   })
 
   it('keeps the keyboard and the file when SDL2.dll is missing, detection fails or no pad is found', async () => {
-    const original = JSON.stringify(defaultConfig({ start_fullscreen: true }), null, 2)
+    const original = JSON.stringify(
+      defaultConfig({
+        start_fullscreen: true,
+        autoload_dirs: [ryujinxUpdatesDir(join(dir, 'Emulation'))]
+      }),
+      null,
+      2
+    )
     await writeFile(configFile(), original)
     const run = runner([{ guid: XBOX_GUID, name: 'X' }])
     await applyPresets(ctx(run, false))
@@ -404,6 +414,47 @@ describe('ryujinx presets', () => {
     expect(ok).toBe(false)
     expect((startHidden.mock.results[0].value as HiddenProcess).stop).toHaveBeenCalled()
     await expect(stat(configFile())).rejects.toThrow()
+  })
+})
+
+describe("Ryujinx's updates and DLC folder", () => {
+  it('adds Updates and DLC/Switch to autoload_dirs, keeping the user folders, once', async () => {
+    const updates = ryujinxUpdatesDir(join(dir, 'Emulation'))
+    expect(updates).toBe(join(dir, 'Emulation', 'Updates and DLC', 'Switch'))
+    await writeFile(
+      configFile(),
+      JSON.stringify(defaultConfig({ autoload_dirs: ['D:/Mine'] }), null, 2)
+    )
+    await applyPresets(ctx(runner([]), false))
+    expect((await readJson(configFile())).autoload_dirs).toEqual(['D:/Mine', updates])
+    expect((await stat(updates)).isDirectory()).toBe(true)
+    const once = await readFile(configFile(), 'utf8')
+    await applyPresets(ctx(runner([]), false))
+    expect(await readFile(configFile(), 'utf8')).toBe(once)
+  })
+
+  it('adds it before a launch of an older setup, without touching the controllers', async () => {
+    await writeFile(configFile(), JSON.stringify(defaultConfig(), null, 2))
+    await writeFile(stateFile(), JSON.stringify({ ids: [] }))
+    await refreshRyujinxControllers({
+      emuDir: E,
+      run: runner([]),
+      log,
+      dataDir: join(dir, 'Emulation')
+    })
+    const cfg = await readJson(configFile())
+    expect(cfg.autoload_dirs).toEqual([ryujinxUpdatesDir(join(dir, 'Emulation'))])
+    expect(cfg.input_config).toEqual([keyboard()])
+  })
+
+  it('adds the key only to the Config.json format it knows', () => {
+    const older: Record<string, unknown> = { version: 60 }
+    expect(addAutoloadDir(older, 'C:/U')).toBe(false)
+    expect(older).toEqual({ version: 60 })
+    const known: Record<string, unknown> = { version: 70 }
+    expect(addAutoloadDir(known, 'C:/U')).toBe(true)
+    expect(known.autoload_dirs).toEqual(['C:/U'])
+    expect(addAutoloadDir({ version: 71, autoload_dirs: ['c:/u'] }, 'C:/U')).toBe(false)
   })
 })
 

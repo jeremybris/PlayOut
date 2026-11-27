@@ -227,7 +227,11 @@ export interface UpgradesServiceDeps {
 }
 
 export interface UpgradesService {
-  upgradeStatus(gameId: string): Promise<UpgradeStatus>
+  /**
+   * The game's Upgrade menu status. `freshMeasure`: the compression state comes from a measure of the folder now, never
+   * from a kept one (Compress games automatically: a game reinstalled since PlayOut compressed it).
+   */
+  upgradeStatus(gameId: string, opts?: { freshMeasure?: boolean }): Promise<UpgradeStatus>
   /** Starts an action (progress comes as 'upgrades:progress') and returns the status with it running. */
   runUpgrade(gameId: string, action: UpgradeAction): Promise<UpgradeStatus>
   cancelUpgrade(gameId: string): Promise<void>
@@ -236,6 +240,8 @@ export interface UpgradesService {
    * and deleting the game are refused meanwhile (UPGRADE_RUNNING_MESSAGE).
    */
   busyFor(gameId: string): UpgradeId | null
+  /** Whether an upgrade runs for any game now (Compress games automatically waits meanwhile). */
+  anyBusy(): boolean
   /** Stops running actions and saves the facts file. */
   dispose(): Promise<void>
 }
@@ -1087,7 +1093,7 @@ export function createUpgradesService(deps: UpgradesServiceDeps): UpgradesServic
   const shadersUnavailable = (gpu: GpuInfo | null): string | null =>
     gpu?.vendor === 'intel' ? tMain('mainUpgrades.gpu.notIntel') : null
 
-  const statusOf = async (game: Game): Promise<UpgradeStatus> => {
+  const statusOf = async (game: Game, freshMeasure = false): Promise<UpgradeStatus> => {
     const gpu = await detectGpu()
     const blocked = await blockedReason(game)
     // A running game still shows what it has; anything else that blocks shows nothing more.
@@ -1110,7 +1116,10 @@ export function createUpgradesService(deps: UpgradesServiceDeps): UpgradesServic
           ? facts.measure
           : null
       // While an action runs on the game its folder is changing: the action measures it when it ends.
-      if (busy || (last && now() - last.at < MEASURE_MAX_AGE_MS)) return last
+      if (busy) return last
+      // A measure of the folder as it is now, however long it takes (one already running is shared).
+      if (freshMeasure) return measure(game.id, dir)
+      if (last && now() - last.at < MEASURE_MAX_AGE_MS) return last
       return raceTimeout(measure(game.id, dir), measureWait, last).then((v) => v ?? last)
     })()
 
@@ -1646,8 +1655,8 @@ export function createUpgradesService(deps: UpgradesServiceDeps): UpgradesServic
   }
 
   return {
-    async upgradeStatus(gameId) {
-      return statusOf(gameOf(gameId))
+    async upgradeStatus(gameId, opts) {
+      return statusOf(gameOf(gameId), opts?.freshMeasure === true)
     },
 
     async runUpgrade(gameId, action) {
@@ -1737,6 +1746,10 @@ export function createUpgradesService(deps: UpgradesServiceDeps): UpgradesServic
 
     busyFor(gameId) {
       return jobs.get(gameId)?.upgrade ?? null
+    },
+
+    anyBusy() {
+      return jobs.size > 0
     },
 
     async dispose() {

@@ -499,7 +499,8 @@ function controlsFrom(raw: unknown): { controls: SteamControls } | null {
       controller,
       vr,
       ...(c.touch === 'supported' ? { touch: 'supported' } : {}),
-      ...(c.keyboard === 'full' ? { keyboard: 'full' } : {})
+      ...(c.keyboard === 'full' ? { keyboard: 'full' } : {}),
+      ...(c.lightgun === 'supported' ? { lightgun: 'supported' } : {})
     }
   }
 }
