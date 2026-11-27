@@ -1,6 +1,6 @@
 {
   "name": "playout",
-  "version": "0.9.94",
+  "version": "0.9.95",
   "description": "PlayOut - console-style game launcher for Windows (stores, ROMs, emulators)",
   "main": "./out/main/index.js",
   "author": "Jeremy Bristol",
