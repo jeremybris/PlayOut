@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs'
+import { promises as fs, readFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { basename, join } from 'path'
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
@@ -9,11 +9,16 @@ vi.mock('../logger', () => ({
 
 import type {
   AchievementsInfo,
+  Game,
   RetroAchievementsStatus,
   ScannedGame,
   Settings
 } from '../../shared/types'
 import { RA_NONE } from '../../shared/ra-consoles'
+import {
+  GOG_ACHIEVEMENTS_SOURCE,
+  knownWithoutStoreAchievements
+} from '../../shared/store-achievements'
 import {
   knownWithoutSteamAchievements,
   STEAM_ACHIEVEMENTS_NONE,
@@ -34,6 +39,7 @@ import {
 } from './achievements-service'
 import { RaAuthError, type RaGame, type RaProfile, type RaProgress } from './retroachievements'
 import { SteamAuthError, type SteamCredential, type SteamProgress } from './steam'
+import type { StoreRead } from './store-scan'
 
 const log = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 
@@ -152,7 +158,7 @@ const setRaCreds = (username = 'Jeremy', apiKey = 'ra-key'): void =>
 
 function createService(
   options: AchievementsOptions = {},
-  extraDeps: Pick<AchievementsDeps, 'gameRunning'> = {}
+  extraDeps: Pick<AchievementsDeps, 'gameRunning' | 'hashForClients'> = {}
 ): AchievementsService {
   service = createAchievementsService(
     { settings, library, events, log, cacheDir: join(dir, 'achievements'), ...extraDeps },
@@ -164,6 +170,10 @@ function createService(
       steamKickDelayMs: 5,
       steamScanGapMs: 0,
       steamCount: vi.fn(async () => 5),
+      // No start-up waits for the hashing for the paired clients or the recompilations' first read.
+      raHashStartDelayMs: 0,
+      recompStartDelayMs: 0,
+      raKickDelayMs: 5,
       ...options
     }
   )
@@ -1027,6 +1037,56 @@ describe('recompilation achievements', () => {
     expect(read).toHaveBeenCalledTimes(2)
   })
 
+  it('reads an installed recompilation once when it is added (recomp:changed), not again without play', async () => {
+    const id = await recompCard('xbox360')
+    const read = vi.fn(async () => recompInfo(0, 6))
+    const svc = createService()
+    svc.useRecomp({ read, played })
+    await svc.recompChanged(['github:other/recomp'])
+    expect(read).not.toHaveBeenCalled()
+    await svc.recompChanged([RECOMP])
+    expect(read).toHaveBeenCalledTimes(1)
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 0, total: 6 })
+    // Its counts are on the card now: the start-up pass (every recompilation) leaves it alone.
+    await svc.recompChanged()
+    expect(read).toHaveBeenCalledTimes(1)
+  })
+
+  it('reads a recompilation that gave no list once, not again on every start, until it changes or is played', async () => {
+    const id = await recompCard('xbox360')
+    const read = vi.fn(async (): Promise<AchievementsInfo | null> => null)
+    const first = createService()
+    first.useRecomp({ read, played })
+    await first.recompChanged()
+    expect(read).toHaveBeenCalledTimes(1)
+    first.dispose()
+    // The next start: remembered (in the cache folder), so nothing is read.
+    const svc = createService()
+    svc.useRecomp({ read, played })
+    await svc.recompChanged()
+    expect(read).toHaveBeenCalledTimes(1)
+    // It changed (recomp:changed names it): read again.
+    await svc.recompChanged([RECOMP])
+    expect(read).toHaveBeenCalledTimes(2)
+    // Played, and a list now: counts on the card.
+    read.mockImplementation(async () => recompInfo(1, 3))
+    await svc.recompPlayed(RECOMP)
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 1, total: 3 })
+  })
+
+  it('leaves the start-up read of the recompilations until a running game ends', async () => {
+    await recompCard('xbox360')
+    let running = true
+    const read = vi.fn(async () => recompInfo(0, 6))
+    const svc = createService({}, { gameRunning: () => running })
+    svc.useRecomp({ read, played })
+    await svc.recompChanged()
+    expect(read).not.toHaveBeenCalled()
+    running = false
+    svc.played('steam:620', new Date().toISOString())
+    await until(() => read.mock.calls.length === 1)
+  })
+
   it('leaves a recompilation counts on the card when RetroAchievements signs out', async () => {
     const id = await recompCard('xbox360')
     const svc = createService(raFakes())
@@ -1654,5 +1714,427 @@ describe('Steam achievements scan: what it reads again, and when', () => {
     signedIn.useSteamAccount(token())
     await signedIn.syncSteam()
     expect(library.getGame('steam:620')?.metadata.achievements?.unlocked).toBe(7)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// The RetroAchievements scan
+// ---------------------------------------------------------------------------
+
+describe('RetroAchievements scan', () => {
+  const recentNone = (): Mock<Opt<'raRecent'>> => vi.fn<Opt<'raRecent'>>(async () => [])
+
+  it('matches and reads new ROMs once, and a ROM again only after it is played', async () => {
+    setRaCreds()
+    const fakes = raFakes()
+    const raRecent = recentNone()
+    const svc = createService({ ...fakes, raRecent, raKickDelayMs: 5 })
+    const ids = await addRoms()
+    svc.kickRetro(0)
+    await until(() => !!library.getGame(ids.chrono)?.metadata.achievements)
+    await until(() => statuses.some((s) => s.state === 'signed-in'))
+    // A few new matches: one request each (no completion request for the whole account).
+    expect(fakes.raCompletion).not.toHaveBeenCalled()
+    expect(library.getGame(ids.chrono)?.metadata.achievements).toMatchObject({
+      unlocked: 21,
+      total: 77
+    })
+    expect(library.getGame(ids.chrono)?.metadata.sources?.[RA_SOURCE]).toBe('319')
+    expect(raRecent).toHaveBeenCalledTimes(1)
+    const reads = fakes.raGame.mock.calls.length
+    // Nothing new, nothing played: a pass asks nothing (not even the account again).
+    svc.kickRetro(0)
+    await sleep(30)
+    expect(fakes.raGame.mock.calls.length).toBe(reads)
+    expect(fakes.raProfile).toHaveBeenCalledTimes(1)
+    expect(raRecent).toHaveBeenCalledTimes(1)
+    // Played: that ROM only is read again.
+    svc.played(ids.chrono, new Date(Date.now() + 1000).toISOString())
+    await until(() => fakes.raGame.mock.calls.length === reads + 1)
+    expect(fakes.raGame.mock.calls.at(-1)?.[0]).toBe(319)
+    const record = JSON.parse(
+      await fs.readFile(join(dir, 'achievements', 'ra-scans.json'), 'utf8')
+    ) as Record<string, { raId?: number; account?: string }>
+    expect(record[ids.chrono]).toMatchObject({ raId: 319, account: 'jeremy' })
+    // The key never goes into the record.
+    expect(JSON.stringify(record)).not.toContain('ra-key')
+  })
+
+  it("refreshes ROMs played on other devices from RetroAchievements' recently played list, once per start", async () => {
+    setRaCreds()
+    const ids = await addRoms()
+    const first = createService({ ...raFakes(), raRecent: recentNone() })
+    first.kickRetro(0)
+    await until(() => !!library.getGame(ids.chrono)?.metadata.achievements)
+    await sleep(20)
+    first.dispose()
+    const fakes = raFakes()
+    const raRecent = vi.fn<Opt<'raRecent'>>(async () => [
+      {
+        gameId: 319,
+        unlocked: 50,
+        unlockedHardcore: 40,
+        total: 77,
+        lastPlayed: new Date(Date.now() + 60_000).toISOString()
+      }
+    ])
+    const svc = createService({ ...fakes, raRecent })
+    svc.kickRetro(0)
+    await until(() => library.getGame(ids.chrono)?.metadata.achievements?.unlocked === 50)
+    // Nothing was due: no game was asked about one by one.
+    expect(fakes.raGame).not.toHaveBeenCalled()
+    expect(raRecent).toHaveBeenCalledTimes(1)
+  })
+
+  it('waits after a failure and tries the due ROMs again by itself', async () => {
+    setRaCreds()
+    let fail = true
+    const fakes = raFakes({
+      raGame: vi.fn<Opt<'raGame'>>(async () => {
+        // No network: the whole scan waits.
+        if (fail) throw new HttpError('offline', { status: 0, url: 'https://ra' })
+        return { ...listInfo(5, 77), provider: 'retroachievements' as const }
+      })
+    })
+    const svc = createService({ ...fakes, raRecent: recentNone(), raBackoffMs: 20 })
+    const ids = await addRoms()
+    svc.kickRetro(0)
+    await until(() => statuses.some((s) => s.state === 'signed-in' && !!s.message))
+    expect(library.getGame(ids.chrono)?.metadata.achievements).toBeUndefined()
+    fail = false
+    await until(() => library.getGame(ids.chrono)?.metadata.achievements?.unlocked === 5)
+  })
+
+  it("keeps the other ROMs' answers when one game's read fails, and asks that one again later", async () => {
+    setRaCreds()
+    let fail = true
+    const fakes = raFakes({
+      raGame: vi.fn<Opt<'raGame'>>(async (id) => {
+        if (id === 228 && fail) throw new HttpError('HTTP 500', { status: 500, url: 'https://ra' })
+        return {
+          ...listInfo(id === 319 ? 21 : 3, id === 319 ? 77 : 96),
+          provider: 'retroachievements' as const
+        }
+      }),
+      // A failed recently played list keeps what the pass found too.
+      raCompletion: vi.fn<Opt<'raCompletion'>>(async () => [])
+    })
+    const raRecent = vi.fn<Opt<'raRecent'>>(async () => {
+      throw new HttpError('HTTP 502', { status: 502, url: 'https://ra' })
+    })
+    const ids = await addRoms()
+    const svc = createService({ ...fakes, raRecent, raBackoffMs: 20 })
+    svc.kickRetro(0)
+    await until(() => library.getGame(ids.chrono)?.metadata.achievements?.unlocked === 21)
+    expect(library.getGame(ids.smw)?.metadata.achievements).toBeUndefined()
+    // The record is written right after the counts.
+    let record: Record<string, { at?: number; fails?: number }> = {}
+    await until(() => {
+      try {
+        record = JSON.parse(
+          readFileSync(join(dir, 'achievements', 'ra-scans.json'), 'utf8')
+        ) as typeof record
+      } catch {
+        return false
+      }
+      return !!record[ids.smw]
+    })
+    expect(record[ids.smw]).toMatchObject({ fails: 1 })
+    expect(record[ids.smw].at).toBeUndefined()
+    fail = false
+    await until(() => library.getGame(ids.smw)?.metadata.achievements?.unlocked === 3)
+  })
+
+  it('matches a ROM again when its console list could not be downloaded, instead of counting it as read', async () => {
+    setRaCreds()
+    let listFails = true
+    const fakes = raFakes({
+      raGameList: vi.fn<Opt<'raGameList'>>(async () => {
+        if (listFails) throw new HttpError('HTTP 500', { status: 500, url: 'https://ra' })
+        return SNES_GAMES
+      })
+    })
+    const ids = await addRoms()
+    const svc = createService({ ...fakes, raRecent: recentNone(), raBackoffMs: 20 })
+    svc.kickRetro(0)
+    await until(() => fakes.raGameList.mock.calls.length >= 1)
+    await sleep(10)
+    expect(library.getGame(ids.chrono)?.metadata.achievements).toBeUndefined()
+    // Not marked as read: once the list comes, the ROMs are matched by themselves.
+    listFails = false
+    await until(() => library.getGame(ids.chrono)?.metadata.achievements?.unlocked === 21)
+  })
+
+  it('hashes nothing while a game runs, and goes on once it ends', async () => {
+    let running = false
+    const fakes = raFakes({
+      hashRom: vi.fn<Opt<'hashRom'>>(async (path) => {
+        // A game starts while the first ROM is hashed.
+        running = true
+        return basename(path) === 'smw.sfc' ? 'aaa111' : 'ffff00'
+      })
+    })
+    const ids = await addRoms()
+    const svc = createService(fakes, { gameRunning: () => running })
+    svc.kickRetro(0)
+    await until(() => fakes.hashRom.mock.calls.length === 1)
+    await sleep(40)
+    expect(fakes.hashRom).toHaveBeenCalledTimes(1)
+    running = false
+    fakes.hashRom.mockImplementation(async (path) =>
+      basename(path) === 'smw.sfc' ? 'aaa111' : 'ffff00'
+    )
+    svc.played('steam:620', new Date().toISOString())
+    await until(() => fakes.hashRom.mock.calls.length === 5)
+    expect(svc.raHashOf(library.getGame(ids.smw)!)).toBeDefined()
+  })
+
+  it('hashes nothing for the clients while this PC does not host', async () => {
+    const fakes = raFakes()
+    await addRoms()
+    const svc = createService(fakes, { hashForClients: () => false })
+    svc.kickRetro(0)
+    await sleep(60)
+    expect(fakes.hashRom).not.toHaveBeenCalled()
+    expect(svc.retroStatus().state).toBe('signed-out')
+  })
+
+  it('hashes the ROMs without an account, for the paired clients', async () => {
+    const fakes = raFakes()
+    const svc = createService(fakes)
+    const ids = await addRoms()
+    const smw = library.getGame(ids.smw)!
+    expect(svc.raHashOf(smw)).toBeUndefined()
+    svc.kickRetro(0)
+    await until(() => svc.raHashOf(smw) === 'aaa111')
+    expect(svc.retroStatus().state).toBe('signed-out')
+    expect(fakes.raGameList).not.toHaveBeenCalled()
+  })
+})
+
+describe("a paired host's ROMs", () => {
+  const HOST_SMW = 'remote:host-1:rom:snes:smw'
+  const HOST_UNKNOWN = 'remote:host-1:rom:snes:odd'
+
+  function hostRom(id: string, title: string, file: string, raHash?: string): Game {
+    return {
+      id,
+      source: 'rom',
+      externalId: `snes/${file}`,
+      platformId: 'snes',
+      title,
+      sortTitle: title.toLowerCase(),
+      installed: false,
+      launch: { kind: 'uri', uri: '' },
+      tracking: { mode: 'none' },
+      hidden: false,
+      favorite: false,
+      playtimeMinutes: 0,
+      playCount: 0,
+      addedAt: new Date().toISOString(),
+      metadata: {},
+      metadataStatus: 'done',
+      user: {},
+      remote: {
+        hostId: 'host-1',
+        hostName: 'Den PC',
+        hostGameId: id.split(':').slice(2).join(':'),
+        streamable: true,
+        downloadable: true,
+        ...(raHash ? { raHash } : {})
+      }
+    } as Game
+  }
+
+  it("matches them with this PC's account by the host's hash, keeps their counts and answers their page", async () => {
+    setRaCreds()
+    const fakes = raFakes()
+    const svc = createService({ ...fakes, raRecent: vi.fn(async () => []) })
+    const changedRemote = vi.fn()
+    svc.useRemote({
+      games: async () => [
+        hostRom(HOST_SMW, 'Some Cart', 'cart.sfc', 'aaa111'),
+        hostRom(HOST_UNKNOWN, 'Zzz Unknown', 'zzz.sfc', 'ffff00')
+      ],
+      changed: changedRemote
+    })
+    svc.kickRetro(0)
+    await until(() => svc.remoteRetro(HOST_SMW) !== undefined)
+    expect(svc.remoteRetro(HOST_SMW)).toMatchObject({ raId: 228, unlocked: 0, total: 96 })
+    // Hashed as RetroAchievements does, in a whole list, no title: no achievements.
+    expect(svc.remoteRetro(HOST_UNKNOWN)).toEqual({ none: true })
+    await until(() => changedRemote.mock.calls.length > 0)
+    // Its page: this PC's list of the matched game.
+    const read = await svc.getRemote(HOST_SMW)
+    expect(read.kind === 'list' && read.info.provider).toBe('retroachievements')
+    expect(fakes.raGame).toHaveBeenLastCalledWith(228, expect.anything())
+    // This account found none: no list, and not the host's either (the card shows none).
+    expect(await svc.getRemote(HOST_UNKNOWN)).toEqual({ kind: 'none' })
+    // Signed out: nothing of this account's shows, and the page asks the host.
+    patchSettings((s) => {
+      s.scrapers.retroachievements = { username: '', apiKey: '' }
+    })
+    expect(svc.remoteRetro(HOST_SMW)).toBeUndefined()
+    expect(await svc.getRemote(HOST_SMW)).toEqual({ kind: 'host' })
+  })
+
+  it('matches a ROM from a host that sends no hash by its title', async () => {
+    setRaCreds()
+    const svc = createService({ ...raFakes(), raRecent: vi.fn(async () => []) })
+    svc.useRemote({
+      games: async () => [hostRom(HOST_SMW, 'Chrono Trigger (USA)', 'Chrono Trigger (USA).sfc')],
+      changed: vi.fn()
+    })
+    const read = await svc.getRemote(HOST_SMW)
+    expect(read.kind === 'list' && read.info.unlocked).toBe(21)
+    expect(svc.remoteRetro(HOST_SMW)).toMatchObject({ raId: 319, unlocked: 21, total: 77 })
+  })
+
+  it("fails a page read with this PC's counts on the card instead of showing the host's list", async () => {
+    setRaCreds()
+    const fakes = raFakes()
+    const svc = createService({ ...fakes, raRecent: vi.fn(async () => []) })
+    svc.useRemote({
+      games: async () => [hostRom(HOST_SMW, 'Some Cart', 'cart.sfc', 'aaa111')],
+      changed: vi.fn()
+    })
+    svc.kickRetro(0)
+    await until(() => svc.remoteRetro(HOST_SMW) !== undefined)
+    fakes.raGame.mockRejectedValue(new HttpError('HTTP 500', { status: 500, url: 'https://ra' }))
+    await expect(svc.getRemote(HOST_SMW)).rejects.toBeInstanceOf(HttpError)
+  })
+
+  it('drops the host ROMs from the record once no host is paired', async () => {
+    setRaCreds()
+    let games = [hostRom(HOST_SMW, 'Some Cart', 'cart.sfc', 'aaa111')]
+    let hosts = 1
+    const svc = createService({ ...raFakes(), raRecent: vi.fn(async () => []) })
+    svc.useRemote({
+      games: async () => games,
+      pairedHosts: async () => hosts,
+      changed: vi.fn()
+    })
+    svc.kickRetro(0)
+    await until(() => svc.remoteRetro(HOST_SMW) !== undefined)
+    const file = join(dir, 'achievements', 'ra-scans.json')
+    // Offers not loaded yet (a host is still paired): the entry stays.
+    games = []
+    await svc.syncRetro()
+    expect(JSON.parse(await fs.readFile(file, 'utf8'))[HOST_SMW]).toBeDefined()
+    hosts = 0
+    await svc.syncRetro()
+    expect(JSON.parse(await fs.readFile(file, 'utf8'))[HOST_SMW]).toBeUndefined()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// GOG
+// ---------------------------------------------------------------------------
+
+describe('GOG achievements', () => {
+  const GOG_ID = '1454587428'
+
+  function addGog(
+    extra: Record<string, string | number | boolean> = { gogProductId: GOG_ID }
+  ): string {
+    return library.mergeScan('gog', [
+      scanned({
+        source: 'gog',
+        externalId: GOG_ID,
+        platformId: 'gog',
+        title: 'Fallout: New Vegas',
+        launch: { kind: 'uri', uri: `goggalaxy://openGameView/${GOG_ID}` },
+        extra
+      })
+    ]).newGameIds[0]!
+  }
+
+  const gogList = (unlocked: number, total: number): StoreRead => ({
+    kind: 'list',
+    info: { provider: 'gog', total, unlocked, list: [] }
+  })
+
+  function gogService(
+    read: (productId: string, priority: 'page' | 'scan') => Promise<StoreRead>
+  ): AchievementsService {
+    return createService({ gogRead: read, storeStartDelayMs: 0, storeScanGapMs: 0 })
+  }
+
+  it('reads a GOG game once when it joins the library, then only after it is played', async () => {
+    const id = addGog()
+    let unlocked = 4
+    const read = vi.fn(async () => gogList(unlocked, 10))
+    const svc = gogService(read)
+    await svc.syncStore('gog')
+    expect(read).toHaveBeenCalledWith(GOG_ID, 'scan')
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 4, total: 10 })
+    expect(library.getGame(id)?.metadata.sources?.[GOG_ACHIEVEMENTS_SOURCE]).toBe(GOG_ID)
+    await svc.syncStore('gog')
+    expect(read).toHaveBeenCalledTimes(1)
+    unlocked = 6
+    svc.played(id, new Date(Date.now() + 1000).toISOString())
+    await until(() => library.getGame(id)?.metadata.achievements?.unlocked === 6)
+    expect(read).toHaveBeenCalledTimes(2)
+  })
+
+  it('waits while GOG is signed out, and reads once signed in', async () => {
+    const id = addGog()
+    let signedIn = false
+    const read = vi.fn(async () =>
+      signedIn ? gogList(1, 3) : ({ kind: 'signed-out' } as StoreRead)
+    )
+    const svc = gogService(read)
+    await svc.syncStore('gog')
+    expect(library.getGame(id)?.metadata.achievements).toBeUndefined()
+    // Still waiting: a library change asks nothing.
+    svc.kick()
+    await sleep(30)
+    expect(read).toHaveBeenCalledTimes(1)
+    signedIn = true
+    await svc.syncStore('gog')
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 1, total: 3 })
+  })
+
+  it('marks a game GOG has no achievements for, keeps the mark on sign-out and drops the counts', async () => {
+    const id = addGog()
+    const read = vi.fn(async (): Promise<StoreRead> => ({ kind: 'none' }))
+    const svc = gogService(read)
+    await svc.syncStore('gog')
+    expect(knownWithoutStoreAchievements(library.getGame(id)!)).toBe(true)
+    expect(library.getGame(id)?.metadata.achievements).toBeUndefined()
+    // Counts from a later read replace the mark; a sign-out takes the counts, not a "none".
+    read.mockImplementation(async () => gogList(2, 5))
+    expect((await svc.get(id))?.provider).toBe('gog')
+    expect(knownWithoutStoreAchievements(library.getGame(id)!)).toBe(false)
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 2, total: 5 })
+    svc.storeSignedOut('gog')
+    expect(library.getGame(id)?.metadata.achievements).toBeUndefined()
+  })
+
+  it('leaves a GOG game with a Steam app id to Steam', async () => {
+    const withSteam = addGog({ gogProductId: GOG_ID, steamAppId: 22380 })
+    const read = vi.fn(async (): Promise<StoreRead> => ({ kind: 'unknown' }))
+    const svc = gogService(read)
+    await svc.syncStore('gog')
+    expect(read).not.toHaveBeenCalled()
+    expect(library.getGame(withSteam)?.metadata.sources?.[GOG_ACHIEVEMENTS_SOURCE]).toBeUndefined()
+  })
+
+  it('does not stop on a failed read of one game; it tries again later', async () => {
+    const id = addGog()
+    const read = vi
+      .fn<(productId: string) => Promise<StoreRead>>()
+      .mockRejectedValueOnce(new HttpError('HTTP 500', { status: 500, url: 'https://gog' }))
+      .mockResolvedValue(gogList(3, 9))
+    const svc = createService({
+      gogRead: read,
+      storeStartDelayMs: 0,
+      storeScanGapMs: 0,
+      steamBackoffMs: 20
+    })
+    await svc.syncStore('gog')
+    // The failed read waits its turn, then goes through by itself.
+    await until(() => library.getGame(id)?.metadata.achievements?.unlocked === 3)
+    expect(read).toHaveBeenCalledTimes(2)
   })
 })

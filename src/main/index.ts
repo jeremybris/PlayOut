@@ -596,7 +596,9 @@ async function main(cli: CliOptions): Promise<void> {
     cacheDir: join(userData, 'retroachievements'),
     log: createLogger('achievements'),
     // The Steam scan holds its requests while a game runs; the session's end picks it up again.
-    gameRunning: () => launcherRef?.running() != null
+    gameRunning: () => launcherRef?.running() != null,
+    // ROM hashes are worked out for the paired clients only while this PC hosts (Settings > Streaming).
+    hashForClients: () => settings.get().streaming.hostEnabled
   })
   let recompDirOf: (id: string) => Promise<string | null | undefined> = async () => undefined
   const installSizes = createInstallSizeService({
@@ -679,8 +681,9 @@ async function main(cli: CliOptions): Promise<void> {
   launcherRef = launcher
   // PCSX2 scans the PS2 games it does not list yet once nothing runs: after a game, and when the library gained games.
   events.on('session:ended', () => emulatorSetup.prewarmPcsx2())
-  // A Steam game played here is read again by the achievements scan (nothing else reads it again).
-  events.on('session:ended', ({ gameId, endedAt }) => achievements.steamPlayed(gameId, endedAt))
+  // A game played here is read again by its achievements scan (Steam, RetroAchievements, GOG): nothing else reads it
+  // again.
+  events.on('session:ended', ({ gameId, endedAt }) => achievements.played(gameId, endedAt))
 
   // The home button and the in-game overlay (docs/home-overlay.md): the controller reader, the overlay window, power
   // profiles, display and media. Started with the deferred start-up work below.
@@ -1028,6 +1031,10 @@ async function main(cli: CliOptions): Promise<void> {
     playtime: { file: join(userData, 'playtime-sync.json') },
     // A paired client's host-only game shows this PC's achievements of it (streaming/host-achievements.ts).
     achievements,
+    // A paired client matches this PC's ROMs with its own RetroAchievements account by their hashes, and the hosts'
+    // ROMs show this PC's own RetroAchievements counts once its scan read them.
+    raHash: (game) => achievements.raHashOf(game),
+    remoteRetro: (gameId) => achievements.remoteRetro(gameId),
     launcher,
     scan,
     emulationDir: () => emulationDirOf(settings.get(), userData),
@@ -1139,6 +1146,14 @@ async function main(cli: CliOptions): Promise<void> {
   })
   remoteMedia = (hostId, hostGameId, kind, rev) =>
     streaming.remoteMedia(hostId, hostGameId, kind, rev)
+  // The paired hosts' ROMs are matched with this PC's own RetroAchievements account (its counts show on their pages).
+  achievements.useRemote({
+    games: async () => (await streaming.remoteLibrary()).games,
+    pairedHosts: async () => (await streaming.status()).client.hosts.length,
+    changed: () => streaming.remoteAchievementsChanged()
+  })
+  // Host-only ROMs that are new to this PC (a host's offer arrived) reach the RetroAchievements scan.
+  events.on('streaming:library', () => achievements.kickRetro())
 
   // Store accounts and the install tracker (ARCHITECTURE.md 4.8): after the scan service and the main window.
   // The accounts service asks the install service (created right after it) which games it is tracking.
@@ -1175,6 +1190,7 @@ async function main(cli: CliOptions): Promise<void> {
     trackedInstalls: () => trackedInstalls(),
     onSignedOut: (source) => {
       if (source === 'steam') achievements.steamSignedOut()
+      if (source === 'gog') achievements.storeSignedOut('gog')
     },
     onOwnedImported: (source) => {
       // Signing in to Steam imports the owned list, so this also fills achievements right after a sign-in.
@@ -1184,7 +1200,11 @@ async function main(cli: CliOptions): Promise<void> {
         void syncSteamHidden()
         void achievements.syncSteam()
       }
-      if (source === 'gog') void syncGogHidden()
+      if (source === 'gog') {
+        void syncGogHidden()
+        // Signing in to GOG imports the owned list: GOG's achievements of its games are read then.
+        void achievements.syncStore('gog')
+      }
     }
   })
   const installs = createInstallService({
@@ -1272,6 +1292,10 @@ async function main(cli: CliOptions): Promise<void> {
       log: createLogger('recomp-achievements')
     })
   )
+  // GOG games' achievements are read with the GOG account signed in to PlayOut (achievements/gog.ts).
+  achievements.useGogAccount(() => accounts.gogCredential())
+  // A recompilation installed (or changed): its games' achievements are read now, not only once the page opens.
+  events.on('recomp:changed', ({ ids }) => void achievements.recompChanged(ids))
   achievements.useSteamAccount(async (refresh) => {
     const tokens = await accounts.steamCredential(refresh)
     if (!tokens) return null
@@ -1291,7 +1315,7 @@ async function main(cli: CliOptions): Promise<void> {
     // New Steam games, Steam's imported last played times and play sessions (here, or synced from a paired PC)
     // reach the achievements scan once things settle.
     if (reason === 'scan' || reason === 'import' || reason === 'update' || reason === 'session')
-      achievements.kickSteam()
+      achievements.kick()
     if (reason !== 'session' && reason !== 'remove') {
       // A recompilation uninstalled (or Play switched away from it): its counts leave the card.
       achievements.forgetStaleRecomp()
@@ -1312,7 +1336,8 @@ async function main(cli: CliOptions): Promise<void> {
         .filter((g) => g.source === id)
         .map((g) => g.id)
     )
-    if (id === 'rom') void achievements.syncRetro()
+    // New ROMs are hashed (for paired clients) and matched with RetroAchievements; known ones are not asked again.
+    if (id === 'rom') achievements.kickRetro()
     if (id === 'manual' || id === 'rom') return
     if (id === 'steam') void syncSteamHidden()
     if (id === 'gog') void syncGogHidden()
@@ -1865,8 +1890,10 @@ async function main(cli: CliOptions): Promise<void> {
 
   void syncSteamHidden()
   void syncGogHidden()
-  // ROM counts from RetroAchievements; Steam's follow the owned import below (or the rescan's).
-  void achievements.syncRetro()
+  // ROM counts from RetroAchievements (the account check, new ROMs, ROMs played since, the recently played list);
+  // Steam's and GOG's follow the owned imports below (or the rescans'). Installed recompilations without counts yet.
+  achievements.kickRetro(0)
+  void achievements.recompChanged()
 
   // Refresh installed games in the background for sources that already have games, then the owned lists of the
   // signed-in store accounts the rescan did not cover (the per-source import after each scan handles the rest, so

@@ -231,6 +231,53 @@ export async function raCompletionProgress(creds: RaCredentials): Promise<RaProg
   return out
 }
 
+/** A game the user played lately (on any device), with their progress in it. */
+export interface RaRecentGame extends RaProgress {
+  /** When they last played it (ISO); undefined when unreadable. */
+  lastPlayed?: string
+}
+
+interface RecentRow {
+  GameID?: number
+  LastPlayed?: string
+  NumPossibleAchievements?: number
+  NumAchieved?: number
+  NumAchievedHardcore?: number
+}
+
+/** RetroAchievements answers at most this many recently played games per request. */
+export const RA_RECENT_MAX = 50
+
+/**
+ * The games the user played most recently, newest first (one request): play on any device (RetroArch on a handheld,
+ * another PC) shows up here, so the counts of every recognised ROM played lately can be refreshed at once.
+ */
+export async function raRecentlyPlayed(
+  creds: RaCredentials,
+  count = RA_RECENT_MAX
+): Promise<RaRecentGame[]> {
+  const rows = await call<RecentRow[] | null>('API_GetUserRecentlyPlayedGames.php', creds, {
+    u: creds.username.trim(),
+    c: Math.max(1, Math.min(RA_RECENT_MAX, count))
+  })
+  if (!Array.isArray(rows)) return []
+  const out: RaRecentGame[] = []
+  for (const r of rows) {
+    const gameId = Number(r.GameID)
+    if (!Number.isInteger(gameId) || gameId <= 0) continue
+    const softcore = Number(r.NumAchieved) || 0
+    const hardcore = Number(r.NumAchievedHardcore) || 0
+    out.push({
+      gameId,
+      unlocked: Math.max(softcore, hardcore),
+      unlockedHardcore: hardcore,
+      total: Number(r.NumPossibleAchievements) || 0,
+      lastPlayed: raDate(r.LastPlayed)
+    })
+  }
+  return out
+}
+
 interface GameProgressResponse {
   ID?: number
   Title?: string

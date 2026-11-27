@@ -6,6 +6,7 @@ import { mkdir, readFile, rename, stat, writeFile } from 'node:fs/promises'
 import { basename, extname, join } from 'node:path'
 import type { AchievementsInfo, Game, RetroAchievementsStatus } from '../../shared/types'
 import type { EventBus } from '../events'
+import type { RemoteRetroAnswer } from '../streaming/remote-library'
 import type { Logger } from '../logger'
 import { HttpError } from '../scrapers/http'
 import { describeError, steamAppIdOf } from '../scrapers/steam-store'
@@ -19,11 +20,12 @@ import {
   raGameProgress,
   raProfile,
   raReady,
+  raRecentlyPlayed,
   RaAuthError,
   type RaCredentials,
   type RaGame,
   type RaProfile,
-  type RaProgress
+  type RaRecentGame
 } from './retroachievements'
 import {
   PROGRESS_BATCH,
@@ -35,6 +37,27 @@ import {
   type SteamProgress
 } from './steam'
 import { mainLanguage, tMain } from '../i18n'
+import {
+  forgetGogTokens,
+  GogAuthError,
+  readGogAchievements,
+  type GogAccountCredential
+} from './gog'
+import { createStoreScan, type StoreRead } from './store-scan'
+import { GOG_ACHIEVEMENTS_SOURCE, storeAchievementsSource } from '../../shared/store-achievements'
+import {
+  askedWait,
+  createScanRecord,
+  createScanRunner,
+  failEntries,
+  lastSessionTimes,
+  playedAfter,
+  readEntry,
+  scanDue,
+  unpark,
+  sharedFailure,
+  type ScanEntry
+} from './scan-scheduler'
 import { RECOMP_ACHIEVEMENTS_SOURCE, recompAchievementsFor } from '../../shared/recomp-play'
 import type { RecompAchievementsReader } from '../recomp/achievements'
 import {
@@ -58,11 +81,14 @@ const STEAM_START_DELAY_MS = 60 * 1000
 const STEAM_KICK_DELAY_MS = 5 * 1000
 /** Between two one-game Steam requests of the scan: a few a second at most. */
 const STEAM_SCAN_GAP_MS = 400
-/** A failed Steam scan step waits this long, doubled each failure in a row, up to STEAM_BACKOFF_MAX_MS. */
+/**
+ * The store scans (GOG) start after the Steam scan's start-up wait. No extra wait between two games: gog.ts already
+ * paces every GOG request (about one a second, a page open's first).
+ */
+const STORE_START_DELAY_MS = 90 * 1000
+const STORE_SCAN_GAP_MS = 0
+/** A failed Steam scan step waits this long, doubled each failure in a row (scan-scheduler.ts). */
 const STEAM_BACKOFF_MS = 2 * 60 * 1000
-const STEAM_BACKOFF_MAX_MS = 6 * 60 * 60 * 1000
-/** A game whose read failed this many times in a row is no longer retried on a timer (only after a play, etc.). */
-const STEAM_PARK_AFTER = 5
 /** The one-game reads of a pass write their marks and the record this often (games, or ms), not after every game. */
 const STEAM_FLUSH_EVERY = 25
 const STEAM_FLUSH_MS = 5 * 1000
@@ -70,6 +96,20 @@ const STEAM_FLUSH_MS = 5 * 1000
 const KEYLESS_CHECK_TTL_MS = 6 * 60 * 60 * 1000
 /** A Settings edit settles before the account is checked again. */
 const RA_SETTINGS_DELAY_MS = 800
+/** RetroAchievements: a ROM scan or a play session settles this long before the scan looks at it. */
+const RA_KICK_DELAY_MS = 5 * 1000
+/** A failed RetroAchievements step waits this long, doubled each failure in a row (scan-scheduler.ts). */
+const RA_BACKOFF_MS = 2 * 60 * 1000
+/** The start-up read of the installed recompilations' achievements waits this long (the start-up work goes first). */
+const RECOMP_START_DELAY_MS = 30 * 1000
+/** This PC's ROMs are hashed for its paired clients this long after the app starts (the start-up work goes first). */
+const RA_HASH_START_DELAY_MS = 60 * 1000
+/** A ROM file that could not be read for its hash is tried again after this long. */
+const HASH_RETRY_MS = 6 * 60 * 60 * 1000
+/** Hashed ROMs are checked for a changed file (size, date) at most this often; new ROMs are hashed on every pass. */
+const HASH_RECHECK_MS = 60 * 60 * 1000
+/** Up to this many games are read one request each; more take the one completion-progress request instead. */
+const RA_PER_GAME_MAX = 5
 /** The `metadata.sources` key of a ROM's RetroAchievements game id. */
 export const RA_SOURCE = 'retroachievements'
 
@@ -88,6 +128,11 @@ export interface AchievementsDeps {
   cacheDir: string
   /** A game is running: the Steam scan holds its requests until it ends. */
   gameRunning?: () => boolean
+  /**
+   * Whether this PC's ROMs are hashed for paired clients (it hosts: Settings > Streaming). Default: yes. A ROM is still
+   * hashed when this PC's own RetroAchievements account matches it.
+   */
+  hashForClients?: () => boolean
 }
 
 /** Network calls, injectable for tests. */
@@ -99,6 +144,15 @@ export interface AchievementsOptions {
   raGameList?: typeof raGameList
   raCompletion?: typeof raCompletionProgress
   raGame?: typeof raGameProgress
+  raRecent?: typeof raRecentlyPlayed
+  /** How long kickRetro waits for more changes. */
+  raKickDelayMs?: number
+  /** The first wait after a failed RetroAchievements step. */
+  raBackoffMs?: number
+  /** The first hashing of this PC's ROMs for its clients after start (0: at the first RetroAchievements pass). */
+  raHashStartDelayMs?: number
+  /** The start-up read of installed recompilations without counts yet waits this long (0: none). */
+  recompStartDelayMs?: number
   hashRom?: typeof raHashRom
   settingsDelayMs?: number
   /** The Steam scan's first pass after start (0: none until syncSteam or kickSteam). */
@@ -109,6 +163,12 @@ export interface AchievementsOptions {
   steamScanGapMs?: number
   /** The first wait after a failed Steam scan step. */
   steamBackoffMs?: number
+  /** One GOG game's achievements (tests; default: gog.ts with the GOG account). */
+  gogRead?: (productId: string, priority: 'page' | 'scan') => Promise<StoreRead>
+  /** The store scans' first pass after start (0: none until syncStore or kick). */
+  storeStartDelayMs?: number
+  /** Between two one-game store requests. */
+  storeScanGapMs?: number
 }
 
 /** The signed-in Steam account's credential; `refresh` mints a new access token first. */
@@ -150,6 +210,42 @@ export interface AchievementsService {
   /** Check the RetroAchievements account and fill unlocked / total for every ROM it recognises. */
   syncRetro(): Promise<RetroAchievementsStatus>
   retroStatus(): RetroAchievementsStatus
+  /**
+   * The RetroAchievements scan (like the Steam scan): the ROMs not read with this account yet (new ROMs, a paired host's
+   * ROMs) and the ROMs played since their last read; the first pass of a run also checks the account and reads
+   * RetroAchievements' recently played list. Then (a minute after start at the earliest, only while this PC hosts, and
+   * never while a game runs) hashes this PC's new ROMs for its paired clients, signed in or not.
+   */
+  kickRetro(delayMs?: number): void
+  /** A play session ended: whichever scan reads the game (Steam, RetroAchievements, GOG) reads it again. */
+  played(gameId: string, endedAt: string): void
+  /** The library changed: the Steam and store scans run once things settle. */
+  kick(): void
+  /** The streaming service is created after this one; it hands over the paired hosts' games here. */
+  useRemote(source: RemoteGamesSource): void
+  /**
+   * A paired host's ROM (`remote:` id): its list with this PC's RetroAchievements account ('list'); 'host' when this PC
+   * cannot read it (not signed in, not a ROM it matches, no RetroAchievements game found: the host's own list is asked
+   * then); 'none' when this account found it has none. Throws when the read failed while this PC's counts of the ROM
+   * are on its card.
+   */
+  getRemote(gameId: string): Promise<RemoteRomRead>
+  /** A paired host's ROM: this PC's RetroAchievements counts of it, or its "none"; undefined when not read. */
+  remoteRetro(gameId: string): RemoteRetroCounts | undefined
+  /** A ROM's RetroAchievements hash when this PC worked it out already (what the host offers its clients). */
+  raHashOf(game: Game): string | undefined
+  /** The accounts service is created after this one; it hands over the GOG account here. */
+  useGogAccount(credential: () => Promise<GogAccountCredential | null>): void
+  /** A sign-in to the store or an owned import: its achievements scan runs (waiting games included). */
+  syncStore(source: 'gog'): Promise<void>
+  /** Signed out of the store: its counts leave the cards. */
+  storeSignedOut(source: 'gog'): void
+  /**
+   * Recompilations were installed or changed (`recomp:changed` ids): the games Play starts them for read their
+   * achievements now when their cards have none of theirs yet. No ids: the start-up read, after a short wait and never
+   * while a game runs, which skips recompilations already read without counts (until they change or are played).
+   */
+  recompChanged(ids?: string[]): Promise<void>
   dispose(): void
 }
 
@@ -158,12 +254,31 @@ interface HashCacheEntry {
   mtimeMs: number
   consoleId: number
   hash: string | null
+  /** Reading the file failed then (locked, a sleeping drive): not tried again for HASH_RETRY_MS. */
+  failedAt?: number
 }
 
-/** A console's games with achievements; `whole` unless a failed download left an older or no list. */
+/**
+ * A console's games with achievements; `whole` while the list is fresh enough that a ROM missing from it has none.
+ * `failed`: its download failed (the games are an older list's, or none); `fetchedAt`: when the list was downloaded
+ * (0: none).
+ */
 interface ConsoleList {
   games: RaGame[]
   whole: boolean
+  failed: boolean
+  fetchedAt: number
+}
+
+/** What matching found: the ROMs' games, and the ROMs that could not be told (their console's list failed). */
+interface MatchResult {
+  matches: Map<string, RaGame>
+  /** Not matched because the console's list could not be downloaded: matched again later, not recorded as read. */
+  unsure: Set<string>
+  /** When the list each ROM was matched against was downloaded. */
+  listAt: Map<string, number>
+  /** A game started meanwhile (`stopIf`): the rest is matched once it ends. */
+  stopped: boolean
 }
 
 interface ListCacheFile {
@@ -173,12 +288,121 @@ interface ListCacheFile {
 
 const isRom = (g: Game): boolean => g.source === 'rom' && !!g.romPath
 
-/** A Steam game's line in steam-scans.json: when the Steam scan last read it. */
-interface SteamScanEntry {
-  /** When Steam last answered for the game (epoch ms); absent while its reads only failed. */
-  at?: number
-  /** The game's last played then (null: none): a later one since = played since (through Steam, a paired PC). */
-  seen?: string | null
+/** A paired host's game (streaming remote-library.ts remoteGameId). */
+const isRemoteId = (id: string): boolean => id.startsWith('remote:')
+
+/**
+ * A paired host's ROM this PC matches with its own RetroAchievements account: a ROM of a system RetroAchievements
+ * covers whose counts are not the host's recompilation's. A host ROM card without a file (`downloadable` false: the
+ * host's recompilation-only card, or a disc image the host deleted once its recompilation played, remote-library.ts
+ * noRomFile) plays a recompilation, not the ROM, so RetroAchievements' sets do not apply to it: the host's counts stay.
+ */
+export function isRemoteRom(g: Game): boolean {
+  return (
+    !!g.remote &&
+    g.source === 'rom' &&
+    g.remote.downloadable &&
+    !g.metadata.sources?.[RECOMP_ACHIEVEMENTS_SOURCE] &&
+    raConsoleFor(g.platformId) !== null
+  )
+}
+
+/** A ROM to match: one of this PC's (hashed from its file) or a paired host's (its hash from the host's offer). */
+interface RomCandidate {
+  id: string
+  platformId: string
+  title: string
+  /** This PC's file, hashed when matched. */
+  path?: string
+  /** The hash known already (a host's ROM: null when the host sent none, so only titles match). */
+  hash?: string | null
+  /** The file's name without its extension, and the extension (lower case, with the dot). */
+  file: string
+  ext: string
+}
+
+function splitName(name: string): { file: string; ext: string } {
+  const ext = extname(name)
+  return { file: ext ? name.slice(0, -ext.length) : name, ext: ext.toLowerCase() }
+}
+
+function localCandidate(game: Game): RomCandidate {
+  const path = game.romPath
+  const name = path ? basename(path) : (game.externalId.split(/[\\/]/).pop() ?? '')
+  return { id: game.id, platformId: game.platformId, title: game.title, path, ...splitName(name) }
+}
+
+function remoteCandidate(game: Game): RomCandidate {
+  return {
+    id: game.id,
+    platformId: game.platformId,
+    title: game.title,
+    hash: game.remote?.raHash ?? null,
+    ...splitName(game.externalId.split(/[\\/]/).pop() ?? '')
+  }
+}
+
+/** What a ROM was matched from: another file (or host hash) since = matched again. */
+const fromOf = (c: RomCandidate): string =>
+  c.path ?? `${c.platformId}|${c.hash ?? ''}|${c.file}${c.ext}`
+
+const clampCounts = (p: {
+  unlocked: number
+  total: number
+}): { unlocked: number; total: number } => ({
+  unlocked: Math.min(Math.max(0, p.unlocked), p.total),
+  total: p.total
+})
+
+/** A ROM's line in ra-scans.json (scan-scheduler.ts ScanEntry). */
+interface RaScanEntry extends ScanEntry {
+  /** The RetroAchievements user (lower case) it was read with; another one = never read. */
+  account?: string
+  /** What it was matched from (fromOf). */
+  from?: string
+  /** The RetroAchievements game it matched. */
+  raId?: number
+  /** RetroAchievements has no achievements for it. */
+  none?: boolean
+  /**
+   * Matched with no game and no "none": when the console's list it was matched against was downloaded. A newer list
+   * in hand since (downloaded for another ROM, or a page open) makes it due again (a set may have been added).
+   */
+  listAt?: number
+  /** A paired host's ROM: this account's counts (this PC's own ROMs keep theirs on the card). */
+  unlocked?: number
+  total?: number
+}
+
+interface RomFound {
+  raId: number
+  counts?: { unlocked: number; total: number }
+}
+
+type RetroMode = 'full' | 'due'
+
+/** A paired host's ROM as this PC's RetroAchievements account sees it (streaming-service rebuild). */
+export type RemoteRetroCounts = RemoteRetroAnswer
+
+/** A paired host's ROM's list as this PC's RetroAchievements account reads it (getRemote). */
+export type RemoteRomRead =
+  | { kind: 'list'; info: AchievementsInfo }
+  /** This PC cannot read it (not signed in, not a ROM it matches, unknown to RetroAchievements): the host's list. */
+  | { kind: 'host' }
+  /** This PC's account found it has no achievements (its card shows none either). */
+  | { kind: 'none' }
+
+/** The paired hosts' games (the streaming service is created after this one). */
+export interface RemoteGamesSource {
+  games(): Promise<Game[]>
+  /** How many hosts are paired (0: none, so an empty games list is final). */
+  pairedHosts?(): Promise<number>
+  /** This PC's counts of the hosts' ROMs changed: the remote library is shown again. */
+  changed(): void
+}
+
+/** A Steam game's line in steam-scans.json: when the Steam scan last read it (scan-scheduler.ts ScanEntry). */
+interface SteamScanEntry extends ScanEntry {
   /** Steam's playtime (minutes) then: more since = played through Steam since. */
   storeMinutes?: number
   /** That read followed a PlayOut session: Steam's playtime growing next only catches up with that session. */
@@ -189,13 +413,6 @@ interface SteamScanEntry {
   none?: boolean
   /** When a pass asked for its counts and got none; Steam's own list is still to be asked. */
   countOnlyAt?: number
-  /** When a PlayOut play session of the game ended (epoch ms): after `at` = read again. */
-  playedAt?: number
-  /** Failed reads in a row, and when the next one may run. */
-  fails?: number
-  retryAt?: number
-  /** Failed STEAM_PARK_AFTER times in a row (epoch ms): no timed retry, only after a play, an import or a restart. */
-  parkedAt?: number
 }
 
 export function createAchievementsService(
@@ -210,6 +427,7 @@ export function createAchievementsService(
   const fetchRaGameList = options.raGameList ?? raGameList
   const fetchRaCompletion = options.raCompletion ?? raCompletionProgress
   const fetchRaGame = options.raGame ?? raGameProgress
+  const fetchRaRecent = options.raRecent ?? raRecentlyPlayed
   const hashRom = options.hashRom ?? raHashRom
 
   let steamAccount: SteamAccountCredential | null = null
@@ -300,25 +518,14 @@ export function createAchievementsService(
 
   // --- the Steam scan ---------------------------------------------------------------
   // Each Steam game (a store game with a Steam app id) is read once when it joins the library, then again only once it
-  // was played after its last read. Never on a timer otherwise: a failed read waits out a growing pause and, after
-  // STEAM_PARK_AFTER failures in a row, waits for a play, an owned import or sign-in, or the next start; games waiting
-  // for a Steam account (or for one Steam accepts) wait for the next sign-in, owned import or Settings key. Nothing is
-  // read while a game runs.
+  // was played after its last read (scan-scheduler.ts). Never on a timer otherwise: a failed read waits out a growing
+  // pause and, after SCAN_PARK_AFTER failures in a row, waits for a play, an owned import or sign-in, or the next start;
+  // games waiting for a Steam account (or for one Steam accepts) wait for the next sign-in, owned import or Settings
+  // key. Nothing is read while a game runs.
 
-  const steamStartDelayMs = options.steamStartDelayMs ?? STEAM_START_DELAY_MS
-  const steamKickDelayMs = options.steamKickDelayMs ?? STEAM_KICK_DELAY_MS
   const steamScanGapMs = options.steamScanGapMs ?? STEAM_SCAN_GAP_MS
   const steamBackoffMs = options.steamBackoffMs ?? STEAM_BACKOFF_MS
   const gameRunning = (): boolean => deps.gameRunning?.() ?? false
-  /** Until the start-up delay has passed, the scan waits (the delay's pass reads whatever is due). */
-  let steamStarted = steamStartDelayMs <= 0
-  let steamStartTimer: NodeJS.Timeout | null = null
-  let steamScanTimer: NodeJS.Timeout | null = null
-  /** When steamScanTimer fires (epoch ms). */
-  let steamScanAt = 0
-  /** No Steam request of the scan before this (epoch ms): its last step failed. */
-  let steamPausedUntil = 0
-  let steamPauseFails = 0
   /** Steam refused every credential: nothing is read until the credential changes (or an import / sign-in). */
   let steamAuthBlocked = false
   /** A pass stopped for a running game: the next session change (or play) picks it up. */
@@ -328,49 +535,23 @@ export function createAchievementsService(
   /** Page opens whose keyless check found achievements this account has no progress in: app id -> when. */
   const keylessChecked = new Map<number, number>()
 
-  const scanFile = join(deps.cacheDir, 'steam-scans.json')
-  let scans: Record<string, SteamScanEntry> | null = null
-  let scansLoading: Promise<Record<string, SteamScanEntry>> | null = null
-  /** A reset (sign-out, another key) came before the record was read: applied to it once read. */
-  let scansResetPending = false
-
-  function loadScans(): Promise<Record<string, SteamScanEntry>> {
-    if (scans) return Promise.resolve(scans)
-    scansLoading ??= (async () => {
-      let table: Record<string, SteamScanEntry> = {}
-      try {
-        const parsed = JSON.parse(await readFile(scanFile, 'utf8')) as unknown
-        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed))
-          table = parsed as Record<string, SteamScanEntry>
-      } catch {
-        // No record yet: every Steam game is new to the scan.
-      }
-      // A new start: games parked after failing again and again get one more try.
-      for (const entry of Object.values(table)) unpark(entry)
-      scans = table
-      if (scansResetPending) {
-        scansResetPending = false
-        forgetSteamScans(table)
-      }
-      return table
-    })()
-    return scansLoading
-  }
-
-  function unpark(entry: SteamScanEntry): void {
-    if (entry.parkedAt === undefined) return
-    delete entry.parkedAt
-    delete entry.fails
-  }
-
-  async function saveScans(): Promise<void> {
-    if (!scans) return
-    // Games that left the library leave the record: one added again is new to the scan.
-    for (const id of Object.keys(scans)) if (!library.getGame(id)) delete scans[id]
-    await writeJson(scanFile, scans).catch((err) =>
+  const steamRecord = createScanRecord<SteamScanEntry>({
+    file: join(deps.cacheDir, 'steam-scans.json'),
+    keep: (id) => !!library.getGame(id),
+    write: (file, value) => writeJson(file, value),
+    onSaveError: (err) =>
       log.warn(`steam: could not save the achievements scan record: ${describeError(err)}`)
-    )
-  }
+  })
+  const loadScans = (): Promise<Record<string, SteamScanEntry>> => steamRecord.load()
+  const saveScans = (): Promise<void> => steamRecord.save()
+
+  const steamRunner = createScanRunner({
+    startDelayMs: options.steamStartDelayMs ?? STEAM_START_DELAY_MS,
+    kickDelayMs: options.steamKickDelayMs ?? STEAM_KICK_DELAY_MS,
+    backoffMs: steamBackoffMs,
+    pass: () => runSteamScan(),
+    onError: (err) => log.warn(`steam: achievements scan failed: ${describeError(err)}`)
+  })
 
   /** The counts went with the account: every game is read again, except those Steam said have none. */
   function forgetSteamScans(table: Record<string, SteamScanEntry>): void {
@@ -386,25 +567,13 @@ export function createAchievementsService(
     return steamAppIdOf(game)
   }
 
-  /**
-   * When each game's newest play session reached this PC (epoch ms, this PC's clock): a session from a paired PC
-   * counts from when it was synced here, one played here from its end.
-   */
+  /** When each game's newest play session reached this PC (epoch ms, this PC's clock). */
   function lastSessions(gameId?: string): Map<string, number> {
-    const out = new Map<string, number>()
-    const sessions = gameId ? library.getSessions(gameId) : library.allSessions()
-    for (const s of sessions) {
-      const when = Date.parse(s.syncedAt ?? s.endedAt ?? '')
-      if (!Number.isFinite(when)) continue
-      if (when > (out.get(s.gameId) ?? 0)) out.set(s.gameId, when)
-    }
-    return out
+    return lastSessionTimes(gameId ? library.getSessions(gameId) : library.allSessions())
   }
 
   /**
-   * Played after `since`: a PlayOut session ended (or a paired PC's session arrived) after it, Steam's last played
-   * changed to a later time than the one seen at the last read and after it (compared with the value seen, so a
-   * clock ahead of this PC's cannot keep the game due), or Steam's playtime grew (not when that only caught up with
+   * Played after `since` (scan-scheduler.ts playedAfter), or Steam's playtime grew (not when that only caught up with
    * the PlayOut session the last read already followed).
    */
   function playedSince(
@@ -413,17 +582,7 @@ export function createAchievementsService(
     since: number,
     lastSession: number | undefined
   ): boolean {
-    if (entry.playedAt && entry.playedAt > since) return true
-    if (lastSession !== undefined && lastSession > since) return true
-    const lastPlayed = game.lastPlayed ? Date.parse(game.lastPlayed) : Number.NaN
-    if (
-      Number.isFinite(lastPlayed) &&
-      lastPlayed > since &&
-      (game.lastPlayed ?? null) !== (entry.seen ?? null)
-    ) {
-      const seen = entry.seen ? Date.parse(entry.seen) : Number.NaN
-      if (!Number.isFinite(seen) || lastPlayed > seen) return true
-    }
+    if (playedAfter(game, entry, since, lastSession)) return true
     return !entry.afterSession && (game.storePlaytimeMinutes ?? 0) > (entry.storeMinutes ?? 0)
   }
 
@@ -437,13 +596,8 @@ export function createAchievementsService(
     now: number,
     lastSession: number | undefined
   ): boolean {
-    if (!entry) return true
-    if (entry.appId !== undefined && entry.appId !== scanAppId(game)) return true
-    if (entry.parkedAt !== undefined)
-      return playedSince(game, entry, Math.max(entry.parkedAt, entry.at ?? 0), lastSession)
-    if (entry.retryAt && now < entry.retryAt) return false
-    if (entry.at === undefined) return true
-    return playedSince(game, entry, entry.at, lastSession)
+    if (entry?.appId !== undefined && entry.appId !== scanAppId(game)) return true
+    return scanDue(entry, now, (since) => playedSince(game, entry!, since, lastSession))
   }
 
   /** Steam answered for these games at `at` (a session that ended after it still makes them due). */
@@ -459,29 +613,19 @@ export function createAchievementsService(
       const playedAt = table[id]?.playedAt
       const appId = scanAppId(game)
       table[id] = {
-        at,
-        seen: game.lastPlayed ?? null,
+        ...readEntry(game, table[id], at),
         storeMinutes: game.storePlaytimeMinutes ?? 0,
         ...(appId ? { appId } : {}),
         ...(none ? { none: true } : {}),
         // This read followed a PlayOut session: Steam's playtime catching up with it later is no new play.
-        ...(playedAt && playedAt <= at ? { afterSession: true } : {}),
-        ...(playedAt && playedAt > at ? { playedAt } : {})
+        ...(playedAt && playedAt <= at ? { afterSession: true } : {})
       }
     }
   }
 
-  const backoff = (fails: number): number =>
-    Math.min(steamBackoffMs * 2 ** Math.max(0, fails - 1), STEAM_BACKOFF_MAX_MS)
-
-  /** A rate limit, a network failure or a Retry-After: everything waits, not just the game asked about. */
-  const sharedFailure = (err: unknown): boolean =>
-    err instanceof HttpError &&
-    (err.status === 429 || err.status === 0 || err.retryAfterMs !== undefined)
-
   /**
    * A scan step failed. Steam refusing the credential stops the scan until the credential changes (no game is held
-   * back for it). Otherwise its games wait, longer after each failure in a row, and after STEAM_PARK_AFTER failures
+   * back for it). Otherwise its games wait, longer after each failure in a row, and after SCAN_PARK_AFTER failures
    * wait for a play (or an import, a sign-in, the next start); with `everyone` (a batch request, a rate limit, no
    * network) the whole scan pauses too, as long as Steam asked when it said.
    */
@@ -499,51 +643,18 @@ export function createAchievementsService(
       return
     }
     const now = Date.now()
-    const asked = err instanceof HttpError ? (err.retryAfterMs ?? 0) : 0
-    let retry = Number.POSITIVE_INFINITY
-    for (const id of ids) {
-      const entry: SteamScanEntry = { ...table[id] }
-      const fails = (entry.fails ?? 0) + 1
-      delete entry.retryAt
-      if (fails >= STEAM_PARK_AFTER) {
-        table[id] = { ...entry, fails, parkedAt: now }
-        continue
-      }
-      const retryAt = now + Math.max(backoff(fails), asked)
-      table[id] = { ...entry, fails, retryAt }
-      retry = Math.min(retry, retryAt)
-    }
+    const retry = failEntries(table, ids, steamBackoffMs, err, now)
     const limited = err instanceof HttpError && err.status === 429
     if (!everyone && !sharedFailure(err)) {
       log.warn(`steam: achievements of ${ids.join(', ')} could not be read: ${describeError(err)}`)
       // Only these games wait; the scan reads them once their wait is over.
-      if (Number.isFinite(retry)) scheduleSteam(retry - now)
+      if (Number.isFinite(retry)) steamRunner.schedule(retry - now)
       return
     }
-    steamPauseFails++
-    const wait = Math.max(backoff(steamPauseFails), asked)
-    steamPausedUntil = now + wait
+    const wait = steamRunner.pause(askedWait(err))
     log.warn(
       `steam: achievements scan ${limited ? 'rate limited' : 'failed'} (${describeError(err)}); next try in ${Math.round(wait / 1000)} s`
     )
-    scheduleSteam(wait)
-  }
-
-  /** Run the scan in `ms`, unless it is already set to run sooner. */
-  function scheduleSteam(ms: number): void {
-    if (disposed || !steamStarted) return
-    const fireAt = Date.now() + Math.max(0, ms)
-    if (steamScanTimer && steamScanAt <= fireAt) return
-    if (steamScanTimer) clearTimeout(steamScanTimer)
-    steamScanAt = fireAt
-    steamScanTimer = setTimeout(
-      () => {
-        steamScanTimer = null
-        void runSteam()
-      },
-      Math.max(0, ms)
-    )
-    steamScanTimer.unref?.()
   }
 
   /** Steam said the game has no achievements: the mark goes on, Steam counts read before go (a recompilation's stay). */
@@ -606,8 +717,9 @@ export function createAchievementsService(
     }
     steamDeferred = false
     const now = Date.now()
-    if (now < steamPausedUntil) {
-      scheduleSteam(steamPausedUntil - now)
+    const paused = steamRunner.pausedFor()
+    if (paused > 0) {
+      steamRunner.schedule(paused)
       return
     }
     const sessions = lastSessions()
@@ -641,7 +753,7 @@ export function createAchievementsService(
     if (recordChanged) await saveScans()
     if (byApp.size && !(await scanSteamApps(table, byApp, countOnly))) return
     // A failed game's wait ends: it is read then (nothing else is on a timer).
-    if (Number.isFinite(nextRetry)) scheduleSteam(nextRetry - Date.now())
+    if (Number.isFinite(nextRetry)) steamRunner.schedule(nextRetry - Date.now())
   }
 
   /**
@@ -758,40 +870,14 @@ export function createAchievementsService(
     }
     await flush()
     // The whole pass went through: the next failure starts the pause over.
-    steamPauseFails = 0
+    steamRunner.passed()
     log.info(
       `steam: achievements scan read ${byApp.size} game(s): ${counted} with counts, ${none} without achievements`
     )
     return true
   }
 
-  let steamRun: Promise<void> | null = null
-  let steamAgain = false
-
-  function runSteam(): Promise<void> {
-    if (disposed) return Promise.resolve()
-    // Before the start-up delay is over: its pass reads what is due.
-    if (!steamStarted) return Promise.resolve()
-    if (steamRun) {
-      steamAgain = true
-      return steamRun
-    }
-    steamRun = (async () => {
-      try {
-        do {
-          steamAgain = false
-          try {
-            await runSteamScan()
-          } catch (err) {
-            log.warn(`steam: achievements scan failed: ${describeError(err)}`)
-          }
-        } while (steamAgain && !disposed)
-      } finally {
-        steamRun = null
-      }
-    })()
-    return steamRun
-  }
+  const runSteam = (): Promise<void> => steamRunner.run()
 
   /** An owned import or a sign-in: a refused credential and parked games get another try. */
   function syncSteam(): Promise<void> {
@@ -801,9 +887,8 @@ export function createAchievementsService(
   }
 
   function kickSteam(): void {
-    if (disposed || !steamStarted) return
     // A pause after a failure is not cut short.
-    scheduleSteam(Math.max(steamKickDelayMs, steamPausedUntil - Date.now()))
+    steamRunner.kick()
   }
 
   function steamPlayed(gameId: string, endedAt: string): void {
@@ -841,12 +926,8 @@ export function createAchievementsService(
       .filter((g) => g.source !== 'rom' && steamAppIdOf(g) && g.metadata.achievements)
       .map((g) => g.id)
     announce(library.clearAchievements(ids))
-    steamPausedUntil = 0
-    steamPauseFails = 0
-    if (scans) {
-      forgetSteamScans(scans)
-      void saveScans()
-    } else scansResetPending = true
+    steamRunner.clearPause()
+    steamRecord.change(forgetSteamScans)
   }
 
   function steamSignedOut(): void {
@@ -920,7 +1001,12 @@ export function createAchievementsService(
     return next
   }
 
-  async function romHash(path: string, consoleId: number): Promise<string | null> {
+  /** `retryFailed`: a file that could not be read lately is tried again now (Sync now, a page open). */
+  async function romHash(
+    path: string,
+    consoleId: number,
+    retryFailed = false
+  ): Promise<string | null> {
     if (!canHash(consoleId)) return null
     const table = await loadHashes()
     let info
@@ -934,15 +1020,25 @@ export function createAchievementsService(
       known &&
       known.size === info.size &&
       known.mtimeMs === info.mtimeMs &&
-      known.consoleId === consoleId
+      known.consoleId === consoleId &&
+      (known.failedAt === undefined ||
+        (!retryFailed && Date.now() - known.failedAt < HASH_RETRY_MS))
     )
       return known.hash
     let hash: string | null
     try {
       hash = await hashRom(path, consoleId)
     } catch (err) {
-      // A locked file or a sleeping drive: try again next time instead of remembering "no hash".
+      // A locked file or a sleeping drive: tried again later (not on every pass) instead of remembering "no hash".
       log.debug(`retroachievements: could not hash ${path}: ${describeError(err)}`)
+      table[path] = {
+        size: info.size,
+        mtimeMs: info.mtimeMs,
+        consoleId,
+        hash: null,
+        failedAt: Date.now()
+      }
+      hashesDirty = true
       return null
     }
     table[path] = { size: info.size, mtimeMs: info.mtimeMs, consoleId, hash }
@@ -972,19 +1068,93 @@ export function createAchievementsService(
     } catch {
       cached = null
     }
-    if (cached && Array.isArray(cached.games) && Date.now() - cached.fetchedAt < RA_LIST_TTL_MS)
-      return { games: cached.games, whole: Date.now() - cached.fetchedAt < RA_LIST_WHOLE_MS }
+    const cachedAt = cached && Number.isFinite(cached.fetchedAt) ? cached.fetchedAt : 0
+    if (cached && Array.isArray(cached.games) && Date.now() - cachedAt < RA_LIST_TTL_MS) {
+      listFetchedAt.set(consoleId, cachedAt)
+      return {
+        games: cached.games,
+        whole: Date.now() - cachedAt < RA_LIST_WHOLE_MS,
+        failed: false,
+        fetchedAt: cachedAt
+      }
+    }
     try {
       const games = await fetchRaGameList(consoleId, creds)
-      await writeJson(file, { fetchedAt: Date.now(), games } satisfies ListCacheFile).catch((err) =>
+      const fetchedAt = Date.now()
+      await writeJson(file, { fetchedAt, games } satisfies ListCacheFile).catch((err) =>
         log.warn(`retroachievements: could not cache console ${consoleId}: ${describeError(err)}`)
       )
-      return { games, whole: true }
+      listFetchedAt.set(consoleId, fetchedAt)
+      return { games, whole: true, failed: false, fetchedAt }
     } catch (err) {
       if (err instanceof RaAuthError) throw err
       log.warn(`retroachievements: game list ${consoleId} failed: ${describeError(err)}`)
-      return { games: Array.isArray(cached?.games) ? cached.games : [], whole: false }
+      return {
+        games: Array.isArray(cached?.games) ? cached.games : [],
+        whole: false,
+        failed: true,
+        fetchedAt: cachedAt
+      }
     }
+  }
+
+  /** When each console's list in hand was downloaded (from this run's reads of it). */
+  const listFetchedAt = new Map<number, number>()
+
+  async function saveHashes(): Promise<void> {
+    if (!hashesDirty || !hashes) return
+    hashesDirty = false
+    await writeJson(hashFile, hashes).catch((err) =>
+      log.warn(`retroachievements: could not save ROM hashes: ${describeError(err)}`)
+    )
+  }
+
+  /** When hashRoms last checked every hashed ROM for a changed file. */
+  let hashesCheckedAt = 0
+  /** A hashing pass stopped for a game: the game's end picks it up. */
+  let hashDeferred = false
+
+  /**
+   * Hash this PC's ROMs without any account, for its paired clients: they match the ROMs this PC offers with their own
+   * RetroAchievements account by these hashes (raHashOf, remote-library.ts hostOffer). Only while this PC hosts; new
+   * ROMs on every pass, and at most hourly a check of the hashed ones for a replaced file (one stat each). Stops when a
+   * game starts: nothing is read while one runs.
+   */
+  async function hashRoms(): Promise<void> {
+    if (!(deps.hashForClients?.() ?? true)) return
+    const table = await loadHashes()
+    const recheck = Date.now() - hashesCheckedAt >= HASH_RECHECK_MS
+    let hashed = 0
+    let stopped = false
+    for (const game of library.games()) {
+      if (disposed) break
+      if (!isRom(game)) continue
+      const consoleId = raConsoleFor(game.platformId)
+      if (consoleId === null || !canHash(consoleId)) continue
+      const known = table[game.romPath!]
+      if (!recheck && known?.consoleId === consoleId && known.failedAt === undefined) continue
+      if (gameRunning()) {
+        stopped = true
+        break
+      }
+      const before = table[game.romPath!]
+      await romHash(game.romPath!, consoleId)
+      if (table[game.romPath!] !== before && table[game.romPath!]?.hash) hashed++
+    }
+    hashDeferred = stopped
+    if (recheck && !stopped && !disposed) hashesCheckedAt = Date.now()
+    if (hashed) log.info(`retroachievements: hashed ${hashed} ROM(s) for the paired clients`)
+    await saveHashes()
+  }
+
+  /** A ROM's RetroAchievements hash when this PC worked it out already (no file is read here). */
+  function raHashOf(game: Game): string | undefined {
+    if (!hashes || !isRom(game)) return undefined
+    const consoleId = raConsoleFor(game.platformId)
+    const known = hashes[game.romPath!]
+    return consoleId !== null && known?.consoleId === consoleId && known.hash
+      ? known.hash
+      : undefined
   }
 
   /**
@@ -993,11 +1163,15 @@ export function createAchievementsService(
    * game of a whole list (a list has only games with achievements) and matched by no title either.
    */
   async function matchRoms(
-    roms: Game[],
+    roms: RomCandidate[],
     creds: RaCredentials,
-    none?: Set<string>
-  ): Promise<Map<string, RaGame>> {
-    const byConsole = new Map<number, Game[]>()
+    none?: Set<string>,
+    /** The background scan: stop (and hash nothing more) once this says so (a game started). */
+    stopIf?: () => boolean
+  ): Promise<MatchResult> {
+    // Only the background scan leaves a file that could not be read lately alone (Sync now and a page open retry it).
+    const retryFailed = !stopIf
+    const byConsole = new Map<number, RomCandidate[]>()
     for (const rom of roms) {
       const consoleId = raConsoleFor(rom.platformId)
       if (consoleId === null) continue
@@ -1005,11 +1179,22 @@ export function createAchievementsService(
       list.push(rom)
       byConsole.set(consoleId, list)
     }
-    const matches = new Map<string, RaGame>()
+    const result: MatchResult = {
+      matches: new Map(),
+      unsure: new Set(),
+      listAt: new Map(),
+      stopped: false
+    }
+    const { matches } = result
     for (const [consoleId, consoleRoms] of byConsole) {
       if (disposed) break
-      const { games, whole } = await consoleGames(consoleId, creds)
-      if (!games.length) continue
+      const { games, whole, failed, fetchedAt } = await consoleGames(consoleId, creds)
+      for (const rom of consoleRoms) result.listAt.set(rom.id, fetchedAt)
+      // The list could not be downloaded: these ROMs cannot be told yet (a cached older list still matches some).
+      if (!games.length) {
+        if (failed) for (const rom of consoleRoms) result.unsure.add(rom.id)
+        continue
+      }
       const byHash = new Map<string, RaGame>()
       const byTitle = new Map<string, RaGame | null>()
       for (const game of games) {
@@ -1023,30 +1208,35 @@ export function createAchievementsService(
         }
       }
       for (const rom of consoleRoms) {
-        const hash = rom.romPath ? await romHash(rom.romPath, consoleId) : null
-        const file = rom.romPath ? basename(rom.romPath, extname(rom.romPath)) : ''
+        if (rom.hash === undefined && rom.path && stopIf?.()) {
+          result.stopped = true
+          break
+        }
+        const hash =
+          rom.hash !== undefined
+            ? rom.hash
+            : rom.path
+              ? await romHash(rom.path, consoleId, retryFailed)
+              : null
         const match =
           (hash ? byHash.get(hash) : undefined) ??
           byTitle.get(matchTitle(rom.title)) ??
-          (file ? byTitle.get(matchTitle(file)) : undefined)
+          (rom.file ? byTitle.get(matchTitle(rom.file)) : undefined)
         if (match) matches.set(rom.id, match)
+        else if (failed) result.unsure.add(rom.id)
         // A zip's ROM is its first file that is not a manual or an image: another file in it may have given the hash.
         else if (
           hash &&
           whole &&
           raHashTrusted(rom.platformId) &&
-          (consoleId === RA_CONSOLE.arcade || extname(rom.romPath!).toLowerCase() !== '.zip')
+          (consoleId === RA_CONSOLE.arcade || rom.ext !== '.zip')
         )
           none?.add(rom.id)
       }
+      if (result.stopped) break
     }
-    if (hashesDirty && hashes) {
-      hashesDirty = false
-      await writeJson(hashFile, hashes).catch((err) =>
-        log.warn(`retroachievements: could not save ROM hashes: ${describeError(err)}`)
-      )
-    }
-    return matches
+    await saveHashes()
+    return result
   }
 
   /** Mark a ROM as without RetroAchievements (RA_NONE), its counts dropped. */
@@ -1075,66 +1265,254 @@ export function createAchievementsService(
       )
       .map((g) => g.id)
     announce(library.clearAchievements(ids, RA_SOURCE))
+    // The paired hosts' ROMs: what the account found for them goes too.
+    const table = raRecord.loaded()
+    if (table && Object.keys(table).some((id) => isRemoteId(id))) {
+      raRecord.change((t) => {
+        for (const id of Object.keys(t)) if (isRemoteId(id)) delete t[id]
+      })
+      remoteSource?.changed()
+    }
+  }
+
+  // --- the RetroAchievements scan -------------------------------------------------------
+  // Like the Steam scan: a ROM is matched and read once when it joins the library (or a paired host offers it), then
+  // again only once it was played after its last read (here, on a paired PC, or in RetroAchievements' recently played
+  // list, read once per start, which also catches play on other devices). The full pass (syncRetro) stays for a new
+  // account and Settings' Sync now. ra-scans.json keeps when each ROM was read, and the counts of the hosts' ROMs.
+
+  const raRecord = createScanRecord<RaScanEntry>({
+    file: join(deps.cacheDir, 'ra-scans.json'),
+    // A paired host's ROMs stay while the hosts' games are not in hand.
+    keep: (id) =>
+      !!library.getGame(id) || (isRemoteId(id) && (remoteIds === null || remoteIds.has(id))),
+    write: (file, value) => writeJson(file, value),
+    onSaveError: (err) =>
+      log.warn(`retroachievements: could not save the scan record: ${describeError(err)}`)
+  })
+  const retroRunner = createScanRunner({
+    startDelayMs: 0,
+    kickDelayMs: options.raKickDelayMs ?? RA_KICK_DELAY_MS,
+    backoffMs: options.raBackoffMs ?? RA_BACKOFF_MS,
+    pass: async () => {
+      // Nothing is read (or hashed) while a game runs; its end picks the pass up.
+      if (gameRunning()) {
+        retroDeferred = true
+        return
+      }
+      retroDeferred = false
+      const paused = retroRunner.pausedFor()
+      if (paused > 0) {
+        retroRunner.schedule(paused)
+        return
+      }
+      await queueRetro('due')
+      // Hashing for the paired clients needs no account; it runs on its own, after the start-up work.
+      hashRunner.kick()
+    },
+    onError: (err) => log.warn(`retroachievements: scan failed: ${describeError(err)}`)
+  })
+  const hashRunner = createScanRunner({
+    startDelayMs: options.raHashStartDelayMs ?? RA_HASH_START_DELAY_MS,
+    kickDelayMs: options.raKickDelayMs ?? RA_KICK_DELAY_MS,
+    backoffMs: options.raBackoffMs ?? RA_BACKOFF_MS,
+    pass: async () => {
+      if (gameRunning()) {
+        hashDeferred = true
+        return
+      }
+      await hashRoms()
+    },
+    onError: (err) => log.warn(`retroachievements: hashing ROMs failed: ${describeError(err)}`)
+  })
+  /** RetroAchievements' recently played list was read this run for this account (once per start). */
+  let recentReadFor = ''
+  /** A pass held back while a game ran. */
+  let retroDeferred = false
+  /** The paired hosts' games as last seen (null: not asked yet). */
+  let remoteIds: Set<string> | null = null
+  let remoteSource: RemoteGamesSource | null = null
+
+  /** The paired hosts' ROMs this PC can match: ROMs of a system RetroAchievements covers (isRemoteRom). */
+  async function remoteRoms(): Promise<Game[]> {
+    if (!remoteSource) return []
+    let games: Game[]
+    try {
+      games = await remoteSource.games()
+    } catch (err) {
+      log.debug(`retroachievements: the hosts' games could not be read: ${describeError(err)}`)
+      return []
+    }
+    // An empty list may only mean the hosts' offers are not loaded yet: what was read for them stays, unless no host is
+    // paired any more (then their ROMs leave the record).
+    if (games.length) remoteIds = new Set(games.map((g) => g.id))
+    else if ((await remoteSource.pairedHosts?.().catch(() => null)) === 0) remoteIds = new Set()
+    return games.filter(isRemoteRom)
+  }
+
+  /** A ROM's line in the record with this account's answer; undefined when it is another account's. */
+  function entryFor(
+    table: Record<string, RaScanEntry>,
+    id: string,
+    account: string
+  ): RaScanEntry | undefined {
+    const entry = table[id]
+    return entry?.account === account ? entry : undefined
   }
 
   let retroRun: Promise<RetroAchievementsStatus> | null = null
-  let retroAgain = false
+  let retroAgain: RetroMode | null = null
   let syncedFor = ''
 
-  async function runRetroSync(): Promise<RetroAchievementsStatus> {
+  /**
+   * One pass: `full` matches and reads every ROM (a new account, Sync now); `due` only the ROMs the scan has not read
+   * with this account yet or that were played since (and, once per start, RetroAchievements' recently played list).
+   */
+  async function runRetroSync(mode: RetroMode): Promise<RetroAchievementsStatus> {
+    // The background pass asks nothing for an account already found signed out or refused: a new username or key
+    // (a higher revision) runs the full pass.
+    if (
+      mode === 'due' &&
+      (status.state === 'signed-out' || status.state === 'invalid') &&
+      status.revision === revision &&
+      (status.state === 'invalid' || !raCredentials())
+    )
+      return status
     runRevision = revision
     const creds = raCredentials()
     if (!creds) {
       profile = null
       clearRetro()
       syncedFor = ''
+      recentReadFor = ''
       return setStatus({ state: 'signed-out' })
     }
     const key = credentialKey(creds)
     // A different account: the previous one's counts must not stay on the cards meanwhile.
     if (syncedFor && syncedFor !== key) clearRetro()
-    // A re-check of the same account keeps showing it; a new one shows nobody until RetroAchievements answers.
-    setStatus(
-      syncedFor === key
-        ? { ...status, state: 'checking', message: undefined }
-        : { state: 'checking' }
-    )
-    try {
-      profile = await fetchRaProfile(creds)
-    } catch (err) {
-      if (err instanceof RaAuthError) {
-        profile = null
+    const fresh = syncedFor !== key || !profile
+    if (mode === 'full' || fresh) {
+      // A re-check of the same account keeps showing it; a new one shows nobody until RetroAchievements answers.
+      setStatus(
+        syncedFor === key
+          ? { ...status, state: 'checking', message: undefined }
+          : { state: 'checking' }
+      )
+      try {
+        profile = await fetchRaProfile(creds)
+      } catch (err) {
+        if (err instanceof RaAuthError) {
+          profile = null
+          return setStatus({
+            state: 'invalid',
+            message: tMain('mainApp.ra.keyRejected')
+          })
+        }
+        if (mode === 'due') retroRunner.pause(askedWait(err))
         return setStatus({
-          state: 'invalid',
-          message: tMain('mainApp.ra.keyRejected')
+          state: 'error',
+          message: tMain('mainApp.ra.unreachable', { error: describeError(err) })
         })
       }
-      return setStatus({
-        state: 'error',
-        message: tMain('mainApp.ra.unreachable', { error: describeError(err) })
-      })
+      if (!profile) {
+        return setStatus({
+          state: 'invalid',
+          message: tMain('mainApp.ra.noUser', { user: creds.username })
+        })
+      }
     }
-    if (!profile) {
-      return setStatus({
-        state: 'invalid',
-        message: tMain('mainApp.ra.noUser', { user: creds.username })
-      })
-    }
+    const current: RaProfile = profile!
     const signedIn: Omit<RetroAchievementsStatus, 'revision'> = {
       state: 'signed-in',
-      user: profile.user,
-      avatar: profile.avatar,
-      points: profile.points,
-      softcorePoints: profile.softcorePoints
+      user: current.user,
+      avatar: current.avatar,
+      points: current.points,
+      softcorePoints: current.softcorePoints
     }
     const roms = library.games().filter(isRom)
-    setStatus({ ...signedIn, state: 'checking', roms: roms.length })
-    let matches: Map<string, RaGame>
+    const hostRoms = await remoteRoms()
+    const table = await raRecord.load()
+    if (disposed) return status
+    const account = creds.username.toLowerCase()
+    const now = Date.now()
+    const sessions = lastSessionTimes(library.allSessions())
+    const byId = new Map<string, Game>([...roms, ...hostRoms].map((g) => [g.id, g]))
+    const candidates = [...roms.map(localCandidate), ...hostRoms.map(remoteCandidate)]
+    /**
+     * Due: never read with this account, matched from another file since, played after its last read, or matched with
+     * no game while a newer list of its console has come in since (a set may have been added; no request for it).
+     */
+    const due =
+      mode === 'full'
+        ? candidates
+        : candidates.filter((c) => {
+            const entry = entryFor(table, c.id, account)
+            if (!entry || entry.from !== fromOf(c)) return true
+            if (!entry.raId && !entry.none && entry.at !== undefined && !entry.retryAt) {
+              const consoleId = raConsoleFor(c.platformId)
+              const newer = consoleId !== null ? listFetchedAt.get(consoleId) : undefined
+              if (newer !== undefined && newer > (entry.listAt ?? 0)) return true
+            }
+            const game = byId.get(c.id)!
+            return scanDue(entry, now, (since) =>
+              playedAfter(game, entry, since, sessions.get(c.id))
+            )
+          })
+    // ROMs whose last read failed and still wait: the scan comes back for the first of them (a timer may fire a little
+    // early, before its wait is over).
+    const dueIds = new Set(due.map((c) => c.id))
+    let waitingUntil = Number.POSITIVE_INFINITY
+    for (const c of candidates) {
+      const retryAt = entryFor(table, c.id, account)?.retryAt
+      if (!dueIds.has(c.id) && retryAt && retryAt > now)
+        waitingUntil = Math.min(waitingUntil, retryAt)
+    }
+    if (Number.isFinite(waitingUntil)) retroRunner.schedule(waitingUntil - Date.now() + 1)
+    const readRecent = mode === 'due' && recentReadFor !== key
+    if (mode === 'due' && !fresh && !due.length && !readRecent) return status
+    if (mode === 'full' || fresh) setStatus({ ...signedIn, state: 'checking', roms: roms.length })
+    /** Due ROMs already matched with this account: only their counts are read again. */
+    const known = new Map<string, number>()
+    const toMatch: RomCandidate[] = []
+    for (const c of due) {
+      const entry = entryFor(table, c.id, account)
+      if (mode === 'due' && entry?.raId && entry.from === fromOf(c)) known.set(c.id, entry.raId)
+      else toMatch.push(c)
+    }
+    let matched: MatchResult
     const none = new Set<string>()
-    let progress: RaProgress[]
+    const progress = new Map<number, { unlocked: number; total: number }>()
+    /** RetroAchievements games whose own read failed (that game only): their ROMs wait and are asked again. */
+    const failedRa = new Set<number>()
+    let failure: unknown = null
+    let recent: RaRecentGame[] = []
+    let recentRead = false
+    const asked = Date.now()
     try {
-      matches = await matchRoms(roms, creds, none)
-      progress = matches.size ? await fetchRaCompletion(creds) : []
+      // The background pass stops when a game starts (no ROM is hashed while one runs); its end picks it up.
+      matched = await matchRoms(toMatch, creds, none, mode === 'due' ? gameRunning : undefined)
+      if (matched.stopped) {
+        retroDeferred = true
+        return setStatus({ ...signedIn, roms: roms.length })
+      }
+      const wanted = new Set([...[...matched.matches.values()].map((g) => g.id), ...known.values()])
+      if (wanted.size && (mode === 'full' || wanted.size > RA_PER_GAME_MAX)) {
+        for (const p of await fetchRaCompletion(creds)) progress.set(p.gameId, p)
+      } else {
+        // A few games (new, or played since): one request each gives their exact counts. One game's failure is that
+        // game's: the others' answers are kept (a rate limit or no network stops the pass).
+        for (const raId of wanted) {
+          try {
+            const info = await fetchRaGame(raId, creds)
+            progress.set(raId, { unlocked: info?.unlocked ?? 0, total: info?.total ?? 0 })
+          } catch (err) {
+            if (err instanceof RaAuthError || sharedFailure(err)) throw err
+            failedRa.add(raId)
+            failure = err
+            log.warn(`retroachievements: game ${raId} could not be read: ${describeError(err)}`)
+          }
+        }
+      }
     } catch (err) {
       if (err instanceof RaAuthError)
         return setStatus({
@@ -1142,61 +1520,260 @@ export function createAchievementsService(
           message: tMain('mainApp.ra.keyRejected')
         })
       log.warn(`retroachievements: sync failed: ${describeError(err)}`)
+      // The due ROMs stay due; the scan waits a while (longer each failure in a row) before it asks again.
+      if (mode === 'due') retroRunner.pause(askedWait(err))
       return setStatus({
         ...signedIn,
         roms: roms.length,
         message: tMain('mainApp.ra.syncFailed', { error: describeError(err) })
       })
     }
-    if (disposed) return status
-    const byGame = new Map(progress.map((p) => [p.gameId, p]))
+    // The recently played list on its own: its failure keeps what the pass found (it is asked again next pass).
+    if (readRecent) {
+      try {
+        recent = await fetchRaRecent(creds)
+        recentRead = true
+      } catch (err) {
+        if (err instanceof RaAuthError)
+          return setStatus({ state: 'invalid', message: tMain('mainApp.ra.keyRejected') })
+        log.warn(
+          `retroachievements: the recently played list could not be read: ${describeError(err)}`
+        )
+      }
+    }
+    // Signed out or switched accounts meanwhile: these answers belong to nobody on screen now.
+    if (disposed || credentialKey(raCredentials()) !== key) return status
+    if (recentRead) recentReadFor = key
+    const { matches } = matched
+    /** ROMs that could not be told this pass: their game's read failed, or their console's list did. */
+    const failedIds = new Set<string>(matched.unsure)
+    for (const [romId, game] of matches) if (failedRa.has(game.id)) failedIds.add(romId)
+    for (const [romId, raId] of known) if (failedRa.has(raId)) failedIds.add(romId)
     const changed: string[] = []
+    /** What this pass found for each ROM: its RetroAchievements game, and its counts when read. */
+    const found = new Map<string, RomFound>()
     for (const [romId, game] of matches) {
-      const p = byGame.get(game.id)
+      if (failedIds.has(romId)) continue
+      const p = progress.get(game.id)
       const total = p?.total || game.achievements
       if (total <= 0) {
         none.add(romId)
         continue
       }
-      const counts = { unlocked: Math.min(p?.unlocked ?? 0, total), total }
-      if (writeCounts(romId, counts, { sources: { [RA_SOURCE]: String(game.id) } }))
-        changed.push(romId)
+      found.set(romId, {
+        raId: game.id,
+        counts: { unlocked: Math.min(p?.unlocked ?? 0, total), total }
+      })
+    }
+    for (const [romId, raId] of known) {
+      if (failedIds.has(romId)) continue
+      const p = progress.get(raId)
+      found.set(romId, p && p.total > 0 ? { raId, counts: clampCounts(p) } : { raId })
+    }
+    // Played lately on any device: the counts of every ROM of that game the scan matched, not only the due ones.
+    const recentById = new Map(recent.map((r) => [r.gameId, r]))
+    if (recentById.size) {
+      for (const c of candidates) {
+        if (found.has(c.id) || none.has(c.id) || failedIds.has(c.id)) continue
+        const entry = entryFor(table, c.id, account)
+        const r = entry?.raId ? recentById.get(entry.raId) : undefined
+        if (!entry?.raId || !r || r.total <= 0) continue
+        const playedAt = r.lastPlayed ? Date.parse(r.lastPlayed) : Number.NaN
+        if (Number.isFinite(playedAt) && entry.at !== undefined && playedAt <= entry.at) continue
+        found.set(c.id, { raId: entry.raId, counts: clampCounts(r) })
+      }
+    }
+    for (const [romId, f] of found) {
+      if (!isRemoteId(romId) && f.counts) {
+        if (writeCounts(romId, f.counts, { sources: { [RA_SOURCE]: String(f.raId) } }))
+          changed.push(romId)
+      }
+      cache.delete(romId)
     }
     // What the sync found without achievements is marked (the game page leaves its section out). A mark stays until a
     // sync matches the ROM (its counts and game id replace it): a sync that could not tell does not undo it.
-    for (const id of none) markNone(id, changed)
+    for (const id of none) if (!isRemoteId(id)) markNone(id, changed)
+    // The record: when each ROM was read, and for a host's ROM what this account found. The ROMs that could not be
+    // told are not read yet: each waits out a growing pause (scan-scheduler.ts failEntries) and is asked again.
+    let hostChanged = false
+    const recorded = new Set([...due.map((c) => c.id), ...found.keys()])
+    for (const c of candidates) {
+      if (failedIds.has(c.id)) {
+        const before = entryFor(table, c.id, account)
+        table[c.id] = { ...(before?.from === fromOf(c) ? before : {}), account, from: fromOf(c) }
+        continue
+      }
+      if (!recorded.has(c.id)) continue
+      const game = byId.get(c.id)!
+      const before = entryFor(table, c.id, account)
+      const f = found.get(c.id)
+      const entry: RaScanEntry = {
+        ...readEntry(game, before, asked),
+        account,
+        from: fromOf(c),
+        ...(f
+          ? { raId: f.raId }
+          : none.has(c.id)
+            ? { none: true }
+            : { listAt: matched.listAt.get(c.id) ?? before?.listAt ?? 0 })
+      }
+      if (isRemoteId(c.id)) {
+        const counts =
+          f?.counts ??
+          (f && before?.raId === f.raId && before.total
+            ? { unlocked: before.unlocked ?? 0, total: before.total }
+            : undefined)
+        if (counts) Object.assign(entry, counts)
+        if (
+          before?.raId !== entry.raId ||
+          before?.none !== entry.none ||
+          before?.unlocked !== entry.unlocked ||
+          before?.total !== entry.total
+        )
+          hostChanged = true
+      }
+      table[c.id] = entry
+    }
+    const retry = failedIds.size
+      ? failEntries(table, [...failedIds], options.raBackoffMs ?? RA_BACKOFF_MS, failure)
+      : Number.POSITIVE_INFINITY
+    await raRecord.save()
     announce(changed)
+    if (hostChanged) remoteSource?.changed()
     syncedFor = key
+    const localMatched =
+      mode === 'full'
+        ? [...matches.keys()].filter((id) => !isRemoteId(id) && !failedIds.has(id)).length
+        : roms.filter((g) => entryFor(table, g.id, account)?.raId).length
     log.info(
-      `retroachievements: ${profile.user}, ${matches.size} of ${roms.length} ROM(s) matched, ${changed.length} changed`
+      `retroachievements: ${current.user}, ${localMatched} of ${roms.length} ROM(s) matched, ${due.length} read, ${changed.length} changed` +
+        (failedIds.size ? `, ${failedIds.size} to ask again` : '') +
+        (hostRoms.length ? `; ${hostRoms.length} host ROM(s)` : '')
     )
+    if (Number.isFinite(retry)) retroRunner.schedule(retry - Date.now())
+    retroRunner.passed()
     return setStatus({
       ...signedIn,
       roms: roms.length,
-      matched: matches.size,
+      matched: localMatched,
       syncedAt: new Date().toISOString()
     })
   }
 
-  function syncRetro(): Promise<RetroAchievementsStatus> {
+  /** One pass at a time; a full pass asked for during one runs after it (a due pass asked then is part of it). */
+  function queueRetro(mode: RetroMode): Promise<RetroAchievementsStatus> {
     if (disposed) return Promise.resolve(status)
     if (retroRun) {
-      retroAgain = true
+      if (mode === 'full' || !retroAgain) retroAgain = mode
       return retroRun
     }
     retroRun = (async () => {
       try {
+        let next = mode
         let result: RetroAchievementsStatus
-        do {
-          retroAgain = false
-          result = await runRetroSync()
-        } while (retroAgain && !disposed)
+        for (;;) {
+          retroAgain = null
+          result = await runRetroSync(next)
+          if (!retroAgain || disposed) break
+          next = retroAgain
+        }
         return result
       } finally {
         retroRun = null
       }
     })()
     return retroRun
+  }
+
+  function syncRetro(): Promise<RetroAchievementsStatus> {
+    return queueRetro('full')
+  }
+
+  /** A play session of a ROM ended (here, or a host's ROM streamed): the scan reads it again. */
+  function retroPlayed(gameId: string, endedAt: string): void {
+    if (disposed) return
+    const game = library.getGame(gameId)
+    if (!(game && isRom(game)) && !isRemoteId(gameId)) {
+      // Another game ended: a pass (or hashing) held back while it ran goes on.
+      if (retroDeferred) retroRunner.kick()
+      if (hashDeferred) hashRunner.kick()
+      return
+    }
+    const ended = Date.parse(endedAt)
+    cache.delete(gameId)
+    void raRecord
+      .load()
+      .then(async (table) => {
+        if (table[gameId])
+          table[gameId] = {
+            ...table[gameId],
+            playedAt: Number.isFinite(ended) ? ended : Date.now()
+          }
+        await raRecord.save()
+        retroRunner.kick()
+      })
+      .catch((err) =>
+        log.warn(`retroachievements: could not note a play session: ${describeError(err)}`)
+      )
+  }
+
+  /** A paired host's ROM: this PC's own RetroAchievements counts of it (ra-scans.json), when this account read it. */
+  function remoteRetro(gameId: string): RemoteRetroCounts | undefined {
+    const creds = raCredentials()
+    const table = raRecord.loaded()
+    if (!creds || !table) return undefined
+    const entry = entryFor(table, gameId, creds.username.toLowerCase())
+    if (!entry || entry.at === undefined) return undefined
+    if (entry.none) return { none: true }
+    if (!entry.raId || !entry.total) return undefined
+    return {
+      raId: entry.raId,
+      unlocked: Math.min(entry.unlocked ?? 0, entry.total),
+      total: entry.total,
+      updatedAt: new Date(entry.at).toISOString()
+    }
+  }
+
+  /** A paired host's ROM's list with this PC's account: by the game the scan matched, or matched now. */
+  async function loadRemoteRom(gameId: string): Promise<RemoteRomRead> {
+    const creds = raCredentials()
+    if (!creds) return { kind: 'host' }
+    const game = (await remoteRoms()).find((g) => g.id === gameId)
+    if (!game) return { kind: 'host' }
+    const asked = credentialKey(creds)
+    const account = creds.username.toLowerCase()
+    const table = await raRecord.load()
+    const candidate = remoteCandidate(game)
+    const entry = entryFor(table, gameId, account)
+    const sameFile = entry?.from === fromOf(candidate)
+    let raId = sameFile ? entry?.raId : undefined
+    if (!raId) {
+      // This account found no achievements for it: the card shows none either, so no other account's list does.
+      if (sameFile && entry?.none) return { kind: 'none' }
+      const match = (await matchRoms([candidate], creds)).matches.get(gameId)
+      // RetroAchievements does not know it (by the host's hash or its title): the host's list is all there may be.
+      if (!match) return { kind: 'host' }
+      raId = match.id
+    }
+    const at = Date.now()
+    const info = await fetchRaGame(raId, creds)
+    if (credentialKey(raCredentials()) !== asked) return { kind: 'host' }
+    const next: RaScanEntry = {
+      ...readEntry(game, entry, at),
+      account,
+      from: fromOf(candidate),
+      raId,
+      ...(info && info.total > 0 ? { unlocked: info.unlocked, total: info.total } : {})
+    }
+    table[gameId] = next
+    await raRecord.save()
+    if (
+      entry?.raId !== next.raId ||
+      entry?.unlocked !== next.unlocked ||
+      entry?.total !== next.total
+    )
+      remoteSource?.changed()
+    return info ? { kind: 'list', info } : { kind: 'host' }
   }
 
   // A new username or key (typed in Settings > Emulators) is checked once the typing settles; a new Steam Web API
@@ -1234,6 +1811,49 @@ export function createAchievementsService(
     }, options.settingsDelayMs ?? RA_SETTINGS_DELAY_MS)
     settingsTimer.unref?.()
   })
+
+  // --- GOG -------------------------------------------------------------------------
+  // A GOG game's achievements, read with the GOG account signed in to PlayOut (gog.ts), scheduled like the Steam scan
+  // (store-scan.ts). A GOG game PlayOut knows a Steam app id of keeps Steam's (shared/store-achievements.ts).
+
+  let gogAccount: (() => Promise<GogAccountCredential | null>) | null = null
+  const gogLocale = (): string => (mainLanguage() === 'es' ? 'es-ES' : 'en-US')
+  const gogScan = createStoreScan(
+    {
+      id: 'gog',
+      source: GOG_ACHIEVEMENTS_SOURCE,
+      keyOf: (game) => {
+        if (!storeAchievementsSource(game)) return null
+        const id = String(game.extra?.gogProductId ?? game.externalId).trim()
+        return /^\d+$/.test(id) ? id : null
+      },
+      read: (_game, productId, priority) =>
+        options.gogRead
+          ? options.gogRead(productId, priority)
+          : readGogAchievements(
+              productId,
+              {
+                account: () => gogAccount?.() ?? Promise.resolve(null),
+                locale: gogLocale
+              },
+              priority
+            ),
+      isAuthError: (err) => err instanceof GogAuthError
+    },
+    {
+      library,
+      log,
+      cacheDir: deps.cacheDir,
+      write: (file, value) => writeJson(file, value),
+      writeCounts,
+      announce,
+      gameRunning,
+      startDelayMs: options.storeStartDelayMs ?? STORE_START_DELAY_MS,
+      kickDelayMs: options.steamKickDelayMs ?? STEAM_KICK_DELAY_MS,
+      gapMs: options.storeScanGapMs ?? STORE_SCAN_GAP_MS,
+      backoffMs: steamBackoffMs
+    }
+  )
 
   // --- recompilations -------------------------------------------------------------
 
@@ -1289,7 +1909,7 @@ export function createAchievementsService(
       const asked = credentialKey(creds)
       let raId = Number(game.metadata.sources?.[RA_SOURCE])
       if (!Number.isInteger(raId) || raId <= 0) {
-        const match = (await matchRoms([game], creds)).get(game.id)
+        const match = (await matchRoms([localCandidate(game)], creds)).matches.get(game.id)
         if (!match) return null
         raId = match.id
       }
@@ -1307,6 +1927,8 @@ export function createAchievementsService(
         announce([game.id])
       return info
     }
+    // A GOG game without a Steam app id: GOG's own achievements, with the GOG account signed in to PlayOut.
+    if (gogScan.handles(game)) return gogScan.load(game)
     const appId = steamAppIdOf(game)
     if (!appId) return null
     // Steam said the game has none: nothing to ask (the Steam scan asks again once it is played).
@@ -1369,7 +1991,9 @@ export function createAchievementsService(
       ? recompKey(recompId)
       : game.source === 'rom'
         ? credentialKey(raCredentials())
-        : 'steam'
+        : gogScan.handles(game)
+          ? `gog:${mainLanguage()}`
+          : 'steam'
     const cached = cache.get(gameId)
     if (cached && cached.key === key && Date.now() - cached.at < LIVE_TTL_MS) return cached.info
     const running = inflight.get(gameId)
@@ -1392,14 +2016,127 @@ export function createAchievementsService(
     return task
   }
 
-  // The Steam scan's first pass waits for the start-up work (the library scans, the store imports) to settle.
-  if (!steamStarted) {
-    steamStartTimer = setTimeout(() => {
-      steamStartTimer = null
-      steamStarted = true
-      void runSteam()
-    }, steamStartDelayMs)
-    steamStartTimer.unref?.()
+  /**
+   * A paired host's ROM's list with this PC's account, cached like a game of this PC's. A failed read throws when this
+   * PC's counts of the ROM are on its card (the host's list would show another account's unlocks under them); with
+   * none on the card the host's list is asked instead, as it is for a ROM this PC cannot read.
+   */
+  async function getRemote(gameId: string): Promise<RemoteRomRead> {
+    if (!isRemoteId(gameId) || !raCredentials()) return { kind: 'host' }
+    const key = `ra:${credentialKey(raCredentials())}`
+    const cached = cache.get(gameId)
+    if (cached && cached.key === key && Date.now() - cached.at < LIVE_TTL_MS)
+      return { kind: 'list', info: cached.info }
+    const running = remoteInflight.get(gameId)
+    if (running) return running
+    const task = (async (): Promise<RemoteRomRead> => {
+      try {
+        const read = await loadRemoteRom(gameId)
+        if (read.kind === 'list') cache.set(gameId, { at: Date.now(), key, info: read.info })
+        return read
+      } catch (err) {
+        log.warn(`achievements for ${gameId} failed: ${describeError(err)}`)
+        if (remoteRetro(gameId) !== undefined) throw err
+        return { kind: 'host' }
+      } finally {
+        remoteInflight.delete(gameId)
+      }
+    })()
+    remoteInflight.set(gameId, task)
+    return task
+  }
+  const remoteInflight = new Map<string, Promise<RemoteRomRead>>()
+
+  // Recompilations read once that gave no achievements (no list yet, or none): not read again on every start, only
+  // when `recomp:changed` names them or they are played. recomp-achievements-tried.json: game id -> recompilation id.
+  const recompTriedFile = join(deps.cacheDir, 'recomp-achievements-tried.json')
+  let recompTried: Record<string, string> | null = null
+  /** The start-up read waits for a game to end. */
+  let recompStartPending = false
+
+  async function loadRecompTried(): Promise<Record<string, string>> {
+    if (recompTried) return recompTried
+    try {
+      const parsed = JSON.parse(await readFile(recompTriedFile, 'utf8')) as unknown
+      recompTried =
+        parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+          ? (parsed as Record<string, string>)
+          : {}
+    } catch {
+      recompTried = {}
+    }
+    return recompTried
+  }
+
+  async function saveRecompTried(): Promise<void> {
+    if (!recompTried) return
+    for (const id of Object.keys(recompTried)) if (!library.getGame(id)) delete recompTried[id]
+    await writeJson(recompTriedFile, recompTried).catch((err) =>
+      log.warn(`recomp achievements: could not save what was read: ${describeError(err)}`)
+    )
+  }
+
+  /** Read a recompilation's achievements for a game; a read that gave no counts is remembered (see above). */
+  async function readRecompOnce(game: Game, recompId: string): Promise<boolean> {
+    const tried = await loadRecompTried()
+    let dirty = false
+    try {
+      const info = await loadRecomp(game, recompId)
+      if (info) cache.set(game.id, { at: Date.now(), key: recompKey(recompId), info })
+      if (!info || info.total <= 0) {
+        dirty = tried[game.id] !== recompId
+        tried[game.id] = recompId
+      } else if (tried[game.id] !== undefined) {
+        delete tried[game.id]
+        dirty = true
+      }
+    } catch (err) {
+      log.warn(`achievements for ${game.id} from ${recompId} failed: ${describeError(err)}`)
+    }
+    return dirty
+  }
+
+  /**
+   * `ids`: these recompilations changed (`recomp:changed`), read again for their games without counts. None: the
+   * start-up read (after a short wait, never while a game runs) of the installed recompilations whose games have no
+   * counts of theirs yet and were not read before.
+   */
+  async function recompChanged(ids?: string[]): Promise<void> {
+    if (disposed || !recompReader) return
+    if (!ids) {
+      const delay = options.recompStartDelayMs ?? RECOMP_START_DELAY_MS
+      if (delay > 0) await new Promise((r) => setTimeout(r, delay).unref?.())
+      if (disposed) return
+      if (gameRunning()) {
+        recompStartPending = true
+        return
+      }
+      recompStartPending = false
+    }
+    const wanted = ids ? new Set(ids) : null
+    const tried = await loadRecompTried()
+    let dirty = false
+    if (wanted) {
+      for (const [gameId, recompId] of Object.entries(tried)) {
+        if (!wanted.has(recompId)) continue
+        delete tried[gameId]
+        dirty = true
+      }
+    }
+    for (const game of library.games()) {
+      if (disposed) return
+      const recompId = recompAchievementsFor(game)
+      if (!recompId || (wanted && !wanted.has(recompId))) continue
+      // Already read for this recompilation: the play sessions keep it current (recompPlayed).
+      if (game.metadata.sources?.[RECOMP_ACHIEVEMENTS_SOURCE] === recompId) continue
+      if (!wanted && tried[game.id] === recompId) continue
+      if (!wanted && gameRunning()) {
+        recompStartPending = true
+        break
+      }
+      if (await readRecompOnce(game, recompId)) dirty = true
+    }
+    if (dirty) await saveRecompTried()
   }
 
   return {
@@ -1414,18 +2151,13 @@ export function createAchievementsService(
       if (disposed) return
       // The unlock file may have just appeared (the first unlock), and a game executable may have been put in place.
       recompReader?.played(recompId)
+      let dirty = false
       for (const game of library.games()) {
         if (recompAchievementsFor(game) !== recompId) continue
         cache.delete(game.id)
-        try {
-          const info = await loadRecomp(game, recompId)
-          if (info) cache.set(game.id, { at: Date.now(), key: recompKey(recompId), info })
-        } catch (err) {
-          log.warn(
-            `achievements for ${game.id} after playing ${recompId} failed: ${describeError(err)}`
-          )
-        }
+        if (await readRecompOnce(game, recompId)) dirty = true
       }
+      if (dirty) await saveRecompTried()
     },
     forgetStaleRecomp,
     get,
@@ -1435,13 +2167,49 @@ export function createAchievementsService(
     steamSignedOut,
     syncRetro,
     retroStatus: () => status,
+    kickRetro(delayMs) {
+      if (disposed) return
+      if (delayMs === 0) void retroRunner.run()
+      else retroRunner.kick()
+    },
+    played(gameId, endedAt) {
+      steamPlayed(gameId, endedAt)
+      retroPlayed(gameId, endedAt)
+      gogScan.played(gameId, endedAt)
+      // The start-up read of the recompilations waited for this game to end.
+      if (recompStartPending) void recompChanged()
+    },
+    kick() {
+      kickSteam()
+      gogScan.kick()
+    },
+    useRemote(source) {
+      remoteSource = source
+    },
+    getRemote,
+    remoteRetro,
+    raHashOf,
+    useGogAccount(credential) {
+      gogAccount = credential
+    },
+    syncStore() {
+      return gogScan.sync()
+    },
+    storeSignedOut() {
+      forgetGogTokens()
+      for (const [id, entry] of cache) if (entry.key.startsWith('gog:')) cache.delete(id)
+      gogScan.signedOut()
+    },
+    recompChanged,
     dispose() {
       disposed = true
       offSettings()
       if (settingsTimer) clearTimeout(settingsTimer)
       if (steamTimer) clearTimeout(steamTimer)
-      if (steamStartTimer) clearTimeout(steamStartTimer)
-      if (steamScanTimer) clearTimeout(steamScanTimer)
+      steamRunner.dispose()
+      retroRunner.dispose()
+      hashRunner.dispose()
+      gogScan.dispose()
     }
   }
 }

@@ -1059,7 +1059,7 @@ export interface MetadataCandidate {
 }
 
 export interface AchievementsInfo {
-  /** Where the list comes from: Steam for store games, RetroAchievements for ROMs. Absent means Steam. */
+  /** Where the list comes from: Steam for store games, RetroAchievements for ROMs, GOG for GOG games. Absent means Steam. */
   provider?: AchievementsProvider
   total: number
   unlocked: number
@@ -1082,8 +1082,11 @@ export interface AchievementsInfo {
   }[]
 }
 
-/** 'recomp': an installed Xbox 360 recompilation's own unlock file and the game's own achievement table. */
-export type AchievementsProvider = 'steam' | 'retroachievements' | 'recomp'
+/**
+ * 'recomp': an installed Xbox 360 recompilation's own unlock file and the game's own achievement table. 'gog': GOG's
+ * achievements of a GOG game, read with the GOG account signed in to PlayOut.
+ */
+export type AchievementsProvider = 'steam' | 'retroachievements' | 'recomp' | 'gog'
 
 /** The RetroAchievements account of Settings > Emulators, as the last check or sync left it. */
 export interface RetroAchievementsStatus {
@@ -1801,6 +1804,11 @@ export interface RemoteGameInfo {
   sizeBytes?: number
   /** The host is not reachable now: this is the game as it offered it when last reached. */
   offline?: true
+  /**
+   * ROM games: the RetroAchievements hash of the host's file (lower-case MD5), when the host worked it out. This PC
+   * matches the ROM with its own RetroAchievements account by it (main achievements-service.ts).
+   */
+  raHash?: string
 }
 
 /**

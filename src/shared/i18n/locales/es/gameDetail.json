@@ -274,6 +274,8 @@
     "raSignInHint": "Inicia sesión en RetroAchievements en Ajustes para seguir los logros de los juegos ROM.",
     "raSignIn": "Iniciar sesión en RetroAchievements",
     "raUnknownRom": "RetroAchievements no reconoce esta ROM, o el juego aún no tiene logros. Las imágenes de disco se buscan por título, así que un archivo con otro nombre puede no encontrarse.",
+    "gogNone": "GOG no devolvió logros para este juego. Inicia sesión en GOG en Importar biblioteca de la Biblioteca para verlos. Si ya iniciaste sesión, puede que el juego no tenga logros o que GOG Galaxy aún no los haya sincronizado.",
+    "openProvider": "Ver en {provider}",
     "noData": "No hay datos de logros para este juego.",
     "noneInGame": "Este juego no tiene logros.",
     "hidden": "Logro oculto",

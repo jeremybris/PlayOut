@@ -696,8 +696,15 @@ export function createHandlers(s: AppServices): ApiHandlers {
     },
     async getAchievements(gameId) {
       const id = streamIdSchema.parse(gameId)
-      // A paired host's game: its host's list (this PC has no record of it).
-      if (parseRemoteGameId(id)) return s.streaming.achievementsFor(id)
+      // A paired host's game: a ROM's RetroAchievements with this PC's own account when it is signed in and knows the
+      // ROM; the host's list (its accounts) only when this PC cannot read it. None when this account found it has none
+      // (its card shows none either); a failed read with this PC's counts on the card is an error, never the host's.
+      if (parseRemoteGameId(id)) {
+        const read = await s.achievements.getRemote(id)
+        if (read.kind === 'list') return read.info
+        if (read.kind === 'none') return null
+        return s.streaming.achievementsFor(id)
+      }
       return s.achievements.get(idSchema.parse(id))
     },
     async getSteamScreenshots(gameId) {

@@ -15,6 +15,7 @@ import {
   titleKey,
   offeredId,
   romStem,
+  withRemoteRetro,
   type HostGame,
   type HostOfferInput
 } from './remote-library'
@@ -1043,5 +1044,82 @@ describe("when a host's game was last played", () => {
     expect(lib.games).toEqual([])
     expect(lib.alsoOnHost[mine.id]).toHaveLength(1)
     expect(mine.lastPlayed).toBeUndefined()
+  })
+})
+
+describe("the host's RetroAchievements hashes", () => {
+  const HASH = '0123456789abcdef0123456789abcdef'
+  const rom = game({
+    id: 'rom:snes:smw',
+    source: 'rom',
+    title: 'Super Mario World',
+    externalId: 'snes/Super Mario World (USA).sfc',
+    romPath: 'D:\\ROMs\\snes\\Super Mario World (USA).sfc'
+  })
+  const wire = (games: Game[], raHash: (g: Game) => string | undefined): HostGame[] =>
+    JSON.parse(JSON.stringify(hostOffer(games, { raHash }))) as HostGame[]
+
+  it("are offered for ROM files the host hashed, and reach the client's host-only game", () => {
+    const [entry] = wire([rom], () => HASH.toUpperCase())
+    expect(entry.raHash).toBe(HASH)
+    const lib = buildRemoteLibrary([], [{ hostId: 'h1', hostName: 'Den', games: [entry] }], now)
+    expect(lib.games[0].remote?.raHash).toBe(HASH)
+    // Nothing known (or no callback): none offered.
+    expect(wire([rom], () => undefined)[0].raHash).toBeUndefined()
+    expect(offerOf([rom])[0].raHash).toBeUndefined()
+  })
+
+  it('are checked when received', () => {
+    const [entry] = wire([rom], () => HASH)
+    const received = (raHash: unknown): unknown => sanitizeHostGame({ ...entry, raHash })?.raHash
+    expect(received(HASH)).toBe(HASH)
+    expect(received('not-a-hash')).toBeUndefined()
+    expect(received(`${HASH}0`)).toBeUndefined()
+    expect(received(42)).toBeUndefined()
+    // Only ROMs carry one.
+    const steam = offerOf([game({ id: 'steam:620', source: 'steam', title: 'Portal 2' })])[0]
+    expect(sanitizeHostGame({ ...steam, raHash: HASH })?.raHash).toBeUndefined()
+  })
+})
+
+describe("this PC's RetroAchievements answer for a host's ROM", () => {
+  const hostRom = (metadata: Game['metadata'] = {}): Game =>
+    game({
+      id: 'remote:h1:rom:snes:smw',
+      source: 'rom',
+      title: 'Super Mario World',
+      metadata: {
+        achievements: { unlocked: 1, total: 96, updatedAt: '' },
+        sources: { igdb: '1' },
+        ...metadata
+      },
+      remote: {
+        hostId: 'h1',
+        hostName: 'Den',
+        hostGameId: 'rom:snes:smw',
+        streamable: true,
+        downloadable: true
+      }
+    })
+
+  it("replaces the host's counts, or takes them off for a ROM without achievements", () => {
+    const mine = withRemoteRetro(hostRom(), {
+      raId: 228,
+      unlocked: 40,
+      total: 96,
+      updatedAt: 'x'
+    })
+    expect(mine.metadata.achievements).toEqual({ unlocked: 40, total: 96, updatedAt: 'x' })
+    expect(mine.metadata.sources).toEqual({ igdb: '1', retroachievements: '228' })
+    const none = withRemoteRetro(hostRom(), { none: true })
+    expect(none.metadata.achievements).toBeUndefined()
+    expect(none.metadata.sources?.retroachievements).toBe('none')
+  })
+
+  it("leaves the host's counts without an answer, and on its recompilation's counts", () => {
+    const plain = hostRom()
+    expect(withRemoteRetro(plain, undefined)).toBe(plain)
+    const recomp = hostRom({ sources: { 'recomp-achievements': 'github:x/y' } })
+    expect(withRemoteRetro(recomp, { none: true })).toBe(recomp)
   })
 })

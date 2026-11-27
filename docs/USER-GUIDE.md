@@ -833,6 +833,15 @@ host and **Moonlight** on the client (both open source, GPL-3, separate from Pla
    RetroAchievements accounts, which are the same ones when the client took the host's logins (see above). A host's game the
    client does not have shows the host's **Achievements x/y** on its page, and expanding it loads the full list from
    the host (the host must be reachable; an older PlayOut on the host shows none).
+   A host's ROM the client does not have shows **RetroAchievements x/y** from the client's own RetroAchievements
+   account, even when the host is not signed in to RetroAchievements: the host works out each ROM's RetroAchievements
+   fingerprint (no account needed) and offers it, and the client recognises the ROM with it (disc images, and ROMs
+   from a host running an older PlayOut, by their title and file name). Expanding it loads the list from
+   RetroAchievements with the client's account. While the client is not signed in to RetroAchievements, the list
+   offers the sign-in, and the host's own list is used when the client's account does not know the ROM. If
+   RetroAchievements cannot be reached while the card shows the client's own counts, the list says it could not load
+   rather than showing the host's unlocks. The host works the fingerprints out only while hosting is on, starting a
+   minute after PlayOut opens, and pauses while a game runs.
 4. **First start:** the first time PlayOut opens on a PC, it looks for PlayOut hosts on the network. When it finds
    any, it asks **Connect to a PlayOut host?** with a **Connect to <name>** button for each one. Connect opens
    Settings → Streaming with that host's address filled in and the cursor in the PIN field: show the PIN on the
@@ -1319,8 +1328,10 @@ once a day). Started offline, it uses the copy from last time and checks as soon
   - Once the recompilation is uninstalled, its counts leave the game's card.
   - If your copy cannot be read, the list shows only how many achievements you have unlocked.
   - Until you unlock the first one, the list says to play the game once. Achievements appear after an unlock.
-  - The counts are read when you open the game's page and when you stop playing. PlayOut never checks them in the
-    background, and it does not show unlocks while you play.
+  - The counts are read once when the recompilation is installed (and at start for an installed one whose game card
+    has none yet, half a minute after PlayOut opens; one that gave no achievements is not read again at start until
+    it changes), when you open the game's page and when you stop playing. PlayOut does not check them otherwise,
+    and it does not show unlocks while you play.
   - Only Xbox 360 recompilations for which the recompilation catalog gives the game's title id or user data folder
     have this. A game whose recompilation does not have it shows what it showed before (RetroAchievements, where the
     console has them).
@@ -1484,8 +1495,24 @@ press it.
 
 PlayOut recognises a ROM by the same fingerprint RetroArch uses (cartridge systems, zip files included). Disc
 images (PlayStation, Saturn, Sega CD, Dreamcast …) are matched by their title, so keep their file names close to
-the game's name. **Sync now** refreshes the counts (they also refresh at every start and after a ROM scan);
-**Sign out** clears the key and the counts.
+the game's name. **Sign out** clears the key and the counts.
+
+The counts fill in the background, as Steam's do (section 6.1):
+
+- Each ROM is recognised and read once when it joins your library (after a ROM scan), and again only after you play
+  it: a play session started from PlayOut, or a session played on a paired PC reaching this one. ROMs you do not play
+  are not asked about again.
+- At every start PlayOut also reads your RetroAchievements **recently played** list once (one request): ROMs you
+  played elsewhere (RetroArch on a handheld, another PC) get their new counts from it.
+- A paired host's ROMs are recognised and read the same way with this PC's account (section 4.3).
+- **Sync now** (and a new username or key) reads every ROM again.
+- Nothing is read while a game is running. If RetroAchievements cannot be reached, PlayOut waits a few minutes,
+  longer after each failure in a row, then tries again by itself. A rejected key stops the reads until you change
+  it. When only one game fails, or a system's game list cannot be downloaded, only those ROMs wait and are asked
+  again; the others keep their counts.
+- A ROM RetroAchievements did not recognise is matched again when a newer game list for its system comes in.
+- The record of when each ROM was read is `%APPDATA%\PlayOut\retroachievements\ra-scans.json` (it holds your
+  RetroAchievements username, never the key).
 
 ## 6. Artwork and metadata
 
@@ -1587,6 +1614,26 @@ profile's **Game details** are public (step 3).
   none. Being signed out, or Steam not answering, is not taken as "no achievements": the stat stays and its list
   says how to sign in. A game Steam later adds achievements to gets them back the next time you play it.
 - The record of when each game was read is `%APPDATA%\PlayOut\retroachievements\steam-scans.json`.
+
+**GOG achievements** (your unlocked achievements for GOG games)
+
+Signing in to GOG in the Library's **Library Import** (section 3.4) is enough: PlayOut reads your achievements of
+your GOG games the way GOG Galaxy does, with the account you signed in with, and shows them like Steam's: an
+**Achievements x/y** stat on the game page (the list shows **GOG** in its header) and the counts on the card.
+
+- Each GOG game is read once when it joins your library, then again only after you play it (here, or on a paired
+  PC), about one request a second, starting a minute and a half after PlayOut opens. Nothing is read while a game
+  runs, or while you are signed out of GOG: those games are read once you sign in. Installed games go first, and a
+  game page you open is read ahead of the background reads. One game GOG refuses waits and is asked again later;
+  the reads stop until you sign in again only when GOG refuses your account for two games in a row.
+- GOG keeps the achievements of the games GOG Galaxy (or the game itself) reported. A game you never played with
+  GOG Galaxy may show none yet.
+- A game GOG has no achievements for has no **Achievements** stat on its page. PlayOut takes that only when GOG's
+  achievement list is empty and the game's GOG store page lists no achievements either.
+- A GOG game PlayOut knows the Steam app id of keeps Steam's achievements, as before.
+- Signing out of GOG takes its counts off the cards. The record of when each game was read is
+  `%APPDATA%\PlayOut\retroachievements\gog-scans.json`.
+- Epic Games achievements are not shown yet.
 
 1. Key: https://steamcommunity.com/dev/apikey (the account must not be limited; enter any domain name as the
    label).

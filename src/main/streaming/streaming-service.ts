@@ -125,8 +125,10 @@ import {
   localMatches,
   sanitizeHostGame,
   surelySameGame,
+  withRemoteRetro,
   type HostGame,
-  type HostOfferInput
+  type HostOfferInput,
+  type RemoteRetroAnswer
 } from './remote-library'
 import {
   downloadRomSet,
@@ -330,6 +332,16 @@ export interface StreamingServiceDeps {
    */
   achievements?: { get(gameId: string): Promise<AchievementsInfo | null> }
   /**
+   * A ROM's RetroAchievements hash when this PC worked it out (AchievementsService.raHashOf): offered to the clients,
+   * which match the ROM with their own RetroAchievements account. Absent: none offered.
+   */
+  raHash?(game: Game): string | undefined
+  /**
+   * A host-only ROM as this PC's own RetroAchievements account sees it (AchievementsService.remoteRetro): its counts
+   * replace the host's on the card, or its "none" hides the stat. Undefined: not read here (the host's counts stay).
+   */
+  remoteRetro?(gameId: string): RemoteRetroAnswer | undefined
+  /**
    * A host-only game's recompilations, matched with this PC's catalogs (main/recomp recompForGame): its
    * metadata.recomp here, for Filters > Recompilations (a host's own match is not taken from its offer). Null = none;
    * undefined = not known yet.
@@ -419,6 +431,8 @@ export interface StreamingService {
    */
   setHostAddress(hostId: string, address: string | null): Promise<StreamingStatus>
   remoteLibrary(): Promise<RemoteLibrary>
+  /** This PC's own counts of the hosts' ROMs changed (remoteRetro): the remote library is shown again (no request). */
+  remoteAchievementsChanged(): void
   /**
    * A host-only game (`remote:` id) as its host offers it, before this PC's cloud and edits are laid over it (the
    * Edit sheet's "scraped" layer); undefined when the remote library has no such game.
@@ -1599,7 +1613,8 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
       // A computer this PC is a client of never sees this PC's games (the library goes host to client only).
       if (isMyHost(ctx)) return []
       const offer = hostOffer(
-        library.games().map((g) => offeredMetadata(g, library.cloudFields?.(g)))
+        library.games().map((g) => offeredMetadata(g, library.cloudFields?.(g))),
+        deps.raHash ? { raHash: (g) => deps.raHash!(g) } : {}
       )
       // This PC's favourites only while it syncs them (a client shows them on host-only games), and when its games
       // were last played only while it syncs play time (a client's Recent row and Recently played go by it).
@@ -3747,6 +3762,8 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
     return file ?? (stem === base ? null : cachedMedia(dir, base))
   }
 
+  let remoteAchievementsTimer: NodeJS.Timeout | null = null
+
   /** The remote library from the offers in hand (no request): an unreachable host shows its last offer. */
   function rebuild(): void {
     const offers: HostOfferInput[] = []
@@ -3824,6 +3841,12 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
       }
       if (Object.keys(sources).length) remote = { ...remote, recompSources: sources }
     }
+    // A host's ROM this PC's RetroAchievements account read: its own counts (or "none") replace the host's.
+    if (deps.remoteRetro)
+      remote = {
+        ...remote,
+        games: remote.games.map((g) => withRemoteRetro(g, deps.remoteRetro!(g.id)))
+      }
     remoteBase = new Map(remote.games.map((g) => [g.id, g]))
     // This PC's cloud and the user's own edits of host-only games (LibraryService.viewRemote).
     if (library.viewRemote)
@@ -4937,6 +4960,17 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
       return remote
     },
 
+    remoteAchievementsChanged() {
+      if (disposed) return
+      if (remoteAchievementsTimer) clearTimeout(remoteAchievementsTimer)
+      remoteAchievementsTimer = setTimeout(() => {
+        remoteAchievementsTimer = null
+        // Before start the hosts' offers are not loaded yet: start's own rebuild shows them with these counts.
+        if (!disposed && started) rebuild()
+      }, 200)
+      remoteAchievementsTimer.unref?.()
+    },
+
     async remoteGameBase(gameId) {
       await ready
       return remoteBase.get(gameId)
@@ -5000,6 +5034,7 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
     },
 
     async dispose() {
+      if (remoteAchievementsTimer) clearTimeout(remoteAchievementsTimer)
       if (disposed) return
       disposed = true
       hostGen++

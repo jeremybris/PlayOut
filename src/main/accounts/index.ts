@@ -102,6 +102,12 @@ export interface AccountsService {
    */
   epicAccessToken(refresh?: boolean): Promise<string | null>
   /**
+   * The signed-in GOG account for GOG's achievements (achievements/gog.ts): its user id and refresh token, which GOG
+   * exchanges for a game's own token as Galaxy does. Read after any refresh in progress; never changed here. Null when
+   * GOG is signed out.
+   */
+  gogCredential(): Promise<{ userId: string; refreshToken: string } | null>
+  /**
    * The app ids (games and DLC) the Steam account signed in to PlayOut owns, read from the store with its cookie
    * session on the hidden Steam window; null when Steam is signed out, signed in with an API key only, or the store
    * did not answer (ownership unknown).
@@ -559,6 +565,18 @@ export async function createAccountsService(deps: AccountsDeps): Promise<Account
     return steamRefresh
   }
 
+  async function gogCredential(): Promise<{ userId: string; refreshToken: string } | null> {
+    if (!accounts.has('gog') || disposed) return null
+    // A refresh in progress may replace the refresh token: read the one it stores.
+    await refreshes.get(refreshKey('gog'))?.catch(() => null)
+    const tokens = await tokensFor('gog')
+    if (!tokens || disposed) return null
+    const { userId, refreshToken } = tokens as { userId?: unknown; refreshToken?: unknown }
+    return typeof userId === 'string' && userId && typeof refreshToken === 'string' && refreshToken
+      ? { userId, refreshToken }
+      : null
+  }
+
   const epicReads = new Map<boolean, Promise<string | null>>()
 
   function epicAccessToken(force = false): Promise<string | null> {
@@ -697,6 +715,7 @@ export async function createAccountsService(deps: AccountsDeps): Promise<Account
     account,
     steamCredential,
     epicAccessToken,
+    gogCredential,
     async steamOwnedApps() {
       if (!accounts.has('steam') || disposed) return null
       const tokens = await tokensFor('steam')

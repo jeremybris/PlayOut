@@ -34,8 +34,8 @@ export interface HttpOptions {
   delaysMs?: number[]
   /** Called after every attempt (success or failure), for a trace log. A throwing hook is ignored. */
   onAttempt?: (attempt: HttpAttempt) => void
-  /** Token bucket to wait on before every attempt. */
-  limiter?: RateLimiter
+  /** Token bucket (or anything else that paces requests) to wait on before every attempt. */
+  limiter?: Pick<RateLimiter, 'take'>
   /**
    * Concurrency gate held for the whole of each attempt (limiter wait, request and body read) and released
    * during retry back-off, so a service's thread allowance covers both API calls and media downloads.

@@ -1,6 +1,6 @@
-import type { Game, GameMetadata } from '@shared/types'
+import type { AchievementsInfo, Game, GameMetadata } from '@shared/types'
 import { describe, expect, it } from 'vitest'
-import { achievementsStat } from './achievements-stat'
+import { achievementsStat, providerLink } from './achievements-stat'
 
 const RECOMP = 'github:someone/game-recomp'
 
@@ -118,5 +118,81 @@ describe('achievementsStat', () => {
       }
     })
     expect(achievementsStat(counted).show).toBe(true)
+  })
+})
+
+describe("achievementsStat: a paired host's ROMs and GOG games", () => {
+  const hostRom = (over: Partial<Game> = {}): Game =>
+    game({
+      id: 'remote:h:rom:snes:x',
+      platformId: 'snes',
+      romPath: undefined,
+      installed: false,
+      remote: {
+        hostId: 'h',
+        hostName: 'Den',
+        hostGameId: 'rom:snes:x',
+        streamable: true,
+        downloadable: true
+      },
+      ...over
+    })
+
+  it("shows a host's ROM file as RetroAchievements without counts (this PC's account reads it)", () => {
+    expect(achievementsStat(hostRom())).toEqual({ show: true, label: 'retro' })
+    // Known without: this PC's (or the host's) "none", or a system RetroAchievements does not cover.
+    expect(
+      achievementsStat(hostRom({ metadata: { sources: { retroachievements: 'none' } } })).show
+    ).toBe(false)
+    expect(achievementsStat(hostRom({ platformId: 'xbox360' })).show).toBe(false)
+    // A card with no file to download (its recompilation plays) is left to the host's counts.
+    const kept = hostRom()
+    kept.remote = { ...kept.remote!, downloadable: false }
+    expect(achievementsStat(kept).show).toBe(false)
+  })
+
+  it("shows a GOG game unless GOG said it has none, and leaves one with a Steam app id to Steam's rules", () => {
+    const gog = (over: Partial<Game> = {}): Game =>
+      game({ id: 'gog:1', source: 'gog', platformId: 'gog', romPath: undefined, ...over })
+    expect(achievementsStat(gog())).toEqual({ show: true, label: 'achievements' })
+    expect(
+      achievementsStat(gog({ metadata: { sources: { 'gog-achievements': 'none' } } })).show
+    ).toBe(false)
+    expect(achievementsStat(gog({ extra: { steamAppId: 22380 } })).show).toBe(false)
+  })
+})
+
+describe('providerLink', () => {
+  const info = (
+    provider: 'steam' | 'retroachievements' | 'gog' | 'recomp',
+    url?: string
+  ): AchievementsInfo => ({
+    provider,
+    url,
+    total: 1,
+    unlocked: 0,
+    list: []
+  })
+
+  it("opens only an https page of the list's own provider", () => {
+    expect(providerLink(info('retroachievements', 'https://retroachievements.org/game/228'))).toBe(
+      'https://retroachievements.org/game/228'
+    )
+    expect(providerLink(info('steam', 'https://steamcommunity.com/stats/620/achievements'))).toBe(
+      'https://steamcommunity.com/stats/620/achievements'
+    )
+    expect(providerLink(info('gog', 'https://www.gog.com/game/x'))).toBe(
+      'https://www.gog.com/game/x'
+    )
+    // A paired host's answer naming another site, a look-alike or plain http gets no link.
+    expect(providerLink(info('retroachievements', 'https://evil.example/game/1'))).toBeUndefined()
+    expect(
+      providerLink(info('retroachievements', 'https://retroachievements.org.evil.example/'))
+    ).toBeUndefined()
+    expect(
+      providerLink(info('retroachievements', 'http://retroachievements.org/game/1'))
+    ).toBeUndefined()
+    expect(providerLink(info('steam', 'not a url'))).toBeUndefined()
+    expect(providerLink(info('recomp', 'https://retroachievements.org/'))).toBeUndefined()
   })
 })

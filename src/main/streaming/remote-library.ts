@@ -1,5 +1,8 @@
 import { STORE_SOURCES } from '../../shared/types'
-import { playsOnlyRecomp } from '../../shared/recomp-play'
+import {
+  playsOnlyRecomp,
+  RECOMP_ACHIEVEMENTS_SOURCE as RECOMP_ACHIEVEMENTS_KEY
+} from '../../shared/recomp-play'
 import { withoutXisoSuffix } from '../../shared/convert'
 import { isDifficultyId } from '../../shared/difficulty'
 import { hashShort } from '../util/ids'
@@ -66,7 +69,15 @@ export type HostGame = Omit<Game, HostOnlyField> & {
    * download. Streaming it starts the recompilation on the host.
    */
   noRomFile?: true
+  /**
+   * ROM games: the RetroAchievements hash of the host's file (lower-case MD5), when the host worked it out (signed in
+   * to RetroAchievements or not). A client matches the ROM with its own RetroAchievements account by it.
+   */
+  raHash?: string
 }
+
+/** A RetroAchievements ROM hash as an offer carries it. */
+const RA_HASH = /^[0-9a-f]{32}$/
 
 /** Screenshots the host serves: `screenshot0`..`screenshot9`. */
 export const MAX_REMOTE_SCREENSHOTS = 10
@@ -78,6 +89,8 @@ const ART_KINDS = ['cover', 'hero', 'logo', 'icon'] as const
 export interface HostOfferOptions {
   /** ROM set size (cue/bin tracks, m3u discs, folder contents) when the host has measured it. */
   romSetSize?: (game: Game) => number | undefined
+  /** A ROM's RetroAchievements hash when the host worked it out (main achievements-service.ts raHashOf). */
+  raHash?: (game: Game) => string | undefined
 }
 
 /** The system of a ROM game: its launch spec, else the `rom:<system>:<hash>` id, else its platform. */
@@ -239,6 +252,10 @@ export function hostOffer(games: Game[], options: HostOfferOptions = {}): HostGa
     if (size !== undefined) entry.sizeBytes = size
     const achievements = sanitizeAchievementsSummary(game.metadata?.achievements)
     if (achievements) entry.achievements = achievements
+    if (isRom && !romRemoved && !recompOnly) {
+      const raHash = options.raHash?.(game)?.toLowerCase()
+      if (raHash && RA_HASH.test(raHash)) entry.raHash = raHash
+    }
     offer.push(entry)
   }
   return offer
@@ -695,6 +712,8 @@ export function sanitizeHostGame(raw: unknown): HostGame | null {
   if (size !== undefined) game.sizeBytes = size
   const achievements = sanitizeAchievementsSummary(g.achievements)
   if (achievements) game.achievements = achievements
+  if (game.source === 'rom' && typeof g.raHash === 'string' && RA_HASH.test(g.raHash))
+    game.raHash = g.raHash
   return game
 }
 
@@ -756,6 +775,7 @@ function infoFor(host: HostOfferInput, game: HostGame): RemoteGameInfo {
   }
   if (host.offline) info.offline = true
   if (game.sizeBytes !== undefined) info.sizeBytes = game.sizeBytes
+  if (game.raHash) info.raHash = game.raHash
   return info
 }
 
@@ -924,4 +944,31 @@ export function buildRemoteLibrary(
   }
 
   return { games, alsoOnHost, updatedAt: stamp }
+}
+
+/** This PC's own RetroAchievements answer for a host's ROM (main achievements-service.ts remoteRetro). */
+export type RemoteRetroAnswer =
+  { none: true } | { raId: number; unlocked: number; total: number; updatedAt: string }
+
+/**
+ * A host-only ROM with this PC's own RetroAchievements answer laid over the host's: its counts and game id, or its
+ * "none" (the stat goes). The host's counts stay when this PC has no answer, and on a ROM whose counts are the host's
+ * recompilation's.
+ */
+export function withRemoteRetro(game: Game, answer: RemoteRetroAnswer | undefined): Game {
+  if (!answer || game.source !== 'rom' || !game.remote) return game
+  if (game.metadata.sources?.[RECOMP_ACHIEVEMENTS_KEY]) return game
+  const metadata: GameMetadata = { ...game.metadata, sources: { ...game.metadata.sources } }
+  if ('none' in answer) {
+    delete metadata.achievements
+    metadata.sources!.retroachievements = 'none'
+  } else {
+    metadata.achievements = {
+      unlocked: answer.unlocked,
+      total: answer.total,
+      updatedAt: answer.updatedAt
+    }
+    metadata.sources!.retroachievements = String(answer.raId)
+  }
+  return { ...game, metadata }
 }

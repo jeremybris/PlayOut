@@ -24,6 +24,7 @@ import {
   raGameList,
   raGameProgress,
   raProfile,
+  raRecentlyPlayed,
   type RaCredentials
 } from './retroachievements'
 
@@ -304,5 +305,39 @@ describe('raGameProgress', () => {
   it('returns null when the game has no achievements (PHP empty map [])', async () => {
     fetchMock.mockResolvedValueOnce(json({ ID: 2, Title: 'None', Achievements: [] }))
     await expect(raGameProgress(2, CREDS)).resolves.toBeNull()
+  })
+})
+
+describe('raRecentlyPlayed', () => {
+  it("reads the user's recently played games with their progress", async () => {
+    fetchMock.mockResolvedValueOnce(
+      json([
+        {
+          GameID: 319,
+          LastPlayed: '2026-11-20 18:30:00',
+          NumPossibleAchievements: 77,
+          NumAchieved: 20,
+          NumAchievedHardcore: 25
+        },
+        { GameID: 0 },
+        { GameID: 228, NumPossibleAchievements: 96 }
+      ])
+    )
+    const games = await raRecentlyPlayed(CREDS, 500)
+    const url = requestUrl()
+    expect(url.pathname).toBe('/API/API_GetUserRecentlyPlayedGames.php')
+    expect(url.searchParams.get('u')).toBe('TestUser')
+    // At most 50 a request.
+    expect(url.searchParams.get('c')).toBe('50')
+    expect(games).toEqual([
+      {
+        gameId: 319,
+        unlocked: 25,
+        unlockedHardcore: 25,
+        total: 77,
+        lastPlayed: '2026-11-20T18:30:00.000Z'
+      },
+      { gameId: 228, unlocked: 0, unlockedHardcore: 0, total: 96, lastPlayed: undefined }
+    ])
   })
 })

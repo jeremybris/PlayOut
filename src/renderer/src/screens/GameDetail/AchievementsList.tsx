@@ -1,6 +1,7 @@
 import { recompAchievementsFor } from '@shared/recomp-play'
-import type { AchievementsInfo, Game } from '@shared/types'
-import { Lock, Settings as SettingsIcon, Trophy } from 'lucide-react'
+import { storeAchievementsSource } from '@shared/store-achievements'
+import type { AchievementsInfo, AchievementsProvider, Game } from '@shared/types'
+import { ExternalLink, Lock, Settings as SettingsIcon, Trophy } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import { api } from '../../api/client'
 import { Button } from '../../components/Button'
@@ -14,7 +15,7 @@ import { formatDate, formatPercent } from '../../lib/format'
 import { createLog } from '../../lib/log'
 import { retroSignedIn, useRetroAchievementsStatus } from '../../state/retroachievements'
 import { useUiStore } from '../../state/ui'
-import { achievementsStat } from './achievements-stat'
+import { achievementsStat, isHostRom, providerLink } from './achievements-stat'
 
 const log = createLog('achievements')
 
@@ -31,6 +32,19 @@ type LoadState =
   | { status: 'unavailable' }
   | { status: 'error'; message: string }
 
+/** The service a list comes from, as its header names it. */
+const PROVIDER_NAMES: Record<Exclude<AchievementsProvider, 'recomp'>, string> = {
+  steam: 'Steam',
+  retroachievements: 'RetroAchievements',
+  gog: 'GOG'
+}
+
+/** The provider's name for the header and its link; null for a recompilation's own list. */
+function providerName(info: AchievementsInfo): string | null {
+  const provider = info.provider ?? 'steam'
+  return provider === 'recomp' ? null : PROVIDER_NAMES[provider]
+}
+
 /** A load result remembers which game it belongs to, so switching games shows "loading" without a reset effect. */
 type Loaded = { gameId: string; state: Exclude<LoadState, { status: 'loading' }> }
 
@@ -39,7 +53,8 @@ type Loaded = { gameId: string; state: Exclude<LoadState, { status: 'loading' }>
  * api.getAchievements: Steam for store games, RetroAchievements for ROMs, the recompilation's own for a game Play
  * starts a recompilation of whose achievements PlayOut reads (gamerscore, unlock dates from its unlock file). A null
  * result points to the sign-in the game needs (Steam account or key; the RetroAchievements account in Settings >
- * Emulators), or for a recompilation, to playing it once.
+ * Emulators; for a paired host's ROM too, since this PC's account reads it), for a GOG game to the GOG sign-in, or for a
+ * recompilation to playing it once. The header names the service the list came from, with a link to its page.
  * Rows are focusable so the gamepad can scroll the list; B collapses it.
  */
 export function AchievementsList({
@@ -55,10 +70,16 @@ export function AchievementsList({
   // A rejected key counts as signed out: the fix is in Settings, not in the ROM.
   const retroStatus = useRetroAchievementsStatus()
   const retroReady = retroSignedIn(retroStatus)
-  // A paired host's game: its list is the host's (its accounts), so this PC's sign-in would not help.
+  // A paired host's game: its list is the host's (its accounts), so this PC's sign-in would not help; except a host's
+  // ROM file, which this PC's RetroAchievements account reads first.
   const hostGame = !!game.remote
+  const hostRomSignIn = isHostRom(game) && isRom && !retroReady
+  const gog = !hostGame && storeAchievementsSource(game) !== null
   // The unavailable message offers a settings button when signing in would help.
-  const settingsHint = !hostGame && !recomp && (game.source === 'steam' || (isRom && !retroReady))
+  const settingsHint =
+    !recomp &&
+    ((!hostGame && game.source === 'steam') ||
+      (isRom && !retroReady && (!hostGame || hostRomSignIn)))
   const [loaded, setLoaded] = useState<Loaded | null>(null)
   const state = useMemo<LoadState>(
     () => (loaded && loaded.gameId === game.id ? loaded.state : { status: 'loading' }),
@@ -115,6 +136,8 @@ export function AchievementsList({
     state.status === 'ready' ? state.info.total : (game.metadata.achievements?.total ?? 0)
   const points = state.status === 'ready' ? state.info.points : undefined
   const gamerscore = state.status === 'ready' && state.info.provider === 'recomp'
+  const provider = state.status === 'ready' ? providerName(state.info) : null
+  const providerUrl = state.status === 'ready' ? providerLink(state.info) : undefined
 
   return (
     <section className="gdetail__achievements" aria-label={t('gameDetail.achievements.title')}>
@@ -123,6 +146,7 @@ export function AchievementsList({
         <span className="gdetail__ach-title">
           {isRom ? 'RetroAchievements' : t('gameDetail.achievements.title')}
         </span>
+        {provider && !isRom ? <span className="gdetail__ach-provider">{provider}</span> : null}
         {total > 0 ? (
           <>
             <span className="gdetail__ach-count u-tabular">
@@ -157,7 +181,7 @@ export function AchievementsList({
           </p>
         ) : state.status === 'unavailable' ? (
           <div className="gdetail__ach-status">
-            {hostGame ? (
+            {hostGame && !hostRomSignIn ? (
               <p>
                 {game.remote?.hostName
                   ? t('gameDetail.achievements.hostNone', { host: game.remote.hostName })
@@ -176,6 +200,8 @@ export function AchievementsList({
                   {t('gameDetail.achievements.openMetadataSettings')}
                 </Button>
               </>
+            ) : gog ? (
+              <p>{t('gameDetail.achievements.gogNone')}</p>
             ) : isRom && !retroReady ? (
               <>
                 <p>
@@ -217,6 +243,21 @@ export function AchievementsList({
             ))}
           </ul>
         )}
+        {provider && providerUrl ? (
+          <div className="gdetail__ach-link">
+            <Button
+              focusKey="detail:ach:link"
+              icon={<ExternalLink />}
+              onPress={() => {
+                void api
+                  .openExternal(providerUrl)
+                  .catch((err) => log.error('openExternal failed', err))
+              }}
+            >
+              {t('gameDetail.achievements.openProvider', { provider })}
+            </Button>
+          </div>
+        ) : null}
       </div>
     </section>
   )

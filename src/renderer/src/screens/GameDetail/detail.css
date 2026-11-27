@@ -957,6 +957,17 @@ body:has(.hints--web-viewer) .hints:not(.hints--web-viewer) {
   color: var(--color-text-secondary);
 }
 
+.gdetail__ach-provider {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+}
+
+.gdetail__ach-link {
+  display: flex;
+  padding: 1.2rem;
+}
+
 .gdetail__ach-progress {
   flex: 1 1 auto;
   max-width: 32rem;

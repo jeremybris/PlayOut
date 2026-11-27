@@ -2017,7 +2017,28 @@ export function createMockApi(options: MockOptions = {}): PlayOutApi {
       // A host-only game: its host's list (main's streaming achievementsFor), from the counts its offer carries.
       if (gameId.startsWith('remote:')) {
         const shown = (await streaming.api.getRemoteLibrary()).games.find((g) => g.id === gameId)
-        return shown ? sampleAchievements(shown, []) : null
+        if (!shown) return null
+        // A host's ROM file: this PC's own RetroAchievements account reads it first (main's achievements getRemote),
+        // here a sample game of 24 achievements while the mock account is signed in.
+        if (
+          shown.source === 'rom' &&
+          shown.remote?.downloadable &&
+          retroStatus().state === 'signed-in'
+        ) {
+          const counts = shown.metadata.achievements ?? { unlocked: 3, total: 24, updatedAt: now() }
+          const info = sampleAchievements(
+            { ...shown, metadata: { ...shown.metadata, achievements: counts } },
+            []
+          )
+          return (
+            info && {
+              ...info,
+              provider: 'retroachievements',
+              url: 'https://retroachievements.org/game/1'
+            }
+          )
+        }
+        return sampleAchievements(shown, [])
       }
       const game = games.get(gameId)
       // A recompilation whose achievements main reads (Burnout Revenge's Xerenge): its own list; the counts land on
@@ -2036,7 +2057,17 @@ export function createMockApi(options: MockOptions = {}): PlayOutApi {
         }
         return info
       }
-      return game ? sampleAchievements(game, sessions) : null
+      if (!game) return null
+      const info = sampleAchievements(game, sessions)
+      // The service each list comes from, as main names it (the header shows it, with a link where there is one).
+      if (!info) return null
+      if (game.source === 'rom')
+        return {
+          ...info,
+          provider: 'retroachievements',
+          url: 'https://retroachievements.org/game/1'
+        }
+      return { ...info, provider: game.source === 'gog' ? 'gog' : 'steam' }
     },
     async getSteamScreenshots(gameId) {
       // The sample Steam games' store screenshots (their media.screenshots are Steam's 1920x1080 ones).
