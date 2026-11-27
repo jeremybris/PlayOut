@@ -3,7 +3,8 @@ import type {
   LibraryTabDef,
   LibraryTabFilters,
   LibrarySortId,
-  Settings
+  Settings,
+  SettingsPatch
 } from '@shared/types'
 import {
   MAX_LIBRARY_TABS_UI,
@@ -55,6 +56,7 @@ function viewOf(def: LibraryTabDef): Partial<typeof DEFAULT_LIBRARY_FILTERS> {
     publishers: filters.publishers ?? [],
     difficulty: filters.difficulty ?? [],
     reviews: filters.reviews ?? [],
+    custom: filters.custom ?? [],
     sort: def.sort,
     sortReversed: def.sortReversed,
     playableFirst: def.playableFirst,
@@ -213,6 +215,32 @@ export function setTabs(defs: LibraryTabDef[]): void {
   const before = libraryTabDefs()
   saveTabs(defs)
   reconcileView(before, defs)
+}
+
+/**
+ * Replace the tabs together with other settings in one write (deleting a custom filter: the filter and the tabs that
+ * picked it go in the same settings patch, so a failed or interrupted write never leaves one without the other). A
+ * tab change waiting for its pause is folded in (`defs` is built from the tabs as they stand, pending ones included).
+ * The shown tab's filters are reloaded when they changed. Resolves to whether it was saved.
+ */
+export function setTabsWith(
+  defs: LibraryTabDef[],
+  also: Omit<SettingsPatch, 'ui'>
+): Promise<boolean> {
+  const store = useSettingsStore.getState()
+  if (!restored || !store.settings) return store.update(also)
+  const before = libraryTabDefs()
+  if (tabsTimer) clearTimeout(tabsTimer)
+  tabsTimer = null
+  pendingTabs = null
+  let saved: Promise<boolean>
+  if (persist) saved = store.update({ ...also, ui: { libraryTabs: savableTabs(defs) } })
+  else {
+    writeUi({ libraryTabs: savableTabs(defs) })
+    saved = store.update(also)
+  }
+  reconcileView(before, defs)
+  return saved
 }
 
 /**

@@ -499,3 +499,25 @@ describe('Reviews filter in tabs', () => {
     expect(migrateTabDef(kept)).toBe(kept)
   })
 })
+
+describe('Custom filter in tabs', () => {
+  it('keeps the picked filters (each once), compares them and leaves an empty list out', () => {
+    const filters = tabFiltersOf({ custom: ['cf1', 'cf1', 'cf2'] })
+    expect(filters.custom).toEqual(['cf1', 'cf2'])
+    expect(tabFiltersOf({ custom: [] })).not.toHaveProperty('custom')
+    expect(sameTabFilters(filters, tabFiltersOf({ custom: ['cf2', 'cf1'] }))).toBe(true)
+    expect(sameTabFilters(filters, emptyTabFilters())).toBe(false)
+    const def = newTabDef({ filters: { custom: [] } }, 'x')
+    expect(savableTabDef(def).filters).not.toHaveProperty('custom')
+  })
+
+  it('names a tab by its filters’ names, leaving out one with no filter here', () => {
+    const names = (id: string): string | undefined => ({ cf1: 'Hard', cf2: 'Cozy' })[id]
+    const filters = tabFiltersOf({ custom: ['cf1', 'cf2', 'elsewhere'] })
+    expect(tabName(filters, undefined, names)).toBe('Hard + Cozy')
+    expect(tabName(tabFiltersOf({ custom: ['elsewhere'] }), undefined, names)).toBe(ALL_GAMES_NAME)
+    expect(stripTabs([newTabDef({ filters }, 'x')], (id) => id, names)[1]!.label).toBe(
+      'Hard + Cozy'
+    )
+  })
+})

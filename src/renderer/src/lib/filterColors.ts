@@ -114,6 +114,57 @@ export const CONTROLS_COLORS: Readonly<Record<string, string>> = {
 /** Filters > Hidden's closed eye. */
 export const HIDDEN_COLOR = '#9aa5ce'
 
+/** The least Delta E (CIE76) between two of CUSTOM_FILTER_COLORS. */
+export const MIN_CUSTOM_COLOR_DISTANCE = 15
+
+/**
+ * The user's own filters' icons (shared/custom-filters.ts CUSTOM_FILTER_ICONS), by icon id: the Create a filter
+ * picker, the options menu and Filters > Custom draw each in its colour. Spread apart so no two look alike (each pair at
+ * least MIN_CUSTOM_COLOR_DISTANCE apart, CIE76 Delta E), not only different strings.
+ */
+export const CUSTOM_FILTER_COLORS: Readonly<Record<string, string>> = {
+  star: '#fadf27',
+  heart: '#fb6ca0',
+  bookmark: '#79a1fc',
+  flame: '#fd7933',
+  trophy: '#e0af3b',
+  crown: '#fbdd67',
+  gem: '#73dee9',
+  rocket: '#6887ff',
+  sword: '#a8d1ee',
+  shield: '#7491d0',
+  skull: '#eadeb2',
+  ghost: '#e7d5ff',
+  puzzle: '#a473ee',
+  gamepad: '#30d882',
+  joystick: '#ed46a5',
+  car: '#ec5d4b',
+  plane: '#4dacf6',
+  music: '#df6df8',
+  book: '#d0975f',
+  coffee: '#bf9d7d',
+  moon: '#b0aff5',
+  sun: '#f4a34b',
+  leaf: '#73d25d',
+  zap: '#dbeb48',
+  target: '#eb596e',
+  flag: '#ef806f',
+  map: '#49d3a1',
+  globe: '#4db4cc',
+  users: '#8fa6cb',
+  baby: '#fdb0d4',
+  clock: '#8cc4bc',
+  calendar: '#d77343',
+  tag: '#7fe0c7',
+  sparkles: '#df99ef',
+  snowflake: '#bcebd1',
+  mountain: '#b39abf',
+  dices: '#db78e2',
+  brain: '#f691cc',
+  bomb: '#fc4734',
+  cat: '#edc47d'
+}
+
 /** Every colour above, for the test that no two icons share one. */
 export function allFilterColors(): string[] {
   return [
@@ -121,6 +172,7 @@ export function allFilterColors(): string[] {
     ...Object.values(ONLINE_COLORS),
     ...Object.values(LOCAL_COLORS),
     ...Object.values(CONTROLS_COLORS),
-    HIDDEN_COLOR
+    HIDDEN_COLOR,
+    ...Object.values(CUSTOM_FILTER_COLORS)
   ]
 }

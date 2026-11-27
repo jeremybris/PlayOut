@@ -36,6 +36,7 @@ import { EmulationMoveDialog } from './screens/Settings/EmulationMoveDialog'
 import { SearchOverlay } from './screens/Search'
 import { SettingsModal } from './screens/Settings'
 import { SteamDlcDialog } from './screens/SteamDlc/SteamDlcDialog'
+import { CustomFilterDialog } from './screens/CustomFilter/CustomFilterDialog'
 // Subscribes to Trim Games' toasts at start, not only once Settings › Convert is opened.
 import './state/convert'
 import './state/metadataCloud'
@@ -564,6 +565,15 @@ function ModalView({ modal, onClose }: { modal: OpenModal; onClose: () => void }
       )
     case 'steam-dlc':
       return <SteamDlcDialog gameId={modal.gameId} mode={modal.mode} onClose={onClose} />
+    case 'custom-filter':
+      return (
+        <CustomFilterDialog
+          gameId={modal.gameId}
+          filterId={modal.filterId}
+          focus={modal.focus}
+          onClose={onClose}
+        />
+      )
     case 'confirm':
       return (
         <ConfirmDialog

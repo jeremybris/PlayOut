@@ -47,7 +47,7 @@ export function emptyTabFilters(): LibraryTabFilters {
     favorites: false,
     coop: false,
     recomp: false
-    // No `developers` / `publishers` / `difficulty` / `reviews`: absent is none (left out of a saved tab while empty,
+    // No `developers` / `publishers` / `difficulty` / `reviews` / `custom`: absent is none (left out of a saved tab while empty,
     // tabFiltersOf).
   }
 }
@@ -237,7 +237,8 @@ export function migrateTabDef(def: LibraryTabDef): LibraryTabDef {
     unsaved(filters.developers) ||
     unsaved(filters.publishers) ||
     unsaved(filters.difficulty) ||
-    unsaved(filters.reviews)
+    unsaved(filters.reviews) ||
+    unsaved(filters.custom)
   )
     return migrateTabDef({ ...def, filters: tabFiltersOf(filters) })
   const sort = def.sort as string
@@ -252,14 +253,22 @@ export function migrateTabDef(def: LibraryTabDef): LibraryTabDef {
  * tabs refuses a key it does not know). The same object when there is none.
  */
 export function savableTabDef(def: LibraryTabDef): LibraryTabDef {
-  const { developers, publishers, difficulty, reviews } = def.filters
+  const { developers, publishers, difficulty, reviews, custom } = def.filters
   const empty = (list: readonly string[] | undefined): boolean => !!list && list.length === 0
-  if (!empty(developers) && !empty(publishers) && !empty(difficulty) && !empty(reviews)) return def
+  if (
+    !empty(developers) &&
+    !empty(publishers) &&
+    !empty(difficulty) &&
+    !empty(reviews) &&
+    !empty(custom)
+  )
+    return def
   const filters = { ...def.filters }
   if (empty(developers)) delete filters.developers
   if (empty(publishers)) delete filters.publishers
   if (empty(difficulty)) delete filters.difficulty
   if (empty(reviews)) delete filters.reviews
+  if (empty(custom)) delete filters.custom
   return { ...def, filters }
 }
 
@@ -292,6 +301,15 @@ export function tabFiltersOf(
   const difficulty = [...new Set((source.difficulty ?? []).filter(isDifficultyId))]
   // Filters > Reviews: its score bands, each once (an id this version does not know goes).
   const reviews = [...new Set((source.reviews ?? []).filter(isReviewBandId))]
+  // Filters > Custom: the user's filters' ids, each once (one with no filter here is kept: it may be another PC's, and
+  // matching ignores it).
+  const custom = [
+    ...new Set(
+      (source.custom ?? []).filter(
+        (id) => typeof id === 'string' && id.length > 0 && id.length <= 200
+      )
+    )
+  ].slice(0, 100)
   return {
     platforms: [...(source.platforms ?? base.platforms)],
     stores: [...(source.stores ?? base.stores)],
@@ -310,7 +328,8 @@ export function tabFiltersOf(
     coop: source.coop ?? false,
     recomp: source.recomp ?? false,
     ...(developers.length ? { developers } : {}),
-    ...(publishers.length ? { publishers } : {})
+    ...(publishers.length ? { publishers } : {}),
+    ...(custom.length ? { custom } : {})
   }
 }
 
@@ -334,6 +353,7 @@ export function sameTabFilters(a: LibraryTabFilters, b: LibraryTabFilters): bool
     lists.every((k) => same(a[k] as string[], b[k] as string[])) &&
     same(a.difficulty ?? [], b.difficulty ?? []) &&
     same(a.reviews ?? [], b.reviews ?? []) &&
+    same(a.custom ?? [], b.custom ?? []) &&
     a.hidden === b.hidden &&
     a.favorites === b.favorites &&
     !!a.coop === !!b.coop &&
@@ -371,11 +391,12 @@ const hltbLabel = (id: string): string => HLTB_BUCKETS.find((b) => b.id === id)?
  * A tab's name, from its filters: every active choice, the choices of one filter joined by "+" and the filters by
  * " · " ("Epic · RPG · 2020-2025", "Epic + G.O.G · RPG"); "All Games" with none. Platform first, then PC (stores),
  * Genre, Release, Tags, Size, H.L.T.B., Difficulty, Reviews, Co-Op, Recompilations, developer, publisher (a game page's buttons),
- * Favorites, Hidden.
+ * the user's own filters (Filters > Custom, by `customName`; one it does not know is left out), Favorites, Hidden.
  */
 export function tabName(
   filters: LibraryTabFilters,
-  platformLabel: (id: string) => string = (id) => id
+  platformLabel: (id: string) => string = (id) => id,
+  customName: (id: string) => string | undefined = () => undefined
 ): string {
   const parts = [
     filters.platforms.map(platformLabel),
@@ -395,6 +416,7 @@ export function tabName(
     creatorNames(filters.developers),
     // A publisher that is also a developer picked is named once.
     creatorNames(filters.publishers).filter((name) => !hasName(filters.developers, name)),
+    (filters.custom ?? []).map(customName).filter((name): name is string => !!name),
     filters.favorites ? [t('lib.tabs.favorites')] : [],
     filters.hidden ? [t('lib.tabs.hidden')] : []
   ]
@@ -417,11 +439,12 @@ export function platformLabelOf(
 /** The strip's tabs: Settings first, then the user's tabs, each named by its filters. */
 export function stripTabs(
   defs: readonly LibraryTabDef[],
-  platformLabel: (id: string) => string
+  platformLabel: (id: string) => string,
+  customName?: (id: string) => string | undefined
 ): LibraryTab[] {
   return [
     { id: LIBRARY_SETTINGS_TAB, label: t('lib.tabs.settings') },
-    ...defs.map((def) => ({ id: def.id, label: tabName(def.filters, platformLabel) }))
+    ...defs.map((def) => ({ id: def.id, label: tabName(def.filters, platformLabel, customName) }))
   ]
 }
 

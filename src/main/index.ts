@@ -125,6 +125,7 @@ import {
   isFavoritesFilePath,
   type FavoritesBackup
 } from './favorites/favorites-file'
+import { followCustomFilters } from './favorites/custom-filters-follow'
 import { hostname } from 'os'
 import { createConvertService } from './convert/convert-service'
 import { createAutoTrimService, helperXboxInfo } from './convert/auto-trim'
@@ -1750,6 +1751,37 @@ async function main(cli: CliOptions): Promise<void> {
       lastEmulationDir = dir
       favoritesBackup.noteLibraryChanged(true)
     })
+  }
+
+  // The user's own filters follow their games to a new id (favorites/custom-filters-follow.ts): a card moved or absorbed
+  // at once, a re-found manual game or ROM once the library settles after a scan; the keys that find them again are
+  // recorded as games are put in a filter.
+  {
+    let followTimer: ReturnType<typeof setTimeout> | null = null
+    const follow = (movedTo?: Record<string, string>): void => {
+      const filters = settings.get().library.customFilters ?? []
+      if (filters.length === 0) return
+      const next = followCustomFilters(filters, library.games(), movedTo)
+      if (next) settings.update({ library: { customFilters: next } })
+    }
+    const followSoon = (): void => {
+      if (followTimer) clearTimeout(followTimer)
+      followTimer = setTimeout(() => {
+        followTimer = null
+        follow()
+      }, 1500)
+    }
+    events.on('library:changed', (change) => {
+      if (change.movedTo && Object.keys(change.movedTo).length) follow(change.movedTo)
+      else if (change.reason !== 'metadata' && change.reason !== 'session') followSoon()
+    })
+    let lastFilters = settings.get().library.customFilters
+    settings.onChange((next) => {
+      if (next.library.customFilters === lastFilters) return
+      lastFilters = next.library.customFilters
+      followSoon()
+    })
+    followSoon()
   }
 
   if (cli.scanReport) {

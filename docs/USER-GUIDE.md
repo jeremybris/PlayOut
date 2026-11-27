@@ -1863,6 +1863,20 @@ The controller rumbles briefly on activation when _Vibration_ is on and the cont
   section 4.5), whether the game is installed or not: also owned games not installed yet, and a paired host's games
   shown for **Download** (this PC matches those with its own recompilation catalogs). The number next to it is how many
   there are on the tab. A tab with it on is named _Recompilations_.
+- **Your own filters.** **Y** on a cover (or a right click) → **Create a filter…** asks for a name (up to 40
+  characters, not one another of your filters has; the on-screen keyboard opens with a controller) and an icon from
+  40, each in its own colour; **Create** (on once both are chosen) saves the filter with that game in it. Once you have
+  a filter, the same menu has **Custom filters**: one row per filter, **Add to _name_** or **Remove from _name_** for
+  this game (the list stays open, so a game can go in several). **Filters → Custom** (shown once you have a filter)
+  lists **All Custom**, then each filter with its icon and how many of the tab's games are in it; it works like the
+  other lists: a game in any filter picked shows, it counts toward the 3 filters at once, **Clear filters** turns it
+  off, and the tab keeps it and is named after the filters. **Y** or a right click on a filter there gives
+  **Rename**, **Change icon** and **Delete** (asked first; the games stay in your library, and the tabs that used it
+  lose it). A paired host's games (Streaming) can go in a filter too. Filters are kept in Settings on this PC (up to
+  100, of up to 10,000 games each) and are not shared with paired PCs: a synced Library tab keeps its **Custom** picks
+  on each PC. A game stays in its filters when it moves: a recompilation's card joining the original game's, a manual
+  game whose program moved or a ROM moved to another folder (found again by name, as favourites are); a game removed
+  from the library simply no longer shows in them.
 - A check in the middle of the cover marks a game you completed (**Y → Mark as Completed**).
 - The rail at the right edge jumps to a letter (title sorts) or to a section of the current sort; the D-pad
   jumps the same way.

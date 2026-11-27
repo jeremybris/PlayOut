@@ -442,6 +442,17 @@
   transform-origin: top right;
 }
 
+/* Filters > Custom: the filter whose Rename / Change icon / Delete are shown, above them */
+.filters-menu__heading {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  max-width: 30rem;
+  padding: 1rem 2rem 0.6rem;
+  font-family: var(--font-ui);
+  color: var(--color-text-secondary);
+}
+
 /* ---- the grid viewport ----------------------------------------------------------------------------- */
 
 .library__viewport {

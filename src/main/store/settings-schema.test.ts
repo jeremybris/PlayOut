@@ -897,3 +897,106 @@ describe('ui.libraryTabs reviews', () => {
     ).toBe(false)
   })
 })
+
+describe('library.customFilters', () => {
+  const filter = { id: 'cf1', name: 'Hard', icon: 'skull', gameIds: ['steam:1', 'rom:snes:abc'] }
+
+  it('defaults to none, and loads and patches filters', () => {
+    expect(defaultSettings().library.customFilters).toEqual([])
+    expect(normalizeSettings({ library: {} })!.library.customFilters).toEqual([])
+    expect(
+      normalizeSettings({ library: { customFilters: [filter] } })!.library.customFilters
+    ).toEqual([filter])
+    expect(parseSettingsPatch({ library: { customFilters: [filter] } })).toEqual({
+      library: { customFilters: [filter] }
+    })
+  })
+
+  it('trims a name, gives an unknown icon the default one and keeps each game once', () => {
+    const patch = parseSettingsPatch({
+      library: {
+        customFilters: [{ ...filter, name: '  Hard ', icon: 'nope', gameIds: ['a', 'a'] }]
+      }
+    })
+    expect(patch.library!.customFilters).toEqual([
+      { id: 'cf1', name: 'Hard', icon: 'star', gameIds: ['a'] }
+    ])
+  })
+
+  it('refuses a patch past the limits or with repeated ids or names', () => {
+    const bad = [
+      [{ ...filter, name: '' }],
+      [{ ...filter, name: 'x'.repeat(41) }],
+      [{ ...filter, gameIds: Array.from({ length: 10_001 }, (_, i) => `g${i}`) }],
+      Array.from({ length: 101 }, (_, i) => ({ ...filter, id: `f${i}`, name: `F${i}` })),
+      [filter, { ...filter, name: 'Other' }],
+      [filter, { ...filter, id: 'cf2', name: 'HARD' }],
+      [{ ...filter, extra: true }]
+    ]
+    for (const customFilters of bad)
+      expect(settingsPatchSchema.safeParse({ library: { customFilters } }).success).toBe(false)
+  })
+
+  it('removes repeated game ids before checking the limit, as the loader does', () => {
+    const ids = [...Array.from({ length: 10_000 }, (_, i) => `g${i}`), 'g0']
+    const patch = settingsPatchSchema.safeParse({
+      library: { customFilters: [{ ...filter, gameIds: ids }] }
+    })
+    expect(patch.success).toBe(true)
+    expect(patch.data!.library!.customFilters![0]!.gameIds).toHaveLength(10_000)
+    const loaded = normalizeSettings({ library: { customFilters: [{ ...filter, gameIds: ids }] } })
+    expect(loaded!.library.customFilters[0]!.gameIds).toHaveLength(10_000)
+  })
+
+  it("keeps the keys games are found again by, only for the filter's own games", () => {
+    const gameKeys = { 'steam:1': 'manual|pc|x', gone: 'manual|pc|y' }
+    const patch = parseSettingsPatch({ library: { customFilters: [{ ...filter, gameKeys }] } })
+    expect(patch.library!.customFilters![0]!.gameKeys).toEqual({ 'steam:1': 'manual|pc|x' })
+    const loaded = normalizeSettings({ library: { customFilters: [{ ...filter, gameKeys }] } })
+    expect(loaded!.library.customFilters[0]!.gameKeys).toEqual({ 'steam:1': 'manual|pc|x' })
+    expect(
+      settingsPatchSchema.safeParse({
+        library: { customFilters: [{ ...filter, gameKeys: { 'steam:1': 'k'.repeat(2001) } }] }
+      }).success
+    ).toBe(false)
+  })
+
+  it('repairs a saved list entry by entry: one bad filter does not cost the others', () => {
+    const loaded = normalizeSettings({
+      library: { customFilters: [filter, { id: '', name: 'x' }, { ...filter, id: 'cf2' }] }
+    })
+    expect(loaded!.library.customFilters).toEqual([
+      filter,
+      { ...filter, id: 'cf2', name: 'Hard 2' }
+    ])
+  })
+
+  it('a tab keeps its Filters > Custom picks, and an empty list is left out', () => {
+    const tab = {
+      id: 'mine',
+      filters: {
+        platforms: [],
+        stores: [],
+        genres: [],
+        eras: [],
+        tags: [],
+        sizes: [],
+        hltb: [],
+        controls: [],
+        players: [],
+        online: [],
+        hidden: false,
+        favorites: false,
+        coop: false,
+        recomp: false
+      },
+      sort: 'title-asc',
+      sortReversed: false,
+      playableFirst: true
+    }
+    const picked = { ...tab, filters: { ...tab.filters, custom: ['cf1'] } }
+    expect(libraryTabDefSchema.parse(picked)).toEqual(picked)
+    const empty = { ...tab, filters: { ...tab.filters, custom: [] } }
+    expect(JSON.stringify(libraryTabDefSchema.parse(empty))).toBe(JSON.stringify(tab))
+  })
+})

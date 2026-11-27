@@ -1,6 +1,17 @@
 import { z } from 'zod'
 import { defaultSettings, SETTINGS_VERSION } from '../../shared/defaults'
 import { nearestCoverScale } from '../../shared/cover-scale'
+import {
+  cleanFilterName,
+  customFilterIcon,
+  keptGameKeys,
+  MAX_CUSTOM_FILTER_GAME_ID,
+  MAX_CUSTOM_FILTER_GAME_KEY,
+  MAX_CUSTOM_FILTER_GAMES,
+  MAX_CUSTOM_FILTER_NAME,
+  MAX_CUSTOM_FILTERS,
+  normalizeCustomFilters
+} from '../../shared/custom-filters'
 import { DYNAMIC_FPS, PAD_BUTTONS, POWER_CHOICES } from '../../shared/overlay'
 import { HOME_ROW_MODES } from '../../shared/types'
 import type {
@@ -49,6 +60,51 @@ const path = z.string().max(4096)
 const secret = z.string().max(500)
 const shortId = z.string().min(1).max(100)
 
+/**
+ * One of the user's own filters (shared/custom-filters.ts): its name trimmed (1-40 characters), an icon this version
+ * does not know becomes the default one, its game ids each once.
+ */
+const customFilter = z
+  .object({
+    id: shortId,
+    name: z
+      .string()
+      .max(500)
+      .transform(cleanFilterName)
+      .pipe(z.string().min(1).max(MAX_CUSTOM_FILTER_NAME)),
+    icon: z.string().max(100).transform(customFilterIcon),
+    // Repeats removed before the limit is checked, as the loader (normalizeCustomFilters) does.
+    gameIds: z.preprocess(
+      (ids) => (Array.isArray(ids) ? [...new Set(ids)] : ids),
+      z.array(z.string().min(1).max(MAX_CUSTOM_FILTER_GAME_ID)).max(MAX_CUSTOM_FILTER_GAMES)
+    ),
+    gameKeys: z
+      .record(
+        z.string().min(1).max(MAX_CUSTOM_FILTER_GAME_ID),
+        z.string().min(1).max(MAX_CUSTOM_FILTER_GAME_KEY)
+      )
+      .refine((keys) => Object.keys(keys).length <= MAX_CUSTOM_FILTER_GAMES, 'too many game keys')
+      .optional()
+  })
+  .strict()
+  // Keys only for the filter's own games (as the loader keeps them).
+  .transform((filter) => {
+    if (!filter.gameKeys) return filter
+    const gameKeys = keptGameKeys(filter.gameKeys, filter.gameIds)
+    const { gameKeys: _all, ...rest } = filter
+    void _all
+    return gameKeys ? { ...rest, gameKeys } : rest
+  })
+/** The user's filters: at most MAX_CUSTOM_FILTERS, ids and names (case-insensitive) each once. */
+const customFilters = z
+  .array(customFilter)
+  .max(MAX_CUSTOM_FILTERS)
+  .refine((list) => new Set(list.map((f) => f.id)).size === list.length, 'repeated filter id')
+  .refine(
+    (list) => new Set(list.map((f) => f.name.toLowerCase())).size === list.length,
+    'repeated filter name'
+  )
+
 // One schema per Settings field. The strict patch schema (updateSettings) and the lenient loader (settings.json)
 // are both derived from these so the two can never disagree about what a valid value is.
 const library = {
@@ -62,7 +118,8 @@ const library = {
   coopKeyboardMouse: z.boolean(),
   coopTwoPlayerLayout: z.enum(['stacked', 'sideBySide']),
   trimGames: z.boolean(),
-  copyPcSaves: z.boolean()
+  copyPcSaves: z.boolean(),
+  customFilters
 }
 const emulators = {
   overrides: z.record(shortId, path),
@@ -141,7 +198,8 @@ function migrateCreatorFilters(raw: unknown): unknown {
     !emptyList(raw.developers) &&
     !emptyList(raw.publishers) &&
     !emptyList(raw.difficulty) &&
-    !emptyList(raw.reviews)
+    !emptyList(raw.reviews) &&
+    !emptyList(raw.custom)
   )
     return raw
   const { developer, publisher, ...rest } = raw
@@ -149,6 +207,7 @@ function migrateCreatorFilters(raw: unknown): unknown {
   if (emptyList(rest.publishers)) delete rest.publishers
   if (emptyList(rest.difficulty)) delete rest.difficulty
   if (emptyList(rest.reviews)) delete rest.reviews
+  if (emptyList(rest.custom)) delete rest.custom
   const merged = (one: unknown, list: unknown): unknown => {
     const name = typeof one === 'string' ? one.trim() : ''
     if (!name) return list
@@ -198,7 +257,9 @@ const libraryTabFilters = z.preprocess(
       // `developer` / `publisher`, migrated above). Tabs saved before either have none; absent = none (an empty list
       // is left out above, so it never reaches an older PlayOut).
       developers: choices.optional(),
-      publishers: choices.optional()
+      publishers: choices.optional(),
+      // Filters > Custom (settings.library.customFilters ids). Optional and left out while empty, like Difficulty.
+      custom: choices.optional()
     })
     .strict()
 )
@@ -429,6 +490,8 @@ export function normalizeSettings(raw: unknown): Settings | null {
     ...defaults.library.sources,
     ...sources
   } as Settings['library']['sources']
+  // The user's filters are repaired entry by entry: one malformed filter must not cost the others.
+  out.library.customFilters = normalizeCustomFilters(lib.customFilters)
   // Library tabs and positions are repaired entry by entry: one malformed tab must not cost the others (a null
   // list would make the renderer build them afresh from the platforms).
   const rawUi = isObject(raw.ui) ? raw.ui : {}

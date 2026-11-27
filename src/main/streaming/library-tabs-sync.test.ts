@@ -311,6 +311,37 @@ describe('createLibraryTabsSync', () => {
     expect(changes).toBe(0)
   })
 
+  it("never sends a tab's Filters > Custom picks (this PC's own filters), and keeps them when taking another copy", async () => {
+    const custom = (
+      id: string,
+      ids: string[],
+      over: Partial<LibraryTabDef> = {}
+    ): LibraryTabDef => {
+      const t = tab(id, over)
+      t.filters = { ...t.filters, custom: ids }
+      return t
+    }
+    const a = await pc('pc-a', [custom('t1', ['cf1'])])
+    // Sent without it: another PC (an older PlayOut too, whose tab schema is strict) reads the tab as it is.
+    expect(a.sync.doc()!.tabs[0]!.filters).not.toHaveProperty('custom')
+    expect(parseTabsDoc(a.sync.doc(), NOW)).not.toBeNull()
+    // Picking or unpicking a custom filter is not a change to sync.
+    a.clock.now = NOW + 1000
+    a.edit([custom('t1', ['cf1', 'cf2'])])
+    expect(a.sync.doc()?.updatedAt).toBe(NEVER_EDITED)
+    // A copy from a PC that still sends them (or a newer tab) never brings another PC's filter ids here.
+    const theirs = doc(
+      [custom('t1', ['cf-other'], { sort: 'recent' }), custom('t2', ['cf-x'])],
+      at(1),
+      'pc-b'
+    )
+    expect(a.sync.offer(theirs, { name: 'Office', isHost: false })).toBe(true)
+    expect(a.settings.ui.libraryTabs).toEqual([
+      custom('t1', ['cf1', 'cf2'], { sort: 'recent' }),
+      tab('t2')
+    ])
+  })
+
   it('ignores an older copy and a malformed one', async () => {
     const a = await pc('pc-a', [tab('t1')])
     a.clock.now = NOW + 120_000

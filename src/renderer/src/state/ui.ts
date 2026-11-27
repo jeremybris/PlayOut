@@ -52,6 +52,16 @@ export type Modal =
    * = turn the installed game's DLC on or off (the Play menu's Manage DLC).
    */
   | { type: 'steam-dlc'; gameId: string; mode: 'install' | 'manage' }
+  /**
+   * One of the user's own filters (screens/CustomFilter): `gameId` = Create a filter from a game's options menu (the
+   * game goes in it); `filterId` = rename it or change its icon from Filters > Custom (`focus` = where focus starts).
+   */
+  | {
+      type: 'custom-filter'
+      gameId?: string
+      filterId?: string
+      focus?: 'name' | 'icon'
+    }
   | {
       type: 'confirm'
       title: string
@@ -151,6 +161,8 @@ export interface LibraryFilters {
   developers: string[]
   /** A game page's publisher buttons: games by any of these publishers (case-insensitive); empty = any. */
   publishers: string[]
+  /** Filters > Custom: the user's filters picked (settings.library.customFilters ids); empty = every game. */
+  custom: string[]
 }
 
 export const DEFAULT_LIBRARY_FILTERS: LibraryFilters = {
@@ -176,7 +188,8 @@ export const DEFAULT_LIBRARY_FILTERS: LibraryFilters = {
   coop: false,
   recomp: false,
   developers: [],
-  publishers: []
+  publishers: [],
+  custom: []
 }
 
 export interface UiState {

@@ -80,8 +80,8 @@
     "difficulty": "Difficulty",
     "reviews": "Reviews",
     "controls": "Controls",
-    "localMultiplayer": "Local Multiplayer",
-    "onlineMultiplayer": "Online Multiplayer",
+    "localMultiplayer": "Multiplayer - Local",
+    "onlineMultiplayer": "Multiplayer - Online",
     "hidden": "Hidden",
     "favorites": "Favorites",
     "recompilations": "Recompilations",
@@ -94,6 +94,12 @@
     "allDifficulties": "All Difficulties",
     "allReviews": "All Reviews",
     "allControls": "All Controls",
-    "allLocalMultiplayer": "All Local Multiplayer"
+    "allLocalMultiplayer": "All Local Multiplayer",
+    "custom": "Custom",
+    "allCustom": "All Custom",
+    "customHint": "Y or right-click a filter to rename it, change its icon or delete it.",
+    "customRename": "Rename",
+    "customIcon": "Change icon",
+    "customDelete": "Delete"
   }
 }

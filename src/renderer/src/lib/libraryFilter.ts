@@ -5,9 +5,10 @@ import {
   isToolsDifficulty,
   type EffectiveDifficulty
 } from '@shared/difficulty'
-import type { Game, Platform, RemoteLibrary } from '@shared/types'
+import type { CustomFilter, Game, Platform, RemoteLibrary } from '@shared/types'
 import { controlsFilterIds } from './controls'
 import type { CopyGroup } from './copies'
+import { customGameIds } from './customFilters'
 import { hltbBucketOf, hltbHours } from './hltb'
 import { installSizeBytes, sizeBucketOf } from './installSize'
 import { hiddenGames, visibleGames } from './library'
@@ -52,6 +53,13 @@ export interface TabCardFilters {
   recomp: boolean
   developers?: readonly string[]
   publishers?: readonly string[]
+  /** Filters > Custom: the user's filters picked (ids); absent or empty = every game. */
+  custom?: readonly string[]
+  /**
+   * The user's filters (settings.library.customFilters) the `custom` ids are looked up in; an id not among them is
+   * ignored (none known: the filter keeps every card).
+   */
+  customFilters: readonly CustomFilter[]
   /**
    * Local Multiplayer > L.A.N. Party: the ids of the games PeerParty is offered for (state/peerparty.ts, from main).
    * Missing: none yet, so the choice keeps no card.
@@ -226,9 +234,12 @@ export function filterTabGroups<G extends Group>(
   // A game page's developer / publisher buttons: a card any copy of which names one of them (case-insensitive).
   const developers = filters.developers ?? []
   const publishers = filters.publishers ?? []
+  // Filters > Custom: a card any copy of which is in any of the user's filters picked.
+  const inCustom = customGameIds(filters.customFilters, filters.custom ?? [])
   const kept = tabGroups.filter(
     (g) =>
       (!matching || g.copies.some((c) => matching.has(c.id))) &&
+      (!inCustom || inCustom.has(g.game.id) || g.copies.some((c) => inCustom.has(c.id))) &&
       matchesCreators([g.game, ...g.copies], developers, publishers) &&
       (!filters.favorites || g.game.favorite) &&
       // Filters > Local Multiplayer: any of its choices (player counts, all local multiplayer, Nucleus Co-Op).

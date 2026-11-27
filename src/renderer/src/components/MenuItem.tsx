@@ -1,4 +1,4 @@
-import { useEffect, type ReactElement, type ReactNode } from 'react'
+import { useEffect, type MouseEvent, type ReactElement, type ReactNode } from 'react'
 import { useFocusableControl } from '../hooks/useFocusableControl'
 import type { Direction } from '../input/focus'
 import { cx } from '../lib/cx'
@@ -38,6 +38,8 @@ export interface MenuItemProps {
   disabled?: boolean
   autoFocus?: boolean
   className?: string
+  /** A right click on the row (Filters > Custom: a filter's edit actions). */
+  onContextMenu?: (event: MouseEvent<HTMLDivElement>) => void
 }
 
 /** One focusable 56u row of a Menu. */
@@ -54,7 +56,8 @@ export function MenuItem({
   focusKey,
   disabled,
   autoFocus,
-  className
+  className,
+  onContextMenu
 }: MenuItemProps): ReactElement {
   const {
     ref,
@@ -87,6 +90,7 @@ export function MenuItem({
       aria-disabled={disabled || undefined}
       aria-current={selected || undefined}
       {...controlProps}
+      onContextMenu={onContextMenu}
     >
       {icon}
       {art ? (

@@ -16,6 +16,9 @@ vi.mock('../../api/client', () => ({
 const { doesFocusableExist, getCurrentFocusKey, initFocus } = await import('../../input/focus')
 const { FiltersPill } = await import('./FiltersPill')
 const { CATEGORY_KEY } = await import('./keys')
+const { useSettingsStore } = await import('../../state/settings')
+const { useUiStore } = await import('../../state/ui')
+const { defaultSettings } = await import('@shared/defaults')
 type StoreFilter = import('../../lib/storeFilters').StoreFilter
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
@@ -35,10 +38,13 @@ interface Start {
   platformOptions?: { id: string; label: string }[]
   stores?: string[]
   storeOptions?: { id: StoreFilter['id']; label: string }[]
+  custom?: string[]
+  customCounts?: Map<string, number>
 }
 
 const onPlatformsSpy = vi.fn()
 const onStoresSpy = vi.fn()
+const onCustomSpy = vi.fn()
 
 const onClearFilters = vi.fn()
 
@@ -53,6 +59,7 @@ function Harness({ start }: { start: Start }): ReactElement {
   const [controls, setControls] = useState(start.controls ?? [])
   const [platforms, setPlatforms] = useState(start.platforms ?? [])
   const [stores, setStores] = useState(start.stores ?? [])
+  const [custom, setCustom] = useState(start.custom ?? [])
   const none = (): void => undefined
   return (
     <FiltersPill
@@ -104,6 +111,12 @@ function Harness({ start }: { start: Start }): ReactElement {
       onDevelopers={setDevelopers}
       publishers={publishers}
       onPublishers={setPublishers}
+      custom={custom}
+      onCustom={(next) => {
+        onCustomSpy(next)
+        setCustom(next)
+      }}
+      customCounts={start.customCounts}
       onClearFilters={() => {
         onClearFilters()
         setDevelopers([])
@@ -112,6 +125,7 @@ function Harness({ start }: { start: Start }): ReactElement {
         setFavorites(false)
         setDifficulty([])
         setReviews([])
+        setCustom([])
       }}
     />
   )
@@ -131,6 +145,8 @@ beforeEach(() => {
   onClearFilters.mockClear()
   onPlatformsSpy.mockClear()
   onStoresSpy.mockClear()
+  onCustomSpy.mockClear()
+  useSettingsStore.setState({ settings: null })
   host = document.createElement('div')
   document.body.appendChild(host)
   root = createRoot(host)
@@ -226,12 +242,12 @@ describe('Filters > Clear filters sub-menu', () => {
     expect(getCurrentFocusKey()).toBe(`${MENU}:clear`)
   })
 
-  it('removes the last row of a tab with nothing else on: focus on Genre, as Clear filters goes', async () => {
+  it('removes the last row of a tab with nothing else on: focus on the first row (Controls), as Clear filters goes', async () => {
     await openClearSubMenu({ developers: ['Atlus'] })
     await click(row(subMenu(), 'Atlus'))
     expect(subMenu()).toBeNull()
     expect(row(filtersMenu(), 'Clear filters')).toBeUndefined()
-    expect(getCurrentFocusKey()).toBe(`${MENU}:genre`)
+    expect(getCurrentFocusKey()).toBe(`${MENU}:controls`)
   })
 
   it('All turns every filter off once and closes the sub-menu', async () => {
@@ -240,7 +256,7 @@ describe('Filters > Clear filters sub-menu', () => {
     expect(onClearFilters).toHaveBeenCalledTimes(1)
     expect(subMenu()).toBeNull()
     expect(row(filtersMenu(), 'Clear filters')).toBeUndefined()
-    expect(getCurrentFocusKey()).toBe(`${MENU}:genre`)
+    expect(getCurrentFocusKey()).toBe(`${MENU}:controls`)
   })
 })
 
@@ -263,13 +279,12 @@ describe('Filters > Difficulty', () => {
   const difficultyMenu = (): HTMLElement | null =>
     document.querySelector<HTMLElement>('[role="listbox"][aria-label="Difficulty"]')
 
-  it('sits directly below H.L.T.B.', async () => {
+  it('sits in the alphabetical list of rows, after Controls and before Genre', async () => {
     act(() => root.render(<Harness start={{}} />))
     await click(pill())
     const labels = rowsOf(filtersMenu()).map((r) => r.textContent ?? '')
-    const hltb = labels.findIndex((t) => t.startsWith('H.L.T.B.'))
-    expect(hltb).toBeGreaterThanOrEqual(0)
-    expect(labels[hltb + 1]).toBe('Difficulty')
+    expect(labels.indexOf('Difficulty')).toBe(labels.indexOf('Controls') + 1)
+    expect(labels[labels.indexOf('Difficulty') + 1]).toBe('Genre')
   })
 
   it('opens a sub-menu: All Difficulties, then the five levels, each with its picture', async () => {
@@ -324,13 +339,13 @@ describe('Filters > Reviews', () => {
   const reviewsMenu = (): HTMLElement | null =>
     document.querySelector<HTMLElement>('[role="listbox"][aria-label="Reviews"]')
 
-  it('sits directly below Difficulty', async () => {
+  it('sits in the alphabetical list of rows, after Release and before Size', async () => {
     act(() => root.render(<Harness start={{}} />))
     await click(pill())
     const labels = rowsOf(filtersMenu()).map((r) => r.textContent ?? '')
-    const difficulty = labels.indexOf('Difficulty')
-    expect(difficulty).toBeGreaterThanOrEqual(0)
-    expect(labels[difficulty + 1]).toBe('Reviews')
+    const reviews = labels.indexOf('Reviews')
+    expect(reviews).toBeGreaterThan(0)
+    expect(labels[reviews + 1]?.startsWith('Size')).toBe(true)
   })
 
   it('opens a sub-menu: All Reviews, then the nine bands best first, each with a star', async () => {
@@ -415,9 +430,9 @@ describe('Filters > Local Multiplayer', () => {
   it('gives each choice but All Local Multiplayer an icon; the player counts keep their picture beside their words', async () => {
     act(() => root.render(<Harness start={{}} />))
     await click(pill())
-    await click(row(filtersMenu(), 'Local Multiplayer'))
+    await click(row(filtersMenu(), 'Multiplayer - Local'))
     const menu = document.querySelector<HTMLElement>(
-      '[role="listbox"][aria-label="Local Multiplayer"]'
+      '[role="listbox"][aria-label="Multiplayer - Local"]'
     )
     const rows = rowsOf(menu)
     const icon = (label: string): string | undefined =>
@@ -444,9 +459,9 @@ describe('Filters > Online Multiplayer', () => {
   it('gives each choice but All Online Multiplayer an icon', async () => {
     act(() => root.render(<Harness start={{}} />))
     await click(pill())
-    await click(row(filtersMenu(), 'Online Multiplayer'))
+    await click(row(filtersMenu(), 'Multiplayer - Online'))
     const rows = rowsOf(
-      document.querySelector<HTMLElement>('[role="listbox"][aria-label="Online Multiplayer"]')
+      document.querySelector<HTMLElement>('[role="listbox"][aria-label="Multiplayer - Online"]')
     )
     const icon = (label: string): string | null | undefined =>
       rows
@@ -602,5 +617,146 @@ describe('Filters > Platform (the stores, a line, then the systems)', () => {
     act(() => root.render(<Harness start={both} />))
     await click(pill())
     expect(row(filtersMenu(), 'Platform')!.textContent).toBe('Platform')
+  })
+})
+
+describe('Filters > Custom', () => {
+  const customMenu = (): HTMLElement | null =>
+    document.querySelector<HTMLElement>('[role="listbox"][aria-label="Custom"]')
+  const actionsMenu = (name: string): HTMLElement | null =>
+    document.querySelector<HTMLElement>(`[role="menu"][aria-label="${name}"]`)
+  const withFilters = (): void => {
+    const settings = defaultSettings()
+    settings.library.customFilters = [
+      { id: 'cf1', name: 'Couch', icon: 'users', gameIds: ['a', 'b'] },
+      { id: 'cf2', name: 'Hard', icon: 'skull', gameIds: ['c'] }
+    ]
+    useSettingsStore.setState({ settings })
+  }
+
+  it('is not offered while the user has no filter', async () => {
+    act(() => root.render(<Harness start={{}} />))
+    await click(pill())
+    expect(row(filtersMenu(), 'Custom')).toBeUndefined()
+  })
+
+  it('lists All Custom, then each filter with its icon in its colour and its count', async () => {
+    withFilters()
+    act(() => root.render(<Harness start={{ customCounts: new Map([['cf1', 7]]) }} />))
+    await click(pill())
+    const labels = rowsOf(filtersMenu()).map((r) => r.textContent ?? '')
+    // In alphabetical order: after Controls, before Difficulty.
+    expect(labels.indexOf('Custom')).toBe(labels.indexOf('Controls') + 1)
+    expect(labels[labels.indexOf('Custom') + 1]).toBe('Difficulty')
+    await click(row(filtersMenu(), 'Custom'))
+    const rows = rowsOf(customMenu())
+    expect(rows.map((r) => r.textContent)).toEqual(['All Custom', 'Couch7', 'Hard1'])
+    const icon = rows[1]!.querySelector<SVGElement>('svg.lucide-users')
+    expect(icon).toBeTruthy()
+    expect(icon!.style.color).not.toBe('')
+    expect(rows[2]!.querySelector('svg.lucide-skull')).toBeTruthy()
+  })
+
+  it('picks filters like the other sub-menus: row text, pill count, All Custom clears', async () => {
+    withFilters()
+    act(() => root.render(<Harness start={{}} />))
+    await click(pill())
+    await click(row(filtersMenu(), 'Custom'))
+    await click(row(customMenu(), 'Couch'))
+    expect(onCustomSpy).toHaveBeenLastCalledWith(['cf1'])
+    expect(pill().textContent).toContain('Filters (1)')
+    expect(row(filtersMenu(), 'Custom')!.textContent).toBe('CustomCouch')
+    await click(row(customMenu(), 'Hard'))
+    expect(onCustomSpy).toHaveBeenLastCalledWith(['cf1', 'cf2'])
+    expect(row(filtersMenu(), 'Custom')!.textContent).toBe('CustomCouch +1')
+    await click(row(customMenu(), 'Couch'))
+    expect(onCustomSpy).toHaveBeenLastCalledWith(['cf2'])
+    await click(row(customMenu(), 'All Custom'))
+    expect(onCustomSpy).toHaveBeenLastCalledWith([])
+    expect(pill().textContent).not.toContain('(')
+  })
+
+  it('ignores a picked id with no filter here (another PC’s tab)', async () => {
+    withFilters()
+    act(() => root.render(<Harness start={{ custom: ['elsewhere'] }} />))
+    expect(pill().textContent).not.toContain('(')
+  })
+
+  it('Clear filters turns it off', async () => {
+    withFilters()
+    act(() => root.render(<Harness start={{ custom: ['cf1', 'cf2'] }} />))
+    expect(pill().textContent).toContain('Filters (2)')
+    await click(pill())
+    await click(row(filtersMenu(), 'Clear filters'))
+    expect(onClearFilters).toHaveBeenCalledTimes(1)
+    expect(pill().textContent).not.toContain('(')
+  })
+
+  it('a right click on a filter shows Rename, Change icon and Delete; Delete asks first', async () => {
+    withFilters()
+    const openModal = vi.spyOn(useUiStore.getState(), 'openModal')
+    act(() => root.render(<Harness start={{}} />))
+    await click(pill())
+    await click(row(filtersMenu(), 'Custom'))
+    act(() => {
+      row(customMenu(), 'Hard')!.dispatchEvent(
+        new MouseEvent('contextmenu', { bubbles: true, cancelable: true })
+      )
+    })
+    await settle()
+    expect(rowsOf(actionsMenu('Hard')).map((r) => r.textContent)).toEqual([
+      'Rename',
+      'Change icon',
+      'Delete'
+    ])
+    await click(row(actionsMenu('Hard'), 'Delete'))
+    // The Filters menu closes and the question opens.
+    expect(filtersMenu()).toBeNull()
+    expect(openModal).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'confirm', title: 'Delete Hard?', danger: true })
+    )
+    openModal.mockRestore()
+  })
+
+  it('Rename and Change icon open the filter’s dialog', async () => {
+    withFilters()
+    const openModal = vi.spyOn(useUiStore.getState(), 'openModal')
+    act(() => root.render(<Harness start={{}} />))
+    await click(pill())
+    await click(row(filtersMenu(), 'Custom'))
+    act(() => {
+      row(customMenu(), 'Couch')!.dispatchEvent(
+        new MouseEvent('contextmenu', { bubbles: true, cancelable: true })
+      )
+    })
+    await settle()
+    await click(row(actionsMenu('Couch'), 'Change icon'))
+    expect(openModal).toHaveBeenCalledWith({
+      type: 'custom-filter',
+      filterId: 'cf1',
+      focus: 'icon'
+    })
+    openModal.mockRestore()
+  })
+})
+
+describe('Filters menu order', () => {
+  it('lists Clear filters first, the sub-menu rows A to Z, then Hidden, Favorites and Recompilations', async () => {
+    act(() => root.render(<Harness start={{}} />))
+    await click(pill())
+    const labels = rowsOf(filtersMenu()).map((r) => r.textContent ?? '')
+    const bottom = ['Hidden', 'Favorites', 'Recompilations']
+    const tail = labels.slice(-3).map((l) => bottom.find((b) => l.startsWith(b)))
+    expect(tail).toEqual(bottom)
+    const rows = labels.slice(0, -3).filter((l) => !l.startsWith('Clear'))
+    const names = rows.map((l) =>
+      l.replace(/(Multiplayer - (Local|Online)|H\.L\.T\.B\.|[A-Z][a-z]+).*/, '$1')
+    )
+    const plain = (s: string): string => s.replace(/[^A-Za-z0-9\s-]/g, '')
+    expect(names).toEqual(
+      [...names].sort((a, b) => plain(a).localeCompare(plain(b), 'en', { sensitivity: 'base' }))
+    )
+    expect(names).toContain('Multiplayer - Local')
+    expect(names).toContain('Multiplayer - Online')
   })
 })

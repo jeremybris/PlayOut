@@ -25,6 +25,10 @@ export function libraryShowsGame(gameId: string, view: LibraryFilters): boolean 
       showHostGames: settings.streaming.showHostGames ?? true,
       showDuplicates: settings.library.showDuplicates ?? false
     },
-    { ...view, lanParty: lanPartyIdsNow(view.players) }
+    {
+      ...view,
+      lanParty: lanPartyIdsNow(view.players),
+      customFilters: settings.library.customFilters ?? []
+    }
   )
 }

@@ -28,6 +28,8 @@ import { libraryPlatformFilters, type PlatformFilter } from '../../../lib/platfo
 import { libraryReleaseEras, type ReleaseEra } from '../../../lib/releaseEras'
 import { libraryTagFilters, type TagFilter } from '../../../lib/steamTags'
 import { libraryStoreFilters, platformKindOf, type StoreFilter } from '../../../lib/storeFilters'
+import { customFilterNames } from '../../../lib/customFilters'
+import { useCustomFilters } from '../../../state/customFilters'
 import { useLibraryStore } from '../../../state/library'
 import { addTab, libraryTabDefs, setTabs } from '../../../state/libraryTabs'
 import { FiltersPill } from '../../Library/FiltersPill'
@@ -49,6 +51,8 @@ interface FilterOptions {
   hiddenCount: number
   favoriteCount: number
   recompCount: number
+  /** Filters > Custom: how many of the library's games each of the user's filters holds (by filter id). */
+  customCounts: ReadonlyMap<string, number>
 }
 
 /**
@@ -74,7 +78,13 @@ export function LibraryTabsSettings({ settings }: Pick<SectionProps, 'settings'>
       controlsOptions: libraryControlsFilters(visible),
       hiddenCount: hiddenGames(games, settings).length,
       favoriteCount: visible.filter((g) => g.favorite).length,
-      recompCount: visible.filter((g) => g.metadata.recomp).length
+      recompCount: visible.filter((g) => g.metadata.recomp).length,
+      customCounts: new Map(
+        (settings.library.customFilters ?? []).map((filter) => {
+          const ids = new Set(filter.gameIds)
+          return [filter.id, visible.filter((g) => ids.has(g.id)).length] as const
+        })
+      )
     }
   }, [games, settings, platforms, platformsById])
   const full = defs.length >= MAX_LIBRARY_TABS_UI
@@ -201,6 +211,8 @@ const TabRow = memo(function TabRow({
 }: TabRowProps): ReactElement {
   const t = useT()
   const id = def.id
+  const customFilters = useCustomFilters()
+  const customName = useMemo(() => customFilterNames(customFilters), [customFilters])
   const key = (name: string): string => tabKey(`${id}:${name}`)
   const setFilter = useCallback(
     <K extends keyof LibraryTabFilters>(name: K, value: LibraryTabFilters[K]) =>
@@ -238,7 +250,9 @@ const TabRow = memo(function TabRow({
           <Columns3 />
         </span>
         <div className="settings-row__text">
-          <span className="settings-row__label">{tabName(def.filters, options.platformLabel)}</span>
+          <span className="settings-row__label">
+            {tabName(def.filters, options.platformLabel, customName)}
+          </span>
           <span className="settings-row__value">{sortLine(def, sortLabel, t)}</span>
         </div>
         <div className="settings-row__actions">
@@ -314,6 +328,9 @@ const TabRow = memo(function TabRow({
             onDevelopers={(v) => setFilter('developers', v)}
             publishers={def.filters.publishers ?? []}
             onPublishers={(v) => setFilter('publishers', v)}
+            custom={def.filters.custom ?? []}
+            onCustom={(v) => setFilter('custom', v)}
+            customCounts={options.customCounts}
             onClearFilters={() => changeTab(id, (d) => ({ ...d, filters: emptyTabFilters() }))}
           />
           <Button

@@ -10,6 +10,11 @@
 // Only a change the user makes stamps the document: restoring the tabs, the renderer's first-run tabs, a migration or
 // applying another PC's copy do not (they are either the same tabs once normalized, or adopted with the old time).
 //
+// A tab's Filters > Custom picks stay on each PC and are never sent: the user's own filters (settings.library.
+// customFilters) are this PC's, with ids made here, so another PC could not read them (a tab would show every game
+// under the wrong name there, and an older PlayOut refuses a document whose tab has them). Taking another PC's tabs
+// keeps this PC's picks of each tab, as it keeps their search text.
+//
 // A copy with no tabs has no say (it never replaces tabs), and a copy with a tab this PC cannot read (a newer
 // PlayOut's filter or sort) is refused whole, so PCs on different versions never lose tabs to each other.
 
@@ -48,7 +53,8 @@ function isObject(value: unknown): value is Record<string, unknown> {
 /**
  * Tabs as settings.json keeps them, repaired entry by entry like normalizeSettings (a malformed tab is dropped, a
  * repeated id keeps its first, at most MAX_LIBRARY_TABS), with their search text removed. Filters naming platforms,
- * stores or systems this PC does not have are kept as they are. Null when `raw` is not a list.
+ * stores or systems this PC does not have are kept as they are; Filters > Custom picks (this PC's own filters) are
+ * removed. Null when `raw` is not a list.
  */
 export function syncedTabs(raw: unknown): LibraryTabDef[] | null {
   if (!Array.isArray(raw)) return null
@@ -60,6 +66,11 @@ export function syncedTabs(raw: unknown): LibraryTabDef[] | null {
     seen.add(parsed.data.id)
     const tab = { ...(parsed.data as LibraryTabDef) }
     delete tab.query
+    if (tab.filters.custom) {
+      const filters = { ...tab.filters }
+      delete filters.custom
+      tab.filters = filters
+    }
     out.push(tab)
     if (out.length === MAX_LIBRARY_TABS) break
   }
@@ -238,13 +249,16 @@ export function createLibraryTabsSync(deps: LibraryTabsSyncDeps): LibraryTabsSyn
       if (pick !== 'theirs' || theirs.tabs.length === 0) return false
       // Kept with its own time: a tie taken from one host stays a tie for this PC's other hosts, which keep theirs.
       const kept = theirs
-      // This PC's search text of each tab stays.
-      const queries = new Map(
-        (deps.settings.get().ui.libraryTabs ?? []).map((t) => [t.id, t.query] as const)
+      // This PC's search text and Filters > Custom picks of each tab stay.
+      const mine = new Map(
+        (deps.settings.get().ui.libraryTabs ?? []).map((t) => [t.id, t] as const)
       )
       const tabs = kept.tabs.map((t) => {
-        const query = queries.get(t.id)
-        return query ? { ...t, query } : { ...t }
+        const own = mine.get(t.id)
+        const tab: LibraryTabDef = own?.query ? { ...t, query: own.query } : { ...t }
+        if (own?.filters.custom?.length)
+          tab.filters = { ...tab.filters, custom: [...own.filters.custom] }
+        return tab
       })
       doc = kept
       applying = true

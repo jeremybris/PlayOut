@@ -80,8 +80,8 @@
     "difficulty": "Dificultad",
     "reviews": "Reseñas",
     "controls": "Controles",
-    "localMultiplayer": "Multijugador local",
-    "onlineMultiplayer": "Multijugador en línea",
+    "localMultiplayer": "Multijugador - Local",
+    "onlineMultiplayer": "Multijugador - En línea",
     "hidden": "Ocultos",
     "favorites": "Favoritos",
     "recompilations": "Recompilaciones",
@@ -94,6 +94,12 @@
     "allDifficulties": "Todas las dificultades",
     "allReviews": "Todas las reseñas",
     "allControls": "Todos los controles",
-    "allLocalMultiplayer": "Todo el multijugador local"
+    "allLocalMultiplayer": "Todo el multijugador local",
+    "custom": "Personalizados",
+    "allCustom": "Todos los personalizados",
+    "customHint": "Pulsa Y o haz clic derecho en un filtro para cambiarle el nombre o el icono, o eliminarlo.",
+    "customRename": "Cambiar nombre",
+    "customIcon": "Cambiar icono",
+    "customDelete": "Eliminar"
   }
 }

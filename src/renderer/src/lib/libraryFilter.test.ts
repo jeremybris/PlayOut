@@ -53,7 +53,8 @@ const NONE: TabCardFilters = {
   hidden: false,
   favorites: false,
   coop: false,
-  recomp: false
+  recomp: false,
+  customFilters: []
 }
 
 function sources(games: Game[], patch: Partial<LibrarySources> = {}): LibrarySources {
@@ -85,6 +86,22 @@ describe('tabShowsGame', () => {
     expect(
       tabShowsGame('okami', sources([portal, okami]), { ...NONE, developers: ['Valve'] })
     ).toBe(false)
+  })
+
+  it('shows only the games of the custom filters picked (any of them), ignoring ids with no filter', () => {
+    const customFilters = [
+      { id: 'cf1', name: 'Hard', icon: 'skull', gameIds: ['okami'] },
+      { id: 'cf2', name: 'Valve', icon: 'star', gameIds: ['portal', 'gone'] }
+    ]
+    const all = sources([portal, okami])
+    const tab = (custom: string[]): TabCardFilters => ({ ...NONE, custom, customFilters })
+    expect(tabShowsGame('portal', all, tab(['cf1']))).toBe(false)
+    expect(tabShowsGame('okami', all, tab(['cf1']))).toBe(true)
+    expect(tabShowsGame('portal', all, tab(['cf1', 'cf2']))).toBe(true)
+    // A tab naming a filter this PC does not have (deleted, another PC's) does not narrow.
+    expect(tabShowsGame('portal', all, tab(['cf-other']))).toBe(true)
+    // Without the filters themselves the picked ids cannot narrow: callers must pass them (the bug this guards).
+    expect(tabShowsGame('portal', all, { ...NONE, custom: ['cf1'] })).toBe(true)
   })
 
   it("does not show a PC game's card on a PS2 tab given its developer", () => {
@@ -367,5 +384,44 @@ describe('Filters > Reviews', () => {
       { ...NONE, reviews: ['r90'] }
     )
     expect(kept.map((g) => g.game.id)).toEqual(['epic:x'])
+  })
+})
+
+describe('Filters > Custom', () => {
+  const hades = game('hades')
+  const celeste = game('celeste')
+  const portal = game('portal')
+  const customFilters = [
+    { id: 'cf1', name: 'Hard', icon: 'skull', gameIds: ['celeste', 'gone-from-library'] },
+    { id: 'cf2', name: 'Story', icon: 'book', gameIds: ['hades'] }
+  ]
+  const kept = (custom: string[]): string[] =>
+    filterTabGroups(
+      [hades, celeste, portal].map((g) => ({ game: g, copies: [g] })),
+      [hades, celeste, portal],
+      { ...NONE, custom, customFilters }
+    ).kept.map((g) => g.game.id)
+
+  it('keeps a game in any of the filters picked', () => {
+    expect(kept(['cf1'])).toEqual(['celeste'])
+    expect(kept(['cf1', 'cf2'])).toEqual(['hades', 'celeste'])
+  })
+
+  it('keeps every game with none picked, or only ids with no filter here', () => {
+    expect(kept([])).toEqual(['hades', 'celeste', 'portal'])
+    expect(kept(['another-pc'])).toEqual(['hades', 'celeste', 'portal'])
+    expect(kept(['another-pc', 'cf2'])).toEqual(['hades'])
+  })
+
+  it('keeps a card when any of its copies is in the filter', () => {
+    const steam = game('steam-copy')
+    const epic = game('epic-copy', { source: 'epic' })
+    const filters = [{ id: 'cf', name: 'X', icon: 'star', gameIds: ['epic-copy'] }]
+    const result = filterTabGroups([{ game: steam, copies: [steam, epic] }], [steam, epic], {
+      ...NONE,
+      custom: ['cf'],
+      customFilters: filters
+    })
+    expect(result.kept.map((g) => g.game.id)).toEqual(['steam-copy'])
   })
 })

@@ -145,6 +145,12 @@
     "copies_one": "{count} copy",
     "copies_other": "{count} copies",
     "copiesLabel": "Copies",
-    "deleteLocal": "Delete from this PC"
+    "deleteLocal": "Delete from this PC",
+    "createFilter": "Create a filter…",
+    "customFilters": "Custom filters",
+    "inFilters_one": "In {count}",
+    "inFilters_other": "In {count}",
+    "addToFilter": "Add to {name}",
+    "removeFromFilter": "Remove from {name}"
   }
 }

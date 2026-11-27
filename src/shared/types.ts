@@ -97,6 +97,30 @@ export interface LibraryTabFilters {
   developers?: string[]
   /** Only games by any of these publishers (Game.metadata.publishers), as `developers`: the publisher button. */
   publishers?: string[]
+  /**
+   * Filters > Custom: the ids of the user's filters picked (settings.library.customFilters); a game in any of them
+   * shows. An id with no filter on this PC (deleted, or a tab synced from another PC) is ignored. Optional and left
+   * out of a saved tab while empty, like `difficulty`. Absent reads as [].
+   */
+  custom?: string[]
+}
+
+/** A filter the user made (settings.library.customFilters; shared/custom-filters.ts). */
+export interface CustomFilter {
+  /** Stable id ('cf…'), what a Library tab's `custom` list holds. */
+  id: string
+  /** Its name, trimmed, 1-40 characters, unique among the user's filters (case-insensitive). */
+  name: string
+  /** One of shared/custom-filters.ts CUSTOM_FILTER_ICONS. */
+  icon: string
+  /** The games in it (Game.id), each once. */
+  gameIds: string[]
+  /**
+   * For the games in it whose id can change (a manual game: its exe moved; a ROM: moved to another folder), the key it
+   * is found again by (main/favorites/favorites-file.ts fallbackKey), by id. Kept by the main process
+   * (custom-filters-follow.ts); absent when none.
+   */
+  gameKeys?: Record<string, string>
 }
 
 /** What Home's row of games shows (settings.ui.homeRow). */
@@ -1386,6 +1410,12 @@ export interface Settings {
      * for each game whose save folder was chosen (its Edit sheet). Default true.
      */
     copyPcSaves: boolean
+    /**
+     * The user's own filters (a game's options menu > Create a filter; Filters > Custom): each a name, an icon and the
+     * games put in it (by Game.id, the id Favorites follow). Ids of games no longer in the library stay and match
+     * nothing. shared/custom-filters.ts has the limits and the icons. Default [].
+     */
+    customFilters: CustomFilter[]
   }
   emulators: {
     /** emulator id (e.g. 'RETROARCH') -> executable path. */

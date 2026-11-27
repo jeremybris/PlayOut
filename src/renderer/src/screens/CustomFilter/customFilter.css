@@ -1,0 +1,83 @@
+/* Create a filter / edit a filter (CustomFilterDialog): a name, then the icon picker's grid. */
+
+.custom-filter {
+  display: flex;
+  flex-direction: column;
+  gap: calc(12 * var(--u));
+}
+
+.custom-filter__note {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+}
+
+.custom-filter__note--problem {
+  color: var(--color-danger);
+}
+
+.custom-filter__label {
+  margin-top: calc(8 * var(--u));
+  color: var(--color-text-secondary);
+}
+
+/* Small enough tiles that all forty icons show without scrolling, down to a 1024x768 window (three rows there). */
+.custom-filter__icons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(48 * var(--u)), 1fr));
+  gap: calc(6 * var(--u));
+}
+
+.custom-filter__icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: calc(12 * var(--u));
+  background: var(--color-control);
+  border: 1px solid var(--color-control-stroke);
+  outline: var(--ring-w) solid transparent;
+  outline-offset: var(--ring-offset);
+  cursor: pointer;
+  transition:
+    background var(--dur-instant) var(--ease-linear),
+    transform var(--dur-focus) var(--ease-p2p),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.custom-filter__icon > svg:first-child {
+  width: calc(28 * var(--u));
+  height: calc(28 * var(--u));
+}
+
+.custom-filter__icon:hover,
+.custom-filter__icon[data-focused='true'] {
+  background: var(--color-control-hover);
+}
+
+.custom-filter__icon[data-focused='true'] {
+  outline-color: var(--ring);
+  transform: scale(1.06);
+}
+
+.custom-filter__icon--selected {
+  border-color: var(--color-text);
+  box-shadow: inset 0 0 0 calc(2 * var(--u)) var(--color-text);
+}
+
+.custom-filter__tick {
+  position: absolute;
+  right: calc(3 * var(--u));
+  bottom: calc(3 * var(--u));
+  width: calc(14 * var(--u));
+  height: calc(14 * var(--u));
+  color: var(--color-text);
+}
+
+/* The options menu's and Filters > Custom's filter icons. */
+.custom-filter-icon {
+  flex: none;
+  width: var(--icon-md);
+  height: var(--icon-md);
+}

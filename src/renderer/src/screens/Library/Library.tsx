@@ -54,6 +54,8 @@ import { librarySections } from '../../lib/librarySections'
 import { hostGamesShown, withRemoteGames } from '../../lib/streaming'
 import { focusCardInRow, openPopup } from '../../lib/popupOpeners'
 import { WheelExit } from '../../lib/wheelExit'
+import { customFilterNames } from '../../lib/customFilters'
+import { useCustomFilters } from '../../state/customFilters'
 import { toggleFocusedFavorite } from '../../state/favorite'
 import { useLibraryStore } from '../../state/library'
 import { useLanPartyIds } from '../../state/peerparty'
@@ -192,7 +194,13 @@ export function LibraryScreen({ leaving, onLeft }: LibraryScreenProps): ReactEle
   // The user's tabs (Settings > Library), each named by its filters; [] until App made them on the first run.
   const defs = useSettingsStore((s) => s.settings?.ui.libraryTabs)
   const platformLabel = useMemo(() => platformLabelOf(platformsById), [platformsById])
-  const tabs = useMemo(() => stripTabs(defs ?? [], platformLabel), [defs, platformLabel])
+  // The user's own filters (Filters > Custom): their names name a tab that picks them.
+  const customFilters = useCustomFilters()
+  const customName = useMemo(() => customFilterNames(customFilters), [customFilters])
+  const tabs = useMemo(
+    () => stripTabs(defs ?? [], platformLabel, customName),
+    [defs, platformLabel, customName]
+  )
   const tabCount = tabs.length - 1
   // A tab that went away (removed in Settings) falls back to the first of the user's tabs.
   const tab = tabs.some((entry) => entry.id === filters.tab)
@@ -312,6 +320,8 @@ export function LibraryScreen({ leaving, onLeft }: LibraryScreenProps): ReactEle
         recomp: filters.recomp,
         developers: filters.developers,
         publishers: filters.publishers,
+        custom: filters.custom,
+        customFilters,
         lanParty
       })
       const counts = new Map<string, number>()
@@ -367,6 +377,8 @@ export function LibraryScreen({ leaving, onLeft }: LibraryScreenProps): ReactEle
       filters.sort,
       filters.sortReversed,
       filters.playableFirst,
+      filters.custom,
+      customFilters,
       lanParty
     ])
   const sections = useMemo(
@@ -400,6 +412,18 @@ export function LibraryScreen({ leaving, onLeft }: LibraryScreenProps): ReactEle
   // What Filters > Nucleus Co-Op would show on this tab.
   // What Filters > Recompilations would show on this tab.
   const recompCount = useMemo(() => tabGroups.filter(hasRecomp).length, [tabGroups])
+  // What each of Filters > Custom's filters would show on this tab (a card any copy of which is in it).
+  const customCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const filter of customFilters) {
+      const ids = new Set(filter.gameIds)
+      counts.set(
+        filter.id,
+        tabGroups.filter((g) => ids.has(g.game.id) || g.copies.some((c) => ids.has(c.id))).length
+      )
+    }
+    return counts
+  }, [customFilters, tabGroups])
   // The tab's remembered card, read once per tab: the grid uses it on mount, and subscribing to the
   // store's libraryFocus would re-render the whole view on every card focus. A remembered copy that another
   // copy now stands for (Preferred Copy changed) resolves to that card.
@@ -738,6 +762,7 @@ export function LibraryScreen({ leaving, onLeft }: LibraryScreenProps): ReactEle
   const onRecomp = useCallback((recomp: boolean) => updateActiveTab({ recomp }), [])
   const onDevelopers = useCallback((developers: string[]) => updateActiveTab({ developers }), [])
   const onPublishers = useCallback((publishers: string[]) => updateActiveTab({ publishers }), [])
+  const onCustom = useCallback((custom: string[]) => updateActiveTab({ custom }), [])
   // Filters > Clear filters (> All): every choice of this tab off, a game page's developers and publishers too (the
   // search and sort stay); the tab is All Games then.
   const onClearFilters = useCallback(
@@ -760,7 +785,8 @@ export function LibraryScreen({ leaving, onLeft }: LibraryScreenProps): ReactEle
         coop: false,
         recomp: false,
         developers: [],
-        publishers: []
+        publishers: [],
+        custom: []
       }),
     []
   )
@@ -838,6 +864,9 @@ export function LibraryScreen({ leaving, onLeft }: LibraryScreenProps): ReactEle
                 onDevelopers={onDevelopers}
                 publishers={filters.publishers}
                 onPublishers={onPublishers}
+                custom={filters.custom}
+                onCustom={onCustom}
+                customCounts={customCounts}
                 onClearFilters={onClearFilters}
                 onDeleteTab={onDeleteTab}
                 canDeleteTab={tabCount > 1}
@@ -927,6 +956,9 @@ interface LibraryHeaderProps {
   onDevelopers: (developers: string[]) => void
   publishers: readonly string[]
   onPublishers: (publishers: string[]) => void
+  custom: readonly string[]
+  onCustom: (custom: string[]) => void
+  customCounts: ReadonlyMap<string, number>
   onClearFilters: () => void
   onDeleteTab: () => void
   canDeleteTab: boolean
@@ -989,6 +1021,9 @@ const LibraryHeader = memo(function LibraryHeader({
   onDevelopers,
   publishers,
   onPublishers,
+  custom,
+  onCustom,
+  customCounts,
   onClearFilters,
   onDeleteTab,
   canDeleteTab
@@ -1105,6 +1140,9 @@ const LibraryHeader = memo(function LibraryHeader({
           onDevelopers={onDevelopers}
           publishers={publishers}
           onPublishers={onPublishers}
+          custom={custom}
+          onCustom={onCustom}
+          customCounts={customCounts}
           onClearFilters={onClearFilters}
         />
         <DeleteTabButton onPress={onDeleteTab} disabled={!canDeleteTab} />

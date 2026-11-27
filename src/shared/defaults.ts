@@ -46,7 +46,9 @@ export function defaultSettings(): Settings {
       coopTwoPlayerLayout: 'stacked',
       // New ROM games keep their format (Settings > Library "Trim Games" off).
       trimGames: false,
-      copyPcSaves: true
+      copyPcSaves: true,
+      // No filters of the user's own yet (a game's options menu > Create a filter).
+      customFilters: []
     },
     emulators: {
       overrides: {},

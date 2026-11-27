@@ -237,6 +237,19 @@ const reportError = (err: unknown): void => console.error('[mock] background job
 // Settings persistence
 // ---------------------------------------------------------------------------
 
+/** The sample filters of the user's own the preview starts with (Hollow Knight, Celeste, Elden Ring; Stardew Valley). */
+function mockCustomFilters(): Settings['library']['customFilters'] {
+  return [
+    {
+      id: 'cfmock1',
+      name: 'Hard as nails',
+      icon: 'skull',
+      gameIds: ['steam:367520', 'steam:504230', 'steam:1245620']
+    },
+    { id: 'cfmock2', name: 'Cozy evenings', icon: 'coffee', gameIds: ['steam:413150'] }
+  ]
+}
+
 function loadSettings(flags: MockFlags): Settings {
   const base = defaultSettings()
   let stored: SettingsPatch | null = null
@@ -247,6 +260,8 @@ function loadSettings(flags: MockFlags): Settings {
     console.warn('[mock] saved settings are unavailable, using defaults', err)
   }
   const settings = stored ? mergeSettings(base, stored) : base
+  // Two of the user's own filters (Filters > Custom, a cover's options menu), until a mock session saves its own.
+  if (!stored?.library?.customFilters) settings.library.customFilters = mockCustomFilters()
   // Over the stored settings, which always carry hostEnabled; updateSettings does not save while this screen is up.
   if (flags.streaming) settings.streaming.hostEnabled = true
   // As main's startup sync (keepRomsRootInSync), the empty screen too: the ROM folder is the Emulation folder's roms

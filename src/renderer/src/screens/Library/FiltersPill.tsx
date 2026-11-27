@@ -10,15 +10,19 @@ import {
   Heart,
   HeartHandshake,
   Network,
+  Palette,
   PartyPopper,
+  Pencil,
   Sword,
   Swords,
+  Trash2,
   Trophy,
   Users,
   X,
   type LucideIcon
 } from 'lucide-react'
 import {
+  Fragment,
   memo,
   useEffect,
   useMemo,
@@ -34,7 +38,7 @@ import { Menu, MenuItem } from '../../components/MenuItem'
 import { LayerContext, useActionHandlersOnLayer } from '../../hooks/useActionHandlers'
 import { useFocusLayer } from '../../hooks/useFocusLayer'
 import { useFocusableControl } from '../../hooks/useFocusableControl'
-import { useT, type Translate } from '../../i18n'
+import { useLanguage, useT, type Translate } from '../../i18n'
 import { FocusContext, doesFocusableExist, getCurrentFocusKey, setFocus } from '../../input/focus'
 import { cx } from '../../lib/cx'
 import { HLTB_BUCKETS } from '../../lib/hltb'
@@ -74,6 +78,14 @@ import {
   toggleChoice
 } from '../../lib/libraryView'
 import { registerPopupOpener } from '../../lib/popupOpeners'
+import { customFilterNames, knownCustomIds } from '../../lib/customFilters'
+import { CustomFilterIconView } from '../../lib/customFilterIcons'
+import {
+  confirmDeleteCustomFilter,
+  openEditCustomFilter,
+  useCustomFilters
+} from '../../state/customFilters'
+import type { CustomFilter } from '@shared/types'
 import { tagFilterLabel, type TagFilter } from '../../lib/steamTags'
 import { releaseEraLabel, type ReleaseEra } from '../../lib/releaseEras'
 import {
@@ -179,6 +191,14 @@ export interface FiltersPillProps {
   publishers: readonly string[]
   onPublishers: (publishers: string[]) => void
   /**
+   * Filters > Custom: the user's filters picked (settings.library.customFilters ids; a game in any of them shows); the
+   * row is there only while the user has a filter.
+   */
+  custom: readonly string[]
+  onCustom: (custom: string[]) => void
+  /** How many of this list's cards each filter holds (by filter id); absent: its games' number. */
+  customCounts?: ReadonlyMap<string, number>
+  /**
    * The menu's Clear filters (shown while any choice is on), or its sub-menu's All (with a developer, publisher or
    * genre on): turns every choice off, developers and publishers included.
    */
@@ -198,6 +218,7 @@ type SubMenuKind =
   | 'controls'
   | 'players'
   | 'online'
+  | 'custom'
 
 interface Option {
   value: string
@@ -392,7 +413,12 @@ export const FiltersPill = memo(function FiltersPill(props: FiltersPillProps): R
       setAnchor(ref.current)
     })
   }, [ref, baseKey])
-  const active = filterChoiceCount(props)
+  // Only the user's filters this PC has count (a tab synced from another PC may name others).
+  const customFilters = useCustomFilters()
+  const active = filterChoiceCount({
+    ...props,
+    custom: knownCustomIds(customFilters, props.custom)
+  })
   const close = (): void => {
     setAnchor(null)
     const target = returnTo.current
@@ -426,6 +452,32 @@ export const FiltersPill = memo(function FiltersPill(props: FiltersPillProps): R
 interface FiltersMenuProps extends FiltersPillProps {
   anchor: HTMLElement
   onClose: () => void
+}
+
+/** The Filters menu's sub-menu rows (the keys of their sub-menus). */
+type FilterRow =
+  | 'genre'
+  | 'era'
+  | 'platform'
+  | 'size'
+  | 'hltb'
+  | 'difficulty'
+  | 'reviews'
+  | 'controls'
+  | 'players'
+  | 'online'
+  | 'custom'
+
+/** The rows that are shown, in alphabetical order of their names in `language` ("H.L.T.B." sorts as "HLTB"). */
+function sortedFilterRows(
+  rows: readonly (readonly [FilterRow, string, boolean])[],
+  language: string
+): FilterRow[] {
+  const key = (label: string): string => label.replace(/[^\p{L}\p{N}\s-]/gu, '')
+  return rows
+    .filter(([, , shown]) => shown)
+    .sort(([, a], [, b]) => key(a).localeCompare(key(b), language, { sensitivity: 'base' }))
+    .map(([row]) => row)
 }
 
 /** "Action", or "Action +2" when several are picked; null when none is. */
@@ -486,10 +538,57 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
     onDevelopers,
     publishers,
     onPublishers,
+    custom,
+    onCustom,
+    customCounts,
     onClearFilters,
     onClose
   } = props
   const t = useT()
+  const customFilters = useCustomFilters()
+  const customPicked = useMemo(() => knownCustomIds(customFilters, custom), [customFilters, custom])
+  const customName = useMemo(() => customFilterNames(customFilters), [customFilters])
+  const language = useLanguage()
+  // The sub-menu rows, in alphabetical order of their names in the language shown (the sub-menus keep their own
+  // order); Clear filters stays first and Hidden, Favorites and Recompilations stay at the bottom.
+  const rowOrder = useMemo(() => {
+    const rows: [FilterRow, string, boolean][] = [
+      ['genre', t('library.filters.genre'), true],
+      ['era', t('library.filters.release'), eraOptions.length > 0 || eras.length > 0],
+      [
+        'platform',
+        t('library.filters.platform'),
+        platformOptions.length > 0 ||
+          platforms.length > 0 ||
+          storeOptions.length > 0 ||
+          stores.length > 0
+      ],
+      ['size', t('library.filters.size'), true],
+      ['hltb', t('library.filters.hltb'), true],
+      ['difficulty', t('library.filters.difficulty'), true],
+      ['reviews', t('library.filters.reviews'), true],
+      ['controls', t('library.filters.controls'), true],
+      ['players', t('library.filters.localMultiplayer'), true],
+      ['online', t('library.filters.onlineMultiplayer'), true],
+      ['custom', t('library.filters.custom'), customFilters.length > 0]
+    ]
+    return sortedFilterRows(rows, language)
+  }, [
+    t,
+    language,
+    eraOptions,
+    eras,
+    platformOptions,
+    platforms,
+    storeOptions,
+    stores,
+    customFilters
+  ])
+  const firstRow = rowOrder[0] ?? 'genre'
+  const firstRowRef = useRef(firstRow)
+  useEffect(() => {
+    firstRowRef.current = firstRow
+  }, [firstRow])
   const options = useMemo(
     () => ({
       players: playersOptions(t),
@@ -509,7 +608,7 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
   // Opens on Genre, not on the X above it: A right after opening must not clear everything.
   const { ref, layerId } = useFocusLayer<HTMLDivElement>({
     focusKey,
-    preferredChildFocusKey: `${focusKey}:genre`
+    preferredChildFocusKey: `${focusKey}:${firstRow}`
   })
   useActionHandlersOnLayer(layerId, {
     back: () => {
@@ -558,7 +657,8 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
   }, [clearingSub])
   useEffect(() => {
     if (!clearedFocus) return undefined
-    const timer = setTimeout(() => void setFocus(`${focusKey}:genre`), 0)
+    // The first row as it is when the focus moves (a ref: the effect runs only when a clear asks for it).
+    const timer = setTimeout(() => void setFocus(`${focusKey}:${firstRowRef.current}`), 0)
     return () => clearTimeout(timer)
   }, [clearedFocus, focusKey])
   const leavingTo = sub?.leaving
@@ -603,8 +703,9 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
 
   // Every choice on (developers and publishers included: Clear filters shows for a developer-only tab); only the
   // Filters menu's own choices count toward MAX_FILTER_CHOICES, as before developers and publishers were lists.
-  const active = filterChoiceCount(props)
-  const full = limitedChoiceCount(props) >= MAX_FILTER_CHOICES
+  const counted = { ...props, custom: customPicked }
+  const active = filterChoiceCount(counted)
+  const full = limitedChoiceCount(counted) >= MAX_FILTER_CHOICES
   // Clear filters' sub-menu rows: the developers, publishers and genres on.
   const clearable = clearableChoices({ developers, publishers, tags }, tagFilterLabel)
   /**
@@ -624,7 +725,7 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
     if (next) {
       const target = `${subMenuKey(baseKey, 'clear')}:${next.key}`
       setTimeout(() => void setFocus(target), 0)
-    } else setSub({ ...sub, leaving: active > 1 ? `${focusKey}:clear` : `${focusKey}:genre` })
+    } else setSub({ ...sub, leaving: active > 1 ? `${focusKey}:clear` : `${focusKey}:${firstRow}` })
   }
 
   /** A row whose left arrow (or A) opens its sub-menu; with that sub-menu open, left moves into it. */
@@ -763,14 +864,21 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
                   onPress={() => (sub ? setSub({ ...sub, clearing: true }) : clearAll())}
                 />
               ) : null}
-              {/* Genre: the genres and the Steam tags, one list (lib/steamTags.ts TAG_FILTERS). */}
-              {subRow('genre', t('library.filters.genre'), pickedText(t, tags, tagFilterLabel))}
-              {eraOptions.length || eras.length
-                ? subRow('era', t('library.filters.release'), pickedText(t, eras, releaseEraLabel))
-                : null}
-              {/* Platform: the stores, then (below a line) the systems. */}
-              {showSystems || showStores
-                ? subRow(
+              {(() => {
+                const rows: Record<FilterRow, ReactNode> = {
+                  // Genre: the genres and the Steam tags, one list (lib/steamTags.ts TAG_FILTERS).
+                  genre: subRow(
+                    'genre',
+                    t('library.filters.genre'),
+                    pickedText(t, tags, tagFilterLabel)
+                  ),
+                  era: subRow(
+                    'era',
+                    t('library.filters.release'),
+                    pickedText(t, eras, releaseEraLabel)
+                  ),
+                  // Platform: the stores, then (below a line) the systems.
+                  platform: subRow(
                     'platform',
                     t('library.filters.platform'),
                     [
@@ -779,37 +887,45 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
                     ]
                       .filter((text): text is string => text !== null)
                       .join(', ') || null
+                  ),
+                  size: subRow('size', t('library.filters.size'), pickedText(t, sizes, sizeLabel)),
+                  hltb: subRow('hltb', t('library.filters.hltb'), pickedText(t, hltb, hltbLabel)),
+                  difficulty: subRow(
+                    'difficulty',
+                    t('library.filters.difficulty'),
+                    pickedText(t, difficulty, difficultyLabel)
+                  ),
+                  reviews: subRow(
+                    'reviews',
+                    t('library.filters.reviews'),
+                    pickedText(t, reviews, reviewBandLabel)
+                  ),
+                  controls: subRow(
+                    'controls',
+                    t('library.filters.controls'),
+                    pickedText(t, controls, controlsFilterLabel)
+                  ),
+                  players: subRow(
+                    'players',
+                    t('library.filters.localMultiplayer'),
+                    pickedText(t, coop ? [...players, COOP_CHOICE] : players, (id) =>
+                      id === COOP_CHOICE ? t('library.filters.coop') : localMultiplayerLabel(id)
+                    )
+                  ),
+                  online: subRow(
+                    'online',
+                    t('library.filters.onlineMultiplayer'),
+                    pickedText(t, online, onlineMultiplayerLabel)
+                  ),
+                  // Custom: the user's own filters (a game's options menu > Create a filter), once there is one.
+                  custom: subRow(
+                    'custom',
+                    t('library.filters.custom'),
+                    pickedText(t, customPicked, (id) => customName(id) ?? id)
                   )
-                : null}
-              {subRow('size', t('library.filters.size'), pickedText(t, sizes, sizeLabel))}
-              {subRow('hltb', t('library.filters.hltb'), pickedText(t, hltb, hltbLabel))}
-              {subRow(
-                'difficulty',
-                t('library.filters.difficulty'),
-                pickedText(t, difficulty, difficultyLabel)
-              )}
-              {subRow(
-                'reviews',
-                t('library.filters.reviews'),
-                pickedText(t, reviews, reviewBandLabel)
-              )}
-              {subRow(
-                'controls',
-                t('library.filters.controls'),
-                pickedText(t, controls, controlsFilterLabel)
-              )}
-              {subRow(
-                'players',
-                t('library.filters.localMultiplayer'),
-                pickedText(t, coop ? [...players, COOP_CHOICE] : players, (id) =>
-                  id === COOP_CHOICE ? t('library.filters.coop') : localMultiplayerLabel(id)
-                )
-              )}
-              {subRow(
-                'online',
-                t('library.filters.onlineMultiplayer'),
-                pickedText(t, online, onlineMultiplayerLabel)
-              )}
+                }
+                return rowOrder.map((row) => <Fragment key={row}>{rows[row]}</Fragment>)
+              })()}
               {toggleRow(
                 'hidden',
                 t('library.filters.hidden'),
@@ -1046,6 +1162,20 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
           onCloseAll={onClose}
           restoreFocus={!sub.clearing}
         />
+      ) : sub?.kind === 'custom' ? (
+        <CustomSubMenu
+          key="custom"
+          baseKey={baseKey}
+          style={sub.style}
+          filters={customFilters}
+          picked={customPicked}
+          counts={customCounts}
+          full={full}
+          onPick={(value) => onCustom(value === ALL ? [] : toggleChoice(customPicked, value))}
+          onClose={closeSub}
+          onCloseAll={onClose}
+          restoreFocus={!sub.clearing}
+        />
       ) : sub?.kind === 'reviews' ? (
         <SubMenu
           baseKey={baseKey}
@@ -1078,7 +1208,8 @@ const SUB_MENU_SUFFIX: Record<SubMenuKind, string> = {
   reviews: 'review-bands',
   controls: 'controls',
   players: 'local-multiplayer',
-  online: 'online-multiplayer'
+  online: 'online-multiplayer',
+  custom: 'custom-filters'
 }
 
 const subMenuKey = (baseKey: string, kind: SubMenuKind): string =>
@@ -1279,8 +1410,188 @@ function ClearSubMenu({
   )
 }
 
-/** The Filters menu's height for placing it: its eleven rows, the X and the padding, in px at 1080p. */
-const MENU_ESTIMATE_U = 12 * 60 + 24
+/**
+ * Filters > Custom's sub-menu: All Custom, then each of the user's filters with its icon (in its colour) and how many
+ * cards it holds; picking works as the other sub-menus' (a game in any filter picked shows). Y or a right click on a
+ * filter turns the sub-menu into that filter's actions: Rename, Change icon and Delete (asked first); B or right steps
+ * back to the list. Each action closes the Filters menu first and opens the filter's dialog (or the question).
+ */
+function CustomSubMenu({
+  baseKey,
+  style,
+  filters,
+  picked,
+  counts,
+  full,
+  onPick,
+  onClose,
+  onCloseAll,
+  restoreFocus
+}: {
+  baseKey: string
+  style: CSSProperties
+  filters: readonly CustomFilter[]
+  picked: readonly string[]
+  counts?: ReadonlyMap<string, number>
+  full: boolean
+  onPick: (value: string) => void
+  onClose: () => void
+  onCloseAll: () => void
+  restoreFocus: boolean
+}): ReactElement {
+  const t = useT()
+  const focusKey = subMenuKey(baseKey, 'custom')
+  const itemKey = (value: string): string => `${focusKey}:${value}`
+  const editKey = (action: string): string => `${focusKey}:edit:${action}`
+  /** The filter whose actions are shown (null: the list). */
+  const [editing, setEditing] = useState<string | null>(null)
+  const editingFilter = editing ? filters.find((f) => f.id === editing) : undefined
+  const { ref, layerId } = useFocusLayer<HTMLDivElement>({
+    focusKey,
+    preferredChildFocusKey: itemKey(picked[0] ?? ALL),
+    restoreFocus
+  })
+  const backToList = (id: string): void => {
+    setEditing(null)
+    setTimeout(() => void setFocus(itemKey(id)), 0)
+  }
+  const edit = (id: string): void => {
+    setEditing(id)
+    setTimeout(() => void setFocus(editKey('rename')), 0)
+  }
+  useActionHandlersOnLayer(layerId, {
+    back: () => {
+      if (editing) backToList(editing)
+      else onClose()
+      return true
+    },
+    rt: () => {
+      onCloseAll()
+      return true
+    },
+    // Y on a filter: its actions.
+    y: () => {
+      if (editing) return true
+      const current = getCurrentFocusKey() ?? ''
+      const id = current.startsWith(itemKey('')) ? current.slice(itemKey('').length) : ''
+      if (filters.some((f) => f.id === id)) edit(id)
+      return true
+    }
+  })
+  /** Close the Filters menu, then run `open` (a dialog) once the menu has handed focus back. */
+  const leaveFor = (open: () => void): void => {
+    onCloseAll()
+    setTimeout(open, 0)
+  }
+  const closeOnRight = (direction: string): boolean => {
+    if (direction !== 'right') return true
+    if (editing) backToList(editing)
+    else onClose()
+    return false
+  }
+  return (
+    <LayerContext.Provider value={layerId}>
+      <FocusContext.Provider value={focusKey}>
+        <div
+          ref={ref}
+          className={cx('select-menu', 'filters-menu--genres')}
+          style={style}
+          role={editingFilter ? 'menu' : 'listbox'}
+          aria-label={editingFilter ? editingFilter.name : t('library.filters.custom')}
+          aria-multiselectable={editingFilter ? undefined : 'true'}
+          data-focus-key={focusKey}
+        >
+          {editingFilter ? (
+            <>
+              <div className="filters-menu__heading">
+                <CustomFilterIconView icon={editingFilter.icon} className="custom-filter-icon" />
+                <span className="u-truncate">{editingFilter.name}</span>
+              </div>
+              <Menu>
+                <MenuItem
+                  focusKey={editKey('rename')}
+                  label={t('library.filters.customRename')}
+                  icon={<Pencil />}
+                  onPress={() => leaveFor(() => openEditCustomFilter(editingFilter.id, 'name'))}
+                  onArrowPress={closeOnRight}
+                />
+                <MenuItem
+                  focusKey={editKey('icon')}
+                  label={t('library.filters.customIcon')}
+                  icon={<Palette />}
+                  onPress={() => leaveFor(() => openEditCustomFilter(editingFilter.id, 'icon'))}
+                  onArrowPress={closeOnRight}
+                />
+                <MenuItem
+                  focusKey={editKey('delete')}
+                  label={t('library.filters.customDelete')}
+                  icon={<Trash2 />}
+                  danger
+                  onPress={() => leaveFor(() => confirmDeleteCustomFilter(editingFilter.id))}
+                  onArrowPress={closeOnRight}
+                />
+              </Menu>
+            </>
+          ) : (
+            <>
+              <Menu>
+                <MenuItem
+                  focusKey={itemKey(ALL)}
+                  label={t('library.filters.allCustom')}
+                  selected={picked.length === 0}
+                  trailing={
+                    picked.length === 0 ? <Check className="select-menu__check" /> : undefined
+                  }
+                  onPress={() => onPick(ALL)}
+                  onArrowPress={closeOnRight}
+                />
+                {filters.map((filter) => {
+                  const on = picked.includes(filter.id)
+                  const blocked = !on && full
+                  const count = counts?.get(filter.id) ?? filter.gameIds.length
+                  return (
+                    <MenuItem
+                      key={filter.id}
+                      focusKey={itemKey(filter.id)}
+                      label={filter.name}
+                      icon={
+                        <span className="console-icon" aria-hidden="true">
+                          <CustomFilterIconView
+                            icon={filter.icon}
+                            className="console-icon__generic"
+                          />
+                        </span>
+                      }
+                      selected={on}
+                      className={blocked ? 'control--disabled' : undefined}
+                      trailing={
+                        on ? (
+                          <Check className="select-menu__check" />
+                        ) : (
+                          <span className="filters-menu__value">{count}</span>
+                        )
+                      }
+                      onPress={blocked ? undefined : () => onPick(filter.id)}
+                      onArrowPress={closeOnRight}
+                      onContextMenu={(event) => {
+                        event.preventDefault()
+                        edit(filter.id)
+                      }}
+                    />
+                  )
+                })}
+              </Menu>
+              <p className="filters-menu__note">{t('library.filters.customHint')}</p>
+            </>
+          )}
+        </div>
+      </FocusContext.Provider>
+    </LayerContext.Provider>
+  )
+}
+
+/** The Filters menu's height for placing it: its twelve rows, the X and the padding, in px at 1080p. */
+const MENU_ESTIMATE_U = 13 * 60 + 24
 
 /**
  * Left-aligned with and at least as wide as the pill: below it, or above it when there is more room there (a pill low in

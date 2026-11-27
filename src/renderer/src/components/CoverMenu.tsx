@@ -12,6 +12,8 @@ import {
   Hourglass,
   Info,
   Layers,
+  ListFilterPlus,
+  ListPlus,
   Pause,
   Play,
   Puzzle,
@@ -25,7 +27,8 @@ import {
   useState,
   type CSSProperties,
   type MouseEvent,
-  type ReactElement
+  type ReactElement,
+  type ReactNode
 } from 'react'
 import { createPortal } from 'react-dom'
 import { api } from '../api/client'
@@ -33,8 +36,10 @@ import { LayerContext, useActionHandlersOnLayer } from '../hooks/useActionHandle
 import { useFocusLayer } from '../hooks/useFocusLayer'
 import { useT, type Translate } from '../i18n'
 import { FocusContext, doesFocusableExist, getCurrentFocusKey, setFocus } from '../input/focus'
-import { cardFocusKey, parseCardFocusKey } from '../lib/focusKeys'
+import { addGamesTileFocusKey, cardFocusKey, parseCardFocusKey } from '../lib/focusKeys'
 import { displayTitle } from '../lib/library'
+import { CustomFilterIconView } from '../lib/customFilterIcons'
+import { knownCustomIds } from '../lib/customFilters'
 import { createLog } from '../lib/log'
 import {
   downloadRunning,
@@ -44,6 +49,12 @@ import {
   streamBusy,
   streamHosts
 } from '../lib/streaming'
+import {
+  gameInFilter,
+  openCreateCustomFilter,
+  toggleGameInFilter,
+  useCustomFilters
+} from '../state/customFilters'
 import {
   closeCoverMenu,
   copiesFor,
@@ -90,6 +101,10 @@ interface RemoteItem {
 const QUEUE_KEY = `${FOCUS_KEY}:queue`
 /** The cover menu row that pauses or resumes a queued game. */
 const PAUSE_KEY = `${FOCUS_KEY}:pause`
+/** The cover menu row that opens the list of the user's filters (Add to … / Remove from …). */
+const CUSTOM_KEY = `${FOCUS_KEY}:custom`
+/** A filter's row in that list. */
+const customFilterKey = (id: string): string => `${FOCUS_KEY}:custom:${id}`
 
 /** Pause Download / Resume Download for a queued game (InstallQueueEntry.paused). */
 function pauseItem(gameId: string, paused: boolean, t: Translate): RemoteItem {
@@ -107,9 +122,17 @@ function pauseItem(gameId: string, paused: boolean, t: Translate): RemoteItem {
 /**
  * The menu of a game only a paired host has (Streaming): Download or Cancel Download for a ROM the host hands out
  * (Remove from Queue while it waits in the install queue; Cancel Download, never Download, once its turn came even
- * before its first progress; Pause / Resume Download while queued), Stream (from each host that has it) and Details. Each row closes the menu first, like the local rows.
+ * before its first progress; Pause / Resume Download while queued), Stream (from each host that has it) and Details,
+ * then the rows given (Create a filter, Custom filters). Each row closes the menu first, like the local rows.
  */
-function RemoteMenuItems({ game }: { game: Game }): ReactElement {
+function RemoteMenuItems({
+  game,
+  children
+}: {
+  game: Game
+  /** Rows after the host's (Create a filter, Custom filters). */
+  children?: ReactNode
+}): ReactElement {
   const t = useT()
   const remote = useStreamingStore((s) => s.remote)
   const download = useRomDownload(game.id)
@@ -201,8 +224,24 @@ function RemoteMenuItems({ game }: { game: Game }): ReactElement {
           }}
         />
       ))}
+      {children}
     </Menu>
   )
+}
+
+/** The Library grid's row id (its cards' focus keys: card:library:<game id>). */
+const LIBRARY_ROW_ID = 'library'
+
+/** The focus key of the Library card after the one `focusKey` names (else the one before), as the grid shows them. */
+function neighbourCardKey(focusKey: string): string | undefined {
+  const keys = [
+    ...document.querySelectorAll<HTMLElement>(`[data-card-key^="card:${LIBRARY_ROW_ID}:"]`)
+  ]
+    .map((el) => el.dataset.cardKey ?? '')
+    .filter((key) => key && key !== addGamesTileFocusKey(LIBRARY_ROW_ID))
+  const index = keys.indexOf(focusKey)
+  if (index < 0) return undefined
+  return keys[index + 1] ?? keys[index - 1]
 }
 
 /** A copy's name in the copy list: its store ('Steam'), or a ROM's system ('PlayStation 2'). */
@@ -218,7 +257,9 @@ function folderCopy(copies: readonly Game[]): Game | undefined {
 
 /**
  * The options menu Y (or a right click) opens over a cover in the Library or on Home: Remove from Queue (a game
- * waiting in the install queue; Pause / Resume Download for any queued one), Show in Folder, Mark as Completed and Preferred Copy, which lists the stores the game was found in and picks the one the library
+ * waiting in the install queue; Pause / Resume Download for any queued one), Show in Folder, Mark as Completed, Create a
+ * filter (the user's own filter, with this game in it) and Custom filters (once there are any: Add to / Remove from each
+ * filter, the list staying open), Preferred Copy, which lists the stores the game was found in and picks the one the library
  * shows, and Delete from this PC for the installed copy (state/localDelete.ts). Portaled to <body> with its own focus and action layer; B closes it, or steps back from the copy list.
  */
 export function CoverMenuHost(): ReactElement | null {
@@ -250,7 +291,14 @@ interface CoverMenuProps {
 
 function CoverMenu({ game, copies, focusKey }: CoverMenuProps): ReactElement {
   const t = useT()
-  const [mode, setMode] = useState<'menu' | 'copies'>('menu')
+  const [mode, setMode] = useState<'menu' | 'copies' | 'custom'>('menu')
+  const customFilters = useCustomFilters()
+  // Subscribed so the rows' Add to / Remove from follow a change (gameInFilter reads the copies itself).
+  const inFilter = useMemo(
+    () => new Set(customFilters.filter((f) => gameInFilter(f, game.id)).map((f) => f.id)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- copies: a copy taking another's place
+    [customFilters, game.id, copies]
+  )
   const platformsById = useLibraryStore((s) => s.platformsById)
   const runningId = useSystemStore((s) => s.running?.gameId ?? null)
   const queueEntries = useInstallQueueStore((s) => s.entries)
@@ -272,6 +320,9 @@ function CoverMenu({ game, copies, focusKey }: CoverMenuProps): ReactElement {
     if (mode === 'copies') {
       setMode('menu')
       void setFocus(`${FOCUS_KEY}:preferred`)
+    } else if (mode === 'custom') {
+      setMode('menu')
+      void setFocus(CUSTOM_KEY)
     } else closeCoverMenu()
   }
   useActionHandlersOnLayer(layerId, {
@@ -316,11 +367,17 @@ function CoverMenu({ game, copies, focusKey }: CoverMenuProps): ReactElement {
     place()
     window.addEventListener('resize', place)
     return () => window.removeEventListener('resize', place)
-  }, [focusKey, mode, copies.length, ref])
+  }, [focusKey, mode, copies.length, customFilters.length, ref])
 
   // Focus the first row of whichever list is showing.
   useEffect(() => {
-    void setFocus(mode === 'copies' ? `${FOCUS_KEY}:copy:${copies[0]?.id}` : firstKey)
+    void setFocus(
+      mode === 'copies'
+        ? `${FOCUS_KEY}:copy:${copies[0]?.id}`
+        : mode === 'custom'
+          ? customFilterKey(customFilters[0]?.id ?? '')
+          : firstKey
+    )
     // the copy list's first row is the shown copy; re-run only when the list switches
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode])
@@ -360,6 +417,58 @@ function CoverMenu({ game, copies, focusKey }: CoverMenuProps): ReactElement {
     })
   }
 
+  // Removing the game from a custom filter the Library is narrowed by takes its card out of the grid: the menu closes
+  // at once and focus goes to the card beside it, not to the first card.
+  const leavesView = (filterId: string): boolean => {
+    if (parseCardFocusKey(focusKey)?.rowId !== LIBRARY_ROW_ID) return false
+    const picked = knownCustomIds(customFilters, useUiStore.getState().library.custom)
+    if (!picked.includes(filterId)) return false
+    return !picked.some((id) => id !== filterId && inFilter.has(id))
+  }
+  const toggleFilter = (filterId: string): void => {
+    if (inFilter.has(filterId) && leavesView(filterId)) closeCoverMenu(neighbourCardKey(focusKey))
+    void toggleGameInFilter(filterId, game.id)
+  }
+
+  // The user's own filters: a new one with this game in it, then (once there are any) the list. A paired host's game
+  // has them too (its id stays the same while the host has it).
+  const filterRows = (
+    <>
+      <MenuItem
+        focusKey={`${FOCUS_KEY}:create-filter`}
+        label={t('components.coverMenu.createFilter')}
+        icon={<ListPlus />}
+        onPress={() => {
+          closeCoverMenu()
+          openCreateCustomFilter(game.id)
+        }}
+      />
+      {customFilters.length ? (
+        <MenuItem
+          focusKey={CUSTOM_KEY}
+          label={t('components.coverMenu.customFilters')}
+          icon={<ListFilterPlus />}
+          trailing={
+            <span className="cover-menu__copy">
+              {inFilter.size ? (
+                <span className="cover-menu__note">
+                  {t('components.coverMenu.inFilters', { count: inFilter.size })}
+                </span>
+              ) : null}
+              <ChevronRight />
+            </span>
+          }
+          onPress={() => setMode('custom')}
+          onArrowPress={(direction) => {
+            if (direction !== 'right') return true
+            setMode('custom')
+            return false
+          }}
+        />
+      ) : null}
+    </>
+  )
+
   return createPortal(
     <div className="select-menu-backdrop" onClick={onBackdropClick}>
       <LayerContext.Provider value={layerId}>
@@ -373,10 +482,14 @@ function CoverMenu({ game, copies, focusKey }: CoverMenuProps): ReactElement {
             data-focus-key={FOCUS_KEY}
           >
             <div className="cover-menu__title">
-              {mode === 'copies' ? t('components.coverMenu.preferredCopy') : displayTitle(game)}
+              {mode === 'copies'
+                ? t('components.coverMenu.preferredCopy')
+                : mode === 'custom'
+                  ? t('components.coverMenu.customFilters')
+                  : displayTitle(game)}
             </div>
-            {game.remote ? (
-              <RemoteMenuItems game={game} />
+            {game.remote && mode === 'menu' ? (
+              <RemoteMenuItems game={game}>{filterRows}</RemoteMenuItems>
             ) : mode === 'menu' ? (
               <Menu>
                 {queuePosition ? (
@@ -496,6 +609,7 @@ function CoverMenu({ game, copies, focusKey }: CoverMenuProps): ReactElement {
                     closeCoverMenu()
                   }}
                 />
+                {filterRows}
                 {/* Only for a game found in more than one store: a single copy has nothing to choose. */}
                 {copies.length > 1 ? (
                   <MenuItem
@@ -542,6 +656,34 @@ function CoverMenu({ game, copies, focusKey }: CoverMenuProps): ReactElement {
                     }}
                   />
                 ) : null}
+              </Menu>
+            ) : mode === 'custom' ? (
+              <Menu aria-label={t('components.coverMenu.customFilters')}>
+                {customFilters.map((filter) => {
+                  const on = inFilter.has(filter.id)
+                  return (
+                    <MenuItem
+                      key={filter.id}
+                      focusKey={customFilterKey(filter.id)}
+                      label={
+                        on
+                          ? t('components.coverMenu.removeFromFilter', { name: filter.name })
+                          : t('components.coverMenu.addToFilter', { name: filter.name })
+                      }
+                      icon={
+                        <CustomFilterIconView icon={filter.icon} className="custom-filter-icon" />
+                      }
+                      selected={on}
+                      trailing={on ? <Check className="select-menu__check" /> : undefined}
+                      onPress={() => toggleFilter(filter.id)}
+                      onArrowPress={(direction) => {
+                        if (direction !== 'left') return true
+                        back()
+                        return false
+                      }}
+                    />
+                  )
+                })}
               </Menu>
             ) : (
               <Menu aria-label={t('components.coverMenu.copiesLabel')}>

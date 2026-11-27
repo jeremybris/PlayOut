@@ -82,7 +82,8 @@ export function limitedChoiceCount(filters: FilterChoiceInput): number {
     Number(filters.hidden) +
     Number(filters.favorites) +
     Number(!!filters.coop) +
-    Number(!!filters.recomp)
+    Number(!!filters.recomp) +
+    (filters.custom?.length ?? 0)
   )
 }
 
@@ -106,6 +107,8 @@ interface FilterChoiceInput {
   recomp?: boolean
   developers?: readonly string[]
   publishers?: readonly string[]
+  /** Filters > Custom: the user's filters picked. */
+  custom?: readonly string[]
 }
 
 /** A choice picked again is turned off; a new one is added (in the order picked). */
