@@ -5,6 +5,7 @@ import { spawn } from 'child_process'
 import {
   app,
   BrowserWindow,
+  clipboard,
   dialog,
   Menu,
   nativeImage,
@@ -826,6 +827,11 @@ async function main(cli: CliOptions): Promise<void> {
     emulationDir: () => emulationDirOf(settings.get(), userData),
     // The start-up catalog check (new recompilations) waits until the PC is online.
     isOnline: () => net.isOnline(),
+    // The browser's Add: PlayOut's list of recompilations, and sending the ones added here (published by the owner,
+    // suggested by anyone else); Remove moves an installed one to the Recycle Bin; Paste reads the clipboard.
+    cloud: metadataCloudService,
+    trash: (path) => shell.trashItem(path),
+    clipboardText: () => clipboard.readText(),
     // An installed recompilation whose game is not in the library becomes a game of its own (and leaves with it).
     recompGames: {
       add: ({ titleKey, title, platformId, recomp: info, art }) => {

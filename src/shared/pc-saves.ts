@@ -24,8 +24,11 @@ export interface PcSaveView {
   /** A copy waiting to be tried again (the Emulation folder could not be reached, a file was locked, too large). */
   pending: boolean
   error: string | null
-  /** Both sides changed since the last copy: the user keeps one (the other is backed up first). */
-  conflict: { localAt: string; cloudAt: string; cloudDevice: string } | null
+  /**
+   * Both sides changed since the last copy: the user keeps one (the other is backed up first). `gone`: the saves are
+   * gone from this PC, which copied them before: Restore from the Emulation folder ('cloud') or Start fresh ('local').
+   */
+  conflict: { localAt: string; cloudAt: string; cloudDevice: string; gone?: boolean } | null
   /**
    * A copy of what looks like this game, made by another PC under another name ("Use the copy from <PC>?"): asked
    * once, before it is used.

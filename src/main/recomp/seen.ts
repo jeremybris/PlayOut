@@ -24,6 +24,17 @@ export function recordSeen(prev: SeenFile | null, ids: Iterable<string>, nowIso:
   return out
 }
 
+/**
+ * `prev` with `ids` counted as known since the baseline (never "new"): the recompilations this PC added itself, once
+ * PlayOut's list carries them. Null while nothing was recorded yet (the first complete check makes them all known).
+ */
+export function recordKnown(prev: SeenFile | null, ids: Iterable<string>): SeenFile | null {
+  if (!prev) return null
+  const out: SeenFile = { baseline: prev.baseline, ids: { ...prev.ids } }
+  for (const id of ids) out.ids[id] = prev.baseline
+  return out
+}
+
 /** Whether `id` showed up after the baseline, within NEW_FOR_MS of `now`. */
 export function isNew(seen: SeenFile | null, id: string, now: Date): boolean {
   const at = seen?.ids[id]

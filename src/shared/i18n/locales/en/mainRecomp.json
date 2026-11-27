@@ -38,6 +38,7 @@
     "stillArriving": "The copy in the Emulation folder is still arriving (or incomplete); PlayOut will try again.",
     "stillArrivingMeta": "The copy in the Emulation folder is still arriving (its meta.json is missing or can't be read yet); PlayOut will try again.",
     "noLocal": "There are no saves on this PC to keep.",
+    "freshChanged": "The saves came back on this PC meanwhile, so nothing was changed. Choose again.",
     "noCloud": "There are no saves in the Emulation folder to keep.",
     "stillArrivingRetry": "The copy in the Emulation folder is still arriving (or incomplete); try again in a moment.",
     "tooManyFiles": "The save folder {folder} holds more than {max} files, so it is not just saves.",
@@ -177,6 +178,7 @@
   },
   "install": {
     "unverified": "This download has no published checksum, so PlayOut could not verify it.",
+    "unscannedAdd": "Added by someone in PlayOut, not listed by a catalog: nobody virus-scanned this download, only GitHub’s checksum was checked.",
     "notInstallable": "{file} is not a file PlayOut can install (zip, 7z or a program)",
     "noWindowsDownload": "{name} {tag} has no download for Windows",
     "noSpace": "Not enough free space: {name} needs about {needed} free to install ({free} free)",
@@ -213,5 +215,20 @@
     "cwdAbove": "the game is started in a folder that holds it",
     "recompAround": "a recompilation is installed in or around it",
     "holdsGameFile": "it holds a game file it reads"
+  },
+  "add": {
+    "notGithub": "That is not a GitHub link. Only GitHub repositories can be added.",
+    "badUrl": "That could not be read as a repository. Paste its address, such as github.com/owner/repo.",
+    "notFound": "No public repository was found there. It may be private, renamed or removed.",
+    "noReleases": "That repository has no releases to download.",
+    "noWindows": "None of that repository’s releases has a Windows download.",
+    "alreadyListed": "{repo} is in the browser already.",
+    "rateLimited": "GitHub’s limit for checks was reached. Try again after {time}.",
+    "failed": "GitHub could not be asked: {error}",
+    "checkFirst": "Check the repository first.",
+    "gameMissing": "Enter the game’s name.",
+    "gameNotPlain": "The game’s name cannot contain HTML or script links.",
+    "consoleUnknown": "Pick a console from the list.",
+    "notAdded": "That recompilation was not added on this PC."
   }
 }

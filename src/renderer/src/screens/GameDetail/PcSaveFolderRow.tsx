@@ -125,7 +125,24 @@ export function PcSaveFolderRow({
             {view.conflict ? ` ${pcSaveConflictText(view.conflict, t)}` : ''}
           </span>
         ) : null}
-        {view.conflict ? (
+        {view.conflict?.gone ? (
+          <div className="gsheet__media-actions">
+            <Button
+              focusKey={focusKey('saves:restore')}
+              disabled={busy || view.running}
+              onPress={() => run(() => api.resolvePcSaveConflict(game.id, 'cloud'))}
+            >
+              {t('pcSaves.conflict.restore')}
+            </Button>
+            <Button
+              focusKey={focusKey('saves:startFresh')}
+              disabled={busy || view.running}
+              onPress={() => run(() => api.resolvePcSaveConflict(game.id, 'fresh'))}
+            >
+              {t('pcSaves.conflict.startFresh')}
+            </Button>
+          </div>
+        ) : view.conflict ? (
           <div className="gsheet__media-actions">
             <Button
               focusKey={focusKey('saves:keepLocal')}

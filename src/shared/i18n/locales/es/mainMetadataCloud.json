@@ -20,6 +20,7 @@
   "tokenRefusedPublish": "{title}: GitHub rechazó el token ({error}); revísalo en Ajustes › Metadatos",
   "publishFailed": "{title}: no se pudo publicar ({error})",
   "noRelay": "Aún no hay un servicio de sugerencias configurado",
+  "recompNotSendable": "su nombre o descripción contiene texto que el repositorio de metadatos rechaza (HTML, enlaces de script o caracteres de control)",
   "relayUnreachable": "no se pudo acceder al servicio de sugerencias ({error})",
   "suggested": "{title}: sugerido al encargado de los metadatos de PlayOut",
   "suggestionRefused": "{title}: se rechazó la sugerencia ({error})",

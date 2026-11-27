@@ -1,3 +1,4 @@
+import { isUnscannedRecomp } from '@shared/recomp'
 import { recompOnlyKey } from '@shared/recomp-play'
 import type {
   GameFileState,
@@ -546,7 +547,7 @@ function EntryDetails({
   // Play asked which program starts the game (its folder has several): the chooser, then Play again.
   const [exeChoice, setExeChoice] = useState<RecompExecutables | null>(null)
 
-  const install = useCallback(
+  const startInstall = useCallback(
     (tag?: string) => {
       api
         .installRecomp(entry.id, tag)
@@ -566,6 +567,24 @@ function EntryDetails({
       setTimeout(() => void setFocus(FOCUS.primary), 0)
     },
     [entry, toast, t]
+  )
+
+  const install = useCallback(
+    (tag?: string) => {
+      // Listed only because someone added it: nobody virus-scanned it, said before the first install.
+      if (!installed && isUnscannedRecomp(entry.sources)) {
+        openModal({
+          type: 'confirm',
+          title: t('recomp.browser.unscannedTitle', { name: entry.name }),
+          message: t('recomp.browser.unscannedMessage', { repo: entry.repo }),
+          confirmLabel: t('recomp.browser.unscannedConfirm'),
+          onConfirm: () => startInstall(tag)
+        })
+        return
+      }
+      startInstall(tag)
+    },
+    [entry, installed, openModal, startInstall, t]
   )
 
   const updateNow = (): void => {
@@ -618,7 +637,11 @@ function EntryDetails({
             return
           case 'save-conflict':
             // The re-read ('recomp:changed') shows the banner; say so in case it is scrolled away.
-            toast(t('recomp.page.saveConflict'))
+            toast(
+              result.conflict.gone
+                ? t('recomp.page.savesGone', { name: entry.name })
+                : t('recomp.page.saveConflict')
+            )
             setTimeout(() => {
               if (doesFocusableExist(FOCUS.conflictLocal)) void setFocus(FOCUS.conflictLocal)
             }, 50)
@@ -695,11 +718,23 @@ function EntryDetails({
     })
   }
 
-  const resolveConflict = (keep: 'local' | 'cloud'): void => {
+  const resolveConflict = (keep: 'local' | 'cloud' | 'fresh'): void => {
+    // "The saves are gone from this PC": 'cloud' restores them, 'fresh' starts fresh (main refuses 'fresh' once the
+    // saves came back, and the two-sided question shows instead).
+    const gone = installed?.cloud.conflict?.gone === true
     api
       .resolveRecompConflict(entry.id, keep)
       .then(() =>
-        toast(keep === 'local' ? t('recomp.page.keptLocal') : t('recomp.page.keptCloud'), 'success')
+        toast(
+          keep === 'fresh'
+            ? t('recomp.page.startedFresh')
+            : gone && keep === 'cloud'
+              ? t('recomp.page.restored')
+              : keep === 'local'
+                ? t('recomp.page.keptLocal')
+                : t('recomp.page.keptCloud'),
+          'success'
+        )
       )
       .catch((err) => {
         log.error('resolveRecompConflict failed', err)
@@ -745,17 +780,33 @@ function EntryDetails({
             <div className="recomp-banner recomp-banner--warn" role="alert">
               <CloudAlert className="recomp-banner__icon" aria-hidden="true" />
               <div className="recomp-banner__text">
-                <strong>{t('recomp.conflict.title', { name: entry.name })}</strong>
+                <strong>
+                  {conflict.gone
+                    ? t('recomp.conflict.goneTitle', { name: entry.name })
+                    : t('recomp.conflict.title', { name: entry.name })}
+                </strong>
                 <span>{conflictText(conflict)}</span>
               </div>
-              <div className="recomp-banner__actions">
-                <Button focusKey={FOCUS.conflictLocal} onPress={() => resolveConflict('local')}>
-                  {t('recomp.conflict.keepLocal')}
-                </Button>
-                <Button focusKey={FOCUS.conflictCloud} onPress={() => resolveConflict('cloud')}>
-                  {t('recomp.conflict.keepCloud')}
-                </Button>
-              </div>
+              {conflict.gone ? (
+                // The saves are gone from this PC: Restore first (the first button keeps the key the page focuses).
+                <div className="recomp-banner__actions">
+                  <Button focusKey={FOCUS.conflictLocal} onPress={() => resolveConflict('cloud')}>
+                    {t('recomp.conflict.restore')}
+                  </Button>
+                  <Button focusKey={FOCUS.conflictCloud} onPress={() => resolveConflict('fresh')}>
+                    {t('recomp.conflict.startFresh')}
+                  </Button>
+                </div>
+              ) : (
+                <div className="recomp-banner__actions">
+                  <Button focusKey={FOCUS.conflictLocal} onPress={() => resolveConflict('local')}>
+                    {t('recomp.conflict.keepLocal')}
+                  </Button>
+                  <Button focusKey={FOCUS.conflictCloud} onPress={() => resolveConflict('cloud')}>
+                    {t('recomp.conflict.keepCloud')}
+                  </Button>
+                </div>
+              )}
             </div>
           ) : null}
 

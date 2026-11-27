@@ -13,6 +13,11 @@ import { basename, dirname, extname, join, resolve } from 'path'
 import type { PlayOutApi } from '../../shared/api'
 import {
   RECOMP_SAVES_FOLDER,
+  isUnscannedRecomp,
+  type AddedRecomp,
+  type RecompSendResult,
+  type AddedRecompState,
+  type CloudRecomp,
   type GameFileState,
   type GameRecomps,
   type InstalledRecomp,
@@ -28,6 +33,7 @@ import {
   type RecompImageOffer,
   type RecompLaunchResult,
   type RecompProgress,
+  type RecompRepoCheck,
   type RecompRow,
   type RecompSaves,
   type RecompTitle,
@@ -56,7 +62,10 @@ import {
 } from '../util/paths'
 import type { AssetHint } from './assets'
 import { isInstallerName } from './assets'
-import { loadCatalog as realLoadCatalog, type RecompCatalog } from './catalog'
+import { loadCatalog as realLoadCatalog, repoKey, withExtras, type RecompCatalog } from './catalog'
+import { isPlainLine, MAX_GAME_CHARS, oneLine, readAdded, withAdded, writeAdded } from './added'
+import { checkRecompRepo } from './add-validate'
+import { isRecompConsole } from './consoles'
 import {
   automaticExe,
   carryExeChoice,
@@ -92,7 +101,7 @@ import {
   notePlayerExe,
   unpackedFolderUse
 } from './image-offer'
-import { isNew, readSeen, recordSeen, writeSeen, type SeenFile } from './seen'
+import { isNew, readSeen, recordKnown, recordSeen, writeSeen, type SeenFile } from './seen'
 import {
   adoptOldCopy,
   oldCloudSaveDir,
@@ -213,7 +222,37 @@ export type RecompMethods = Pick<
   | 'askRecompImageDelete'
   | 'getRecompHeldImages'
   | 'answerRecompHeldImage'
+  | 'checkRecompRepo'
+  | 'addRecomp'
+  | 'removeAddedRecomp'
+  | 'readRecompClipboard'
 >
+
+/**
+ * The metadata cloud as the browser's Add uses it (MetadataCloudService): PlayOut's own list of recompilations, and
+ * sending one the user added (the owner publishes it, anyone else suggests it).
+ */
+export interface RecompCloudLink {
+  cloudRecomps(): CloudRecomp[]
+  onCloudRecomps(listener: () => void): () => void
+  submitRecomp(input: {
+    id: string
+    repo: string
+    game: string
+    systemId: string
+    blurb?: string
+  }): Promise<RecompSendResult>
+  withdrawRecomp(id: string): void
+  onRecompDelivered(
+    listener: (id: string, state: AddedRecompState, prUrl?: string, refused?: string) => void
+  ): () => void
+  /** Told when adds start being sent (Suggest my edits switched on, the owner's token works): the waiting ones go. */
+  onSendingRecomps?(listener: () => void): () => void
+  /** Whether an add is sent at all (the owner, or Suggest my edits on). */
+  sendsRecomps(): boolean
+  /** Ids of the recompilations waiting in its queue. */
+  queuedRecompIds(): string[]
+}
 
 export interface RecompService extends RecompMethods {
   /**
@@ -356,6 +395,12 @@ export interface RecompServiceDeps {
   originalImage?: OriginalImageFiles
   /** Library cards for installed recompilations whose game is not in the library; absent = none are made. */
   recompGames?: RecompGames
+  /** The metadata cloud (PlayOut's list of recompilations, sending the ones added here); absent = local only. */
+  cloud?: RecompCloudLink
+  /** Move a folder to the Recycle Bin (Remove an added recompilation and uninstall it); absent = deleted. */
+  trash?: (path: string) => Promise<void>
+  /** The clipboard's text (the Add dialog's Paste). */
+  clipboardText?: () => string | Promise<string>
   log: Logger
   /** The user's Documents folder (it may be redirected to OneDrive). */
   documents?: string
@@ -553,7 +598,18 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
   let disposed = false
   let rootPromise: Promise<string> | null = null
   let stateObj: ReturnType<typeof createRecompState> | null = null
+  /**
+   * The catalog in use: the loaded one (baseCatalog) with PlayOut's list and this PC's adds laid in (withExtras).
+   * Whether the catalogs were loaded is always asked of baseCatalog: the adds alone are not a loaded catalog.
+   */
   let catalog: RecompCatalog | null = null
+  /** The catalogs as loaded (decomp-buddy + RecompLauncher). */
+  let baseCatalog: RecompCatalog | null = null
+  /** The recompilations added in the browser on this PC (recomp-added.json); read on first use. */
+  let added: AddedRecomp[] = []
+  let addedRead: Promise<void> | null = null
+  /** The last successful Check of each repository (Add uses what it found). */
+  const checks = new Map<string, Extract<RecompRepoCheck, { ok: true }>>()
   let index: TitleIndex | null = null
   /** Entry id -> the key of the title it is in. */
   let titleOfEntry = new Map<string, string>()
@@ -599,6 +655,8 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
   /** The titles whose original game was in the library at the last match (null before the first). */
   let originalTitles: Set<string> | null = null
   const timers: ReturnType<typeof setTimeout>[] = []
+  /** Listeners to drop on dispose (the metadata cloud's). */
+  const unsubscribe: (() => void)[] = []
   /** The start-up check's next retry (see start()). */
   let retryTimer: ReturnType<typeof setTimeout> | null = null
   let matchTimer: ReturnType<typeof setTimeout> | null = null
@@ -755,6 +813,87 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
 
   // --- catalog and matching ---------------------------------------------------------------------------------------
 
+  /** The catalog in use again: the loaded one with PlayOut's list and this PC's adds (an empty one before a load). */
+  function compose(): void {
+    const base: RecompCatalog = baseCatalog ?? {
+      entries: new Map(),
+      titles: new Map(),
+      byRepo: new Map(),
+      fetchedAt: { 'decomp-buddy': null, recomplauncher: null },
+      offline: []
+    }
+    const cloudList = deps.cloud?.cloudRecomps() ?? []
+    if (!baseCatalog && !cloudList.length && !added.length) return
+    setCatalog(withExtras(base, { cloud: cloudList, user: added }))
+  }
+
+  async function loadAdded(): Promise<void> {
+    addedRead ??= readAdded(deps.userData).then((list) => {
+      added = list
+      compose()
+    })
+    return addedRead
+  }
+
+  /** Save the list of adds and use it. */
+  async function saveAdded(next: AddedRecomp[]): Promise<void> {
+    added = next
+    await writeAdded(deps.userData, next)
+    compose()
+  }
+
+  /**
+   * Added recompilations PlayOut's list carries now (approved): their local copy goes, the list's entry (same id, so
+   * an install keeps working) takes over.
+   */
+  async function tidyAdded(): Promise<void> {
+    const listed = new Set((deps.cloud?.cloudRecomps() ?? []).map((r) => r.id))
+    const keep = added.filter((a) => !listed.has(a.id))
+    if (keep.length === added.length) return
+    const gone = added.filter((a) => listed.has(a.id))
+    for (const a of gone) log.info(`recomp: ${a.repo} is in PlayOut's list now`)
+    // Added on this PC: never marked new here once PlayOut's list carries it.
+    await noteKnown(gone.map((a) => a.id))
+    await saveAdded(keep)
+  }
+
+  /**
+   * An installed recompilation added here (or from PlayOut's list) that a catalog now lists under another id (one game
+   * of a multi-game repository, "#slug"): when the catalog has exactly one entry for that repository, the install is
+   * filed under it. Several: it stays as it is (shown as installed under its own id).
+   */
+  async function rekeyInstalls(): Promise<void> {
+    if (!baseCatalog) return
+    const ours = new Set([
+      ...added.map((a) => a.id),
+      ...(deps.cloud?.cloudRecomps() ?? []).map((c) => c.id)
+    ])
+    const st = await state()
+    const m = await st.read()
+    const moves: [string, string][] = []
+    for (const id of Object.keys(m.installed)) {
+      if (id.includes('#') || baseCatalog.entries.has(id)) continue
+      const repo = /^github:(.+)$/.exec(id)?.[1]
+      if (!repo || !ours.has(id)) continue
+      const there = baseCatalog.byRepo.get(repoKey('github', repo)) ?? []
+      if (there.length === 1 && there[0] !== id && !m.installed[there[0]!])
+        moves.push([id, there[0]!])
+    }
+    if (!moves.length) return
+    await st.update((mm) => {
+      for (const [from, to] of moves) {
+        const rec = mm.installed[from]
+        if (!rec || mm.installed[to]) continue
+        mm.installed[to] = { ...rec, id: to }
+        delete mm.installed[from]
+        for (const [k, v] of Object.entries(mm.preferred)) if (v === from) mm.preferred[k] = to
+        mm.favorites = mm.favorites.map((f) => (f === from ? to : f))
+        log.info(`recomp: ${from} is listed as ${to} now; its install moved with it`)
+      }
+    })
+    changed(moves.flat())
+  }
+
   function setCatalog(c: RecompCatalog): void {
     catalog = c
     index = buildTitleIndex(c)
@@ -773,13 +912,23 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
       refreshing = true
       try {
         const c = await loadCatalog({ ...httpCache(), force })
+        await loadAdded()
         // An empty answer (every source offline, nothing cached) never replaces a catalog in use.
-        if (c.entries.size > 0 || !catalog) setCatalog(c)
-        else if (catalog) catalog = { ...catalog, offline: c.offline }
+        if (c.entries.size > 0 || !baseCatalog) baseCatalog = c
+        else baseCatalog = { ...baseCatalog, offline: c.offline }
+        compose()
         // A forced check that reached at least one catalog ends the start-up retries (the daily check covers a
         // catalog that stays unreachable); "new" marks need every catalog.
         if (force && c.entries.size > 0 && c.offline.length < 2) checkedOnline = true
-        if (c.entries.size > 0 && c.offline.length === 0) await noteSeen(c)
+        // PlayOut's list counts as a catalog for "new"; this PC's own adds never do.
+        if (c.entries.size > 0 && c.offline.length === 0)
+          await noteSeen([
+            ...c.entries.keys(),
+            ...(deps.cloud?.cloudRecomps() ?? []).map((r) => r.id)
+          ])
+        await rekeyInstalls().catch((err) =>
+          log.warn('recomp: could not move installs to their catalog entries', err)
+        )
         log.info(
           `recomp: catalog has ${c.entries.size} recompilation(s) in ${c.titles.size} title(s)${c.offline.length ? ` (offline: ${c.offline.join(', ')})` : ''}`
         )
@@ -802,7 +951,8 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
     if (!catalog || !seen) return 0
     const at = now()
     let n = 0
-    for (const id of catalog.entries.keys()) if (isNew(seen, id, at)) n++
+    for (const [id, e] of catalog.entries)
+      if (!e.sources.includes('user') && isNew(seen, id, at)) n++
     return n
   }
 
@@ -811,12 +961,26 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
     return seenRead
   }
 
+  /** Record recompilations this PC added as known since the baseline (never marked new here). */
+  async function noteKnown(ids: string[]): Promise<void> {
+    if (!ids.length) return
+    try {
+      await loadSeen()
+      const next = recordKnown(seen, ids)
+      if (!next) return
+      seen = next
+      await writeSeen(seenFile, next)
+    } catch (err) {
+      log.warn('recomp: could not record the added recompilations as seen', err)
+    }
+  }
+
   /** Record the entries of a complete catalog check (new ones are stamped now). */
-  async function noteSeen(c: RecompCatalog): Promise<void> {
+  async function noteSeen(ids: Iterable<string>): Promise<void> {
     try {
       await loadSeen()
       const before = seen ? Object.keys(seen.ids).length : 0
-      const next = recordSeen(seen, c.entries.keys(), now().toISOString())
+      const next = recordSeen(seen, ids, now().toISOString())
       const added = Object.keys(next.ids).length - before
       if (added === 0 && seen) return
       seen = next
@@ -828,8 +992,9 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
   }
 
   async function ensureCatalog(): Promise<RecompCatalog | null> {
-    // An empty catalog (offline at start, nothing cached) is not a loaded one: try again.
-    if (catalog && catalog.entries.size > 0) return catalog
+    // An empty catalog (offline at start, nothing cached) is not a loaded one: try again. This PC's adds alone are
+    // not one either.
+    if (baseCatalog && baseCatalog.entries.size > 0 && catalog) return catalog
     try {
       return await loadNow(false)
     } catch (err) {
@@ -847,7 +1012,8 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
 
   /** Write metadata.recomp on every matched game (and remove it from games no longer matched). */
   async function matchAll(): Promise<void> {
-    if (!catalog || !index || catalog.entries.size === 0 || disposed) return
+    // Never with this PC's adds alone: matching takes recompilations off every game the catalog does not list.
+    if (!catalog || !index || !baseCatalog || baseCatalog.entries.size === 0 || disposed) return
     const m = await (await state()).read()
     const installedIds = Object.keys(m.installed)
     knownInstalled = installedIds
@@ -3365,6 +3531,73 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
     }
   }
 
+  // --- recompilations added in the browser ------------------------------------------------------------------------
+
+  /** Note how far an add got (the cloud sent it, or refused it: `refused` says why). */
+  async function noteAddedState(
+    id: string,
+    st: AddedRecompState,
+    prUrl?: string,
+    refused?: string
+  ): Promise<void> {
+    await loadAdded()
+    const entry = added.find((a) => a.id === id)
+    const why = st === 'local' ? refused || undefined : undefined
+    if (!entry || (entry.state === st && entry.prUrl === prUrl && entry.refused === why)) return
+    await saveAdded(
+      added.map((a) => {
+        if (a.id !== id) return a
+        const next: AddedRecomp = { ...a, state: st, ...(prUrl ? { prUrl } : {}) }
+        if (why) next.refused = why
+        else delete next.refused
+        return next
+      })
+    )
+    if (st === 'published') await noteKnown([id])
+    changed([id])
+  }
+
+  /**
+   * Send the adds that wait: 'queued' ones the cloud's queue does not hold, and (while the cloud sends adds) 'local'
+   * ones made while sending was off. One the cloud refused is never sent again.
+   */
+  function sendWaiting(): void {
+    const cloud = deps.cloud
+    if (!cloud) return
+    const queued = new Set(cloud.queuedRecompIds())
+    const sends = cloud.sendsRecomps()
+    for (const a of added) {
+      if (queued.has(a.id)) continue
+      if (a.state === 'queued' || (sends && a.state === 'local' && !a.refused)) void sendAdded(a)
+    }
+  }
+
+  /** Send an add to the metadata cloud (the owner publishes, anyone else suggests) and note how far it got. */
+  async function sendAdded(entry: AddedRecomp): Promise<void> {
+    if (!deps.cloud) return
+    try {
+      const r = await deps.cloud.submitRecomp({
+        id: entry.id,
+        repo: entry.repo,
+        game: entry.game,
+        systemId: entry.systemId,
+        ...(entry.blurb ? { blurb: entry.blurb } : {})
+      })
+      // Removed while it was being sent, or a flush sent it meanwhile (and noted it): nothing to note.
+      const current = added.find((a) => a.id === entry.id)
+      if (!current || r.state === null) return
+      // Never back from sent to unsent: a late answer of this call loses to what a flush noted already.
+      if (
+        (current.state === 'suggested' || current.state === 'published') &&
+        (r.state === 'local' || r.state === 'queued')
+      )
+        return
+      await noteAddedState(entry.id, r.state, r.prUrl, r.refused)
+    } catch (err) {
+      log.warn(`recomp: ${entry.repo} could not be sent`, err)
+    }
+  }
+
   // --- the API ----------------------------------------------------------------------------------------------------
 
   const api: RecompMethods = {
@@ -3618,7 +3851,9 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
 
     async browseRecomps() {
       await ensureCatalog()
+      await loadAdded()
       await loadSeen()
+      const addedById = new Map(added.map((a) => [a.id, a]))
       const m = await (await state()).read()
       const at = now()
       const gamesOf = new Map<string, string[]>()
@@ -3643,7 +3878,8 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
           const e = catalog!.entries.get(id)
           if (!e) continue
           cover ??= e.coverUrl
-          const fresh = isNew(seen, id, at)
+          const mine = e.sources.includes('user') ? addedById.get(id) : undefined
+          const fresh = !mine && isNew(seen, id, at)
           if (fresh) newCount++
           entries.push({
             id,
@@ -3665,7 +3901,19 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
             isNew: fresh,
             // Its own card's heart when it has one (a merge or a paired PC can change it there).
             favorite: cardOf.get(id)?.favorite ?? favorites.has(id),
-            libraryGameId: cardOf.get(id)?.id ?? null
+            libraryGameId: cardOf.get(id)?.id ?? null,
+            ...(mine
+              ? {
+                  added: mine.state,
+                  awaiting: mine.state === 'queued' || mine.state === 'suggested',
+                  ...(mine.state === 'local'
+                    ? mine.refused
+                      ? { notSent: 'refused' as const, refusedReason: mine.refused }
+                      : { notSent: 'off' as const }
+                    : {})
+                }
+              : {}),
+            ...(isUnscannedRecomp(e.sources) ? { unscanned: true } : {})
           })
         }
         if (!entries.length) continue
@@ -3727,12 +3975,110 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
       return gameId
     },
 
+    async readRecompClipboard() {
+      const text = (await deps.clipboardText?.()) ?? ''
+      return text.trim().slice(0, 2048)
+    },
+
+    async checkRecompRepo(url) {
+      await ensureCatalog()
+      await loadAdded()
+      const result = await checkRecompRepo(url, {
+        cache: httpCache(),
+        fetch: deps.fetch,
+        fetchReleases,
+        listed: (id) => catalog?.byRepo.get(id)?.[0] ?? (added.some((a) => a.id === id) ? id : null)
+      })
+      if (result.ok) checks.set(result.id, result)
+      return result
+    },
+
+    async addRecomp(input) {
+      await ensureCatalog()
+      await loadAdded()
+      const check = checks.get(input.id)
+      if (!check) throw new Error(tMain('mainRecomp.add.checkFirst'))
+      const game = oneLine(input.game, MAX_GAME_CHARS)
+      if (!game) throw new Error(tMain('mainRecomp.add.gameMissing'))
+      // The metadata repository's check (and every PlayOut) refuses HTML and script URLs: never stored or sent.
+      if (!isPlainLine(game)) throw new Error(tMain('mainRecomp.add.gameNotPlain'))
+      if (!isRecompConsole(input.systemId)) throw new Error(tMain('mainRecomp.add.consoleUnknown'))
+      if (catalog?.byRepo.has(check.id) || added.some((a) => a.id === check.id))
+        throw new Error(tMain('mainRecomp.add.alreadyListed', { repo: check.repo }))
+      const sending = deps.cloud?.sendsRecomps() ?? false
+      const entry: AddedRecomp = {
+        id: check.id,
+        repo: check.repo,
+        game,
+        systemId: input.systemId,
+        // The repository's description, as one plain line (text a check would refuse is left out, not sent).
+        ...(check.description && isPlainLine(check.description)
+          ? { blurb: check.description }
+          : {}),
+        stars: check.stars,
+        license: check.license,
+        ...(check.archived ? { archived: true } : {}),
+        ...(check.fork ? { fork: true } : {}),
+        addedAt: now().toISOString(),
+        state: sending ? 'queued' : 'local'
+      }
+      await saveAdded(withAdded(added, entry))
+      checks.delete(check.id)
+      log.info(`recomp: ${check.repo} was added (${game}, ${input.systemId})`)
+      await rematch()
+      changed([entry.id])
+      // Sent only while the cloud sends adds; one made while sending is off goes once it is switched on (sendWaiting).
+      if (deps.cloud && sending) void sendAdded(entry)
+      return { id: entry.id, titleKey: titleOfEntry.get(entry.id) ?? '' }
+    },
+
+    async removeAddedRecomp(recompId, uninstallToo) {
+      await loadAdded()
+      const entry = added.find((a) => a.id === recompId)
+      if (!entry) throw new Error(tMain('mainRecomp.add.notAdded'))
+      // Its folder found again first when it was moved (as Uninstall does), so the right folder goes.
+      const rec = uninstallToo ? await requireInstalled(recompId).catch(() => null) : null
+      if (rec && uninstallToo) {
+        if (busy(recompId)) throw new Error(tMain('mainRecomp.version.installing'))
+        if (inUse(recompId)) throw new Error(tMain('mainRecomp.version.running'))
+        const r = await root()
+        const dir = resolve(rec.dir)
+        if (!isInside(r, dir) || normalizePath(dir) === normalizePath(resolve(r)))
+          throw new Error(tMain('mainRecomp.install.outsideFolder', { folder: dir }))
+        if (deps.trash) {
+          // To the Recycle Bin (never deleted for good); a folder already gone is fine.
+          if (await fs.stat(dir).catch(() => null)) await deps.trash(dir)
+          log.info(`recomp: ${recompId} was moved to the Recycle Bin from ${dir}`)
+          // What Uninstall removes besides the folder: a half-done update and the cached download.
+          const rmOpts = { recursive: true, force: true, maxRetries: 3 }
+          await fs.rm(`${dir}.staging`, rmOpts).catch(() => undefined)
+          await fs
+            .rm(join(recompPlayoutDir(r), 'cache', 'downloads', safeRecompId(recompId)), rmOpts)
+            .catch(() => undefined)
+        } else
+          await uninstall(rec, { root: r, cacheDir: join(recompPlayoutDir(r), 'cache'), log, now })
+        await (
+          await state()
+        ).update((m) => {
+          delete m.installed[recompId]
+        })
+        updates.delete(recompId)
+        releaseInfo.delete(recompId)
+        progress.delete(recompId)
+      }
+      deps.cloud?.withdrawRecomp(recompId)
+      await saveAdded(added.filter((a) => a.id !== recompId))
+      log.info(`recomp: ${entry.repo} was removed from the browser`)
+      await rematch()
+      changed([recompId])
+    },
+
     async refreshRecompCatalog() {
       try {
         await loadNow(true)
       } catch (err) {
         log.warn('recomp: catalog refresh failed', err)
-        if (!catalog) throw err
+        if (!baseCatalog) throw err
       }
       changed([])
       return catalogStatus()
@@ -3928,7 +4274,7 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
       return (await installedOf(id))?.dir ?? null
     },
     recompForGame(game) {
-      if (!catalog || !index || catalog.entries.size === 0) return undefined
+      if (!catalog || !index || !baseCatalog || baseCatalog.entries.size === 0) return undefined
       const title = matchGameToTitle(matchable(game), catalog, index)
       return title
         ? recompInfo(title, knownInstalled, knownPreferred[title.key] ?? null, now().toISOString())
@@ -3937,6 +4283,36 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
     start(): void {
       if (disposed) return
       void root().catch((err) => log.error('recomp: no install folder', err))
+      // PlayOut's list of recompilations changed (a download, the owner's publish): shown at once, and the adds it
+      // carries now are tidied away.
+      const offCloud = deps.cloud?.onCloudRecomps(() => {
+        void loadAdded()
+          .then(async () => {
+            compose()
+            await tidyAdded()
+            await rekeyInstalls()
+            await rematch()
+            changed([])
+          })
+          .catch((err) => log.warn("recomp: could not take PlayOut's list in", err))
+      })
+      const offDelivered = deps.cloud?.onRecompDelivered((id, st, prUrl, refused) => {
+        void noteAddedState(id, st, prUrl, refused).catch((err) =>
+          log.warn(`recomp: ${id}: could not note how far it got`, err)
+        )
+      })
+      // Sending turned on: the adds made while it was off go now.
+      const offSending = deps.cloud?.onSendingRecomps?.(() => {
+        void loadAdded()
+          .then(() => sendWaiting())
+          .catch((err) => log.warn('recomp: could not send the added recompilations', err))
+      })
+      unsubscribe.push(...[offCloud, offDelivered, offSending].filter((f): f is () => void => !!f))
+      // Adds waiting to be sent that the cloud's queue lost (an older PlayOut saved it meanwhile), and adds made while
+      // sending was off: sent now.
+      void loadAdded()
+        .then(() => sendWaiting())
+        .catch((err) => log.warn('recomp: could not read the added recompilations', err))
       const online = (): boolean => deps.isOnline?.() ?? true
       timers.push(
         setTimeout(() => {
@@ -4015,6 +4391,7 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
       }
       if (matchTimer) clearTimeout(matchTimer)
       if (retryTimer) clearTimeout(retryTimer)
+      for (const off of unsubscribe.splice(0)) off()
     }
   }
 }

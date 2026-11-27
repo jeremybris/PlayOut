@@ -193,3 +193,44 @@ export function prBody(opts: {
   ]
   return lines.join('\n')
 }
+
+/**
+ * The pull request body of a recompilation suggestion (/suggest-recomp): what the user said of it (game, console,
+ * one line) and what GitHub says of its repository. Every value someone else chose (the user's text, the repository's
+ * name) sits in a code span and is defused: no mentions, links or closing keywords.
+ */
+export function recompPrBody(opts: {
+  /** "owner/repo" as GitHub spells it. */
+  repo: string
+  path: string
+  game: string
+  systemId: string
+  blurb: string
+  archived: boolean
+  fork: boolean
+  appVersion: string
+  at: string
+}): string {
+  const rows = [
+    `| Repository | ${codeSpan(`github.com/${opts.repo}`)} |`,
+    `| Game | ${cell(opts.game)} |`,
+    `| Console (PlayOut system id) | ${codeSpan(opts.systemId)} |`,
+    `| About | ${cell(opts.blurb)} |`
+  ]
+  const warnings = [
+    opts.archived ? '- **Archived:** the repository is read-only; it gets no more releases.' : '',
+    opts.fork ? '- **Fork:** the repository is a fork of another one.' : ''
+  ].filter(Boolean)
+  return [
+    `Suggested recompilation for PlayOut's Recompilations browser (${codeSpan(opts.path)}, new file).`,
+    '',
+    '| | |',
+    '| --- | --- |',
+    ...rows,
+    '',
+    ...(warnings.length ? [...warnings, ''] : []),
+    'The relay checked that the repository is public and has a release with a download; PlayOut checked that the release has a Windows download. Edit the game or the console on this branch if they are wrong.',
+    '',
+    `Sent from PlayOut ${codeSpan(opts.appVersion)} on ${codeSpan(opts.at)} through the metadata relay. Merge to approve, close to reject.`
+  ].join('\n')
+}

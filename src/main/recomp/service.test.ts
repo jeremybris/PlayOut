@@ -706,6 +706,31 @@ describe('recomp service: launch', () => {
     expect(state).toMatchObject({ pending: false, error: null, conflict: null })
   })
 
+  it('asks before copying back saves deleted from this PC, and restores them when told to', async () => {
+    const h = await harness()
+    await installAndWait(h, ZELDA)
+    let row = (await h.service.getRecompSettings()).rows[0]!
+    expect(await h.service.launchRecomp(h.game.id)).toEqual({ ok: true })
+    await fs.mkdir(join(row.installed.dir, 'saves'), { recursive: true })
+    await fs.writeFile(join(row.installed.dir, 'saves', 'mm.sav'), 'save 1')
+    h.spawned[0]!.child.emit('exit', 0)
+    await until(async () => {
+      row = (await h.service.getRecompSettings()).rows[0]!
+      expect(row.installed.cloud.syncedHash).toBeTruthy()
+    })
+    await fs.rm(join(row.installed.dir, 'saves', 'mm.sav'))
+    const refused = await h.service.launchRecomp(h.game.id)
+    expect(refused).toMatchObject({ ok: false, reason: 'save-conflict', conflict: { gone: true } })
+    expect(h.spawned).toHaveLength(1)
+    await expect(fs.access(join(row.installed.dir, 'saves', 'mm.sav'))).rejects.toThrow()
+    // Asked again (stored) until answered.
+    expect(await h.service.launchRecomp(h.game.id)).toMatchObject({ reason: 'save-conflict' })
+    const restored = await h.service.resolveRecompConflict(ZELDA, 'cloud')
+    expect(restored).toMatchObject({ conflict: null, error: null })
+    expect(await fs.readFile(join(row.installed.dir, 'saves', 'mm.sav'), 'utf8')).toBe('save 1')
+    expect(await h.service.launchRecomp(h.game.id)).toEqual({ ok: true })
+  })
+
   it('stops for a save conflict that is waiting on the user', async () => {
     const root = join(tmp, 'Recompilations')
     const dir = join(root, 'Zelda')

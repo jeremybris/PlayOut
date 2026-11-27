@@ -23,8 +23,13 @@ import {
   type RateLimitResult
 } from './ratelimit'
 
-/** What a request asks: 'peek' reads only, 'take' checks and counts one contribution, 'turned-away' counts one. */
-export type DbLimitOp = 'peek' | 'take' | 'turned-away'
+/**
+ * What a request asks: 'peek' reads only, 'take' checks and counts one contribution, 'turned-away' counts one refusal,
+ * 'turned-away-address' counts one against the sender's address only (an honest answer, not a probe).
+ */
+export type DbLimitOp = 'peek' | 'take' | 'turned-away' | 'turned-away-address'
+
+const OPS: readonly DbLimitOp[] = ['peek', 'take', 'turned-away', 'turned-away-address']
 
 interface DbLimitRequest {
   op: DbLimitOp
@@ -36,6 +41,8 @@ interface DbLimitRequest {
 
 /** The name of the one object every relay instance counts in (all contributions share the global limit). */
 export const DB_LIMITER_NAME = 'playout-database'
+/** The object the recompilation suggestions (/suggest-recomp) count in: the same class, counters of their own. */
+export const RECOMP_LIMITER_NAME = 'playout-recomps'
 
 /** The storage key of the clock hour the stored counters belong to. */
 const HOUR_KEY = 'hour'
@@ -45,7 +52,7 @@ function isRequest(x: unknown): x is DbLimitRequest {
   const r = x as Record<string, unknown>
   const limits = r.limits as Record<string, unknown> | null
   return (
-    (r.op === 'peek' || r.op === 'take' || r.op === 'turned-away') &&
+    OPS.includes(r.op as DbLimitOp) &&
     typeof r.ip === 'string' &&
     typeof r.clientId === 'string' &&
     typeof r.now === 'number' &&
@@ -54,7 +61,9 @@ function isRequest(x: unknown): x is DbLimitRequest {
     limits !== null &&
     ['ipPerHour', 'ip48PerHour', 'clientPerHour', 'globalPerHour'].every(
       (k) => typeof limits[k] === 'number'
-    )
+    ) &&
+    (limits.turnedAwayGlobalPerHour === undefined ||
+      typeof limits.turnedAwayGlobalPerHour === 'number')
   )
 }
 
@@ -97,7 +106,14 @@ export class DbRateLimiter implements DurableObject {
     } else if (op === 'take') {
       result = await takeRateLimit(store, ip, clientId, limits, now, DB_RATE_LIMIT_PREFIX)
     } else {
-      await countTurnedAway(store, ip, limits, now, DB_RATE_LIMIT_PREFIX)
+      await countTurnedAway(
+        store,
+        ip,
+        limits,
+        now,
+        DB_RATE_LIMIT_PREFIX,
+        op === 'turned-away-address'
+      )
     }
     return new Response(JSON.stringify(result), {
       headers: { 'Content-Type': 'application/json; charset=utf-8' }
@@ -110,17 +126,23 @@ export interface DbLimits {
   peek(): Promise<RateLimitResult>
   take(): Promise<RateLimitResult>
   turnedAway(): Promise<void>
+  /** A refusal counted against the sender's address only. */
+  turnedAwayAddress(): Promise<void>
 }
 
-/** Asks the DB_LIMITS Durable Object; throws when it cannot answer (the caller treats that as a failure). */
+/**
+ * Asks the DB_LIMITS Durable Object (`name`: which one; the database's by default); throws when it cannot answer (the
+ * caller treats that as a failure).
+ */
 export function dbLimitsOf(
   ns: DurableObjectNamespace,
   ip: string,
   clientId: string,
   limits: RateLimitConfig,
-  now: number
+  now: number,
+  name: string = DB_LIMITER_NAME
 ): DbLimits {
-  const stub = ns.get(ns.idFromName(DB_LIMITER_NAME))
+  const stub = ns.get(ns.idFromName(name))
   const ask = async (op: DbLimitOp): Promise<RateLimitResult> => {
     const res = await stub.fetch('https://db-limits.internal/', {
       method: 'POST',
@@ -141,6 +163,9 @@ export function dbLimitsOf(
     take: () => ask('take'),
     turnedAway: async () => {
       await ask('turned-away')
+    },
+    turnedAwayAddress: async () => {
+      await ask('turned-away-address')
     }
   }
 }

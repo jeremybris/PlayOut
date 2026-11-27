@@ -49,6 +49,37 @@ describe('mock recompilations', () => {
     vi.unstubAllGlobals()
   })
 
+  it('adds a GitHub repository in the browser: checked, shown as added by you, then removed', async () => {
+    vi.useFakeTimers()
+    const api = createMockApi({ search: '' })
+    const check = (url: string): ReturnType<PlayOutApi['checkRecompRepo']> => {
+      const p = api.checkRecompRepo(url)
+      void vi.advanceTimersByTimeAsync(1000)
+      return p
+    }
+    expect(await check('https://gitlab.com/a/b')).toMatchObject({ ok: false, reason: 'notGithub' })
+    expect(await check('github.com/a/missing')).toMatchObject({ ok: false, reason: 'notFound' })
+    expect(await check('github.com/a/nowin')).toMatchObject({ ok: false, reason: 'noWindows' })
+    const ok = await check(await api.readRecompClipboard())
+    expect(ok).toMatchObject({ ok: true, repo: 'Zelda64Recomp/Zelda64Recomp' })
+    if (!ok.ok) throw new Error('not ok')
+    const adding = api.addRecomp({ id: ok.id, game: 'Doom 64', systemId: 'n64' })
+    await vi.advanceTimersByTimeAsync(500)
+    const added = await adding
+    expect(added.titleKey).toBe('n64:doom 64')
+    const listed = await check('Zelda64Recomp/Zelda64Recomp')
+    expect(listed).toMatchObject({ ok: false, reason: 'alreadyListed', existingId: ok.id })
+    const find = async (): Promise<unknown> =>
+      (await api.browseRecomps()).titles.flatMap((t) => t.entries).find((e) => e.id === ok.id)
+    expect(await find()).toMatchObject({ added: 'queued', awaiting: true, isNew: false })
+    await vi.advanceTimersByTimeAsync(2500)
+    expect(await find()).toMatchObject({ added: 'suggested', awaiting: true })
+    const removing = api.removeAddedRecomp(ok.id, false)
+    await vi.advanceTimersByTimeAsync(500)
+    await removing
+    expect(await find()).toBeUndefined()
+  })
+
   it('marks the matched sample games with metadata.recomp', async () => {
     const api = createMockApi({ search: '' })
     const { games } = await api.getLibrary()

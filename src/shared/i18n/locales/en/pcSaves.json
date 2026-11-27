@@ -20,6 +20,7 @@
     "error": "Could not copy: {error}",
     "running": "It is running: its saves are copied when you close it.",
     "conflict": "The saves changed on this PC and in the Emulation folder: pick which to keep.",
+    "gone": "This PC's saves are gone: restore them from the Emulation folder or start fresh.",
     "confirm": "The Emulation folder has saves {machine} copied for a game with the same name ({title})."
   },
   "conflict": {
@@ -27,7 +28,12 @@
     "text": "Your saves changed on this PC{localAt} and in the Emulation folder's copy{cloudAt}. Pick the ones to keep; the others are kept as a backup.",
     "textDevice": "Your saves changed on this PC{localAt} and in the Emulation folder's copy from {device}{cloudAt}. Pick the ones to keep; the others are kept as a backup.",
     "keepLocal": "Keep this PC's saves",
-    "keepCloud": "Keep the Emulation folder's copy"
+    "keepCloud": "Keep the Emulation folder's copy",
+    "goneTitle": "The saves of {title} are gone from this PC",
+    "goneText": "This PC has no saves any more, but the Emulation folder has a copy{cloudAt}. Restore it, or start fresh: nothing is deleted now, but this PC's next saves become the copy every PC gets (the old copy is backed up on this PC first, and another PC backs up its own saves before taking the new copy).",
+    "goneTextDevice": "This PC has no saves any more, but the Emulation folder has a copy from {device}{cloudAt}. Restore it, or start fresh: nothing is deleted now, but this PC's next saves become the copy every PC gets (the old copy is backed up on this PC first, and another PC backs up its own saves before taking the new copy).",
+    "restore": "Restore from the Emulation folder",
+    "startFresh": "Start fresh"
   },
   "confirm": {
     "title": "Use the copy from {machine}?",

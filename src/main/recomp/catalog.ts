@@ -12,9 +12,12 @@ import { isSidePiece, notForWindows } from './assets'
 import { systemGroup } from './match'
 import { normalizeGameTitle, titleKeyOf, withoutVersionWord } from './titles'
 import type {
+  AddedRecomp,
+  CloudRecomp,
   GameFileHow,
   GameFileNeed,
   RecompEntry,
+  RecompRepoRefusal,
   RecompTag,
   RecompTitle
 } from '../../shared/recomp'
@@ -99,7 +102,10 @@ export function parseSize(text: unknown): number | null {
 }
 
 /** A repo reference ("owner/repo", "gitlab:group/repo", "forgejo:codeberg.org/o/r") → host + path; null = unsupported. */
-function parseRepoRef(ref: string, hostField: string | null): { host: Host; repo: string } | null {
+export function parseRepoRef(
+  ref: string,
+  hostField: string | null
+): { host: Host; repo: string } | null {
   let host: string = hostField?.toLowerCase() ?? 'github'
   let repo = ref.trim().replace(/^https?:\/\/(?:www\.)?/i, '')
   const prefixed = /^([a-z]+):(.+)$/i.exec(repo)
@@ -132,11 +138,12 @@ function parseRepoRef(ref: string, hostField: string | null): { host: Host; repo
   return { host, repo }
 }
 
-function repoKey(host: Host, repo: string): string {
+/** "host:owner/repo" lower case: the key of a repository (RecompCatalog.byRepo), and an added recompilation's id. */
+export function repoKey(host: Host, repo: string): string {
   return `${host}:${repo}`.toLowerCase()
 }
 
-function repoUrlOf(host: Host, repo: string): string {
+export function repoUrlOf(host: Host, repo: string): string {
   const base =
     host === 'github'
       ? 'https://github.com'
@@ -742,7 +749,7 @@ function rlPartOf(app: Obj, game: string | null, art: Obj | null, systemId: stri
  * one game are one PC title, every arcade board one arcade title, as the library matcher sees them) and the game's
  * name without a trailing "Version" ("Pokémon Platinum Version" is "Pokemon Platinum").
  */
-function entryTitleKey(systemId: string, game: string): string {
+export function entryTitleKey(systemId: string, game: string): string {
   return titleKeyOf(systemGroup(systemId), withoutVersionWord(game) ?? game)
 }
 
@@ -1296,4 +1303,151 @@ export async function loadCatalog(
     },
     offline
   })
+}
+
+// --- recompilations added in PlayOut (the browser's Add, and PlayOut's own list) ----------------------------------
+
+/** A GitHub account name: letters, digits and single dashes inside, at most 39. */
+export const GITHUB_OWNER_RE = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/
+/** A GitHub repository name. */
+export const GITHUB_REPO_RE = /^[A-Za-z0-9._-]{1,100}$/
+
+/**
+ * The GitHub repository a pasted link or name points at: a bare "owner/repo", "github.com/owner/repo" with or
+ * without http(s):// and www., any page inside it (/tree/..., /releases/..., /blob/...), a ".git" ending, a query
+ * or hash, and "git@github.com:owner/repo.git". Another host is 'notGithub'; anything else unreadable 'badUrl'.
+ */
+export function parseGithubUrl(
+  input: string
+): { owner: string; repo: string } | { error: Extract<RecompRepoRefusal, 'notGithub' | 'badUrl'> } {
+  const text = String(input ?? '').trim()
+  if (!text || text.length > 2048 || /\s/.test(text)) return { error: 'badUrl' }
+  let path: string
+  const ssh = /^git@([^:]+):(.+)$/i.exec(text)
+  if (ssh) {
+    if (ssh[1]!.toLowerCase() !== 'github.com') return { error: 'notGithub' }
+    path = ssh[2]!
+  } else {
+    const hasScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(text)
+    const looksLikeHost = /^[^/]+\.[a-z]{2,}(?:[/:?#]|$)/i.test(text)
+    if (hasScheme || looksLikeHost) {
+      let url: URL
+      try {
+        url = new URL(hasScheme ? text : `https://${text}`)
+      } catch {
+        return { error: 'badUrl' }
+      }
+      if (url.protocol !== 'https:' && url.protocol !== 'http:') return { error: 'badUrl' }
+      const host = url.hostname.toLowerCase()
+      if (host !== 'github.com' && host !== 'www.github.com') return { error: 'notGithub' }
+      if (url.username || url.password || url.port) return { error: 'badUrl' }
+      path = url.pathname
+    } else path = text
+  }
+  const parts = path.split(/[?#]/)[0]!.split('/').filter(Boolean)
+  if (parts.length < 2) return { error: 'badUrl' }
+  const owner = parts[0]!
+  let repo = parts[1]!
+  try {
+    repo = decodeURIComponent(repo)
+  } catch {
+    return { error: 'badUrl' }
+  }
+  repo = repo.replace(/\.git$/i, '')
+  if (!GITHUB_OWNER_RE.test(owner) || !GITHUB_REPO_RE.test(repo) || repo === '.' || repo === '..')
+    return { error: 'badUrl' }
+  return { owner, repo }
+}
+
+/** An added recompilation (this PC's, or PlayOut's list) as a catalog entry: what is known of it, nothing invented. */
+function extraEntry(
+  x: {
+    id: string
+    repo: string
+    game: string
+    systemId: string
+    blurb?: string
+    addedAt?: string | null
+    stars?: number | null
+    license?: string | null
+    archived?: boolean
+  },
+  source: 'playout' | 'user'
+): RecompEntry {
+  const [owner = '', name = x.repo] = x.repo.split('/')
+  const archived = !!x.archived
+  return {
+    id: x.id,
+    name,
+    game: x.game,
+    systemId: x.systemId,
+    console: originDisplayName(x.systemId),
+    host: 'github',
+    repo: x.repo,
+    repoUrl: repoUrlOf('github', x.repo),
+    author: owner,
+    blurb: x.blurb ?? '',
+    description: '',
+    features: [],
+    tags: archived ? [{ label: tMain('mainRecomp.tags.archived'), kind: 'warning' }] : [],
+    latestTag: null,
+    released: null,
+    addedAt: x.addedAt ?? null,
+    updatedAt: null,
+    downloadBytes: null,
+    stars: x.stars ?? null,
+    downloads: null,
+    license: x.license ?? null,
+    completeness: null,
+    recommended: false,
+    assetPattern: null,
+    exe: null,
+    installer: false,
+    // Never scanned: an added recompilation's download is verified by GitHub's digest or installs unverified.
+    scannedSha256: null,
+    needs: [],
+    setupNotes: [],
+    savePaths: [],
+    iconUrl: null,
+    coverUrl: null,
+    heroUrl: null,
+    archived,
+    sources: [source]
+  }
+}
+
+/**
+ * The catalog with the recompilations added in PlayOut: PlayOut's own list (`cloud`, approved: 'playout') first, then
+ * this PC's own adds (`user`). A repository a catalog (or the list before it) has already is left out: the catalog's
+ * entry wins, the added one stays stored and shows again if the catalog drops it. Each joins the title of its game
+ * when there is one, else gets a title of its own. Pure: `base` is not changed.
+ */
+export function withExtras(
+  base: RecompCatalog,
+  extras: { cloud: readonly CloudRecomp[]; user: readonly AddedRecomp[] }
+): RecompCatalog {
+  if (!extras.cloud.length && !extras.user.length) return base
+  const entries = new Map(base.entries)
+  const titles = new Map(base.titles)
+  const byRepo = new Map(base.byRepo)
+  const add = (e: RecompEntry): void => {
+    const rk = repoKey('github', e.repo)
+    if (byRepo.has(rk) || entries.has(e.id)) return
+    entries.set(e.id, e)
+    byRepo.set(rk, [e.id])
+    const key = entryTitleKey(e.systemId, e.game)
+    const title = titles.get(key)
+    if (title) titles.set(key, { ...title, entries: [...title.entries, e.id] })
+    else
+      titles.set(key, {
+        key,
+        game: e.game,
+        systemId: e.systemId,
+        console: e.console,
+        entries: [e.id]
+      })
+  }
+  for (const c of extras.cloud) add(extraEntry(c, 'playout'))
+  for (const u of extras.user) add(extraEntry(u, 'user'))
+  return { ...base, entries, titles, byRepo }
 }

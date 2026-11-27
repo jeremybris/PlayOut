@@ -14,6 +14,7 @@ import {
   type GameDbRow
 } from './database-format'
 import { DB_PLATFORMS } from './platforms'
+import { RECOMP_CONSOLES } from './recomp-consoles'
 
 export const MAX_BODY_BYTES = 64 * 1024
 
@@ -459,5 +460,93 @@ export function validateContribution(bodyText: string): Validated<Contribution> 
   return {
     ok: true,
     value: { clientId: body.clientId, appVersion: body.appVersion, rows, refused }
+  }
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// POST /suggest-recomp: a recompilation added in PlayOut's Recompilations browser
+
+/** A GitHub account name: letters, digits and single dashes inside, at most 39 (PlayOut's own check is the same). */
+const GH_OWNER_RE = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/
+/** A GitHub repository name. */
+const GH_REPO_RE = /^[A-Za-z0-9._-]{1,100}$/
+const RECOMP_GAME_MAX = 200
+const RECOMP_BLURB_MAX = 500
+
+export interface RecompSuggestion {
+  owner: string
+  repo: string
+  game: string
+  systemId: string
+  /** '' when none was sent. */
+  blurb: string
+  appVersion: string
+  clientId: string
+}
+
+/** owner and repo of `https://github.com/<owner>/<repo>` (an optional trailing '/', nothing else); null otherwise. */
+export function parseRecompUrl(url: unknown): { owner: string; repo: string } | null {
+  if (typeof url !== 'string' || url.length > 200) return null
+  const m = /^https:\/\/github\.com\/([^/?#\s]+)\/([^/?#\s]+)\/?$/.exec(url)
+  if (!m) return null
+  const [, owner, repo] = m
+  if (!GH_OWNER_RE.test(owner) || !GH_REPO_RE.test(repo)) return null
+  if (repo === '.' || repo === '..' || /\.git$/i.test(repo)) return null
+  return { owner, repo }
+}
+
+/** Validates the raw body text of POST /suggest-recomp. */
+export function validateRecompSuggestion(bodyText: string): Validated<RecompSuggestion> {
+  if (new TextEncoder().encode(bodyText).length > MAX_BODY_BYTES) {
+    return { ok: false, error: 'request is larger than 64 KB' }
+  }
+  let body: unknown
+  try {
+    body = JSON.parse(bodyText)
+  } catch {
+    return { ok: false, error: 'request is not valid JSON' }
+  }
+  if (!isPlainObject(body)) return { ok: false, error: 'request must be a JSON object' }
+  for (const k of Object.keys(body)) {
+    if (!['url', 'game', 'systemId', 'blurb', 'appVersion', 'clientId'].includes(k)) {
+      return { ok: false, error: `unknown property ${k}` }
+    }
+  }
+  if (typeof body.appVersion !== 'string' || !APP_VERSION_RE.test(body.appVersion)) {
+    return { ok: false, error: 'appVersion is not a version number' }
+  }
+  if (typeof body.clientId !== 'string' || !CLIENT_ID_RE.test(body.clientId)) {
+    return { ok: false, error: 'clientId is not valid' }
+  }
+  const ref = parseRecompUrl(body.url)
+  if (!ref) return { ok: false, error: 'url is not https://github.com/<owner>/<repo>' }
+  // Only the consoles PlayOut keeps a recompilation for (its all.json parser drops any other).
+  if (typeof body.systemId !== 'string' || !RECOMP_CONSOLES.has(body.systemId)) {
+    return { ok: false, error: 'systemId is not a system PlayOut knows' }
+  }
+  try {
+    const game = checkText('game', body.game, RECOMP_GAME_MAX)
+    const blurb =
+      body.blurb === undefined
+        ? ''
+        : checkText('blurb', body.blurb, RECOMP_BLURB_MAX, { allowEmpty: true })
+    // No control character at all, tabs included: PlayOut drops a record that holds one.
+    // eslint-disable-next-line no-control-regex
+    if (/[\u0000-\u001f\u007f]/.test(game + blurb)) {
+      throw new Error('game and blurb must not contain tabs or control characters')
+    }
+    return {
+      ok: true,
+      value: {
+        ...ref,
+        game,
+        systemId: body.systemId,
+        blurb,
+        appVersion: body.appVersion,
+        clientId: body.clientId
+      }
+    }
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'invalid request' }
   }
 }

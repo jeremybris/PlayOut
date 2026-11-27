@@ -20,6 +20,7 @@
     "error": "No se pudo copiar: {error}",
     "running": "Está en ejecución: sus partidas guardadas se copian cuando lo cierres.",
     "conflict": "Las partidas guardadas cambiaron en este PC y en la carpeta Emulation: elige cuáles conservar.",
+    "gone": "Las partidas guardadas de este PC ya no están: restáuralas desde la carpeta Emulation o empieza de cero.",
     "confirm": "La carpeta Emulation tiene partidas guardadas que {machine} copió de un juego con el mismo nombre ({title})."
   },
   "conflict": {
@@ -27,7 +28,12 @@
     "text": "Tus partidas guardadas cambiaron en este PC{localAt} y en la copia de la carpeta Emulation{cloudAt}. Elige las que quieres conservar; las otras se guardan como copia de seguridad.",
     "textDevice": "Tus partidas guardadas cambiaron en este PC{localAt} y en la copia de la carpeta Emulation desde {device}{cloudAt}. Elige las que quieres conservar; las otras se guardan como copia de seguridad.",
     "keepLocal": "Conservar las de este PC",
-    "keepCloud": "Conservar la copia de la carpeta Emulation"
+    "keepCloud": "Conservar la copia de la carpeta Emulation",
+    "goneTitle": "Las partidas guardadas de {title} ya no están en este PC",
+    "goneText": "Este PC ya no tiene partidas guardadas, pero la carpeta Emulation tiene una copia{cloudAt}. Restáurala o empieza de cero: ahora no se borra nada, pero las próximas partidas guardadas de este PC pasarán a ser la copia que reciben todos los PC (antes se guarda en este PC una copia de seguridad de la copia anterior, y cada uno de los otros PC guarda una copia de seguridad de sus partidas antes de tomar la nueva).",
+    "goneTextDevice": "Este PC ya no tiene partidas guardadas, pero la carpeta Emulation tiene una copia desde {device}{cloudAt}. Restáurala o empieza de cero: ahora no se borra nada, pero las próximas partidas guardadas de este PC pasarán a ser la copia que reciben todos los PC (antes se guarda en este PC una copia de seguridad de la copia anterior, y cada uno de los otros PC guarda una copia de seguridad de sus partidas antes de tomar la nueva).",
+    "restore": "Restaurar desde la carpeta Emulation",
+    "startFresh": "Empezar de cero"
   },
   "confirm": {
     "title": "¿Usar la copia de {machine}?",

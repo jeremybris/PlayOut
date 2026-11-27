@@ -267,7 +267,12 @@ describe('all.json', () => {
     await mkdir(dir, { recursive: true })
     await writeFile(
       join(dir, 'cache.json'),
-      JSON.stringify({ version: 1, etag: '"v0"', games: { 'steam-620': { genres: ['Old'] } } })
+      JSON.stringify({
+        version: 1,
+        etag: '"v0"',
+        games: { 'steam-620': { genres: ['Old'] } },
+        recomps: []
+      })
     )
     routes.push(allJson({ 'steam-620': { genres: ['Puzzle'] }, 'steam-1': { title: 'X' } }))
     const s = create()
@@ -1392,5 +1397,354 @@ describe('queue: saves while an edit is being sent', () => {
     expect(sent).toEqual([{ genres: ['A'] }, { genres: ['B'] }])
     expect(JSON.parse(files.get('games/steam-620.json')!.text).fields).toEqual({ genres: ['B'] })
     expect(s.status().queued).toBe(0)
+  })
+})
+
+describe('recompilations added in the browser', () => {
+  const RELAY = 'https://relay.test'
+  const zelda = {
+    id: 'github:zeldaret/mm',
+    repo: 'ZeldaRET/mm',
+    game: "Majora's Mask",
+    systemId: 'n64',
+    blurb: 'A PC port.'
+  }
+  const row = (patch: Record<string, unknown> = {}): Record<string, unknown> => ({
+    id: 'github:zeldaret/mm',
+    repo: 'ZeldaRET/mm',
+    repoUrl: 'https://github.com/ZeldaRET/mm',
+    game: "Majora's Mask",
+    systemId: 'n64',
+    blurb: 'A PC port.',
+    addedAt: '2026-11-20T00:00:00.000Z',
+    ...patch
+  })
+  /** The relay's /suggest-recomp answering with `status` (the bodies sent go in `sent`). */
+  const relay =
+    (status: number, body: unknown, sent: unknown[]): Route =>
+    (c) => {
+      if (c.url !== `${RELAY}/suggest-recomp` || c.method !== 'POST') return undefined
+      sent.push(c.body)
+      return json(body, status)
+    }
+
+  it('reads all.json recomps strictly and tells the listeners when the list changes', async () => {
+    routes.push(
+      allJson(
+        {},
+        {
+          recomps: [
+            row(),
+            row(), // twice: kept once
+            row({ id: 'github:other/mm' }), // the id is not the repository's
+            row({ id: 'github:a/b', repo: 'a/b', repoUrl: 'https://evil.example/a/b' }),
+            row({
+              id: 'github:a/c',
+              repo: 'a/c',
+              repoUrl: 'https://github.com/a/c',
+              systemId: 'nope'
+            }),
+            row({
+              id: 'github:a/d',
+              repo: 'a/d',
+              repoUrl: 'https://github.com/a/d',
+              game: '<b>x</b>'
+            }),
+            row({ id: 'github:a/e', repo: 'a/e', repoUrl: 'https://github.com/a/e', game: '' }),
+            row({ id: 'github:a/..', repo: 'a/..', repoUrl: 'https://github.com/a/..' }),
+            'junk'
+          ]
+        }
+      )
+    )
+    const s = create()
+    let told = 0
+    s.onCloudRecomps(() => told++)
+    await s.start()
+    await s.sync()
+    expect(s.cloudRecomps()).toEqual([
+      {
+        id: 'github:zeldaret/mm',
+        repo: 'ZeldaRET/mm',
+        repoUrl: 'https://github.com/ZeldaRET/mm',
+        game: "Majora's Mask",
+        systemId: 'n64',
+        blurb: 'A PC port.',
+        addedAt: '2026-11-20T00:00:00.000Z'
+      }
+    ])
+    expect(told).toBe(1)
+    await s.sync() // 304: nothing changed
+    expect(told).toBe(1)
+  })
+
+  it('does not send the ETag of a cache an older PlayOut wrote (no recomps), then caches them', async () => {
+    await mkdir(dir, { recursive: true })
+    await writeFile(
+      join(dir, 'cache.json'),
+      JSON.stringify({ version: 1, etag: '"v1"', games: { 'steam-620': { genres: ['Old'] } } })
+    )
+    routes.push(allJson({ 'steam-620': { genres: ['Old'] } }, { recomps: [row()] }))
+    const s = create()
+    await s.start()
+    await s.sync()
+    const first = calls.filter((c) => c.url === ALL_URL)
+    expect(first[0]?.headers['If-None-Match']).toBeUndefined()
+    expect(s.cloudRecomps().map((r) => r.id)).toEqual(['github:zeldaret/mm'])
+    await s.sync()
+    expect(calls.filter((c) => c.url === ALL_URL).at(-1)?.headers['If-None-Match']).toBe('"v1"')
+    await s.dispose()
+    const cache = JSON.parse(await readFile(join(dir, 'cache.json'), 'utf8')) as {
+      recomps: unknown[]
+    }
+    expect(cache.recomps).toHaveLength(1)
+  })
+
+  it('caches an empty list when all.json has no recomps (one built before them)', async () => {
+    routes.push(allJson({ 'steam-620': { genres: ['A'] } }))
+    const s = create()
+    await s.start()
+    await s.sync()
+    await s.dispose()
+    const cache = JSON.parse(await readFile(join(dir, 'cache.json'), 'utf8')) as {
+      recomps: unknown[]
+    }
+    expect(cache.recomps).toEqual([])
+  })
+
+  it('suggests through the relay with the link, the game and the console', async () => {
+    const sent: unknown[] = []
+    routes.push(
+      allJson({}, { relayUrl: RELAY }),
+      relay(
+        200,
+        {
+          ok: true,
+          pr: { number: 3, url: 'https://github.com/jeremybris/PlayOut-metadata/pull/3' }
+        },
+        sent
+      )
+    )
+    const s = create()
+    await s.start()
+    await s.sync()
+    const result = await s.submitRecomp(zelda)
+    expect(result).toEqual({
+      state: 'suggested',
+      prUrl: 'https://github.com/jeremybris/PlayOut-metadata/pull/3'
+    })
+    expect(sent).toEqual([
+      {
+        url: 'https://github.com/ZeldaRET/mm',
+        game: "Majora's Mask",
+        systemId: 'n64',
+        blurb: 'A PC port.',
+        appVersion: '0.1.138',
+        clientId: expect.any(String)
+      }
+    ])
+    expect(s.queuedRecompIds()).toEqual([])
+  })
+
+  it('maps the relay answers: 409 listed, 400 / 413 refused, 404 / 5xx / 429 wait in the queue', async () => {
+    const answers: [number, string][] = [
+      [409, 'published'],
+      [400, 'local'],
+      [413, 'local'],
+      [404, 'queued'],
+      [503, 'queued'],
+      [429, 'queued']
+    ]
+    for (const [status, state] of answers) {
+      routes.length = 0
+      routes.push(allJson({}, { relayUrl: RELAY }), relay(status, { ok: false, error: 'x' }, []))
+      await service?.dispose()
+      await rm(dir, { recursive: true, force: true })
+      const s = create()
+      await s.start()
+      await s.sync()
+      const result = await s.submitRecomp(zelda)
+      expect(result.state, String(status)).toBe(state)
+      expect(s.queuedRecompIds(), String(status)).toEqual(state === 'queued' ? [zelda.id] : [])
+    }
+  })
+
+  it('sends nothing while Suggest my edits is off (and this PC is not the owner)', async () => {
+    const sent: unknown[] = []
+    routes.push(allJson({}, { relayUrl: RELAY }), relay(200, { ok: true }, sent))
+    const s = create()
+    await s.start()
+    await s.sync()
+    await s.setConfig({ suggestEdits: false })
+    expect(s.sendsRecomps()).toBe(false)
+    expect(await s.submitRecomp(zelda)).toEqual({ state: 'local' })
+    expect(sent).toEqual([])
+  })
+
+  it('a waiting recompilation goes with the next flush and tells the listeners; a withdrawn one never goes', async () => {
+    const sent: { url: string }[] = []
+    let up = false
+    routes.push(allJson({}, { relayUrl: RELAY }), (c) => {
+      if (c.url !== `${RELAY}/suggest-recomp`) return undefined
+      sent.push(c.body as { url: string })
+      return up ? json({ ok: true, pr: { url: 'https://github.com/x/y/pull/9' } }) : json({}, 502)
+    })
+    const s = create()
+    await s.start()
+    await s.sync()
+    const told: unknown[] = []
+    s.onRecompDelivered((id, state, prUrl) => told.push({ id, state, prUrl }))
+    expect((await s.submitRecomp(zelda)).state).toBe('queued')
+    expect((await s.submitRecomp({ ...zelda, id: 'github:a/b', repo: 'a/b' })).state).toBe('queued')
+    s.withdrawRecomp('github:a/b')
+    up = true
+    await s.flushQueue(true)
+    expect(told).toEqual([
+      { id: 'github:zeldaret/mm', state: 'suggested', prUrl: 'https://github.com/x/y/pull/9' }
+    ])
+    expect(s.queuedRecompIds()).toEqual([])
+    // Sent once when it was added (and failed); the flush after Remove leaves it out.
+    expect(sent.filter((b) => b.url.endsWith('/a/b'))).toHaveLength(1)
+  })
+
+  it('the owner publishes recomps/<owner>__<repo>.json and shows it until all.json carries it', async () => {
+    const files = new Map<string, { text: string; sha: string }>()
+    routes.push(allJson({}), tokenOk, repo(files))
+    const s = create()
+    await s.start()
+    await s.setConfig({ token: TOKEN })
+    let told = 0
+    s.onCloudRecomps(() => told++)
+    expect(await s.submitRecomp(zelda)).toEqual({ state: 'published' })
+    const written = JSON.parse(files.get('recomps/zeldaret__mm.json')!.text) as Record<
+      string,
+      unknown
+    >
+    expect(written).toEqual({
+      id: 'github:zeldaret/mm',
+      repo: 'ZeldaRET/mm',
+      repoUrl: 'https://github.com/ZeldaRET/mm',
+      game: "Majora's Mask",
+      systemId: 'n64',
+      blurb: 'A PC port.',
+      addedAt: new Date(START).toISOString(),
+      updatedAt: new Date(START).toISOString()
+    })
+    expect(told).toBe(1)
+    expect(s.cloudRecomps().map((r) => r.id)).toEqual(['github:zeldaret/mm'])
+    // all.json carries it now: no longer pending.
+    routes.unshift(allJson({}, { recomps: [row()] }, '"v2"'))
+    await s.sync()
+    expect(s.cloudRecomps()).toHaveLength(1)
+    await s.dispose()
+    const cache = JSON.parse(await readFile(join(dir, 'cache.json'), 'utf8')) as {
+      pendingRecomps?: unknown
+    }
+    expect(cache.pendingRecomps).toBeUndefined()
+    // Publishing the same repository again finds its file: listed already, nothing written.
+    const again = create()
+    await again.start()
+    await again.setConfig({ token: TOKEN })
+    expect(await again.submitRecomp(zelda)).toEqual({ state: 'published' })
+    expect(files.size).toBe(1)
+  })
+
+  it('never writes or sends a recompilation whose text the repository check refuses', async () => {
+    // The owner: nothing is written on main.
+    const files = new Map<string, { text: string; sha: string }>()
+    routes.push(allJson({}), tokenOk, repo(files))
+    const s = create()
+    await s.start()
+    await s.setConfig({ token: TOKEN })
+    for (const game of ['<b>Majora</b>', 'javascript:alert(1)', 'Zel\tda', 'Zel\u0001da']) {
+      const result = await s.submitRecomp({ ...zelda, game })
+      expect(result.state, game).toBe('local')
+      expect(result.refused, game).toBeTruthy()
+    }
+    expect(files.size).toBe(0)
+    expect(s.queuedRecompIds()).toEqual([])
+    await s.dispose()
+
+    // Anyone else: nothing reaches the relay.
+    routes.length = 0
+    await rm(dir, { recursive: true, force: true })
+    const sent: unknown[] = []
+    routes.push(allJson({}, { relayUrl: RELAY }), relay(200, { ok: true }, sent))
+    const other = create()
+    await other.start()
+    await other.sync()
+    expect(
+      (await other.submitRecomp({ ...zelda, game: '<img src=x onerror=alert(1)>' })).state
+    ).toBe('local')
+    expect(sent).toEqual([])
+  })
+
+  it('answers state null (nothing to note) when a running flush sent the add first', async () => {
+    let up = false
+    routes.push(allJson({}, { relayUrl: RELAY }), (c) => {
+      if (c.url !== `${RELAY}/suggest-recomp`) return undefined
+      return up ? json({ ok: true, pr: { url: 'https://github.com/x/y/pull/9' } }) : json({}, 502)
+    })
+    const s = create()
+    await s.start()
+    await s.sync()
+    const told: { id: string; state: string }[] = []
+    s.onRecompDelivered((id, state) => told.push({ id, state }))
+    expect((await s.submitRecomp(zelda)).state).toBe('queued')
+    up = true
+    // A flush runs; the second add is queued while it does and goes with it.
+    const flush = s.flushQueue(true)
+    const second = s.submitRecomp({ ...zelda, id: 'github:a/b', repo: 'a/b' })
+    await flush
+    const r = await second
+    expect(told).toEqual([
+      { id: 'github:zeldaret/mm', state: 'suggested' },
+      { id: 'github:a/b', state: 'suggested' }
+    ])
+    expect(r).toEqual({ state: null })
+  })
+
+  it('tells its listeners when adds start being sent (Suggest my edits switched on)', async () => {
+    routes.push(allJson({}, { relayUrl: RELAY }), relay(200, { ok: true }, []))
+    const s = create()
+    await s.start()
+    await s.sync()
+    await s.setConfig({ suggestEdits: false })
+    let on = 0
+    s.onSendingRecomps(() => on++)
+    await s.setConfig({ suggestEdits: false })
+    expect(on).toBe(0)
+    await s.setConfig({ suggestEdits: true })
+    expect(on).toBe(1)
+    await s.setConfig({ suggestEdits: true })
+    expect(on).toBe(1)
+  })
+
+  it('keeps waiting recompilations in queue.json, and a queue without them still loads', async () => {
+    await mkdir(dir, { recursive: true })
+    await writeFile(
+      join(dir, 'queue.json'),
+      JSON.stringify({
+        version: 1,
+        items: [],
+        recomps: [
+          { ...zelda, queuedAt: '2026-11-16T00:00:00Z', attempts: 2 },
+          { ...zelda, id: 'github:wrong/id' },
+          { ...zelda, id: 'github:a/b', repo: 'a/b', systemId: 'nope' }
+        ]
+      })
+    )
+    await writeFile(
+      join(dir, 'config.json'),
+      JSON.stringify({ version: 1, clientId: 'client-0001', relayUrl: '', suggestEdits: false })
+    )
+    const s = create()
+    await s.start()
+    expect(s.queuedRecompIds()).toEqual(['github:zeldaret/mm'])
+    await s.dispose()
+    await writeFile(join(dir, 'queue.json'), JSON.stringify({ version: 1, items: [] }))
+    const older = create()
+    await older.start()
+    expect(older.queuedRecompIds()).toEqual([])
   })
 })

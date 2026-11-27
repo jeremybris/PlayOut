@@ -18,6 +18,7 @@
   },
   "launch": {
     "conflict": "Las partidas guardadas de {title} han cambiado en este PC y en la carpeta Emulation desde la última copia. Elige cuáles conservar.",
+    "gone": "Las partidas guardadas de {title} ya no están en este PC. Restáuralas desde la carpeta Emulation o empieza de cero.",
     "confirm": "La carpeta Emulation tiene partidas guardadas que {machine} copió de un juego con el mismo nombre ({title}). ¿Usarlas?"
   }
 }

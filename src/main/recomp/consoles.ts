@@ -246,3 +246,18 @@ export function originDisplayName(systemId: string): string {
     ? systemId.toUpperCase()
     : systemId[0].toUpperCase() + systemId.slice(1)
 }
+
+/**
+ * The consoles a recompilation added in the browser may name (RecompBrowser's Add, and PlayOut's list in the
+ * metadata cloud): the systems this file has a name for, 'other' last. Each is a system of resources/systems or
+ * 'other', so the relay (metadata-relay/src/platforms.ts) takes them all (consoles.test.ts checks it).
+ */
+export const RECOMP_CONSOLE_IDS: readonly string[] = [
+  ...Object.keys(DISPLAY_NAMES).filter((id) => id !== 'other'),
+  'other'
+]
+
+/** Whether `systemId` is one of RECOMP_CONSOLE_IDS. */
+export function isRecompConsole(systemId: unknown): systemId is string {
+  return typeof systemId === 'string' && RECOMP_CONSOLE_IDS.includes(systemId)
+}

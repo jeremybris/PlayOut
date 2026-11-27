@@ -511,7 +511,11 @@ export function saveSourceText(source: InstalledRecomp['saveSource']): string {
 /** The save-copy line of the Saves section (the copy in the Emulation folder). */
 export function cloudStatusText(cloud: RecompCloudState): { text: string; tone?: 'warn' } {
   if (!cloud.enabled) return { text: t('recomp.cloud.off') }
-  if (cloud.conflict) return { text: t('recomp.cloud.conflict'), tone: 'warn' }
+  if (cloud.conflict)
+    return {
+      text: cloud.conflict.gone ? t('recomp.cloud.gone') : t('recomp.cloud.conflict'),
+      tone: 'warn'
+    }
   if (cloud.error) return { text: t('recomp.cloud.error', { error: cloud.error }), tone: 'warn' }
   if (cloud.pending) return { text: t('recomp.cloud.pending') }
   if (cloud.syncedAt)
@@ -519,12 +523,16 @@ export function cloudStatusText(cloud: RecompCloudState): { text: string; tone?:
   return { text: t('recomp.cloud.on') }
 }
 
-/** The conflict banner's sentence. */
+/** The conflict banner's sentence (also "the saves are gone from this PC", conflict.gone). */
 export function conflictText(conflict: NonNullable<RecompCloudState['conflict']>): string {
   const local = formatDate(conflict.localAt, 'medium')
   const cloud = formatDate(conflict.cloudAt, 'medium')
   // The dates are optional "(date)" after each side: punctuation only, so they are filled in here.
   const vars = { localAt: local ? ` (${local})` : '', cloudAt: cloud ? ` (${cloud})` : '' }
+  if (conflict.gone)
+    return conflict.cloudDevice
+      ? t('recomp.conflict.goneTextDevice', { cloudAt: vars.cloudAt, device: conflict.cloudDevice })
+      : t('recomp.conflict.goneText', { cloudAt: vars.cloudAt })
   return conflict.cloudDevice
     ? t('recomp.conflict.textDevice', { ...vars, device: conflict.cloudDevice })
     : t('recomp.conflict.text', vars)

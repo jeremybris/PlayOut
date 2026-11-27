@@ -38,6 +38,7 @@
     "stillArriving": "La copia de la carpeta Emulation aún está llegando (o está incompleta); PlayOut lo intentará de nuevo.",
     "stillArrivingMeta": "La copia de la carpeta Emulation aún está llegando (falta su meta.json o aún no se puede leer); PlayOut lo intentará de nuevo.",
     "noLocal": "No hay partidas guardadas en este PC para conservar.",
+    "freshChanged": "Mientras tanto, las partidas guardadas han vuelto a este PC, así que no se ha cambiado nada. Vuelve a elegir.",
     "noCloud": "No hay partidas guardadas en la carpeta Emulation para conservar.",
     "stillArrivingRetry": "La copia de la carpeta Emulation aún está llegando (o está incompleta); inténtalo de nuevo en un momento.",
     "tooManyFiles": "La carpeta de partidas guardadas {folder} tiene más de {max} archivos, así que no son solo partidas guardadas.",
@@ -177,6 +178,7 @@
   },
   "install": {
     "unverified": "Esta descarga no tiene suma de verificación publicada, así que PlayOut no pudo verificarla.",
+    "unscannedAdd": "La añadió alguien en PlayOut y no figura en ningún catálogo: nadie ha analizado esta descarga en busca de virus, solo se comprobó la suma de verificación de GitHub.",
     "notInstallable": "{file} no es un archivo que PlayOut pueda instalar (zip, 7z o un programa)",
     "noWindowsDownload": "{name} {tag} no tiene descarga para Windows",
     "noSpace": "No hay suficiente espacio libre: {name} necesita unos {needed} libres para instalarse ({free} libres)",
@@ -213,5 +215,20 @@
     "cwdAbove": "el juego se inicia en una carpeta que la contiene",
     "recompAround": "hay una recompilación instalada dentro o alrededor",
     "holdsGameFile": "contiene un archivo del juego que este lee"
+  },
+  "add": {
+    "notGithub": "No es un enlace de GitHub. Solo se pueden añadir repositorios de GitHub.",
+    "badUrl": "No se ha podido leer como repositorio. Pega su dirección, por ejemplo github.com/propietario/repositorio.",
+    "notFound": "No se ha encontrado ningún repositorio público ahí. Puede que sea privado, que haya cambiado de nombre o que se haya eliminado.",
+    "noReleases": "Ese repositorio no tiene versiones para descargar.",
+    "noWindows": "Ninguna versión de ese repositorio tiene una descarga para Windows.",
+    "alreadyListed": "{repo} ya está en el explorador.",
+    "rateLimited": "Se ha alcanzado el límite de comprobaciones de GitHub. Vuelve a intentarlo después de las {time}.",
+    "failed": "No se ha podido consultar GitHub: {error}",
+    "checkFirst": "Comprueba primero el repositorio.",
+    "gameMissing": "Escribe el nombre del juego.",
+    "gameNotPlain": "El nombre del juego no puede contener HTML ni enlaces de script.",
+    "consoleUnknown": "Elige una consola de la lista.",
+    "notAdded": "Esa recompilación no se añadió en este PC."
   }
 }

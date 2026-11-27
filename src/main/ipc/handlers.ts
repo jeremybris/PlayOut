@@ -1048,6 +1048,33 @@ export function createHandlers(s: AppServices): ApiHandlers {
     addRecompToLibrary(recompId) {
       return s.recomp.addRecompToLibrary(recompIdSchema.parse(recompId))
     },
+    checkRecompRepo(url) {
+      return s.recomp.checkRecompRepo(z.string().max(2048).parse(url))
+    },
+    addRecomp(input) {
+      return s.recomp.addRecomp(
+        z
+          .object({
+            id: z
+              .string()
+              .max(160)
+              .regex(/^github:[a-z0-9-]{1,39}\/[a-z0-9._-]{1,100}$/),
+            game: z.string().max(400),
+            systemId: z.string().max(30)
+          })
+          .strict()
+          .parse(input)
+      )
+    },
+    removeAddedRecomp(recompId, uninstall) {
+      return s.recomp.removeAddedRecomp(
+        recompIdSchema.parse(recompId),
+        z.boolean().parse(uninstall)
+      )
+    },
+    readRecompClipboard() {
+      return s.recomp.readRecompClipboard()
+    },
     refreshRecompCatalog() {
       return s.recomp.refreshRecompCatalog()
     },
@@ -1082,7 +1109,7 @@ export function createHandlers(s: AppServices): ApiHandlers {
     resolveRecompConflict(recompId, keep) {
       return s.recomp.resolveRecompConflict(
         recompIdSchema.parse(recompId),
-        z.enum(['local', 'cloud']).parse(keep)
+        z.enum(['local', 'cloud', 'fresh']).parse(keep)
       )
     },
     async getPcSaves(gameId) {
@@ -1103,7 +1130,10 @@ export function createHandlers(s: AppServices): ApiHandlers {
     },
     async resolvePcSaveConflict(gameId, keep) {
       notWhileMoving()
-      return s.pcSaves.resolve(idSchema.parse(gameId), z.enum(['local', 'cloud']).parse(keep))
+      return s.pcSaves.resolve(
+        idSchema.parse(gameId),
+        z.enum(['local', 'cloud', 'fresh']).parse(keep)
+      )
     },
     async answerPcSaveCopy(gameId, use) {
       notWhileMoving()

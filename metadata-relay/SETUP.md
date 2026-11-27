@@ -307,6 +307,51 @@ added by hand (`manual-` keys, made from folder names on the user's disk). If th
 can commit to the `database` branch (and open suggestions, as before), but cannot touch `main`, force-push or delete
 the branch, so history is never lost: rotate the key as described in step 5c and revert the commits.
 
+## Recompilation suggestions
+
+PlayOut's Recompilations browser has an **Add** button: a user pastes a GitHub repository the catalogs do not list,
+PlayOut checks it (public, a release with a Windows download) and shows it at once as "Added by you"; then the owner's
+PlayOut publishes it to `recomps/<owner>__<repo>.json` on `main`, and everyone else's sends it to
+`POST /suggest-recomp`. The relay reads the repository again (public, not disabled; its current name), reads its
+newest releases (one that is not a draft must carry a download), and opens a pull request from
+`suggest/recomp/<owner>__<repo>-<id>` that adds only that file, labelled `recomp-suggestion`. One PlayOut lists
+already (the file is on `main`) answers 409; a repository with an open suggestion answers with that pull request and
+writes nothing. Recompilation pull requests have a backlog of their own: no new one while `MAX_OPEN_RECOMP_SUGGESTIONS`
+(30; default `DEFAULT_MAX_OPEN_RECOMP_SUGGESTIONS` in `src/index.ts`) `suggest/recomp/` pull requests are open, and
+they never count toward `MAX_OPEN_SUGGESTIONS` (a pile of them cannot stop the game suggestions). PlayOut's owner
+screens do not list them: review them on github.com (label `recomp-suggestion`). The console must be one of PlayOut's
+(`src/recomp-consoles.ts`, the same list as `recomp-schema.json`), and the game and blurb hold no tabs or other
+control characters, so a record the relay writes is always one `check.yml` passes and every PlayOut keeps.
+
+What you do once:
+
+1. **Nothing in the rulesets.** `suggest/recomp/...` branches are under `suggest/**`, which the app may already
+   write (step 5b), and `check.yml` holds them to `recomps/*.json` by their branch name.
+2. **Push the metadata repository first** (its `recomp-schema.json`, `scripts/` and workflows, from PlayOut's
+   `metadata-repo/`): the check workflow reads its rules from `main`.
+3. **Deploy** the relay (`npx wrangler deploy`). It brings the `RATE_RECOMP_*` values; the counters live in the
+   existing `DB_LIMITS` Durable Object under a name of their own (`playout-recomps`), so no new class or migration is
+   needed. Without `DB_LIMITS`, `/suggest-recomp` answers 503.
+4. **Check it reads other repositories.** The reads use the app's installation token, which GitHub lets read public
+   repositories outside the installation; if it ever cannot, the request fails with 502 (it never falls back to
+   reading without signing in). Try it once:
+
+   ```powershell
+   curl.exe -s -X POST https://<your relay>/suggest-recomp -H "Content-Type: application/json" `
+     -d '{"url":"https://github.com/does-not/exist-xyz","game":"Test","systemId":"other","appVersion":"0.0.1","clientId":"setup-check-01"}'
+   ```
+
+   `400` with "the repository was not found" means it works (GitHub answered); `502` means the token cannot read
+   other repositories; `404 not found` means the deployed relay is older than this code.
+
+Limits: `RATE_RECOMP_*_PER_HOUR` in `wrangler.toml` (5 per PlayOut install, 10 per IP, 15 per IPv6 `/48`, 30 in total
+per hour), checked before GitHub is asked anything; a request turned away counts apart and takes none of the hour's
+suggestions. A refused repository (missing, private, no release with a download, a name that cannot be stored)
+counts against its address and in a total of its own, `RATE_RECOMP_TURNED_AWAY_GLOBAL_PER_HOUR` (400), far above the
+accepted ones, so a few addresses cannot block every honest suggestion for the hour; "listed already" (409) and
+"suggested already" count against the sender's address only. A repository name the relay cannot store (`..`, a
+trailing `.`) answers 400, never 502 (which PlayOut would retry).
+
 ## Maintenance
 
 - Logs: `npx wrangler tail` shows requests live (validation errors and GitHub failures are logged; keys and
@@ -316,6 +361,23 @@ the branch, so history is never lost: rotate the key as described in step 5c and
 - Code changes: `npm test`, then `npx wrangler deploy`.
 
 ## What the relay accepts
+
+`POST /suggest-recomp` with `Content-Type: application/json`, at most 64 KB:
+
+```json
+{
+  "url": "https://github.com/Zelda64Recomp/Zelda64Recomp",
+  "game": "The Legend of Zelda: Majora's Mask",
+  "systemId": "n64",
+  "blurb": "Static recompilation of Majora's Mask for PC.",
+  "appVersion": "0.9.92",
+  "clientId": "a-random-install-id"
+}
+```
+
+`url` is exactly `https://github.com/<owner>/<repo>` (an optional trailing `/`; no `.git`, query or hash); `systemId`
+is `other` or a system of `src/platforms.ts`; `game` (at most 200 characters) and `blurb` (optional, at most 500)
+are one line of plain text. Anything else is refused with 400.
 
 `POST /suggest` with `Content-Type: application/json`, at most 64 KB:
 

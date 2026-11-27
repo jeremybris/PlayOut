@@ -14,7 +14,9 @@ import {
   Heart,
   ListFilter,
   LibraryBig,
+  Plus,
   RotateCcw,
+  UserPlus,
   Search,
   Sparkles,
   Star,
@@ -55,13 +57,18 @@ import { useLibraryStore } from '../../state/library'
 import { useUiStore } from '../../state/ui'
 import { catalogSourceName, progressText } from '../Settings/sections/recompText'
 import {
+  addedMark,
+  addedMarkText,
+  removeAddedMessage,
   browseFilters,
   browseSorts,
   favoriteTitles,
   searchTitles,
   sortTitles,
+  titleIndexOf,
   type RecompBrowseFilter
 } from './browseView'
+import { RecompAddDialog } from './RecompAddDialog'
 import './recompBrowser.css'
 
 const log = createLog('recomp-browser')
@@ -73,7 +80,8 @@ const PAGE = 60
 /**
  * The recompilation browser (Settings › Recompilations › Browse recompilations): every recompilation in the
  * decomp-buddy and RecompLauncher catalogs, by game. Search, sort (recently added, recently updated, GitHub stars),
- * and a game's recompilations side by side with Install, its GitHub page and the game's own Recompilation page.
+ * and a game's recompilations side by side with Install, its GitHub page and the game's own Recompilation page. Add
+ * (RecompAddDialog) puts a GitHub repository in the browser: "Added by you" at once, sent for approval by main.
  */
 export function RecompBrowser({ onClose }: { onClose: () => void }): ReactElement {
   const t = useT()
@@ -88,6 +96,9 @@ export function RecompBrowser({ onClose }: { onClose: () => void }): ReactElemen
   const [sort, setSort] = useState<RecompBrowseSort>('added')
   const [shown, setShown] = useState(PAGE)
   const [selected, setSelected] = useState<string | null>(null)
+  const [adding, setAdding] = useState(false)
+  /** A recompilation to show once the list has it (just added, or Show it). */
+  const [reveal, setReveal] = useState<string | null>(null)
 
   const load = useCallback(() => {
     api
@@ -136,6 +147,29 @@ export function RecompBrowser({ onClose }: { onClose: () => void }): ReactElemen
     return [...sorted.filter(favourite), ...sorted.filter((t) => !favourite(t))]
   }, [view, query, sort, filter, favorites])
   const refreshFavourites = (): void => setFavorites(null)
+  // Show a recompilation (just added, or Show it) once the list has it: its game selected, the list long enough to
+  // hold it, and a pad's focus on its row.
+  const [revealed, setRevealed] = useState<{ key: string; n: number } | null>(null)
+  const revealAt = reveal ? titleIndexOf(list, reveal) : null
+  if (revealAt) {
+    setReveal(null)
+    setSelected(revealAt.key)
+    if (revealAt.index >= shown) setShown(revealAt.index + 1)
+    setRevealed((r) => ({ key: revealAt.key, n: (r?.n ?? 0) + 1 }))
+  }
+  useEffect(() => {
+    if (!revealed) return undefined
+    const timer = setTimeout(() => {
+      if (doesFocusableExist(key('title', revealed.key))) void setFocus(key('title', revealed.key))
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [revealed])
+  const showEntry = (id: string): void => {
+    setQuery('')
+    setFilter('all')
+    refreshFavourites()
+    setReveal(id)
+  }
   // The game shown on the right is always one of the listed rows.
   const visible = list.slice(0, shown)
   const current = visible.find((t) => t.key === selected) ?? visible[0] ?? null
@@ -163,6 +197,21 @@ export function RecompBrowser({ onClose }: { onClose: () => void }): ReactElemen
   }, [shown])
 
   const install = (e: RecompBrowseEntry): void => {
+    if (recompBusy(progress[e.id])) return
+    // Listed only because someone added it: nobody virus-scanned it, said before the first install.
+    if (e.unscanned && !e.installed) {
+      openModal({
+        type: 'confirm',
+        title: t('recomp.browser.unscannedTitle', { name: e.name }),
+        message: t('recomp.browser.unscannedMessage', { repo: e.repo }),
+        confirmLabel: t('recomp.browser.unscannedConfirm'),
+        onConfirm: () => startInstall(e)
+      })
+      return
+    }
+    startInstall(e)
+  }
+  const startInstall = (e: RecompBrowseEntry): void => {
     if (recompBusy(progress[e.id])) return
     // Install turns into a progress line: keep a pad's focus on this recompilation's card.
     if (getCurrentFocusKey() === key('install', e.id)) void setFocus(key('repo', e.id))
@@ -251,6 +300,44 @@ export function RecompBrowser({ onClose }: { onClose: () => void }): ReactElemen
         )
       })
   }
+  // Remove: a recompilation added on this PC leaves the browser (a waiting suggestion is not sent); an installed one
+  // may go to the Recycle Bin too, or stay installed.
+  const removeAdded = (e: RecompBrowseEntry): void => {
+    openModal({
+      type: 'confirm',
+      title: t('recomp.browser.removeAddedTitle'),
+      message: removeAddedMessage(e),
+      confirmLabel: t('recomp.browser.removeAddedConfirm'),
+      danger: true,
+      ...(e.installed
+        ? {
+            option: {
+              label: t('recomp.browser.removeAddedUninstall'),
+              description: t('recomp.browser.removeAddedUninstallHint'),
+              checked: false
+            }
+          }
+        : {}),
+      onConfirm: (uninstall) => {
+        api
+          .removeAddedRecomp(e.id, e.installed && uninstall)
+          .then(() => {
+            toast(t('recomp.browser.removedAdded', { name: e.name }))
+            load()
+          })
+          .catch((err) => {
+            log.error('removeAddedRecomp failed', err)
+            toast(
+              t('recomp.browser.removeAddedFailed', {
+                name: e.name,
+                error: ipcErrorMessage(err) || t('recomp.browser.unknownError')
+              }),
+              'error'
+            )
+          })
+      }
+    })
+  }
   const openRepo = (e: RecompBrowseEntry): void => {
     api.openExternal(e.repoUrl).catch((err) => {
       log.error('openExternal failed', err)
@@ -293,6 +380,21 @@ export function RecompBrowser({ onClose }: { onClose: () => void }): ReactElemen
         )
       ) : (
         <>
+          {adding ? (
+            <RecompAddDialog
+              onClose={() => {
+                setAdding(false)
+                setTimeout(() => {
+                  if (doesFocusableExist(key('add'))) void setFocus(key('add'))
+                }, 0)
+              }}
+              onAdded={(id) => {
+                load()
+                showEntry(id)
+              }}
+              onShow={showEntry}
+            />
+          ) : null}
           <div className="recomp-browser__bar">
             <TextField
               focusKey={key('search')}
@@ -308,6 +410,9 @@ export function RecompBrowser({ onClose }: { onClose: () => void }): ReactElemen
                 refreshFavourites()
               }}
             />
+            <Button focusKey={key('add')} icon={<Plus />} onPress={() => setAdding(true)}>
+              {t('recomp.browser.add')}
+            </Button>
             <SelectField
               focusKey={key('sort')}
               variant="pill"
@@ -390,6 +495,7 @@ export function RecompBrowser({ onClose }: { onClose: () => void }): ReactElemen
                   onRepo={openRepo}
                   onFavorite={toggleFavorite}
                   onLibrary={toggleLibrary}
+                  onRemove={removeAdded}
                   onOpenGame={(gameId) => openModal({ type: 'recomp', gameId })}
                 />
               ) : null}
@@ -536,6 +642,7 @@ function TitleDetail({
   onRepo,
   onFavorite,
   onLibrary,
+  onRemove,
   onOpenGame
 }: {
   title: RecompBrowseTitle
@@ -544,6 +651,7 @@ function TitleDetail({
   onRepo: (e: RecompBrowseEntry) => void
   onFavorite: (e: RecompBrowseEntry) => void
   onLibrary: (e: RecompBrowseEntry) => void
+  onRemove: (e: RecompBrowseEntry) => void
   onOpenGame: (gameId: string) => void
 }): ReactElement {
   const t = useT()
@@ -585,6 +693,7 @@ function TitleDetail({
             onRepo={() => onRepo(e)}
             onFavorite={() => onFavorite(e)}
             onLibrary={() => onLibrary(e)}
+            onRemove={() => onRemove(e)}
           />
         ))}
       </div>
@@ -614,7 +723,8 @@ function EntryCard({
   onInstall,
   onRepo,
   onFavorite,
-  onLibrary
+  onLibrary,
+  onRemove
 }: {
   entry: RecompBrowseEntry
   progress: ReturnType<typeof useRecompStore.getState>['progress'][string] | undefined
@@ -622,9 +732,11 @@ function EntryCard({
   onRepo: () => void
   onFavorite: () => void
   onLibrary: () => void
+  onRemove: () => void
 }): ReactElement {
   const t = useT()
   const busy = recompBusy(progress)
+  const mine = addedMark(entry)
   const facts = [
     entry.latestTag,
     entry.updatedAt
@@ -662,7 +774,11 @@ function EntryCard({
       </div>
       {entry.blurb ? <p className="recomp-browser-entry__blurb">{entry.blurb}</p> : null}
       <div className="recomp-browser-entry__chips">
-        {entry.isNew ? (
+        {mine ? (
+          <Chip accent icon={<UserPlus />} title={mine.title ?? undefined}>
+            {addedMarkText(mine)}
+          </Chip>
+        ) : entry.isNew ? (
           <Chip accent icon={<Sparkles />}>
             {t('recomp.browser.new')}
           </Chip>
@@ -710,6 +826,16 @@ function EntryCard({
         <Button focusKey={key('repo', entry.id)} icon={<ExternalLink />} onPress={onRepo}>
           {t('recomp.browser.projectPage')}
         </Button>
+        {mine && !busy ? (
+          <Button
+            focusKey={key('remove', entry.id)}
+            variant="ghost"
+            icon={<Trash2 />}
+            onPress={onRemove}
+          >
+            {t('recomp.browser.removeAdded')}
+          </Button>
+        ) : null}
       </div>
     </article>
   )

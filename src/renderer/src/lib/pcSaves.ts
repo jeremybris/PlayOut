@@ -19,7 +19,11 @@ export function pcSaveStatus(
       }),
       tone: 'warn'
     }
-  if (view.conflict) return { text: t('pcSaves.status.conflict'), tone: 'warn' }
+  if (view.conflict)
+    return {
+      text: view.conflict.gone ? t('pcSaves.status.gone') : t('pcSaves.status.conflict'),
+      tone: 'warn'
+    }
   if (view.running) return { text: t('pcSaves.status.running') }
   if (view.error) return { text: t('pcSaves.status.error', { error: view.error }), tone: 'warn' }
   if (view.pending) return { text: t('pcSaves.status.pending') }
@@ -34,7 +38,7 @@ export function pcSaveStatus(
   return { text: t('pcSaves.status.never') }
 }
 
-/** The conflict prompt's sentence (the two sides' dates when known). */
+/** The conflict prompt's sentence (the two sides' dates when known; also "the saves are gone", conflict.gone). */
 export function pcSaveConflictText(
   conflict: NonNullable<PcSaveView['conflict']>,
   t: Translate
@@ -42,6 +46,13 @@ export function pcSaveConflictText(
   const local = formatDate(conflict.localAt, 'medium')
   const cloud = formatDate(conflict.cloudAt, 'medium')
   const vars = { localAt: local ? ` (${local})` : '', cloudAt: cloud ? ` (${cloud})` : '' }
+  if (conflict.gone)
+    return conflict.cloudDevice
+      ? t('pcSaves.conflict.goneTextDevice', {
+          cloudAt: vars.cloudAt,
+          device: conflict.cloudDevice
+        })
+      : t('pcSaves.conflict.goneText', { cloudAt: vars.cloudAt })
   return conflict.cloudDevice
     ? t('pcSaves.conflict.textDevice', { ...vars, device: conflict.cloudDevice })
     : t('pcSaves.conflict.text', vars)

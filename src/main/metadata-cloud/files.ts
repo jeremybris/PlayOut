@@ -1,11 +1,23 @@
 // The metadata cloud's files in userData/metadata-cloud: config.json (relay URL, the owner token encrypted with
 // safeStorage like accounts.json, the install's random suggestion id), cache.json (the last all.json and its ETag, so
 // the cloud's corrections show offline and at once on start) and queue.json (edits waiting to be published or
-// suggested). Whatever a file holds is reduced to valid values: a damaged entry is dropped, never an exception.
+// suggested, and recompilations added in the browser waiting to be published or suggested). Whatever a file holds is
+// reduced to valid values: a damaged entry is dropped, never an exception.
 import { randomUUID } from 'crypto'
 import type { MetadataTokenState } from '../../shared/metadata-cloud'
 import type { MetadataEdit } from '../../shared/metadata-edit'
+import type { CloudRecomp } from '../../shared/recomp'
 import { safeParseMetadataEdit } from '../metadata-edits/schema'
+import { isRecompConsole } from '../recomp/consoles'
+import { repoKey } from '../recomp/catalog'
+import {
+  CLOUD_RECOMP_BLURB_MAX,
+  CLOUD_RECOMP_GAME_MAX,
+  githubRepoOf,
+  isSafeLine,
+  parseCloudRecomp,
+  parseCloudRecomps
+} from './recomps'
 
 export interface CloudConfigFile {
   version: 1
@@ -36,6 +48,19 @@ export interface CloudCacheFile {
    * them, a newer build replaces them, or they are older than PENDING_MAX_MS.
    */
   pending?: Record<string, PendingWrite>
+  /**
+   * all.json's `recomps` (PlayOut's list of recompilations, parseCloudRecomps). Absent in a cache an older PlayOut
+   * wrote, which never read them: such a cache's ETag is not sent, so the next download brings them.
+   */
+  recomps?: CloudRecomp[]
+  /** The owner's own recompilation publishes all.json may not carry yet (as `pending`), by id. */
+  pendingRecomps?: Record<string, PendingRecomp>
+}
+
+/** One owner publish of a recompilation waiting for all.json. */
+export interface PendingRecomp {
+  recomp: CloudRecomp
+  at: string
 }
 
 /** One owner write waiting for all.json: the game's whole fields on main after the write, and when it was made. */
@@ -54,9 +79,25 @@ export interface QueuedEdit {
   lastError?: string
 }
 
+/** A recompilation added in the browser, waiting to be published (owner) or suggested (anyone else). */
+export interface QueuedRecomp {
+  /** "github:<owner>/<repo>". */
+  id: string
+  /** "<owner>/<repo>" as GitHub spells it. */
+  repo: string
+  game: string
+  systemId: string
+  blurb?: string
+  queuedAt: string
+  attempts: number
+  lastError?: string
+}
+
 export interface QueueFile {
   version: 1
   items: QueuedEdit[]
+  /** Kept apart from the edits: an older PlayOut reads only `items` (and drops this list when it saves). */
+  recomps: QueuedRecomp[]
 }
 
 /** The most edits kept waiting; the oldest go first when there are more. */
@@ -115,6 +156,18 @@ export function normalizeCache(raw: unknown): CloudCacheFile | null {
   out.generatedAt = optText(raw.generatedAt, 64)
   out.relayUrl = optText(raw.relayUrl, 500)
   if (isObject(raw.games)) out.games = raw.games
+  if (Array.isArray(raw.recomps)) out.recomps = parseCloudRecomps(raw.recomps)
+  if (isObject(raw.pendingRecomps)) {
+    const pending: Record<string, PendingRecomp> = {}
+    for (const entry of Object.values(raw.pendingRecomps)) {
+      if (!isObject(entry)) continue
+      const recomp = parseCloudRecomp(entry.recomp)
+      const at = optText(entry.at, 64)
+      if (!recomp || !at || Number.isNaN(Date.parse(at))) continue
+      pending[recomp.id] = { recomp, at }
+    }
+    if (Object.keys(pending).length) out.pendingRecomps = pending
+  }
   if (isObject(raw.pending)) {
     const pending: Record<string, PendingWrite> = {}
     for (const [key, entry] of Object.entries(raw.pending)) {
@@ -130,7 +183,36 @@ export function normalizeCache(raw: unknown): CloudCacheFile | null {
 }
 
 export function emptyQueue(): QueueFile {
-  return { version: 1, items: [] }
+  return { version: 1, items: [], recomps: [] }
+}
+
+/** A waiting recompilation as stored, or null when it is not a valid one. */
+export function parseQueuedRecomp(item: unknown): QueuedRecomp | null {
+  if (!isObject(item)) return null
+  const repo = githubRepoOf(item.repo)
+  if (!repo || item.id !== repoKey('github', repo) || !isRecompConsole(item.systemId)) return null
+  const game = typeof item.game === 'string' ? item.game.trim() : ''
+  if (!game || game.length > CLOUD_RECOMP_GAME_MAX || !isSafeLine(game)) return null
+  const blurb =
+    typeof item.blurb === 'string' &&
+    item.blurb.trim() &&
+    item.blurb.length <= CLOUD_RECOMP_BLURB_MAX &&
+    isSafeLine(item.blurb)
+      ? item.blurb.trim()
+      : undefined
+  return {
+    id: item.id,
+    repo,
+    game,
+    systemId: item.systemId,
+    ...(blurb ? { blurb } : {}),
+    queuedAt: optText(item.queuedAt, 64) ?? new Date(0).toISOString(),
+    attempts:
+      typeof item.attempts === 'number' && Number.isInteger(item.attempts) && item.attempts >= 0
+        ? item.attempts
+        : 0,
+    lastError: optText(item.lastError, 500)
+  }
 }
 
 export function normalizeQueue(raw: unknown): QueueFile | null {
@@ -154,6 +236,14 @@ export function normalizeQueue(raw: unknown): QueueFile | null {
     })
   }
   out.items = out.items.slice(-MAX_QUEUED)
+  const ids = new Set<string>()
+  for (const item of Array.isArray(raw.recomps) ? raw.recomps : []) {
+    const r = parseQueuedRecomp(item)
+    if (!r || ids.has(r.id)) continue
+    ids.add(r.id)
+    out.recomps.push(r)
+  }
+  out.recomps = out.recomps.slice(-MAX_QUEUED)
   return out
 }
 

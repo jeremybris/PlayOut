@@ -1,6 +1,7 @@
 // A game the user added could not start because a PC Saves question is open (main/pc-saves): both sides' saves
-// changed since the last copy (Keep this PC's saves / Keep the Emulation folder's copy), or another PC's copy looks
-// like this game's ("Use the copy from <PC>?"). Answered, the game starts.
+// changed since the last copy (Keep this PC's saves / Keep the Emulation folder's copy), the saves are gone from this
+// PC, which copied them before (Restore from the Emulation folder / Start fresh), or another PC's copy looks like this
+// game's ("Use the copy from <PC>?"). Answered, the game starts.
 import type { LaunchError } from '@shared/types'
 import type { PcSaveView } from '@shared/pc-saves'
 import { useEffect, useState, type ReactElement } from 'react'
@@ -72,7 +73,9 @@ export function PcSaveConflictDialog({
   const conflict = view?.conflict ?? null
   const heading = confirm
     ? t('pcSaves.confirm.title', { machine: confirm.machine })
-    : t('pcSaves.conflict.title', { title })
+    : conflict?.gone
+      ? t('pcSaves.conflict.goneTitle', { title })
+      : t('pcSaves.conflict.title', { title })
   const message = confirm
     ? t('pcSaves.confirm.text', { machine: confirm.machine, title: confirm.title || title })
     : conflict
@@ -85,7 +88,9 @@ export function PcSaveConflictDialog({
       narrow
       hideClose
       focusKey="pc-save-conflict"
-      preferredChildFocusKey="pc-save-conflict:close"
+      preferredChildFocusKey={
+        !confirm && conflict?.gone ? 'pc-save-conflict:restore' : 'pc-save-conflict:close'
+      }
       title={heading}
       subtitle={title || undefined}
       onClose={onClose}
@@ -111,6 +116,26 @@ export function PcSaveConflictDialog({
                 onPress={() => answer(() => api.answerPcSaveCopy(gameId, true))}
               >
                 {t('pcSaves.confirm.use')}
+              </Button>
+            </>
+          ) : conflict?.gone ? (
+            // Restore first, as on the game's page and the recompilation's page; 'fresh' is refused by main once the
+            // saves came back (the two-sided question shows then).
+            <>
+              <Button
+                focusKey="pc-save-conflict:restore"
+                variant="primary"
+                disabled={busy}
+                onPress={() => answer(() => api.resolvePcSaveConflict(gameId, 'cloud'))}
+              >
+                {t('pcSaves.conflict.restore')}
+              </Button>
+              <Button
+                focusKey="pc-save-conflict:fresh"
+                disabled={busy}
+                onPress={() => answer(() => api.resolvePcSaveConflict(gameId, 'fresh'))}
+              >
+                {t('pcSaves.conflict.startFresh')}
               </Button>
             </>
           ) : conflict ? (

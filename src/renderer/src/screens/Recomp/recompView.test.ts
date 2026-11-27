@@ -624,6 +624,17 @@ describe('saves and their copy', () => {
       "Your saves changed on this PC and in the Emulation folder's copy from STEAMDECK. Pick the ones to keep; the others are kept as a backup."
     )
   })
+
+  it('words saves gone from this PC', () => {
+    const gone = { localAt: '', cloudAt: '', cloudDevice: 'STEAMDECK', gone: true }
+    expect(conflictText(gone)).toMatch(
+      /^This PC has no saves any more, but the Emulation folder has a copy from STEAMDECK\. Restore it, or start fresh/
+    )
+    expect(cloudStatusText({ ...CLOUD_OFF, enabled: true, conflict: gone })).toEqual({
+      text: "This PC's saves are gone: restore them from the Emulation folder or start fresh.",
+      tone: 'warn'
+    })
+  })
 })
 
 describe('misc', () => {

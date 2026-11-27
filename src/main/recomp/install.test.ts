@@ -15,6 +15,7 @@ import {
   safeRecompFolder,
   safeRecompId,
   uninstallRecomp,
+  unscannedWarning,
   unverifiedWarning,
   writeZip,
   type InstallDeps
@@ -209,6 +210,35 @@ describe('installRecomp', () => {
     expect(rec.verified).toBe('unverified')
     expect(rec.sha256).toBe(sha(served.get(asset.browser_download_url)!))
     expect(progress.at(-1)).toMatchObject({ phase: 'done', warning: unverifiedWarning() })
+  })
+
+  it('warns for a recompilation someone added (never scanned), even with GitHub’s checksum', async () => {
+    for (const sources of [['user'], ['playout'], ['playout', 'user']] as const) {
+      progress.length = 0
+      const asset = await zipAsset('Game-windows.zip', { 'Game.exe': 'x' })
+      const rec = await installRecomp(
+        entry({ sources: [...sources] }),
+        release('v1', [asset]),
+        null,
+        deps()
+      )
+      expect(rec.verified, sources.join()).toBe('github')
+      expect(progress.at(-1), sources.join()).toMatchObject({
+        phase: 'done',
+        warning: unscannedWarning()
+      })
+      await rm(rec.dir, { recursive: true, force: true })
+    }
+    // A catalog's entry with the same checksum: no warning.
+    progress.length = 0
+    const asset = await zipAsset('Game-windows.zip', { 'Game.exe': 'x' })
+    await installRecomp(
+      entry({ sources: ['decomp-buddy', 'playout'] }),
+      release('v1', [asset]),
+      null,
+      deps()
+    )
+    expect(progress.every((p) => p.warning === null)).toBe(true)
   })
 
   it('fails on a checksum mismatch and installs nothing', async () => {

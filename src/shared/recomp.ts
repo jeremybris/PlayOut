@@ -141,8 +141,19 @@ export interface RecompEntry {
   coverUrl: string | null
   heroUrl: string | null
   archived: boolean
-  /** Which catalogs list it. */
-  sources: ('decomp-buddy' | 'recomplauncher')[]
+  /**
+   * Which catalogs list it: decomp-buddy and RecompLauncher; 'playout' = added by someone in PlayOut's browser and
+   * approved (the metadata cloud's all.json); 'user' = added on this PC (RecompBrowser's Add, not approved yet).
+   */
+  sources: ('decomp-buddy' | 'recomplauncher' | 'playout' | 'user')[]
+}
+
+/**
+ * Whether a recompilation is listed only because someone added it (this PC's Add, or PlayOut's list): no catalog
+ * virus-scanned its download, so its install is never called verified beyond GitHub's own checksum.
+ */
+export function isUnscannedRecomp(sources: readonly RecompEntry['sources'][number][]): boolean {
+  return sources.length > 0 && sources.every((s) => s === 'user' || s === 'playout')
 }
 
 /** Several recompilations of the same game, shown as one entry. */
@@ -253,8 +264,16 @@ export interface RecompCloudState {
   pending: boolean
   /** Last problem, shown in the tab. */
   error: string | null
-  /** Set when both sides changed: the user picks; nothing is overwritten meanwhile. */
-  conflict: { localAt: string; cloudAt: string; cloudDevice: string } | null
+  /**
+   * Set when both sides changed: the user picks; nothing is overwritten meanwhile. `gone`: this PC synced the saves
+   * before and they are gone from it: Restore from the Emulation folder ('cloud') or Start fresh ('local').
+   */
+  conflict: { localAt: string; cloudAt: string; cloudDevice: string; gone?: boolean } | null
+  /**
+   * The user chose Start fresh for saves gone from this PC: no saves here is not copied back over, and this PC's next
+   * saves replace the copy (cleared once both sides are the same again).
+   */
+  freshStart?: boolean
 }
 
 /** A release of a recompilation, for the Updates list. */
@@ -586,7 +605,125 @@ export interface RecompBrowseEntry {
   favorite: boolean
   /** Its own library card (Add to library), or null when it has none. */
   libraryGameId: string | null
+  /**
+   * Added in the browser on this PC (RecompBrowser's Add), not in a catalog or PlayOut's list yet: how far it got
+   * (AddedRecompState). Absent for every other recompilation.
+   */
+  added?: AddedRecompState
+  /** Added here and waiting for the owner's approval (queued or suggested). */
+  awaiting?: boolean
+  /**
+   * Added here and not sent for approval: 'off' while sending is off (Suggest my edits; it is sent once that is on),
+   * 'refused' when the metadata cloud refused it (`refusedReason` says why). Absent otherwise.
+   */
+  notSent?: 'off' | 'refused'
+  refusedReason?: string
+  /**
+   * Listed only because someone added it (this PC, or PlayOut's list after the owner approved it): no catalog
+   * virus-scanned its download, only GitHub's checksum is checked. The browser warns before installing it.
+   */
+  unscanned?: boolean
 }
+
+/**
+ * How far a recompilation added in the browser got: 'local' only on this PC (sending is off, or it was refused),
+ * 'queued' waiting to be sent, 'suggested' a pull request waits for the owner, 'published' the owner put it in
+ * PlayOut's list (it reaches every PlayOut once all.json carries it).
+ */
+export type AddedRecompState = 'local' | 'queued' | 'suggested' | 'published'
+
+/** A recompilation the user added in the browser (userData/recomp-added.json). */
+export interface AddedRecomp {
+  /** "github:<owner>/<repo>" lower case, the repository's name as GitHub spells it now. */
+  id: string
+  /** "<owner>/<repo>" as GitHub spells it. */
+  repo: string
+  game: string
+  /** PlayOut system id of the original console, or 'other'. */
+  systemId: string
+  /** The repository's description (one line, plain text). */
+  blurb?: string
+  stars?: number | null
+  license?: string | null
+  archived?: boolean
+  fork?: boolean
+  addedAt: string
+  state: AddedRecompState
+  /** The suggestion's pull request. */
+  prUrl?: string
+  /** Why the metadata cloud refused it (state 'local'); absent when it was not refused. */
+  refused?: string
+}
+
+/**
+ * How sending an add went (the metadata cloud's submitRecomp): its state, the pull request, why it was refused; or
+ * state null when there is nothing to note (a flush sent it meanwhile and told its listeners, or it was withdrawn).
+ */
+export interface RecompSendResult {
+  state: AddedRecompState | null
+  prUrl?: string
+  refused?: string
+}
+
+/** A recompilation in PlayOut's own list (the metadata cloud's all.json `recomps`): added by someone and approved. */
+export interface CloudRecomp {
+  id: string
+  repo: string
+  repoUrl: string
+  game: string
+  systemId: string
+  blurb: string
+  addedAt: string | null
+}
+
+/** What adding a recompilation sends (RecompBrowser's Add): the repository and what the user says of it. */
+export interface RecompAddInput {
+  /** The repository's id from checkRecompRepo ("github:<owner>/<repo>"). */
+  id: string
+  game: string
+  systemId: string
+}
+
+/** Why a repository cannot be added (checkRecompRepo): mainRecomp.add.<reason>. */
+export type RecompRepoRefusal =
+  | 'notGithub'
+  | 'badUrl'
+  | 'notFound'
+  | 'noReleases'
+  | 'noWindows'
+  | 'alreadyListed'
+  | 'rateLimited'
+  | 'failed'
+
+/** The result of checking a repository before it is added. */
+export type RecompRepoCheck =
+  | {
+      ok: true
+      id: string
+      /** "owner/repo" as GitHub spells it. */
+      repo: string
+      repoUrl: string
+      description: string
+      stars: number | null
+      license: string | null
+      archived: boolean
+      fork: boolean
+      /** The newest release with a Windows download, and that download. */
+      tag: string
+      asset: { name: string; size: number }
+      /** The game, guessed from the repository's name and description (the user may change it). */
+      game: string
+      /** Consoles to choose from (PlayOut system ids, with their names), 'other' last. */
+      consoles: { id: string; name: string }[]
+    }
+  | {
+      ok: false
+      reason: RecompRepoRefusal
+      /** In words, for the dialog. */
+      message: string
+      /** alreadyListed: the recompilation in the browser (Show it). */
+      existingId?: string
+    }
 
 /** One game in the browser, with every recompilation of it. */
 export interface RecompBrowseTitle {

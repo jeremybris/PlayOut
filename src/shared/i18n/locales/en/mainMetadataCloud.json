@@ -20,6 +20,7 @@
   "tokenRefusedPublish": "{title}: GitHub refused the token ({error}); check it in Settings › Metadata",
   "publishFailed": "{title}: could not publish ({error})",
   "noRelay": "No suggestion service is set up yet",
+  "recompNotSendable": "its name or description holds text the metadata repository refuses (HTML, script links or control characters)",
   "relayUnreachable": "the suggestion service could not be reached ({error})",
   "suggested": "{title}: suggested to the PlayOut metadata maintainer",
   "suggestionRefused": "{title}: the suggestion was refused ({error})",

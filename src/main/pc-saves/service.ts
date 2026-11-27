@@ -81,7 +81,7 @@ export interface PcSavesService {
   setFolder(gameId: string, path: string | null): Promise<PcSaveView>
   /** Copy now (refused while the game runs). */
   syncNow(gameId: string): Promise<PcSaveView>
-  resolve(gameId: string, keep: 'local' | 'cloud'): Promise<PcSaveView>
+  resolve(gameId: string, keep: 'local' | 'cloud' | 'fresh'): Promise<PcSaveView>
   /** The answer to "Use the copy from <PC>?". */
   answerCopy(gameId: string, use: boolean): Promise<PcSaveView>
   /**
@@ -607,7 +607,9 @@ export function createPcSavesService(deps: PcSavesDeps): PcSavesService {
                   title: game.title,
                   machine: v.confirm.machine
                 })
-              : tMain('mainPcSaves.launch.conflict', { title: game.title })
+              : v.conflict?.gone
+                ? tMain('mainPcSaves.launch.gone', { title: game.title })
+                : tMain('mainPcSaves.launch.conflict', { title: game.title })
           }
         }
         if (v.error) log.warn(`pc saves: ${game.title}: before play: ${v.error}`)

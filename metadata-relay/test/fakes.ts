@@ -172,6 +172,14 @@ export class FakeGitHub {
    * GitHub App); set it to a user for a relay running on GITHUB_TOKEN.
    */
   author: { login: string; type: string } | null = null
+  /**
+   * Other repositories on this GitHub (a recompilation's), read only: lowercase "owner/repo" -> what GET
+   * /repos/{owner}/{repo} and its /releases answer. Their reads are logged in `otherCalls`, never in `calls`.
+   */
+  readonly otherRepos = new Map<string, { info: Record<string, unknown>; releases: unknown[] }>()
+  readonly otherCalls: { method: string; path: string; auth: string | null }[] = []
+  /** Answer every read of another repository with this status (a token that may not read them). */
+  otherReposStatus: number | null = null
   /** Every commit by sha (a branch's live files win for its current sha: tests change them in place). */
   private readonly commits = new Map<string, Commit>()
   private readonly trees = new Map<string, Map<string, string>>()
@@ -315,6 +323,22 @@ export class FakeGitHub {
     const method = init?.method ?? 'GET'
     const headers = new Headers(init?.headers)
     const body = (init?.body ? JSON.parse(String(init.body)) : undefined) as CallBody | undefined
+    const other =
+      url.origin === 'https://api.github.com' && !url.pathname.startsWith(`${PREFIX}/`)
+        ? /^\/repos\/([^/]+)\/([^/]+)(\/releases)?$/.exec(url.pathname)
+        : null
+    if (other && method === 'GET') {
+      this.otherCalls.push({
+        method,
+        path: url.pathname + url.search,
+        auth: headers.get('Authorization')
+      })
+      if (this.otherReposStatus !== null) return reply(this.otherReposStatus, { message: 'forced' })
+      const name = `${decodeURIComponent(other[1])}/${decodeURIComponent(other[2])}`.toLowerCase()
+      const repo = this.otherRepos.get(name)
+      if (!repo) return reply(404, { message: 'Not Found' })
+      return reply(200, other[3] ? repo.releases : repo.info)
+    }
     if (url.origin !== 'https://api.github.com' || !url.pathname.startsWith(`${PREFIX}/`)) {
       this.strayCalls.push({ method, url: url.toString() })
       return reply(404, { message: 'Not Found' })
@@ -478,6 +502,28 @@ export class FakeGitHub {
       )
     }
     return reply(404, { message: 'Not Found' })
+  }
+}
+
+/** A public repository as GET /repos answers it, and its releases (one with a Windows zip by default). */
+export function publicRepo(
+  fullName: string,
+  patch: Record<string, unknown> = {},
+  releases: unknown[] = [
+    { tag_name: 'v1.0.0', draft: false, prerelease: false, assets: [{ name: 'Game-win64.zip' }] }
+  ]
+): { info: Record<string, unknown>; releases: unknown[] } {
+  return {
+    info: {
+      full_name: fullName,
+      private: false,
+      visibility: 'public',
+      disabled: false,
+      archived: false,
+      fork: false,
+      ...patch
+    },
+    releases
   }
 }
 

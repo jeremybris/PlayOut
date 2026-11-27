@@ -86,6 +86,11 @@ export interface RateLimitConfig {
   ip48PerHour: number
   clientPerHour: number
   globalPerHour: number
+  /**
+   * The global counter of requests turned away, when it differs from `globalPerHour` (/suggest-recomp: a refusal
+   * costs a few GitHub reads, so a handful of addresses must not block every honest request for the hour).
+   */
+  turnedAwayGlobalPerHour?: number
 }
 
 export type RateLimitResult = { ok: true } | { ok: false; retryAfter: number; scope: string }
@@ -143,7 +148,11 @@ function turnedAwayBuckets(
     ...(block
       ? [{ scope: 'ip48', key: `${prefix}rl:no:ip48:${block}:${hour}`, limit: config.ip48PerHour }]
       : []),
-    { scope: 'global', key: `${prefix}rl:no:global:${hour}`, limit: config.globalPerHour }
+    {
+      scope: 'global',
+      key: `${prefix}rl:no:global:${hour}`,
+      limit: config.turnedAwayGlobalPerHour ?? config.globalPerHour
+    }
   ]
 }
 
@@ -212,9 +221,12 @@ export async function countTurnedAway(
   ip: string,
   config: RateLimitConfig,
   now: number = Date.now(),
-  prefix = ''
+  prefix = '',
+  /** Count it against the sender's address only (an honest answer, such as "listed already", not a probe). */
+  addressOnly = false
 ): Promise<void> {
-  const buckets = turnedAwayBuckets(ip, config, hourOf(now), prefix)
+  const all = turnedAwayBuckets(ip, config, hourOf(now), prefix)
+  const buckets = addressOnly ? all.filter((b) => b.scope !== 'global') : all
   await addOne(kv, buckets, await readCounts(kv, buckets))
 }
 
@@ -282,4 +294,45 @@ export function dbRateLimitConfig(env: {
     },
     DEFAULT_DB_RATE_LIMITS
   )
+}
+
+/**
+ * The limits of /suggest-recomp (a recompilation added in PlayOut's browser, opened as a pull request) without the
+ * RATE_RECOMP_*_PER_HOUR variables: the values wrangler.toml deploys, kept equal to them by hand. Counted in a
+ * DB_LIMITS Durable Object of their own (RECOMP_LIMITER_NAME), apart from the suggestions' KV counters and the
+ * database's: each costs the relay up to eight GitHub calls, and a person adds a few recompilations, not dozens.
+ */
+export const DEFAULT_RECOMP_RATE_LIMITS: RateLimitConfig = {
+  ipPerHour: 10,
+  ip48PerHour: 15,
+  clientPerHour: 5,
+  globalPerHour: 30,
+  // Refusals in total: far above the accepted ones, so a few addresses sending links that fail the checks cannot
+  // block every honest suggestion for the rest of the hour (each refusal costs at most four GitHub reads).
+  turnedAwayGlobalPerHour: 400
+}
+
+export function recompRateLimitConfig(env: {
+  RATE_RECOMP_IP_PER_HOUR?: string
+  RATE_RECOMP_IP48_PER_HOUR?: string
+  RATE_RECOMP_CLIENT_PER_HOUR?: string
+  RATE_RECOMP_GLOBAL_PER_HOUR?: string
+  RATE_RECOMP_TURNED_AWAY_GLOBAL_PER_HOUR?: string
+}): RateLimitConfig {
+  const turnedAway = Number(env.RATE_RECOMP_TURNED_AWAY_GLOBAL_PER_HOUR)
+  return {
+    ...rateLimitConfig(
+      {
+        RATE_IP_PER_HOUR: env.RATE_RECOMP_IP_PER_HOUR,
+        RATE_IP48_PER_HOUR: env.RATE_RECOMP_IP48_PER_HOUR,
+        RATE_CLIENT_PER_HOUR: env.RATE_RECOMP_CLIENT_PER_HOUR,
+        RATE_GLOBAL_PER_HOUR: env.RATE_RECOMP_GLOBAL_PER_HOUR
+      },
+      DEFAULT_RECOMP_RATE_LIMITS
+    ),
+    turnedAwayGlobalPerHour:
+      Number.isInteger(turnedAway) && turnedAway > 0
+        ? turnedAway
+        : DEFAULT_RECOMP_RATE_LIMITS.turnedAwayGlobalPerHour
+  }
 }

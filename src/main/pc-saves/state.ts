@@ -67,8 +67,14 @@ function normalizeState(v: unknown): SaveCopyState {
     error: str(s.error),
     conflict:
       c && str(c.localAt) && str(c.cloudAt) && str(c.cloudDevice)
-        ? { localAt: str(c.localAt)!, cloudAt: str(c.cloudAt)!, cloudDevice: str(c.cloudDevice)! }
-        : null
+        ? {
+            localAt: str(c.localAt)!,
+            cloudAt: str(c.cloudAt)!,
+            cloudDevice: str(c.cloudDevice)!,
+            ...(c.gone === true ? { gone: true } : {})
+          }
+        : null,
+    ...(s.freshStart === true ? { freshStart: true } : {})
   }
 }
 

@@ -497,16 +497,21 @@ function RecompCard({
     )
   }
 
-  const resolve = (keep: 'local' | 'cloud'): void =>
+  // 'fresh' only to "the saves are gone" (main refuses it once the saves came back); 'cloud' restores them then.
+  const resolve = (keep: 'local' | 'cloud' | 'fresh', gone = false): void =>
     saveAction(
       'resolveRecompConflict',
       t('settingsRecomp.saves.keepFailed'),
       () => api.resolveRecompConflict(id, keep),
       () =>
         toast(
-          keep === 'local'
-            ? t('settingsRecomp.saves.keptLocal')
-            : t('settingsRecomp.saves.keptCloud'),
+          keep === 'fresh'
+            ? t('recomp.page.startedFresh')
+            : keep === 'local'
+              ? t('settingsRecomp.saves.keptLocal')
+              : gone
+                ? t('recomp.page.restored')
+                : t('settingsRecomp.saves.keptCloud'),
           'success'
         )
     )
@@ -766,24 +771,46 @@ function RecompCard({
           <span className="settings-recomp-conflict__text">
             {cloudStatusText(row.installed.cloud)}
           </span>
-          <div className="settings-row__actions">
-            <Button
-              focusKey={key('keep-local')}
-              icon={<HardDrive />}
-              onPress={() => resolve('local')}
-              aria-disabled={saveBusy}
-            >
-              {t('settingsRecomp.card.keepLocal')}
-            </Button>
-            <Button
-              focusKey={key('keep-cloud')}
-              icon={<Copy />}
-              onPress={() => resolve('cloud')}
-              aria-disabled={saveBusy}
-            >
-              {t('settingsRecomp.card.keepCloud')}
-            </Button>
-          </div>
+          {conflict.gone ? (
+            // The saves are gone from this PC: Restore first, as on the recompilation's page and Play's question.
+            <div className="settings-row__actions">
+              <Button
+                focusKey={key('keep-cloud')}
+                icon={<Copy />}
+                onPress={() => resolve('cloud', true)}
+                aria-disabled={saveBusy}
+              >
+                {t('recomp.conflict.restore')}
+              </Button>
+              <Button
+                focusKey={key('keep-local')}
+                icon={<HardDrive />}
+                onPress={() => resolve('fresh', true)}
+                aria-disabled={saveBusy}
+              >
+                {t('recomp.conflict.startFresh')}
+              </Button>
+            </div>
+          ) : (
+            <div className="settings-row__actions">
+              <Button
+                focusKey={key('keep-local')}
+                icon={<HardDrive />}
+                onPress={() => resolve('local')}
+                aria-disabled={saveBusy}
+              >
+                {t('settingsRecomp.card.keepLocal')}
+              </Button>
+              <Button
+                focusKey={key('keep-cloud')}
+                icon={<Copy />}
+                onPress={() => resolve('cloud')}
+                aria-disabled={saveBusy}
+              >
+                {t('settingsRecomp.card.keepCloud')}
+              </Button>
+            </div>
+          )}
         </div>
       ) : null}
 

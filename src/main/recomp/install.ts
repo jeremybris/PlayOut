@@ -10,7 +10,12 @@ import { createReadStream, promises as fs } from 'fs'
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'path'
 import { pipeline } from 'stream/promises'
 import { crc32, deflateRawSync } from 'zlib'
-import type { InstalledRecomp, RecompEntry, RecompProgress } from '../../shared/recomp'
+import {
+  isUnscannedRecomp,
+  type InstalledRecomp,
+  type RecompEntry,
+  type RecompProgress
+} from '../../shared/recomp'
 import { detectArchive, extractArchive, flattenSingleRoot } from '../emulator-setup/archive'
 import { downloadFile, safeFileName, type HttpDeps } from '../emulator-setup/download'
 import type { Logger, Runner } from '../emulator-setup/types'
@@ -38,6 +43,8 @@ export interface InstallDeps {
 }
 
 export const unverifiedWarning = (): string => tMain('mainRecomp.install.unverified')
+/** Added by someone in PlayOut (this PC, or PlayOut's list): no catalog virus-scanned it, only GitHub's checksum. */
+export const unscannedWarning = (): string => tMain('mainRecomp.install.unscannedAdd')
 
 /** A player file larger than this is not backed up (game data, not a save). */
 const BACKUP_FILE_MAX = 16 * 1024 * 1024
@@ -761,6 +768,8 @@ export async function installRecomp(
     const digest = sha256FromDigest(asset.digest)
     const expected = scanned ?? digest
     if (!expected) warning = unverifiedWarning()
+    // Listed only because someone added it: whatever checksum it has, nobody scanned the file.
+    else if (isUnscannedRecomp(entry.sources)) warning = unscannedWarning()
 
     let last = 0
     emit('downloading', { progress: 0, bytes: 0, total: asset.size || null })

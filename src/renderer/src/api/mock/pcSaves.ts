@@ -136,6 +136,8 @@ export function createPcSavesMock(deps: PcSavesMockDeps): PcSavesMock {
       async resolvePcSaveConflict(gameId, keep) {
         eligible(gameId)
         const v = current(gameId)
+        if (keep === 'fresh' && !v.conflict?.gone)
+          throw new Error('The saves came back meanwhile. Choose again.')
         return store({
           ...copied(v),
           copyMachine: keep === 'cloud' ? (v.conflict?.cloudDevice ?? null) : 'THIS-PC'

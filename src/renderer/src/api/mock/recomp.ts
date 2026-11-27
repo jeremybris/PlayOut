@@ -21,10 +21,16 @@
 // services/held-files.ts): Sonic 2's decompilation "crashes" 2 s after it starts (the Restore question shows), any
 // other recompilation passes once it ran MOCK_IMAGE_TEST_MS and its session ended (the file goes to the Recycle Bin, a
 // toast says so).
+// The browser's Add (main: add-validate.ts, metadata cloud) checks a made-up GitHub: any github.com/<owner>/<repo>
+// passes (a 'gitlab' link is not GitHub, a repo named 'missing' is not found, one named 'nowin' has no Windows
+// download, 'archived' / 'fork' in the name show those warnings, a catalog repository is listed already); Paste reads
+// https://github.com/Zelda64Recomp/Zelda64Recomp. An added one shows as "Added by you · awaiting approval" and is
+// "suggested" 2 s later (still awaiting approval); Remove asks whether to uninstall it too when it is installed.
 import type { PlayOutApi } from '@shared/api'
 import {
   AUTO_STARTS_BEFORE_ASK,
   RECOMP_SAVES_FOLDER,
+  type AddedRecompState,
   type GameFileNeed,
   type GameFileState,
   type GameRecomps,
@@ -89,7 +95,23 @@ export type RecompApi = Pick<
   | 'askRecompImageDelete'
   | 'getRecompHeldImages'
   | 'answerRecompHeldImage'
+  | 'checkRecompRepo'
+  | 'addRecomp'
+  | 'removeAddedRecomp'
+  | 'readRecompClipboard'
 >
+
+/** The consoles the mock's Add offers (main: consoles.ts RECOMP_CONSOLE_IDS). */
+const MOCK_ADD_CONSOLES = [
+  { id: 'n64', name: 'Nintendo 64' },
+  { id: 'psx', name: 'PlayStation' },
+  { id: 'ps2', name: 'PlayStation 2' },
+  { id: 'gc', name: 'GameCube' },
+  { id: 'xbox360', name: 'Xbox 360' },
+  { id: 'genesis', name: 'Genesis / Mega Drive' },
+  { id: 'pc', name: 'PC' },
+  { id: 'other', name: 'Other' }
+]
 
 export interface RecompMockDeps {
   emitter: MockEmitter
@@ -554,6 +576,8 @@ export function createRecompMock(deps: RecompMockDeps): RecompMock {
   const titles = new Map(catalogTitles().map((t) => [t.key, t]))
   const releases = new Map([...entries.values()].map((e) => [e.id, releasesFor(e)]))
   const installed = new Map<string, InstalledRecomp>()
+  /** Recompilations added in the browser: how far each got. */
+  const addedState = new Map<string, AddedRecompState>()
   const preferred = new Map<string, string>()
   const progress = new Map<string, RecompProgress>()
   const emulationDir = (): string =>
@@ -1785,9 +1809,18 @@ export function createRecompMock(deps: RecompMockDeps): RecompMock {
             archived: e.archived,
             repoUrl: e.repoUrl,
             installed: installed.has(id),
-            isNew,
+            isNew: isNew && !addedState.has(id),
             favorite: favorites.has(id),
-            libraryGameId: addedCardOf(id)?.id ?? null
+            libraryGameId: addedCardOf(id)?.id ?? null,
+            ...(addedState.has(id)
+              ? {
+                  added: addedState.get(id)!,
+                  awaiting: addedState.get(id) === 'queued' || addedState.get(id) === 'suggested',
+                  // As main: never scanned by a catalog (Install asks first); 'local' = not sent.
+                  unscanned: true,
+                  ...(addedState.get(id) === 'local' ? { notSent: 'off' as const } : {})
+                }
+              : {})
           })
         }
         if (!list.length) continue
@@ -1802,6 +1835,137 @@ export function createRecompMock(deps: RecompMockDeps): RecompMock {
         })
       }
       return clone({ catalog: catalogStatus, titles: out, newCount })
+    },
+    async readRecompClipboard() {
+      return 'https://github.com/Zelda64Recomp/Zelda64Recomp'
+    },
+    async checkRecompRepo(url) {
+      await sleep(700)
+      const text = url.trim()
+      if (/gitlab|codeberg/i.test(text))
+        return {
+          ok: false,
+          reason: 'notGithub',
+          message: 'That is not a GitHub link. Only GitHub repositories can be added.'
+        }
+      const m =
+        /^(?:https?:\/\/)?(?:www\.)?(?:github\.com\/)?([A-Za-z0-9-]+)\/([A-Za-z0-9._-]+)/.exec(text)
+      if (!m)
+        return {
+          ok: false,
+          reason: 'badUrl',
+          message:
+            'That could not be read as a repository. Paste its address, such as github.com/owner/repo.'
+        }
+      const repo = `${m[1]}/${m[2]!.replace(/\.git$/i, '')}`
+      const id = `github:${repo.toLowerCase()}`
+      const listed = [...entries.values()].find((e) => e.repo.toLowerCase() === repo.toLowerCase())
+      if (listed)
+        return {
+          ok: false,
+          reason: 'alreadyListed',
+          message: `${repo} is in the browser already.`,
+          existingId: listed.id
+        }
+      if (/missing/i.test(repo))
+        return {
+          ok: false,
+          reason: 'notFound',
+          message: 'No public repository was found there. It may be private, renamed or removed.'
+        }
+      if (/nowin/i.test(repo))
+        return {
+          ok: false,
+          reason: 'noWindows',
+          message: 'None of that repository’s releases has a Windows download.'
+        }
+      const name = m[2]!
+      return {
+        ok: true,
+        id,
+        repo,
+        repoUrl: `https://github.com/${repo}`,
+        description: `A native PC port of ${name.replace(/[-_.]+/g, ' ')}.`,
+        stars: 1234,
+        license: 'MIT',
+        archived: /archived/i.test(repo),
+        fork: /fork/i.test(repo),
+        tag: 'v1.2.0',
+        asset: { name: `${name}-v1.2.0-windows-x64.zip`, size: 42 * MB },
+        game:
+          name
+            .replace(/([a-z])([A-Z])/g, '$1 $2')
+            .replace(/[-_.]+/g, ' ')
+            .replace(/\b(?:recomp(?:iled)?|decomp|port|pc)\b/gi, '')
+            .replace(/\s+/g, ' ')
+            .trim() || name,
+        consoles: MOCK_ADD_CONSOLES
+      }
+    },
+    async addRecomp(input) {
+      await sleep(300)
+      const repo = input.id.replace(/^github:/, '')
+      if (entries.has(input.id)) throw new Error(`${repo} is in the browser already.`)
+      const consoleName = MOCK_ADD_CONSOLES.find((c) => c.id === input.systemId)?.name ?? 'Other'
+      const name = repo.split('/')[1] ?? repo
+      const e = entry({
+        id: input.id,
+        name,
+        game: input.game,
+        systemId: input.systemId,
+        console: consoleName,
+        blurb: `A native PC port of ${input.game}.`,
+        stars: 1234,
+        completeness: null,
+        addedAt: now(),
+        sources: ['user']
+      })
+      entries.set(e.id, e)
+      releases.set(e.id, releasesFor(e))
+      const key = `${input.systemId}:${input.game.toLowerCase().replace(/[^a-z0-9]+/g, '')}`
+      const title = [...titles.values()].find(
+        (t) => t.systemId === input.systemId && t.game.toLowerCase() === input.game.toLowerCase()
+      )
+      if (title) title.entries.push(e.id)
+      else
+        titles.set(key, {
+          key,
+          game: input.game,
+          systemId: input.systemId,
+          console: consoleName,
+          entries: [e.id]
+        })
+      addedState.set(e.id, 'queued')
+      log(`recomp ${e.id} added`)
+      changed([e.id])
+      // Sent for approval a moment later (main's metadata cloud).
+      setTimeout(() => {
+        if (!addedState.has(e.id)) return
+        addedState.set(e.id, 'suggested')
+        changed([e.id])
+      }, 2000)
+      return { id: e.id, titleKey: titleOfEntry(e.id)?.key ?? key }
+    },
+    async removeAddedRecomp(recompId, uninstall) {
+      if (!addedState.has(recompId)) throw new Error('That recompilation was not added on this PC.')
+      await sleep(200)
+      if (uninstall && installed.has(recompId)) {
+        if (busy(recompId)) throw new Error('It is installing; wait until it finishes.')
+        installed.delete(recompId)
+        progress.delete(recompId)
+      }
+      addedState.delete(recompId)
+      for (const [key, t] of titles) {
+        if (!t.entries.includes(recompId)) continue
+        t.entries = t.entries.filter((id) => id !== recompId)
+        if (!t.entries.length) titles.delete(key)
+      }
+      if (!installed.has(recompId)) {
+        entries.delete(recompId)
+        releases.delete(recompId)
+      }
+      log(`recomp ${recompId} removed from the browser`)
+      changed([recompId])
     },
     async setRecompFavorite(recompId, favorite) {
       if (favorite) favorites.add(recompId)
@@ -1945,6 +2109,9 @@ export function createRecompMock(deps: RecompMockDeps): RecompMock {
     },
     async resolveRecompConflict(recompId, keep) {
       const record = requireInstalled(recompId)
+      // As main: Start fresh only answers "the saves are gone".
+      if (keep === 'fresh' && !record.cloud.conflict?.gone)
+        throw new Error('The saves came back meanwhile. Choose again.')
       record.cloud = {
         ...record.cloud,
         conflict: null,

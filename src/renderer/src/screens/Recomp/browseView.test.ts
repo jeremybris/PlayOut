@@ -1,6 +1,18 @@
 import type { RecompBrowseEntry, RecompBrowseTitle } from '@shared/recomp'
 import { describe, expect, it } from 'vitest'
-import { browseFilters, favoriteTitles, foldText, searchTitles, sortTitles } from './browseView'
+import {
+  addedMark,
+  addedMarkText,
+  browseFilters,
+  canAddChecked,
+  createCheckGate,
+  favoriteTitles,
+  foldText,
+  searchTitles,
+  sortTitles,
+  removeAddedMessage,
+  titleIndexOf
+} from './browseView'
 
 const e = (id: string, over: Partial<RecompBrowseEntry> = {}): RecompBrowseEntry => ({
   id,
@@ -126,5 +138,74 @@ describe('favoriteTitles (the Favorites filter)', () => {
     ])
     expect(out[1]).toBe(kart)
     expect(favoriteTitles([zelda], new Set())).toEqual([])
+  })
+})
+
+describe('added recompilations', () => {
+  it('marks only the ones added on this PC, with awaiting approval while they wait', () => {
+    expect(addedMark(e('a'))).toBeNull()
+    expect(addedMark(e('a', { added: 'local', awaiting: false }))).toEqual({
+      label: 'Added by you',
+      awaiting: null,
+      notSent: null,
+      title: null
+    })
+    expect(addedMark(e('a', { added: 'suggested', awaiting: true }))).toEqual({
+      label: 'Added by you',
+      awaiting: 'awaiting approval',
+      notSent: null,
+      title: null
+    })
+  })
+
+  it('says when an add was not sent, and why', () => {
+    const off = addedMark(e('a', { added: 'local', awaiting: false, notSent: 'off' }))!
+    expect(addedMarkText(off)).toBe('Added by you · not sent')
+    expect(off.title).toMatch(/Suggest my edits is off/)
+    const refused = addedMark(
+      e('a', { added: 'local', notSent: 'refused', refusedReason: 'no release with a download' })
+    )!
+    expect(addedMarkText(refused)).toBe('Added by you · not sent')
+    expect(refused.title).toMatch(/refused \(no release with a download\)/)
+    expect(addedMarkText(addedMark(e('a', { added: 'queued', awaiting: true }))!)).toBe(
+      'Added by you · awaiting approval'
+    )
+  })
+
+  it('warns that removing an add already sent does not withdraw it', () => {
+    expect(removeAddedMessage(e('a', { name: 'MM', added: 'queued' }))).toMatch(/is not sent/)
+    for (const added of ['suggested', 'published'] as const)
+      expect(removeAddedMessage(e('a', { name: 'MM', added }))).toMatch(/does not withdraw/)
+  })
+
+  it("drops a Check's answer once the link changed (or Paste replaced it) while it ran", () => {
+    const gate = createCheckGate()
+    const first = gate.begin()
+    expect(gate.pending()).toBe(true)
+    // The user types another link: the running Check is cancelled, and a new one can start at once.
+    gate.cancel()
+    expect(gate.pending()).toBe(false)
+    const second = gate.begin()
+    expect(gate.isCurrent(first)).toBe(false)
+    expect(gate.finish(first)).toBe(false)
+    expect(gate.pending()).toBe(true)
+    expect(gate.isCurrent(second)).toBe(true)
+    expect(gate.finish(second)).toBe(true)
+    expect(gate.pending()).toBe(false)
+    // A finished Check's answer arriving late is not current either.
+    expect(gate.isCurrent(second)).toBe(false)
+  })
+
+  it('needs a game name to add a checked repository', () => {
+    expect(canAddChecked({ ok: true }, 'Doom 64')).toBe(true)
+    expect(canAddChecked({ ok: true }, '   ')).toBe(false)
+    expect(canAddChecked({ ok: true }, 'x'.repeat(201))).toBe(false)
+  })
+
+  it('finds the title holding a recompilation, by its id or the title key', () => {
+    const titles = [t('Doom 64', [e('a')]), t('Sonic', [e('b'), e('c')])]
+    expect(titleIndexOf(titles, 'c')).toEqual({ key: 'n64:sonic', index: 1 })
+    expect(titleIndexOf(titles, 'n64:doom 64')).toEqual({ key: 'n64:doom 64', index: 0 })
+    expect(titleIndexOf(titles, 'zzz')).toBeNull()
   })
 })

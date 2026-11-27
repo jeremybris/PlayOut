@@ -483,7 +483,10 @@ describe('PC Saves: review fixes', () => {
     await fs.mkdir(join(moved, 'saves'))
     await a.svc.setFolder(a.game.id, join(moved, 'saves'))
     await fs.rm(join(moved, 'saves'), { recursive: true })
-    expect(await a.svc.beforePlay(a.game)).toBeNull()
+    // This PC copied the game's saves before: their being gone is asked about (Restore from the Emulation folder).
+    expect((await a.svc.beforePlay(a.game))?.kind).toBe('save-conflict')
+    expect((await a.svc.view(a.game.id))!.conflict?.gone).toBe(true)
+    await a.svc.resolve(a.game.id, 'cloud')
     expect(await read(join(moved, 'saves'), 's.dat')).toBe('A1')
   })
 
@@ -582,5 +585,88 @@ describe('PC Saves: review fixes', () => {
     await fs.symlink(target, join(a.saves, 'slot'), 'junction')
     expect((await a.svc.syncNow(a.game.id)).error).toMatch(/link or junction \(slot\)/)
     expect((await readCopyMeta(first.copyDir!))?.hash).toBe(before?.hash)
+  })
+})
+
+describe('PC Saves: saves gone from this PC (asked first)', () => {
+  /** Every .zip under `dir`, recursively. */
+  async function zipsUnder(dir: string): Promise<string[]> {
+    const out: string[] = []
+    const walk = async (d: string): Promise<void> => {
+      for (const e of await fs.readdir(d, { withFileTypes: true }).catch(() => [])) {
+        const p = join(d, e.name)
+        if (e.isDirectory()) await walk(p)
+        else if (e.name.endsWith('.zip')) out.push(p)
+      }
+    }
+    await walk(dir)
+    return out
+  }
+
+  /** PC-A copied its saves, then they were deleted from PC-A. */
+  async function deletedAfterSync(): Promise<{ a: Pc; copyDir: string }> {
+    const a = await makePc('PC-A')
+    await write(a.saves, 's.dat', 'A1')
+    const v = await a.svc.setFolder(a.game.id, a.saves)
+    expect(v.syncedAt).not.toBeNull()
+    await fs.rm(join(a.saves, 's.dat'))
+    return { a, copyDir: v.copyDir! }
+  }
+
+  it('Play asks (Restore / Start fresh) instead of copying back; Restore puts them back', async () => {
+    const { a } = await deletedAfterSync()
+    const refused = await a.svc.beforePlay(a.game)
+    expect(refused).toMatchObject({ kind: 'save-conflict' })
+    expect(refused?.message).toMatch(/are gone from this PC/)
+    const view = (await a.svc.view(a.game.id))!
+    expect(view.conflict?.gone).toBe(true)
+    await expect(fs.access(join(a.saves, 's.dat'))).rejects.toThrow()
+    const after = await a.svc.resolve(a.game.id, 'cloud')
+    expect(after.conflict).toBeNull()
+    expect(await read(a.saves, 's.dat')).toBe('A1')
+    expect(await a.svc.beforePlay(a.game)).toBeNull()
+  })
+
+  it('Start fresh: the game starts with none; the next copy after play replaces the old one, backed up first', async () => {
+    const { a, copyDir } = await deletedAfterSync()
+    expect((await a.svc.beforePlay(a.game))?.kind).toBe('save-conflict')
+    const fresh = await a.svc.resolve(a.game.id, 'fresh')
+    expect(fresh).toMatchObject({ conflict: null, error: null })
+    expect(await read(join(copyDir, 'current', '0'), 's.dat')).toBe('A1')
+    await play(a, () => write(a.saves, 'new.dat', 'N1'))
+    await expect(fs.access(join(a.saves, 's.dat'))).rejects.toThrow()
+    expect(await read(join(copyDir, 'current', '0'), 'new.dat')).toBe('N1')
+    await expect(fs.access(join(copyDir, 'current', '0', 's.dat'))).rejects.toThrow()
+    const backups = await zipsUnder(join(a.userData, 'pc-save-backups'))
+    expect(backups.filter((z) => z.includes('replaced copies'))).toHaveLength(1)
+    expect((await a.svc.view(a.game.id))!.conflict).toBeNull()
+  })
+
+  it("a paired PC's stream starts the game with the question still open, and nothing is replaced", async () => {
+    const { a, copyDir } = await deletedAfterSync()
+    expect(await a.svc.beforePlay(a.game, { streamed: true })).toBeNull()
+    expect((await a.svc.view(a.game.id))!.conflict?.gone).toBe(true)
+    await expect(fs.access(join(a.saves, 's.dat'))).rejects.toThrow()
+    // The streamed session makes saves: still the player's pick (now between both), the copy untouched.
+    const startedAt = new Date().toISOString()
+    a.running = { gameId: a.game.id, startedAt }
+    await write(a.saves, 'new.dat', 'N1')
+    a.running = null
+    await a.svc.afterPlay(a.game.id)
+    const view = (await a.svc.view(a.game.id))!
+    expect(view.conflict).not.toBeNull()
+    expect(view.conflict?.gone).toBeUndefined()
+    expect(await read(join(copyDir, 'current', '0'), 's.dat')).toBe('A1')
+    await expect(fs.access(join(copyDir, 'current', '0', 'new.dat'))).rejects.toThrow()
+  })
+
+  it('a PC that never copied the game takes the copy without asking', async () => {
+    const a = await makePc('PC-A')
+    const b = await makePc('PC-B')
+    await write(a.saves, 's.dat', 'A1')
+    await a.svc.setFolder(a.game.id, a.saves)
+    await b.svc.setFolder(b.game.id, b.saves)
+    expect((await b.svc.view(b.game.id))!.conflict).toBeNull()
+    expect(await read(b.saves, 's.dat')).toBe('A1')
   })
 })

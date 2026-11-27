@@ -70,8 +70,13 @@ export function fromBase64(b64: string): string {
   return new TextDecoder().decode(bytes)
 }
 
-/** The only branches the relay may write: suggest/<key>-<id> (no '..', no ref tricks). */
-const SUGGEST_BRANCH_RE = /^suggest\/[a-z0-9_][a-z0-9._-]{0,299}$/
+/**
+ * The only branches the relay may write: suggest/<key>-<id> (a game's suggestion) and suggest/recomp/<file>-<id> (a
+ * recompilation's, recomps.ts: <file> is <owner>__<repo>). No '..', no ref tricks. A game key has no '/', so the two
+ * kinds never meet.
+ */
+const SUGGEST_BRANCH_RE =
+  /^suggest\/(?:[a-z0-9_][a-z0-9._-]{0,299}|recomp\/[a-z0-9][a-z0-9._-]{0,250})$/
 
 export class RefNotAllowedError extends Error {}
 
@@ -219,6 +224,13 @@ function openPullOf(p: RawPull): OpenPull {
  */
 export const MAX_PULL_PAGES = 5
 
+/** A game suggestion's head branch (suggest/<key>-<id>): every suggest/ branch but the recompilations'. */
+export const isGameSuggestion = (p: OpenPull): boolean =>
+  p.headRef.startsWith('suggest/') && !p.headRef.startsWith('suggest/recomp/')
+
+/** A recompilation suggestion's head branch (suggest/recomp/<file>-<id>). */
+export const isRecompSuggestion = (p: OpenPull): boolean => p.headRef.startsWith('suggest/recomp/')
+
 /**
  * The open pull requests, newest first (GitHub's order), and how many of them come from the relay's suggest/
  * branches, counting up to `cap + 1` at most (pages of 100, so a backlog costs one or two calls; never more than
@@ -231,7 +243,12 @@ export async function listOpenSuggestions(
   ref: RepoRef,
   cap: number,
   pages = MAX_PULL_PAGES,
-  wanted?: (p: OpenPull) => boolean
+  wanted?: (p: OpenPull) => boolean,
+  /**
+   * Which open pull requests count toward `cap`: the game suggestions by default. The recompilation suggestions
+   * (suggest/recomp/) have a backlog of their own, so a pile of them never stops the game suggestions.
+   */
+  counts: (p: OpenPull) => boolean = isGameSuggestion
 ): Promise<{ count: number; pulls: OpenPull[] }> {
   let count = 0
   let found = !wanted
@@ -240,7 +257,7 @@ export async function listOpenSuggestions(
     const raw = await gh<RawPull[]>(ref, 'GET', `/pulls?state=open&per_page=100&page=${page}`)
     const pulls = raw.map(openPullOf)
     all.push(...pulls)
-    count += pulls.filter((p) => p.headRef.startsWith('suggest/')).length
+    count += pulls.filter(counts).length
     if (wanted && !found) found = pulls.some(wanted)
     if ((count > cap && found) || raw.length < 100) break
     if (page >= pages) {
@@ -377,4 +394,54 @@ export async function commentOnSuggestionPull(
 ): Promise<void> {
   assertSuggestBranch(pull.headRef)
   await gh(ref, 'POST', `/issues/${pull.number}/comments`, { body })
+}
+
+/** A repository as GET /repos/{owner}/{repo} answers it, reduced to what /suggest-recomp looks at. */
+export interface RepoInfo {
+  /** "owner/repo" as GitHub spells it now (a renamed repository answers with its new name). */
+  fullName: string
+  private: boolean
+  disabled: boolean
+  archived: boolean
+  fork: boolean
+}
+
+/**
+ * Another repository's facts (a recompilation's, read only: the relay never writes anywhere but the metadata
+ * repository's suggest/ branches). `ref` names that repository; null when GitHub has no such repository (404).
+ */
+export async function getRepoInfo(ref: RepoRef): Promise<RepoInfo | null> {
+  try {
+    const r = await gh<{
+      full_name?: string
+      private?: boolean
+      visibility?: string
+      disabled?: boolean
+      archived?: boolean
+      fork?: boolean
+    }>(ref, 'GET', '')
+    return {
+      fullName: typeof r.full_name === 'string' ? r.full_name : '',
+      private: r.private !== false || (r.visibility !== undefined && r.visibility !== 'public'),
+      disabled: r.disabled === true,
+      archived: r.archived === true,
+      fork: r.fork === true
+    }
+  } catch (e) {
+    if (e instanceof GitHubError && e.status === 404) return null
+    throw e
+  }
+}
+
+/** A repository's newest releases (one page of 10), reduced to what /suggest-recomp looks at. */
+export async function listReleases(
+  ref: RepoRef
+): Promise<{ draft: boolean; prerelease: boolean; assets: number }[]> {
+  const raw = await gh<unknown>(ref, 'GET', '/releases?per_page=10')
+  if (!Array.isArray(raw)) throw new GitHubError('GitHub returned no release list', 502)
+  return raw.map((r: { draft?: boolean; prerelease?: boolean; assets?: unknown[] }) => ({
+    draft: r?.draft === true,
+    prerelease: r?.prerelease === true,
+    assets: Array.isArray(r?.assets) ? r.assets.length : 0
+  }))
 }

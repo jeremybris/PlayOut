@@ -41,6 +41,22 @@ RATE_DB_IP_PER_HOUR = "20"
 RATE_DB_IP48_PER_HOUR = "40"
 RATE_DB_CLIENT_PER_HOUR = "12"
 RATE_DB_GLOBAL_PER_HOUR = "30"
+# Recompilation suggestions (POST /suggest-recomp: a GitHub repository added in PlayOut's Recompilations browser,
+# opened as a pull request) per rolling clock hour, counted in the DB_LIMITS Durable Object below (an object of their
+# own, "playout-recomps": no new class or migration). The code's defaults without them are the same numbers
+# (src/ratelimit.ts DEFAULT_RECOMP_RATE_LIMITS): change both together. Without DB_LIMITS /suggest-recomp answers 503.
+RATE_RECOMP_IP_PER_HOUR = "10"
+RATE_RECOMP_IP48_PER_HOUR = "15"
+RATE_RECOMP_CLIENT_PER_HOUR = "5"
+RATE_RECOMP_GLOBAL_PER_HOUR = "30"
+# Refused recompilation suggestions in total per hour (a link that fails the checks): far above the accepted ones, so
+# a few addresses cannot block every honest suggestion for the hour. "Listed already" and "suggested already" count
+# against the sender's address only. Default DEFAULT_RECOMP_RATE_LIMITS.turnedAwayGlobalPerHour.
+RATE_RECOMP_TURNED_AWAY_GLOBAL_PER_HOUR = "400"
+# No new recompilation suggestion (429) while this many recompilation PRs (suggest/recomp/) are open. A backlog of its
+# own: these never count toward MAX_OPEN_SUGGESTIONS, and the game suggestions never count here. Default
+# src/index.ts DEFAULT_MAX_OPEN_RECOMP_SUGGESTIONS.
+MAX_OPEN_RECOMP_SUGGESTIONS = "30"
 
 # The PlayOut database's rate-limit counters (src/db-limiter.ts). SQLite-backed, which the Workers free plan allows;
 # `npx wrangler deploy` creates it from the migration. Without it /contribute answers 503.

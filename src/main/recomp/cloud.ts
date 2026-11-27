@@ -5,7 +5,9 @@
 // what PlayOut's streaming sync shares between PCs (and it may itself sit in a cloud app's folder), so the copy is how
 // saves reach other PCs. It is kept in step with RecompLauncher's three-way rule (local hash L, copy hash C, hash when
 // last synced S): equal = in sync; only one side moved from S = that side wins and the other is backed up first; both
-// moved = a conflict the user resolves, nothing overwritten meanwhile. Backups never go into the Emulation folder
+// moved = a conflict the user resolves, nothing overwritten meanwhile. Saves gone from a PC that synced them before
+// are asked about too ("Restore from the Emulation folder" / "Start fresh"), never copied back silently; a PC that
+// never synced the game takes the copy (first-time setup). Backups never go into the Emulation folder
 // (they would be synced to every PC): both sides' backups are zips in <recomp root>/.playout/save-backups/<id>/.
 //
 // Work in progress inside the Emulation folder carries the ".playout-new" / ".playout-old" suffixes the Emulation
@@ -991,7 +993,7 @@ async function restoreFiles(
 }
 
 function synced(state: RecompCloudState, hash: string | null, now: Date): RecompCloudState {
-  return {
+  const out: RecompCloudState = {
     ...state,
     syncedHash: hash,
     localHash: hash,
@@ -1000,6 +1002,9 @@ function synced(state: RecompCloudState, hash: string | null, now: Date): Recomp
     error: null,
     conflict: null
   }
+  // Both sides are the same again: a "Start fresh" answered before is done with.
+  delete out.freshStart
+  return out
 }
 
 function failed(
@@ -1082,16 +1087,46 @@ export async function syncSaves(
       return synced(state, await upload(entryId, sides, deps, []), now)
     }
     if (L === null) {
+      if (S !== null) {
+        // The player chose "Start fresh": no saves here is what they asked for, and the copy waits for this PC's
+        // next saves (the upload after play replaces it, backed up first). A copy that moved on since asks again.
+        if (state.freshStart && C === S)
+          return { ...state, localHash: null, pending: false, error: null, conflict: null }
+        // This PC synced the game before and its saves are gone (deleted, or the game reset them): never copied back
+        // silently, the player is asked (Restore from the Emulation folder / Start fresh).
+        deps.log.info(`${tag(deps)}: ${entryId} saves gone from this PC, asking (${direction})`)
+        return {
+          ...state,
+          localHash: null,
+          pending: false,
+          error: null,
+          conflict: {
+            localAt: now.toISOString(),
+            cloudAt: sides.cloud.meta?.at ?? now.toISOString(),
+            cloudDevice: sides.cloud.meta?.machine ?? 'another PC',
+            gone: true
+          }
+        }
+      }
+      // Never synced here: a first-time setup on this PC takes the copy.
       deps.log.info(
         `${tag(deps)}: ${entryId} copying back from the Emulation folder (${direction}, nothing here)`
       )
       return synced(state, await restore(entryId, sides, deps), now)
     }
+    // "The saves are gone" still unanswered while saves came back (a paired PC's stream started the game meanwhile):
+    // neither side is taken over the other, the player picks between both.
+    const unanswered = state.conflict?.gone === true
     // Only a copy that moved on from this PC's last sync is taken (its history reaches S). One that did not is a
     // conflict although this PC's saves did not change: two PCs uploaded from the same saves and the Emulation folder
     // sync kept the other's copy.
     const history = sides.cloud.meta?.history
-    if (L === S && C !== S && (history === undefined || (S !== null && history.includes(S)))) {
+    if (
+      !unanswered &&
+      L === S &&
+      C !== S &&
+      (history === undefined || (S !== null && history.includes(S)))
+    ) {
       deps.log.info(
         `${tag(deps)}: ${entryId} copy newer (${sides.cloud.meta?.machine}), copying back (${direction})`
       )
@@ -1099,7 +1134,7 @@ export async function syncSaves(
       await backupLocal(entryId, sides, deps, 'before restore')
       return synced(state, await restore(entryId, sides, deps), now)
     }
-    if (C === S && L !== S) {
+    if (!unanswered && C === S && L !== S) {
       deps.log.info(
         `${tag(deps)}: ${entryId} local newer, copying to the Emulation folder (${direction})`
       )
@@ -1125,14 +1160,32 @@ export async function syncSaves(
 }
 
 /**
+ * An answer to a save conflict: 'local' keeps this PC's saves, 'cloud' the Emulation folder's copy (Restore, when the
+ * saves are gone), 'fresh' starts fresh (only to "the saves are gone from this PC").
+ */
+export type SaveConflictAnswer = 'local' | 'cloud' | 'fresh'
+
+/** Start fresh was pressed on a question that no longer stands (the saves came back): nothing was changed. */
+export class FreshChangedError extends Error {
+  constructor() {
+    super(tMain('mainRecomp.saves.freshChanged'))
+    this.name = 'FreshChangedError'
+  }
+}
+
+/**
  * The user's answer to a conflict: keep this PC's saves (the Emulation folder's copy is backed up on this PC, then
- * replaced) or the copy's (this PC's saves are backed up, then replaced). Never throws.
+ * replaced) or the copy's (this PC's saves are backed up, then replaced). Never throws, except FreshChangedError (the
+ * state is left as it was: the caller reads the question again).
+ * To "the saves are gone from this PC" (conflict.gone): 'cloud' restores them from the copy, 'fresh' starts fresh —
+ * the game starts with no saves, nothing is deleted, and this PC's next saves count as newer than the copy (the upload
+ * after play replaces it, backed up into "replaced copies" first).
  */
 export async function resolveConflict(
   entryId: string,
   savePaths: string[],
   state: RecompCloudState,
-  keep: 'local' | 'cloud',
+  keep: SaveConflictAnswer,
   deps: CloudSyncDeps
 ): Promise<RecompCloudState> {
   const now = (deps.now ?? (() => new Date()))()
@@ -1144,6 +1197,23 @@ export async function resolveConflict(
     return failed(state, err)
   }
   try {
+    if (keep === 'fresh') {
+      // Only while the saves are still gone: saves that came back meanwhile (a paired PC's stream) are never
+      // uploaded over the copy by a Start fresh pressed on the older question.
+      if (sides.local.hash !== null || !state.conflict?.gone || sides.cloud.hash === null)
+        throw new FreshChangedError()
+      deps.log.info(`${tag(deps)}: ${entryId} starts fresh (the copy stays until the next upload)`)
+      return {
+        ...state,
+        // What this PC last synced with is the copy as it is now: this PC's next saves are newer than it.
+        syncedHash: sides.cloud.hash,
+        localHash: null,
+        freshStart: true,
+        pending: false,
+        error: null,
+        conflict: null
+      }
+    }
     if (keep === 'local') {
       if (sides.local.hash === null) throw new Error(tMain('mainRecomp.saves.noLocal'))
       const replaced = sides.cloud.meta?.hash ?? null
@@ -1159,6 +1229,7 @@ export async function resolveConflict(
     }
     return synced(state, sides.local.hash, now)
   } catch (err) {
+    if (err instanceof FreshChangedError) throw err
     deps.log.warn(`${tag(deps)}: ${entryId} resolving the conflict (${keep}) failed:`, err)
     return failed(state, err, sides.local.hash)
   }

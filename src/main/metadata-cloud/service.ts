@@ -15,6 +15,11 @@
 // - The owner's own writes (publishes, approvals) are kept in the cache as pending until a downloaded all.json carries
 //   them, so an all.json built before them does not hide them; the owner's matching local edit is tidied away only
 //   then.
+// - Recompilations added in the Recompilations browser (recomp/service.ts addRecomp): the owner writes
+//   recomps/<owner>__<repo>.json on main (pending until all.json carries it), anyone else sends it to the relay's
+//   /suggest-recomp, which opens a pull request labelled 'recomp-suggestion'. They wait in queue.json's `recomps` list
+//   with the edits' backoff. all.json's `recomps` (PlayOut's list, read strictly) reaches the browser through
+//   cloudRecomps() and onCloudRecomps().
 import { join } from 'path'
 import {
   diffMetadataFields,
@@ -40,6 +45,7 @@ import {
   type MetadataEdit,
   type MetadataEditField
 } from '../../shared/metadata-edit'
+import type { AddedRecompState, CloudRecomp, RecompSendResult } from '../../shared/recomp'
 import type { Game } from '../../shared/types'
 import type { TokenCrypto } from '../accounts/token-store'
 import type { EventBus } from '../events'
@@ -60,10 +66,14 @@ import {
   pruneQueued,
   type CloudCacheFile,
   type CloudConfigFile,
+  type PendingRecomp,
   type PendingWrite,
   type QueueFile,
-  type QueuedEdit
+  type QueuedEdit,
+  type QueuedRecomp,
+  parseQueuedRecomp
 } from './files'
+import { parseCloudRecomps, recompFilePath } from './recomps'
 import { GitHubClient, GitHubError, type PullRequestInfo } from './github'
 import { tMain } from '../i18n'
 
@@ -145,6 +155,14 @@ type Delivery =
       waiting?: boolean
     }
   | { result: 'drop'; message: string }
+
+/** How sending one added recompilation went. */
+type RecompDelivery =
+  | { result: 'published'; message: string }
+  /** PlayOut lists it already (the file is on main). */
+  | { result: 'listed'; message: string }
+  | { result: 'suggested'; message: string; prUrl?: string }
+  | Extract<Delivery, { result: 'retry' } | { result: 'drop' }>
 
 async function electronCrypto(): Promise<TokenCrypto> {
   const { safeStorage } = await import('electron')
@@ -295,6 +313,16 @@ export class MetadataCloudService {
   /** Runs the flush when flushNotBefore passes (one at a time). */
   private flushTimer: NodeJS.Timeout | null = null
   private disposed = false
+  /** Told when PlayOut's list of recompilations (cloudRecomps) changed. */
+  private readonly recompListeners = new Set<() => void>()
+  /** Told how far a waiting recompilation got once it was sent (or refused). */
+  private readonly recompDelivered = new Set<
+    (id: string, state: AddedRecompState, prUrl?: string, refused?: string) => void
+  >()
+  /** Told when added recompilations start being sent (Suggest my edits switched on, or the owner's token works). */
+  private readonly sendingOn = new Set<() => void>()
+  /** sendsRecomps() when it was last looked at (emitStatus), to tell `sendingOn` when it turns true. */
+  private sentRecomps: boolean | null = null
 
   constructor(private readonly deps: MetadataCloudDeps) {
     const debounceMs = deps.debounceMs ?? 400
@@ -394,6 +422,17 @@ export class MetadataCloudService {
   private emitStatus(): void {
     if (this.disposed) return
     this.deps.events.emit('metadata-cloud:status', this.status())
+    const sends = this.sendsRecomps()
+    const turnedOn = sends && this.sentRecomps === false
+    this.sentRecomps = sends
+    if (turnedOn)
+      for (const listener of this.sendingOn) {
+        try {
+          listener()
+        } catch (err) {
+          this.deps.log.warn(`metadata cloud: a recompilation listener failed (${errorText(err)})`)
+        }
+      }
   }
 
   private notice(notice: MetadataCloudNotice): void {
@@ -411,7 +450,8 @@ export class MetadataCloudService {
         this.lastError = null
         this.failures = 0
         // Owner writes all.json does not carry yet: look again soon.
-        this.schedule(this.cache.get().pending ? PENDING_RECHECK_MS : SYNC_INTERVAL_MS)
+        const c = this.cache.get()
+        this.schedule(c.pending || c.pendingRecomps ? PENDING_RECHECK_MS : SYNC_INTERVAL_MS)
       })
       .catch((err: unknown) => {
         this.lastError = errorText(err)
@@ -439,8 +479,14 @@ export class MetadataCloudService {
   private async download(): Promise<void> {
     const cache = this.cache.get()
     const headers: Record<string, string> = { 'User-Agent': 'PlayOut', Accept: 'application/json' }
-    // Only an ETag of a cache that holds games is worth a 304.
-    if (cache.etag && Object.keys(cache.games).length) headers['If-None-Match'] = cache.etag
+    // Only an ETag of a cache that holds something is worth a 304; and one an older PlayOut wrote (no `recomps`, which
+    // it never read) is not sent, so the first download after an update brings PlayOut's list of recompilations.
+    if (
+      cache.etag &&
+      cache.recomps !== undefined &&
+      (Object.keys(cache.games).length || cache.recomps.length)
+    )
+      headers['If-None-Match'] = cache.etag
     let res: Response
     try {
       res = await this.doFetch(this.deps.allJsonUrl ?? METADATA_ALL_JSON_URL, {
@@ -456,20 +502,26 @@ export class MetadataCloudService {
     if (res.status === 304) {
       this.cache.set((c) => void (c.lastSyncAt = at))
       this.settlePending(this.cache.get().games, this.cache.get().generatedAt)
+      this.settlePendingRecomps(this.cache.get().generatedAt)
       this.applyOverlay()
       return
     }
+    const recompsBefore = JSON.stringify(this.cloudRecomps())
     // 404: the repository has no all.json yet (it is new): an empty cloud, not an error. The owner's first writes
     // stay pending (the Action has not built all.json yet).
     if (res.status === 404) {
       this.cache.replace({
         version: 1,
         games: {},
+        recomps: [],
         lastSyncAt: at,
-        pending: this.cache.get().pending
+        pending: this.cache.get().pending,
+        pendingRecomps: this.cache.get().pendingRecomps
       })
       this.settlePending({}, undefined)
+      this.settlePendingRecomps(undefined)
       this.applyOverlay()
+      this.recompsChanged(recompsBefore)
       return
     }
     if (!res.ok) throw new Error(tMain('mainMetadataCloud.cloudAnswered', { status: res.status }))
@@ -492,7 +544,12 @@ export class MetadataCloudService {
     }
     if (typeof raw !== 'object' || raw === null || Array.isArray(raw))
       throw new Error('all.json has an unexpected form')
-    const file = raw as { generatedAt?: unknown; relayUrl?: unknown; games?: unknown }
+    const file = raw as {
+      generatedAt?: unknown
+      relayUrl?: unknown
+      games?: unknown
+      recomps?: unknown
+    }
     const games =
       typeof file.games === 'object' && file.games !== null && !Array.isArray(file.games)
         ? (file.games as Record<string, unknown>)
@@ -508,13 +565,18 @@ export class MetadataCloudService {
       generatedAt,
       relayUrl: relay || undefined,
       games,
+      // Always written (an all.json without the key, from before recompilations were listed, has none).
+      recomps: parseCloudRecomps(file.recomps),
       // Written while the download ran: kept.
-      pending: this.cache.get().pending
+      pending: this.cache.get().pending,
+      pendingRecomps: this.cache.get().pendingRecomps
     })
     this.settlePending(games, generatedAt)
+    this.settlePendingRecomps(generatedAt)
     this.applyOverlay()
+    this.recompsChanged(recompsBefore)
     // The repository announced a relay: what waits for one can go now.
-    if (relay && relay !== relayBefore && this.queue.get().items.length) void this.flushQueue(true)
+    if (relay && relay !== relayBefore && this.hasQueued()) void this.flushQueue(true)
   }
 
   /** The overlay: the cached all.json with the owner's pending writes laid over it. */
@@ -690,8 +752,7 @@ export class MetadataCloudService {
       })
     }
     this.emitStatus()
-    if (this.config.get().tokenState === 'ok' && this.queue.get().items.length)
-      void this.flushQueue(true)
+    if (this.config.get().tokenState === 'ok' && this.hasQueued()) void this.flushQueue(true)
     return this.status()
   }
 
@@ -896,6 +957,21 @@ export class MetadataCloudService {
         // Something went: the service works, whatever stops this flush later starts its backoff afresh.
         this.delivered()
         this.afterDelivery(item, delivery, false)
+      }
+      // The recompilations added in the browser, after the edits, with the same backoff.
+      for (const { id } of [...this.queue.get().recomps]) {
+        if (this.disposed) return
+        if (!this.isOwner() && !this.config.get().suggestEdits) return
+        const item = this.queue.get().recomps.find((r) => r.id === id)
+        if (!item) continue
+        const delivery = await this.deliverRecomp(item)
+        if (delivery.result === 'retry') {
+          this.backOff(delivery)
+          this.afterRecompDelivery(item, delivery)
+          return
+        }
+        this.delivered()
+        this.afterRecompDelivery(item, delivery)
       }
       this.delivered()
       this.flushNotBefore = 0
@@ -1217,6 +1293,312 @@ export class MetadataCloudService {
       }
     const after = res.status === 429 ? retryAfterMs(res, this.now()) : undefined
     // The relay names the limit it hit (relayLimit).
+    const limit = res.status === 429 ? relayLimit(body.error ?? '') : undefined
+    return {
+      result: 'retry',
+      message: body.error ?? tMain('mainMetadataCloud.relayAnswered', { status: res.status }),
+      ...(after !== undefined ? { retryAfterMs: after } : {}),
+      ...(limit ? { limit } : {})
+    }
+  }
+
+  // --- recompilations added in the browser ------------------------------------------------------
+
+  private hasQueued(): boolean {
+    const q = this.queue.get()
+    return q.items.length > 0 || q.recomps.length > 0
+  }
+
+  /** PlayOut's list of recompilations: all.json's `recomps`, with the owner's publishes it does not carry yet. */
+  cloudRecomps(): CloudRecomp[] {
+    const cache = this.cache.get()
+    const list = [...(cache.recomps ?? [])]
+    for (const p of Object.values(cache.pendingRecomps ?? {}))
+      if (!list.some((r) => r.id === p.recomp.id)) list.push(p.recomp)
+    return list
+  }
+
+  /** Call `listener` whenever cloudRecomps() changes; returns the way to stop. */
+  onCloudRecomps(listener: () => void): () => void {
+    this.recompListeners.add(listener)
+    return () => this.recompListeners.delete(listener)
+  }
+
+  /** Call `listener` with how far a waiting recompilation got once a flush sent it; returns the way to stop. */
+  onRecompDelivered(
+    listener: (id: string, state: AddedRecompState, prUrl?: string, refused?: string) => void
+  ): () => void {
+    this.recompDelivered.add(listener)
+    return () => this.recompDelivered.delete(listener)
+  }
+
+  /**
+   * Call `listener` when added recompilations start being sent (Suggest my edits switched on, or the owner's token
+   * works now): adds made while sending was off are sent then. Returns the way to stop.
+   */
+  onSendingRecomps(listener: () => void): () => void {
+    this.sentRecomps ??= this.sendsRecomps()
+    this.sendingOn.add(listener)
+    return () => this.sendingOn.delete(listener)
+  }
+
+  private recompsChanged(before: string): void {
+    if (JSON.stringify(this.cloudRecomps()) === before) return
+    for (const listener of this.recompListeners) {
+      try {
+        listener()
+      } catch (err) {
+        this.deps.log.warn(`metadata cloud: a recompilation listener failed (${errorText(err)})`)
+      }
+    }
+  }
+
+  /** Whether an added recompilation is sent at all: by the owner, or while Suggest my edits is on. */
+  sendsRecomps(): boolean {
+    return this.isOwner() || this.config.get().suggestEdits
+  }
+
+  /**
+   * Send a recompilation added in the browser: the owner publishes it, anyone else suggests it. It waits in the queue
+   * first (and stays there while it cannot go: no relay, unreachable, rate limited). How far it got: 'published',
+   * 'suggested' (with the pull request), 'queued' (waits), 'local' (sending is off; or it was refused, with `refused`),
+   * or null: a flush sent it meanwhile (and told the onRecompDelivered listeners), or it was withdrawn.
+   */
+  async submitRecomp(input: {
+    id: string
+    repo: string
+    game: string
+    systemId: string
+    blurb?: string
+  }): Promise<RecompSendResult> {
+    if (!this.sendsRecomps()) return { state: 'local' }
+    // Read as the queue file is read: text the metadata repository's check would refuse is never sent or written.
+    const item = parseQueuedRecomp({
+      id: input.id,
+      repo: input.repo,
+      game: input.game,
+      systemId: input.systemId,
+      ...(input.blurb ? { blurb: input.blurb } : {}),
+      queuedAt: new Date(this.now()).toISOString(),
+      attempts: 0
+    })
+    if (!item || item.game !== input.game.trim()) {
+      const refused = tMain('mainMetadataCloud.recompNotSendable')
+      this.deps.log.warn(`metadata cloud: ${input.repo} was not sent (${refused})`)
+      return { state: 'local', refused }
+    }
+    this.queue.set((q) => {
+      q.recomps = [...q.recomps.filter((r) => r.id !== item.id), item].slice(-MAX_QUEUED)
+    })
+    return this.exclusive(async () => {
+      const stored = this.queue.get().recomps.find((r) => r.id === item.id)
+      // Withdrawn meanwhile (Remove), or a flush sent it already (it told the listeners): nothing to note.
+      if (!stored) return { state: null }
+      if (!this.sendsRecomps()) return { state: 'queued' }
+      const delivery: RecompDelivery =
+        this.now() < this.flushNotBefore
+          ? { result: 'retry', message: this.waitingText(), waiting: true }
+          : await this.deliverRecomp(stored)
+      if (delivery.result === 'retry') {
+        if (!delivery.waiting && delivery.retryAfterMs !== undefined) this.backOff(delivery)
+      } else this.delivered()
+      return this.afterRecompDelivery(stored, delivery, false)
+    })
+  }
+
+  /** Ids of the recompilations waiting to be sent. */
+  queuedRecompIds(): string[] {
+    return this.queue.get().recomps.map((r) => r.id)
+  }
+
+  /** Take a waiting recompilation out of the queue (the user removed it): it is never sent. */
+  withdrawRecomp(id: string): void {
+    if (!this.queue.get().recomps.some((r) => r.id === id)) return
+    this.queue.set((q) => {
+      q.recomps = q.recomps.filter((r) => r.id !== id)
+    })
+  }
+
+  /** What became of a delivery: the queue, the listeners (`tell`), and the state for the caller. */
+  private afterRecompDelivery(
+    item: QueuedRecomp,
+    delivery: RecompDelivery,
+    tell = true
+  ): { state: AddedRecompState; prUrl?: string; refused?: string } {
+    if (delivery.result === 'retry') {
+      if (this.queue.get().recomps.some((r) => r.id === item.id))
+        this.queue.set((q) => {
+          q.recomps = q.recomps.map((r) =>
+            r.id === item.id
+              ? { ...r, attempts: r.attempts + 1, lastError: delivery.message.slice(0, 500) }
+              : r
+          )
+        })
+      return { state: 'queued' }
+    }
+    this.queue.set((q) => {
+      q.recomps = q.recomps.filter((r) => r.id !== item.id)
+    })
+    const out: { state: AddedRecompState; prUrl?: string; refused?: string } =
+      delivery.result === 'drop'
+        ? { state: 'local', refused: delivery.message.slice(0, 300) }
+        : delivery.result === 'suggested'
+          ? { state: 'suggested', ...(delivery.prUrl ? { prUrl: delivery.prUrl } : {}) }
+          : { state: 'published' }
+    if (delivery.result === 'drop')
+      this.deps.log.warn(`metadata cloud: ${item.repo} was refused (${delivery.message})`)
+    if (tell)
+      for (const listener of this.recompDelivered) {
+        try {
+          listener(item.id, out.state, out.prUrl, out.refused)
+        } catch (err) {
+          this.deps.log.warn(`metadata cloud: a recompilation listener failed (${errorText(err)})`)
+        }
+      }
+    return out
+  }
+
+  private async deliverRecomp(item: QueuedRecomp): Promise<RecompDelivery> {
+    // Never written or sent unless it reads back as a valid record (the owner's write goes to main unchecked).
+    const valid = parseQueuedRecomp(item)
+    if (!valid || valid.game !== item.game || valid.blurb !== item.blurb)
+      return { result: 'drop', message: tMain('mainMetadataCloud.recompNotSendable') }
+    return this.isOwner() ? this.publishRecomp(item) : this.suggestRecomp(item)
+  }
+
+  /** Owner: write recomps/<owner>__<repo>.json on main (one there already is left as it is). */
+  private async publishRecomp(item: QueuedRecomp): Promise<RecompDelivery> {
+    const token = await this.ownerToken()
+    if (!token) return this.suggestRecomp(item)
+    const gh = this.client(token)
+    const path = recompFilePath(item.repo)
+    const at = new Date(this.now()).toISOString()
+    const recomp: CloudRecomp = {
+      id: item.id,
+      repo: item.repo,
+      repoUrl: `https://github.com/${item.repo}`,
+      game: item.game,
+      systemId: item.systemId,
+      blurb: item.blurb ?? '',
+      addedAt: at
+    }
+    try {
+      const current = await gh.readFile(path, METADATA_REPO.branch)
+      if (current) return { result: 'listed', message: item.repo }
+      const record = {
+        id: recomp.id,
+        repo: recomp.repo,
+        repoUrl: recomp.repoUrl,
+        game: recomp.game,
+        systemId: recomp.systemId,
+        ...(recomp.blurb ? { blurb: recomp.blurb } : {}),
+        addedAt: at,
+        updatedAt: at
+      }
+      await gh.writeFile({
+        path,
+        branch: METADATA_REPO.branch,
+        text: `${JSON.stringify(record, null, 2)}\n`,
+        message: `Add recompilation ${item.repo} (${item.game})`
+      })
+      this.addPendingRecomp({ recomp, at })
+      return { result: 'published', message: item.repo }
+    } catch (err) {
+      const status = err instanceof GitHubError ? err.status : 0
+      if (status === 401 || status === 403 || status === 404) {
+        this.config.set((c) => {
+          c.tokenState = status === 401 ? 'invalid' : 'no-access'
+          c.tokenError = errorText(err)
+        })
+        this.emitStatus()
+        return { result: 'retry', message: errorText(err) }
+      }
+      if (status === 0 || status === 409 || status === 422 || status === 429 || status >= 500)
+        return { result: 'retry', message: errorText(err) }
+      return { result: 'drop', message: errorText(err) }
+    }
+  }
+
+  /** An owner publish shows at once and stays laid over all.json until a download carries it. */
+  private addPendingRecomp(p: PendingRecomp): void {
+    const before = JSON.stringify(this.cloudRecomps())
+    this.cache.set((c) => {
+      c.pendingRecomps = { ...(c.pendingRecomps ?? {}), [p.recomp.id]: p }
+    })
+    this.recompsChanged(before)
+    if (!this.syncing) this.schedule(PENDING_RECHECK_MS)
+  }
+
+  /**
+   * After a download: an owner publish all.json carries is done; one an all.json built well after it does not carry
+   * was taken out since; one older than PENDING_MAX_MS is given up. The rest stays laid over all.json.
+   */
+  private settlePendingRecomps(generatedAt: string | undefined): void {
+    const pending = this.cache.get().pendingRecomps
+    if (!pending) return
+    const carried = new Set((this.cache.get().recomps ?? []).map((r) => r.id))
+    const now = this.now()
+    const built = generatedAt ? Date.parse(generatedAt) : NaN
+    const keep: Record<string, PendingRecomp> = {}
+    for (const [id, p] of Object.entries(pending)) {
+      const at = Date.parse(p.at)
+      if (carried.has(id)) continue
+      if (!Number.isNaN(built) && built > at + PENDING_BUILD_MARGIN_MS) continue
+      if (Number.isNaN(at) || now - at > PENDING_MAX_MS) continue
+      keep[id] = p
+    }
+    if (Object.keys(keep).length === Object.keys(pending).length) return
+    this.cache.set((c) => {
+      if (Object.keys(keep).length) c.pendingRecomps = keep
+      else delete c.pendingRecomps
+    })
+  }
+
+  /** Anyone else: send the recompilation to the relay's /suggest-recomp, which opens a pull request. */
+  private async suggestRecomp(item: QueuedRecomp): Promise<RecompDelivery> {
+    const relay = this.relayUrl()
+    if (!relay) return { result: 'retry', message: tMain('mainMetadataCloud.noRelay') }
+    let res: Response
+    try {
+      res = await this.doFetch(`${relay}/suggest-recomp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'User-Agent': 'PlayOut' },
+        body: JSON.stringify({
+          url: `https://github.com/${item.repo}`,
+          game: item.game,
+          systemId: item.systemId,
+          ...(item.blurb ? { blurb: item.blurb } : {}),
+          appVersion: this.deps.appVersion,
+          clientId: this.config.get().clientId
+        }),
+        signal: AbortSignal.timeout(30_000)
+      })
+    } catch (err) {
+      return {
+        result: 'retry',
+        message: tMain('mainMetadataCloud.relayUnreachable', { error: errorText(err) })
+      }
+    }
+    let body: { ok?: boolean; error?: string; pr?: { url?: unknown } } = {}
+    try {
+      body = (await res.json()) as typeof body
+    } catch {
+      // not JSON
+    }
+    if (res.ok && body.ok !== false) {
+      const url = typeof body.pr?.url === 'string' ? body.pr.url : ''
+      return {
+        result: 'suggested',
+        message: item.repo,
+        ...(/^https:\/\/github\.com\/\S{1,300}$/.test(url) ? { prUrl: url } : {})
+      }
+    }
+    // PlayOut lists it already.
+    if (res.status === 409) return { result: 'listed', message: item.repo }
+    if (res.status === 400 || res.status === 413 || res.status === 415)
+      return { result: 'drop', message: body.error ?? String(res.status) }
+    // Anything else waits, 404 too: a relay from before /suggest-recomp keeps it queued until the relay is updated.
+    const after = res.status === 429 ? retryAfterMs(res, this.now()) : undefined
     const limit = res.status === 429 ? relayLimit(body.error ?? '') : undefined
     return {
       result: 'retry',

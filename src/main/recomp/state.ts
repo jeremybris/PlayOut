@@ -183,9 +183,11 @@ function normalizeCloud(v: unknown): RecompCloudState {
       ? {
           localAt: str(c.localAt) ?? '',
           cloudAt: str(c.cloudAt) ?? '',
-          cloudDevice: str(c.cloudDevice) ?? ''
+          cloudDevice: str(c.cloudDevice) ?? '',
+          ...(c.gone === true ? { gone: true } : {})
         }
-      : null
+      : null,
+    ...(v.freshStart === true ? { freshStart: true } : {})
   }
 }
 

@@ -6,6 +6,8 @@
  *                     -> { ok: true, pr: { number, url }, updated?: true } | { ok: false, error }
  *   POST /contribute  { clientId, appVersion, rows: GameDbRow[] (1-25) }
  *                     -> { ok: true, added, present, refused, later } | { ok: false, error }
+ *   POST /suggest-recomp { url, game, systemId, blurb?, appVersion, clientId }
+ *                     -> { ok: true, pr: { number, url }, updated?: false } | { ok: false, error }
  *
  * A suggestion is validated (validate.ts), rate limited (ratelimit.ts: checked before GitHub is asked anything,
  * counted as a suggestion only once it is about to become a pull request), merged onto the current
@@ -21,6 +23,11 @@
  * lacks are appended to their shards on that branch (database.ts, the only code that writes there; never main, never
  * suggest/...). A row the database has already is never changed. Rows it did not get to are answered as `later`,
  * with Retry-After.
+ *
+ * A recompilation suggestion (handleSuggestRecomp) is a GitHub repository someone added in PlayOut's Recompilations
+ * browser: the repository is checked (public, a release with a download), rate limited in a DB_LIMITS object of its
+ * own, written to recomps/<owner>__<repo>.json on a suggest/recomp/<file>-<id> branch and opened as a pull request
+ * labelled 'recomp-suggestion'. At most one open pull request per repository; one PlayOut lists already answers 409.
  */
 
 import {
@@ -32,12 +39,16 @@ import {
   deleteBranch,
   fastForwardSuggestBranch,
   getPull,
+  getRepoInfo,
   GitHubError,
+  listReleases,
+  isRecompSuggestion,
   listOpenSuggestions,
   MAX_PULL_PAGES,
   mergeBase,
   openPullRequest,
   readFile,
+  RefNotAllowedError,
   suggestionPullsFor,
   treeOf,
   updateSuggestionPull,
@@ -53,23 +64,25 @@ import {
 } from './appauth'
 import { appendRows, assertDbRepo, groupByShard, type DbRepoRef } from './database'
 import { gameDbShardPath } from './database-format'
-import { dbLimitsOf } from './db-limiter'
+import { dbLimitsOf, RECOMP_LIMITER_NAME } from './db-limiter'
 import {
   countTurnedAway,
   dbRateLimitConfig,
   peekRateLimit,
   rateLimitConfig,
+  recompRateLimitConfig,
   takeRateLimit,
   type RateLimitResult
 } from './ratelimit'
 
 // The Durable Object class of the database's rate limits: wrangler.toml binds it as DB_LIMITS.
 export { DbRateLimiter } from './db-limiter'
-import { changedFields, logEntriesOf, plainText, prBody } from './summary'
+import { changedFields, logEntriesOf, plainText, prBody, recompPrBody } from './summary'
 import {
   mergeFields,
   storedFieldsOf,
   validateContribution,
+  validateRecompSuggestion,
   validateSuggestion,
   MAX_BODY_BYTES,
   type MetadataFields,
@@ -110,6 +123,15 @@ export interface Env {
   RATE_DB_IP48_PER_HOUR?: string
   RATE_DB_CLIENT_PER_HOUR?: string
   RATE_DB_GLOBAL_PER_HOUR?: string
+  /** /suggest-recomp's limits (counted in DB_LIMITS too; it answers 503 without it). */
+  RATE_RECOMP_IP_PER_HOUR?: string
+  RATE_RECOMP_IP48_PER_HOUR?: string
+  RATE_RECOMP_CLIENT_PER_HOUR?: string
+  RATE_RECOMP_GLOBAL_PER_HOUR?: string
+  /** Refusals of /suggest-recomp in total per hour (default DEFAULT_RECOMP_RATE_LIMITS.turnedAwayGlobalPerHour). */
+  RATE_RECOMP_TURNED_AWAY_GLOBAL_PER_HOUR?: string
+  /** No new recompilation suggestion while this many wait for review (default DEFAULT_MAX_OPEN_RECOMP_SUGGESTIONS). */
+  MAX_OPEN_RECOMP_SUGGESTIONS?: string
 }
 
 /** Retry-After (seconds) when too many suggestions wait for review. */
@@ -120,6 +142,17 @@ export const DEFAULT_MAX_OPEN_SUGGESTIONS = 300
 function maxOpenSuggestions(env: Env): number {
   const x = Number(env.MAX_OPEN_SUGGESTIONS)
   return Number.isInteger(x) && x > 0 ? x : DEFAULT_MAX_OPEN_SUGGESTIONS
+}
+
+/**
+ * Without MAX_OPEN_RECOMP_SUGGESTIONS: the value wrangler.toml deploys, kept equal to it by hand. The recompilation
+ * suggestions have a backlog of their own, apart from the game suggestions' (which they never fill).
+ */
+export const DEFAULT_MAX_OPEN_RECOMP_SUGGESTIONS = 30
+
+function maxOpenRecompSuggestions(env: Env): number {
+  const x = Number(env.MAX_OPEN_RECOMP_SUGGESTIONS)
+  return Number.isInteger(x) && x > 0 ? x : DEFAULT_MAX_OPEN_RECOMP_SUGGESTIONS
 }
 
 function usesApp(env: Env): boolean {
@@ -773,6 +806,237 @@ export async function handleContribute(
   )
 }
 
+// ---------------------------------------------------------------------------------------------------------------
+// POST /suggest-recomp: a recompilation added in PlayOut's Recompilations browser
+
+/** The label of a recompilation suggestion's pull request (PlayOut's owner screens list 'suggestion' only). */
+export const RECOMP_SUGGESTION_LABEL = 'recomp-suggestion'
+
+/**
+ * The file name (without .json) of a recompilation's record: "<owner>__<repo>" in lower case. GitHub owners cannot
+ * hold '_', so it splits one way only; the metadata repository's validate.mjs recompFileKey is the same.
+ */
+export function recompFileKey(fullName: string): string {
+  return fullName.replace('/', '__').toLowerCase()
+}
+
+/** The open pull requests the relay opened for one recompilation file: head suggest/recomp/<file>-<id> here. */
+function recompPullsFor(
+  pulls: OpenPull[],
+  file: string,
+  where: { owner: string; repo: string; base: string }
+): OpenPull[] {
+  const prefix = `suggest/recomp/${file}-`
+  const repo = `${where.owner}/${where.repo}`.toLowerCase()
+  return pulls
+    .filter(
+      (p) =>
+        p.headRef.startsWith(prefix) &&
+        /^[a-z0-9]{1,32}$/.test(p.headRef.slice(prefix.length)) &&
+        p.headRepo.toLowerCase() === repo &&
+        p.baseRef === where.base
+    )
+    .sort((a, b) => a.number - b.number)
+}
+
+export async function handleSuggestRecomp(
+  request: Request,
+  env: Env,
+  deps: Deps = {}
+): Promise<Response> {
+  if (!hasGitHubAuth(env)) {
+    return fail('relay is not configured (GITHUB_APP_ID / GITHUB_APP_PRIVATE_KEY missing)', 503)
+  }
+  if (!env.DB_LIMITS) return fail('relay is not configured (DB_LIMITS Durable Object missing)', 503)
+  const type = request.headers.get('Content-Type') ?? ''
+  if (!/^application\/json\b/i.test(type)) return fail('Content-Type must be application/json', 415)
+  const text = await readBody(request)
+  if (text === null) return fail('request is larger than 64 KB', 413)
+  const parsed = validateRecompSuggestion(text)
+  if (!parsed.ok) return fail(parsed.error, 400)
+  const s = parsed.value
+
+  // Counted once, by outcome, as /suggest and /contribute are: read before GitHub is asked anything, turned away on
+  // every refusal after that, taken only right before the branch is created.
+  const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown'
+  const now = deps.now?.() ?? Date.now()
+  const counters = dbLimitsOf(
+    env.DB_LIMITS,
+    ip,
+    s.clientId,
+    recompRateLimitConfig(env),
+    now,
+    RECOMP_LIMITER_NAME
+  )
+  const tooMany = (limit: Exclude<RateLimitResult, { ok: true }>): Response =>
+    fail(`too many recompilation suggestions (${limit.scope}); try again later`, 429, {
+      'Retry-After': String(limit.retryAfter)
+    })
+  let counted = false
+  // `addressOnly`: an honest answer (listed already, suggested already) counts against the sender's address only, so
+  // it never fills the global counter of refusals that every sender shares.
+  const turnedAway = async (addressOnly = false): Promise<void> => {
+    if (counted) return
+    counted = true
+    try {
+      await (addressOnly ? counters.turnedAwayAddress() : counters.turnedAway())
+    } catch (e) {
+      console.error('rate-limit store failed', e instanceof Error ? e.message : 'unknown error')
+    }
+  }
+  let allowed: RateLimitResult
+  try {
+    allowed = await counters.peek()
+  } catch (e) {
+    console.error('rate-limit store failed', e instanceof Error ? e.message : 'unknown error')
+    return fail('the rate limits cannot be checked; try again later', 503, {
+      'Retry-After': String(DB_LIMITS_RETRY_AFTER)
+    })
+  }
+  if (!allowed.ok) return tooMany(allowed)
+
+  const owner = env.REPO_OWNER || 'jeremybris'
+  const repoName = env.REPO_NAME || 'PlayOut-metadata'
+  let token: string
+  try {
+    token = await githubToken(env, owner, repoName, deps)
+  } catch (e) {
+    console.error('GitHub sign-in failed', e instanceof Error ? e.message : 'unknown error')
+    await turnedAway()
+    if (e instanceof PrivateKeyError) return fail('relay is not configured (GitHub App key)', 503)
+    if (e instanceof GitHubError && (e.status === 401 || e.status === 404)) clearAppTokenCache()
+    return fail('relay cannot reach the metadata repository (GitHub App)', 502)
+  }
+  const repo: RepoRef = { owner, repo: repoName, token, fetch: deps.fetch }
+  // The recompilation's own repository, read only (the same installation token: GitHub lets it read public
+  // repositories; when it cannot, the request fails with 502 rather than reading without signing in).
+  const target: RepoRef = {
+    owner: encodeURIComponent(s.owner),
+    repo: encodeURIComponent(s.repo),
+    token,
+    fetch: deps.fetch
+  }
+  const base = env.BASE_BRANCH || 'main'
+  const where = { owner, repo: repoName, base }
+  let branch = ''
+  let branchCreated = false
+  try {
+    const info = await getRepoInfo(target)
+    if (!info || info.private || info.disabled || !/^[^/]+\/[^/]+$/.test(info.fullName)) {
+      await turnedAway()
+      return fail('the repository was not found, is private or is disabled', 400)
+    }
+    const fullName = info.fullName
+    const releases = await listReleases(target)
+    if (!releases.some((r) => !r.draft && r.assets > 0)) {
+      await turnedAway()
+      return fail('the repository has no release with a download', 400)
+    }
+    const file = recompFileKey(fullName)
+    const path = `recomps/${file}.json`
+    if (
+      !/^[a-z0-9][a-z0-9._-]{0,200}$/.test(file) ||
+      file.endsWith('.lock') ||
+      file.endsWith('.') ||
+      file.includes('..')
+    ) {
+      await turnedAway()
+      return fail('the repository name cannot be stored', 400)
+    }
+    if (await readFile(repo, path, base)) {
+      await turnedAway(true)
+      return fail('PlayOut lists this recompilation already', 409)
+    }
+    const cap = maxOpenRecompSuggestions(env)
+    const ofThis = (p: OpenPull): boolean => recompPullsFor([p], file, where).length > 0
+    const open = await listOpenSuggestions(repo, cap, MAX_PULL_PAGES, ofThis, isRecompSuggestion)
+    const existing = recompPullsFor(open.pulls, file, where)[0]
+    if (existing) {
+      // Suggested already (by anyone): nothing to write.
+      await turnedAway(true)
+      return json({ ok: true, pr: { number: existing.number, url: existing.url }, updated: false })
+    }
+    if (open.count >= cap) {
+      await turnedAway()
+      return fail('too many suggestions wait for review; try again later', 429, {
+        'Retry-After': String(BACKLOG_RETRY_AFTER)
+      })
+    }
+    counted = true
+    const limit = await counters.take()
+    if (!limit.ok) return tooMany(limit)
+
+    const baseSha = await branchSha(repo, base)
+    const at = new Date(now).toISOString()
+    const record = {
+      id: `github:${fullName.toLowerCase()}`,
+      repo: fullName,
+      repoUrl: `https://github.com/${fullName}`,
+      game: s.game,
+      systemId: s.systemId,
+      ...(s.blurb ? { blurb: s.blurb } : {}),
+      addedAt: at,
+      updatedAt: at
+    }
+    branch = `suggest/recomp/${file}-${(deps.id ?? shortId)()}`
+    await createBranch(repo, branch, baseSha)
+    branchCreated = true
+    const title = `Recompilation: ${plainText(s.game)} (${plainText(fullName)})`
+    await writeFile(repo, {
+      path,
+      branch,
+      text: `${JSON.stringify(record, null, 2)}\n`,
+      message: title
+    })
+    const pr = await openPullRequest(repo, {
+      title,
+      head: branch,
+      base,
+      body: recompPrBody({
+        repo: fullName,
+        path,
+        game: s.game,
+        systemId: s.systemId,
+        blurb: s.blurb,
+        archived: info.archived,
+        fork: info.fork,
+        appVersion: s.appVersion,
+        at: shownTime(at)
+      })
+    })
+    branchCreated = false
+    try {
+      await addLabels(repo, pr.number, [RECOMP_SUGGESTION_LABEL])
+    } catch {
+      // The PR stands without its label (the repository's check knows it by its branch).
+    }
+    return json({ ok: true, pr: { number: pr.number, url: pr.url } })
+  } catch (e) {
+    await turnedAway()
+    if (branchCreated) {
+      try {
+        await deleteBranch(repo, branch)
+      } catch {
+        // Left for the owner to delete.
+      }
+    }
+    // A branch name the relay may not write: the repository's name cannot be stored (sending it again changes nothing).
+    if (e instanceof RefNotAllowedError) {
+      console.error('suggest-recomp refused a branch', e.message)
+      return fail('the repository name cannot be stored', 400)
+    }
+    const status = e instanceof GitHubError ? e.status : 0
+    if (status === 401 && usesApp(env)) clearAppTokenCache()
+    console.error('suggest-recomp failed', e instanceof Error ? e.message : e)
+    return fail(
+      status === 401 || status === 403
+        ? 'relay cannot read the repository or reach the metadata repository (token)'
+        : 'GitHub did not accept the suggestion; try again later',
+      502
+    )
+  }
+}
+
 export async function handle(request: Request, env: Env, deps: Deps = {}): Promise<Response> {
   const url = new URL(request.url)
   if (url.pathname === '/health') {
@@ -787,6 +1051,10 @@ export async function handle(request: Request, env: Env, deps: Deps = {}): Promi
   if (url.pathname === '/contribute') {
     if (request.method !== 'POST') return fail('method not allowed', 405, { Allow: 'POST' })
     return handleContribute(request, env, deps)
+  }
+  if (url.pathname === '/suggest-recomp') {
+    if (request.method !== 'POST') return fail('method not allowed', 405, { Allow: 'POST' })
+    return handleSuggestRecomp(request, env, deps)
   }
   return fail('not found', 404)
 }

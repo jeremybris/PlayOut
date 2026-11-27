@@ -64,6 +64,8 @@ import type {
   GameFileState,
   GameRecomps,
   RecompBrowseView,
+  RecompAddInput,
+  RecompRepoCheck,
   RecompCatalogStatus,
   RecompCloudState,
   RecompExecutables,
@@ -458,6 +460,24 @@ export interface PlayOutApi {
   setRecompFavorite(recompId: string, favorite: boolean): Promise<void>
   /** Add one recompilation to the library as its own card (not installed); the card's game id. */
   addRecompToLibrary(recompId: string): Promise<string>
+  /**
+   * The browser's Add → Check: whether a GitHub repository (a link or "owner/repo") can be added: public, not listed
+   * yet, with a release that has a Windows download. Nothing is downloaded or run.
+   */
+  checkRecompRepo(url: string): Promise<RecompRepoCheck>
+  /**
+   * Add a checked repository to the browser (shown at once as "Added by you"); then the owner publishes it to
+   * PlayOut's list, anyone else suggests it (Settings › Metadata › Cloud metadata's Suggest my edits). Returns its id
+   * and the key of the title it joined.
+   */
+  addRecomp(input: RecompAddInput): Promise<{ id: string; titleKey: string }>
+  /**
+   * Take a recompilation added on this PC out of the browser (a waiting suggestion is not sent). `uninstall`: an
+   * installed one's folder goes to the Recycle Bin too; else it stays installed.
+   */
+  removeAddedRecomp(recompId: string, uninstall: boolean): Promise<void>
+  /** The clipboard's text (trimmed, at most 2 KB): the Add dialog's Paste. */
+  readRecompClipboard(): Promise<string>
   /** Fetch both catalogs again and re-match the library. */
   refreshRecompCatalog(): Promise<RecompCatalogStatus>
   setRecompAutoUpdate(recompId: string, on: boolean): Promise<void>
@@ -480,7 +500,10 @@ export interface PlayOutApi {
   /** Bring this recompilation's saves and their copy in the Emulation folder in step now. */
   syncRecompSaves(recompId: string): Promise<RecompCloudState>
   /** Both sides changed: keep this PC's saves ('local') or the Emulation folder's copy ('cloud'); the other is backed up. */
-  resolveRecompConflict(recompId: string, keep: 'local' | 'cloud'): Promise<RecompCloudState>
+  resolveRecompConflict(
+    recompId: string,
+    keep: 'local' | 'cloud' | 'fresh'
+  ): Promise<RecompCloudState>
   // --- PC Saves (a game the user added: its save folder copied to <Emulation>/PC Saves) ---
   /** The game's save copy; null for a game that is not one the user added (or a paired host's). */
   getPcSaves(gameId: string): Promise<PcSaveView | null>
@@ -491,7 +514,7 @@ export interface PlayOutApi {
   /** Copy now (refused while the game runs). */
   syncPcSaves(gameId: string): Promise<PcSaveView>
   /** Both sides changed: keep this PC's saves ('local') or the Emulation folder's copy ('cloud'). */
-  resolvePcSaveConflict(gameId: string, keep: 'local' | 'cloud'): Promise<PcSaveView>
+  resolvePcSaveConflict(gameId: string, keep: 'local' | 'cloud' | 'fresh'): Promise<PcSaveView>
   /** The answer to "Use the copy from <PC>?". */
   answerPcSaveCopy(gameId: string, use: boolean): Promise<PcSaveView>
   /** Open the install folder, the first save folder, or the folder holding the copies in the Emulation folder. */
@@ -835,6 +858,10 @@ export const API_METHODS = [
   'browseRecomps',
   'setRecompFavorite',
   'addRecompToLibrary',
+  'checkRecompRepo',
+  'addRecomp',
+  'removeAddedRecomp',
+  'readRecompClipboard',
   'refreshRecompCatalog',
   'setRecompAutoUpdate',
   'setRecompSavePaths',

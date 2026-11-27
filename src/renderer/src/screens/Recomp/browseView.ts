@@ -138,3 +138,96 @@ export function sortTitles(
     .sort((a, b) => byValue(a.v, b.v) || a.t.game.localeCompare(b.t.game))
     .map((x) => x.t)
 }
+
+/**
+ * The browser's mark of a recompilation added on this PC: "Added by you", and "awaiting approval" while it is queued
+ * or suggested; null for every other recompilation.
+ */
+export function addedMark(entry: RecompBrowseEntry): {
+  label: string
+  awaiting: string | null
+  /** "not sent": sending is off, or the metadata cloud refused it. */
+  notSent: string | null
+  /** The chip's tooltip: why it was not sent. */
+  title: string | null
+} | null {
+  if (!entry.added) return null
+  const refused = entry.notSent === 'refused'
+  return {
+    label: t('recomp.browser.addedByYou'),
+    awaiting: entry.awaiting ? t('recomp.browser.awaitingApproval') : null,
+    notSent: entry.notSent ? t('recomp.browser.notSent') : null,
+    title: refused
+      ? t('recomp.browser.notSentRefused', { reason: entry.refusedReason ?? '' })
+      : entry.notSent === 'off'
+        ? t('recomp.browser.notSentOff')
+        : null
+  }
+}
+
+/** The text of the chip addedMark describes: "Added by you", with "awaiting approval" or "not sent" after it. */
+export function addedMarkText(mark: NonNullable<ReturnType<typeof addedMark>>): string {
+  const extra = mark.awaiting ?? mark.notSent
+  return extra ? `${mark.label} · ${extra}` : mark.label
+}
+
+/**
+ * Remove's question for a recompilation added here: one already sent for approval (or published) is not withdrawn by
+ * removing it, and comes back with PlayOut's list once it is approved.
+ */
+export function removeAddedMessage(entry: RecompBrowseEntry): string {
+  return entry.added === 'suggested' || entry.added === 'published'
+    ? t('recomp.browser.removeAddedMessageSent', { name: entry.name })
+    : t('recomp.browser.removeAddedMessage', { name: entry.name })
+}
+
+/**
+ * Which Check's answer the Add dialog may still show. Each Check gets a number; changing the link cancels the one
+ * running, so an answer about an older link is dropped instead of being shown (and added) under the new one.
+ */
+export interface CheckGate {
+  /** A Check starts: its number. */
+  begin(): number
+  /** The link changed: the running Check's answer is dropped. */
+  cancel(): void
+  /** Whether Check `n`'s answer may be shown. */
+  isCurrent(n: number): boolean
+  /** Check `n` ended; true when it was the running one (its spinner stops). */
+  finish(n: number): boolean
+  /** Whether a Check runs. */
+  pending(): boolean
+}
+
+export function createCheckGate(): CheckGate {
+  let seq = 0
+  let active: number | null = null
+  return {
+    begin: () => (active = ++seq),
+    cancel: () => {
+      seq++
+      active = null
+    },
+    isCurrent: (n) => active === n && seq === n,
+    finish: (n) => {
+      if (active !== n) return false
+      active = null
+      return true
+    },
+    pending: () => active !== null
+  }
+}
+
+/** Whether a checked repository can be added with this game name (one is needed, at most 200 characters). */
+export function canAddChecked(check: { ok: true }, game: string): boolean {
+  const name = game.trim()
+  return check.ok && name.length > 0 && name.length <= 200
+}
+
+/** The title (key) that holds the recompilation `id` in `titles`, and where it is in the list; null when none does. */
+export function titleIndexOf(
+  titles: readonly RecompBrowseTitle[],
+  id: string
+): { key: string; index: number } | null {
+  const index = titles.findIndex((x) => x.key === id || x.entries.some((e) => e.id === id))
+  return index < 0 ? null : { key: titles[index]!.key, index }
+}

@@ -536,8 +536,8 @@ about the game:
   controller and mouse and keyboard). Console games always show a controller and have no Controls choice. A game
   whose scraped controls are not exactly one of these shows the nearest (full controller with VR as an option shows
   as Full Controller Support) and is left as it is unless you pick another choice.
-- **Time to beat, rating and difficulty**: the How Long to Beat hours (main story, main + extras, completionist,
-  solo), the rating (0-100), shown as Steam's percent positive or IGDB's rating, and the difficulty for Filters ›
+- **Time to beat, review score and difficulty**: the How Long to Beat hours (main story, main + extras, completionist,
+  solo), the review score (0-100), shown as Steam's percent positive or IGDB's rating, and the difficulty for Filters ›
   Difficulty: **Default** or Story, Easy, Medium, Hard or Impossible. Default is the level the game's Steam tags give
   (Visual Novel = Story, Casual, Free to Play and Relaxing = Easy, Souls-like and
   Difficult = Hard; it says which, e.g. "Default (Story,
@@ -563,7 +563,7 @@ and a streaming host's metadata keep updating the scraped value underneath but n
 game page, the Library filters and the search all use the shown value. Edits are kept per game in `library.json`.
 
 **A game on another PC (Streaming).** A paired host's game that this PC does not have shows the pen too. Its Edit
-sheet has the game information, players and controls, and time to beat and rating fields; their values come from
+sheet has the game information, players and controls, and time to beat and review score fields; their values come from
 the host, so a field you have not edited says **From the host** (instead of _Scraped_), and **Reset** goes back to
 the PlayOut cloud's value, else the host's. The emulator, launch arguments, install size, hiding and custom artwork
 belong to this PC's own copy of a game, so they are not in the sheet: set them once the game is on this PC. Your edit
@@ -1131,6 +1131,29 @@ once a day). Started offline, it uses the copy from last time and checks as soon
     projects only decomp-buddy lists have none and come last). Pick a game to see all of its recompilations side by
     side, with **Install**, **Project page** and, for a game in your library, **Open game page**. Recompilations a
     catalog check turned up in the last two weeks are marked **New**, and the Browse button shows how many.
+  - **Add** (next to the search) puts a recompilation the catalogs do not list in the browser: paste or type its
+    GitHub repository (`github.com/owner/repo`, any page of it, or `owner/repo`; **Paste** reads the clipboard) and
+    press **Check**. PlayOut asks GitHub once per press: the repository must be public and have a release with a
+    Windows download (it shows the stars, the description, the newest release and the file an install would take,
+    and warns when the repository is **Archived** or a **Fork**, which can still be added). Only GitHub is supported.
+    Then name the **Game** (guessed from the repository's name) and pick its **Console** (so it matches the game in
+    your library; _Other_ works too) and press **Add**. The game's name must be plain text (no HTML or script links).
+    Nothing is downloaded until you press **Install**. No catalog virus-scanned an added recompilation (yours, or one
+    in PlayOut's list), so its first **Install** asks first, and the install report says so: PlayOut only checks that
+    the download is the file GitHub published (GitHub's checksum, else it installs with the _unverified_ warning).
+    A repository the browser lists already says so, with **Show it**.
+  - An added recompilation shows at once, in its game's list, marked **Added by you** (and **awaiting approval**
+    while it waits), and can be installed and played like any other. It is then sent to the maintainer as a
+    suggestion (with your game and console, which the maintainer may correct) when **Suggest my edits** is on
+    (Settings → Metadata → _Cloud metadata_), or published straight away on the maintainer's PC. While Suggest my
+    edits is off the mark says **not sent**, and the add is sent once you switch it on; one the suggestion service
+    refused says **not sent** too (point at the mark to see why) and stays on this PC. Once approved, every PlayOut
+    lists it (with its next metadata check) and the _Added by you_ mark goes (it is never marked **New** on the PC that
+    added it). **Remove** takes one you added out of the browser (a suggestion still waiting is not sent; one already
+    sent is not withdrawn, and comes back with PlayOut's list if it is approved); when it is installed you choose
+    whether to **also uninstall it** (its folder goes to the Recycle Bin) or keep it installed (it then leaves the
+    browser but stays under Settings › Recompilations, where you can uninstall it later). If decomp-buddy or
+    RecompLauncher lists the repository later, their entry takes its place (an install moves to it).
   - **Check for updates** and **Update all**. Installed recompilations are also checked when PlayOut starts; the
     ones with **Update automatically** on are then updated by themselves.
   - One card per installed recompilation: version, size on disk, **Update to vX**, **Update automatically**, the
@@ -1173,6 +1196,12 @@ once a day). Started offline, it uses the copy from last time and checks as soon
   for one. The newer side wins; what it replaces is kept as a backup on this PC
   (`<Recompilations folder>\.playout\save-backups\`). When the saves changed on both sides since the last copy,
   PlayOut asks which to keep (**Keep this PC's saves** / **Keep the Emulation folder's copy**) before the game starts.
+  When the saves are gone from a PC that copied them before (you deleted them, or the game reset them), PlayOut asks
+  too instead of copying them back: **Restore from the Emulation folder** puts them back; **Start fresh** starts the
+  game with no saves. Nothing is deleted then: the copy stays in the Emulation folder until the copy after you next
+  play replaces it with this PC's new saves (the old copy is backed up on this PC first, with the other replaced
+  copies). Those new saves then become the copy every PC gets: another PC that copied the old saves backs its own
+  saves up and takes the new copy the next time it plays. A PC that never copied the recompilation's saves takes the copy without asking (setting up a new PC).
   Saves an older PlayOut copied into a cloud folder you chose are taken over once, the first time each recompilation
   is copied (the old copy is left where it was); if they differ from this PC's saves, PlayOut asks which to keep.
 - **Saves of PC games you added.** The same copying works for PC games you added yourself (Add game). Open the
@@ -1183,7 +1212,12 @@ once a day). Started offline, it uses the copy from last time and checks as soon
   app) gets your saves when you pick the same game's save folder there. It also copies when the Emulation folder sync
   is off. What a copy replaces is backed up on this PC first (`pc-save-backups` in PlayOut's settings folder, never in
   the Emulation folder); when the saves changed on both sides, Play asks which to keep (**Keep this PC's saves** /
-  **Keep the Emulation folder's copy**), as it does the first time both PCs already had saves. A copy another PC made
+  **Keep the Emulation folder's copy**), as it does the first time both PCs already had saves. When the saves are gone
+  from a PC that copied them before, Play asks too (**Restore from the Emulation folder** / **Start fresh**): Start
+  fresh starts the game with no saves and deletes nothing, and the copy after you next play replaces the old copy with
+  the new saves (backing the old copy up on this PC first); every other PC then takes the new saves, backing its own
+  up first. If saves came back meanwhile, Start fresh changes nothing and the question is asked again. A game started by a paired PC's stream starts anyway, with
+  the question waiting here. A copy another PC made
   for a game with the same title but a different program asks **Use the copy from <PC>?** before it is used. **Copy
   now** copies straight away; **Clear** stops copying that game and leaves its saves and their copy as they are.
   Folders that are too broad or not just saves are refused: a drive or a folder right below one, your user folder
@@ -1611,7 +1645,8 @@ the Library (left of _All Games_), which shows the same menu in place of the gam
   - **Suggest my edits** (on by default; not shown to the maintainer): send your saved edits to the maintainer as
     suggestions. Off keeps every edit on this PC. The line under it says what happens to your edits, how many
     are waiting and, while one of the suggestion service's limits (such as 30 per hour from one PC) holds them,
-    which limit and when the next ones go.
+    which limit and when the next ones go. Recompilations you add in the recompilation browser (section 4.5) are
+    suggested the same way (at most 5 an hour from one PC).
   - **Suggestion relay URL**: the suggestion service (a small Cloudflare Worker the maintainer runs). Leave it empty
     to use the one the repository announces; type one (`https://…`) and **Save** to use your own. The maintainer
     also gets **Share with every PlayOut**, which writes the URL into the repository so every PlayOut picks it up.

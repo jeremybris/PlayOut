@@ -18,6 +18,7 @@
   },
   "launch": {
     "conflict": "The saves of {title} changed on this PC and in the Emulation folder since they were last copied. Choose which to keep.",
+    "gone": "The saves of {title} are gone from this PC. Restore them from the Emulation folder, or start fresh.",
     "confirm": "The Emulation folder has saves {machine} copied for a game with the same name ({title}). Use them?"
   }
 }

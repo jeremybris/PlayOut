@@ -13,6 +13,7 @@ import { isExcluded } from '../streaming/emulation-sync/rules'
 import { listZip, readZipEntry } from '../util/zip'
 import {
   adoptOldCopy,
+  FreshChangedError,
   cloudSaveKey,
   isWritableSaveRoot,
   oldCloudSaveDir,
@@ -942,5 +943,129 @@ describe('interrupted copies, read-only saves and PCs sharing a name', () => {
     expect((await fs.stat(join(otherSaves, 'a.sav'))).mode & 0o200).toBe(0)
     // Writable again, so the temp folder can be removed.
     for (const f of [join(saves, 'a.sav'), join(otherSaves, 'a.sav')]) await fs.chmod(f, 0o666)
+  })
+})
+
+describe('saves gone from a PC that synced them before (asked first)', () => {
+  /** PC-A copied its saves, then they were deleted from PC-A. */
+  async function deletedAfterSync(): Promise<RecompCloudState> {
+    await write(join(saves, 'a.sav'), 'A1')
+    const s = await syncSaves(ID, [saves], state(), deps('PC-A'), 'after-play')
+    expect(s.syncedHash).not.toBeNull()
+    await fs.rm(saves, { recursive: true })
+    return s
+  }
+
+  it('asks instead of copying back, and touches nothing', async () => {
+    const s0 = await deletedAfterSync()
+    const s = await syncSaves(ID, [saves], s0, deps('PC-A'), 'before-play')
+    expect(s.conflict).toMatchObject({ gone: true, cloudDevice: 'PC-A' })
+    expect(s).toMatchObject({ localHash: null, pending: false, error: null })
+    expect(await exists(join(saves, 'a.sav'))).toBe(false)
+    expect(await read(join(base(), 'current', '0', 'a.sav'))).toBe('A1')
+    // Asked again until answered.
+    const again = await syncSaves(ID, [saves], s, deps('PC-A'), 'before-play')
+    expect(again.conflict?.gone).toBe(true)
+  })
+
+  it('Restore from the Emulation folder copies them back', async () => {
+    const asked = await syncSaves(ID, [saves], await deletedAfterSync(), deps(), 'before-play')
+    const s = await resolveConflict(ID, [saves], asked, 'cloud', deps())
+    expect(s).toMatchObject({ conflict: null, pending: false, error: null })
+    expect(s.freshStart).toBeUndefined()
+    expect(await read(join(saves, 'a.sav'))).toBe('A1')
+    expect(s.syncedHash).toBe((await hashSaves([saves])).hash)
+  })
+
+  it('Start fresh: the game starts with none, then the next upload replaces the copy (backed up first)', async () => {
+    const s0 = await deletedAfterSync()
+    const copied = s0.syncedHash
+    const asked = await syncSaves(ID, [saves], s0, deps(), 'before-play')
+    const fresh = await resolveConflict(ID, [saves], asked, 'fresh', deps())
+    expect(fresh).toMatchObject({ conflict: null, pending: false, error: null, freshStart: true })
+    expect(fresh.syncedHash).toBe(copied)
+    // Nothing deleted: the copy stays as it was.
+    expect(await read(join(base(), 'current', '0', 'a.sav'))).toBe('A1')
+    // The next start: no question, nothing copied back.
+    const before = await syncSaves(ID, [saves], fresh, deps(), 'before-play')
+    expect(before.conflict).toBeNull()
+    expect(before.freshStart).toBe(true)
+    expect(await exists(join(saves, 'a.sav'))).toBe(false)
+    // An after-play with still no saves keeps the copy.
+    const empty = await syncSaves(ID, [saves], before, deps(), 'after-play')
+    expect(empty.conflict).toBeNull()
+    expect(await read(join(base(), 'current', '0', 'a.sav'))).toBe('A1')
+    // The game made new saves: they are newer, the copy is backed up into "replaced copies" and replaced.
+    await write(join(saves, 'new.sav'), 'N1')
+    const after = await syncSaves(ID, [saves], empty, deps(), 'after-play')
+    expect(after).toMatchObject({ conflict: null, pending: false, error: null })
+    expect(after.freshStart).toBeUndefined()
+    expect(after.syncedHash).toBe((await hashSaves([saves])).hash)
+    expect(await read(join(base(), 'current', '0', 'new.sav'))).toBe('N1')
+    expect(await exists(join(base(), 'current', '0', 'a.sav'))).toBe(false)
+    const backups = await zips(copyBackups())
+    expect(backups).toHaveLength(1)
+    const zipPath = join(copyBackups(), backups[0])
+    const entry = (await listZip(zipPath)).find((e) => e.name === '0/a.sav')!
+    expect((await readZipEntry(zipPath, entry)).toString()).toBe('A1')
+    expect((await readCopyMeta(base()))?.history).toEqual([copied])
+  })
+
+  it('after Start fresh, a copy another PC moved on asks again', async () => {
+    const s0 = await deletedAfterSync()
+    const asked = await syncSaves(ID, [saves], s0, deps('PC-A'), 'before-play')
+    const fresh = await resolveConflict(ID, [saves], asked, 'fresh', deps('PC-A'))
+    const sB = await syncSaves(ID, [otherSaves], state(), deps('PC-B'), 'before-play')
+    await write(join(otherSaves, 'a.sav'), 'B2')
+    await syncSaves(ID, [otherSaves], sB, deps('PC-B'), 'after-play')
+    const s = await syncSaves(ID, [saves], fresh, deps('PC-A'), 'before-play')
+    expect(s.conflict).toMatchObject({ gone: true, cloudDevice: 'PC-B' })
+    expect(await exists(join(saves, 'a.sav'))).toBe(false)
+  })
+
+  it('a PC that never synced the game and has no saves still takes the copy silently', async () => {
+    await write(join(saves, 'a.sav'), 'A1')
+    await syncSaves(ID, [saves], state(), deps('PC-A'), 'after-play')
+    const s = await syncSaves(ID, [otherSaves], state(), deps('PC-B'), 'before-play')
+    expect(s.conflict).toBeNull()
+    expect(await read(join(otherSaves, 'a.sav'))).toBe('A1')
+  })
+
+  it('unanswered while new saves appear (a stream started the game): both sides are asked about, nothing replaced', async () => {
+    const asked = await syncSaves(ID, [saves], await deletedAfterSync(), deps(), 'before-play')
+    await write(join(saves, 'new.sav'), 'N1')
+    const s = await syncSaves(ID, [saves], asked, deps(), 'after-play')
+    expect(s.conflict).not.toBeNull()
+    expect(s.conflict?.gone).toBeUndefined()
+    expect(await read(join(base(), 'current', '0', 'a.sav'))).toBe('A1')
+    expect(await exists(join(base(), 'current', '0', 'new.sav'))).toBe(false)
+    expect(await zips(copyBackups())).toHaveLength(0)
+  })
+
+  it('Start fresh pressed after the saves came back changes nothing (never uploads them over the copy)', async () => {
+    const asked = await syncSaves(ID, [saves], await deletedAfterSync(), deps(), 'before-play')
+    expect(asked.conflict?.gone).toBe(true)
+    // A stream made saves meanwhile; the player still sees (and answers) the older question.
+    await write(join(saves, 'new.sav'), 'N1')
+    await expect(resolveConflict(ID, [saves], asked, 'fresh', deps())).rejects.toBeInstanceOf(
+      FreshChangedError
+    )
+    expect(await read(join(base(), 'current', '0', 'a.sav'))).toBe('A1')
+    expect(await exists(join(base(), 'current', '0', 'new.sav'))).toBe(false)
+    // Not to a two-sided conflict either, and 'local' no longer means Start fresh with no saves here.
+    await expect(
+      resolveConflict(
+        ID,
+        [saves],
+        { ...asked, conflict: { ...asked.conflict!, gone: undefined } },
+        'fresh',
+        deps()
+      )
+    ).rejects.toBeInstanceOf(FreshChangedError)
+    await fs.rm(join(saves, 'new.sav'))
+    const noLocal = await resolveConflict(ID, [saves], asked, 'local', deps())
+    expect(noLocal.error).toBeTruthy()
+    expect(noLocal.freshStart).toBeUndefined()
+    expect(await read(join(base(), 'current', '0', 'a.sav'))).toBe('A1')
   })
 })
