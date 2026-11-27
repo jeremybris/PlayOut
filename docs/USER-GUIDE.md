@@ -1633,7 +1633,30 @@ your GOG games the way GOG Galaxy does, with the account you signed in with, and
 - A GOG game PlayOut knows the Steam app id of keeps Steam's achievements, as before.
 - Signing out of GOG takes its counts off the cards. The record of when each game was read is
   `%APPDATA%\PlayOut\retroachievements\gog-scans.json`.
-- Epic Games achievements are not shown yet.
+
+**Epic Games achievements** (your unlocked achievements for Epic games)
+
+Signing in to Epic Games in the Library's **Library Import** (section 3.4) is enough: PlayOut reads your achievements
+of your Epic games and shows them like Steam's: an **Achievements x/y** stat on the game page (the list shows **Epic
+Games** in its header, with each achievement's XP as its points) and the counts on the card.
+
+- PlayOut asks the Epic Games launcher's own achievements service, the same one the launcher, Legendary and Heroic
+  use, with the account you signed in with. It is not a published Epic API: if Epic changes it, the Epic lists stop
+  filling until PlayOut is updated. Nothing else breaks: the reads just fail quietly (they are noted in the log).
+- Each Epic game is read once when it joins your library, then again only after you play it (here, or on a paired
+  PC), about one request a second, starting a minute and a half after PlayOut opens. Nothing is read while a game
+  runs, or while you are signed out of Epic: those games are read once you sign in. Installed games go first, and a
+  game page you open is read ahead of the background reads. If Epic refuses your sign-in even after PlayOut renews
+  it, the reads wait until you sign in again. If Epic cannot be reached (no network, or Epic's service is down),
+  the reads pause and try again later by themselves; you stay signed in.
+- A game Epic has no achievements for has no **Achievements** stat on its page. PlayOut takes that only from Epic's
+  own list of the game's achievements, which states that it has none.
+- An Epic game PlayOut knows the Steam app id of shows Epic's achievements while you are signed in to Epic: **Play**
+  starts the Epic copy, so those are the ones your play earns. While you are signed out of Epic it shows Steam's
+  instead. A card that shows the Steam copy (a game you own on both) keeps Steam's.
+- Hidden achievements show as **Hidden** until you unlock them.
+- Signing out of Epic takes its counts off the cards. The record of when each game was read is
+  `%APPDATA%\PlayOut\retroachievements\epic-scans.json`.
 
 1. Key: https://steamcommunity.com/dev/apikey (the account must not be limited; enter any domain name as the
    label).

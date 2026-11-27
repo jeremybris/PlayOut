@@ -47,7 +47,7 @@ const entrySchema = z.object({
 })
 
 const infoSchema = z.object({
-  provider: optional(z.enum(['steam', 'retroachievements', 'recomp', 'gog'])),
+  provider: optional(z.enum(['steam', 'retroachievements', 'recomp', 'gog', 'epic'])),
   total: count,
   unlocked: count,
   points: optional(z.object({ earned: count, total: count })),

@@ -28,9 +28,10 @@ export type GogPriority = 'page' | 'scan'
 
 /**
  * GOG publishes no number: about one request a second, shared by every GOG achievements request. The requests wait in
- * two queues and a page open's are served first, so an open page never waits behind the scan's queued requests.
+ * two queues and a page open's are served first, so an open page never waits behind the scan's queued requests. Epic's
+ * achievements (epic.ts) pace theirs with an instance of their own.
  */
-class PriorityPacer {
+export class PriorityPacer {
   private readonly waiting: Record<GogPriority, (() => void)[]> = { page: [], scan: [] }
   private draining = false
 

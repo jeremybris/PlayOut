@@ -681,8 +681,8 @@ async function main(cli: CliOptions): Promise<void> {
   launcherRef = launcher
   // PCSX2 scans the PS2 games it does not list yet once nothing runs: after a game, and when the library gained games.
   events.on('session:ended', () => emulatorSetup.prewarmPcsx2())
-  // A game played here is read again by its achievements scan (Steam, RetroAchievements, GOG): nothing else reads it
-  // again.
+  // A game played here is read again by its achievements scan (Steam, RetroAchievements, GOG, Epic): nothing else
+  // reads it again.
   events.on('session:ended', ({ gameId, endedAt }) => achievements.played(gameId, endedAt))
 
   // The home button and the in-game overlay (docs/home-overlay.md): the controller reader, the overlay window, power
@@ -1191,6 +1191,7 @@ async function main(cli: CliOptions): Promise<void> {
     onSignedOut: (source) => {
       if (source === 'steam') achievements.steamSignedOut()
       if (source === 'gog') achievements.storeSignedOut('gog')
+      if (source === 'epic') achievements.storeSignedOut('epic')
     },
     onOwnedImported: (source) => {
       // Signing in to Steam imports the owned list, so this also fills achievements right after a sign-in.
@@ -1205,6 +1206,8 @@ async function main(cli: CliOptions): Promise<void> {
         // Signing in to GOG imports the owned list: GOG's achievements of its games are read then.
         void achievements.syncStore('gog')
       }
+      // Signing in to Epic imports the owned list too: Epic's achievements of its games are read then.
+      if (source === 'epic') void achievements.syncStore('epic')
     }
   })
   const installs = createInstallService({
@@ -1294,6 +1297,12 @@ async function main(cli: CliOptions): Promise<void> {
   )
   // GOG games' achievements are read with the GOG account signed in to PlayOut (achievements/gog.ts).
   achievements.useGogAccount(() => accounts.gogCredential())
+  // Epic games' achievements are read with the Epic account signed in to PlayOut (achievements/epic.ts).
+  // An Epic copy with a Steam app id keeps Steam's achievements while Epic is signed out.
+  achievements.useEpicAccount(
+    (refresh) => accounts.epicCredential(refresh),
+    () => accounts.epicSignedIn()
+  )
   // A recompilation installed (or changed): its games' achievements are read now, not only once the page opens.
   events.on('recomp:changed', ({ ids }) => void achievements.recompChanged(ids))
   achievements.useSteamAccount(async (refresh) => {
@@ -1891,7 +1900,7 @@ async function main(cli: CliOptions): Promise<void> {
   void syncSteamHidden()
   void syncGogHidden()
   // ROM counts from RetroAchievements (the account check, new ROMs, ROMs played since, the recently played list);
-  // Steam's and GOG's follow the owned imports below (or the rescans'). Installed recompilations without counts yet.
+  // Steam's, GOG's and Epic's follow the owned imports below (or the rescans'). Installed recompilations without counts yet.
   achievements.kickRetro(0)
   void achievements.recompChanged()
 

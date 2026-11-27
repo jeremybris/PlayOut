@@ -2067,6 +2067,18 @@ export function createMockApi(options: MockOptions = {}): PlayOutApi {
           provider: 'retroachievements',
           url: 'https://retroachievements.org/game/1'
         }
+      if (game.source === 'epic') {
+        // Epic's list (main epic.ts): XP as points (each row's too), hidden rows hidden until unlocked, a link to the
+        // store page when the game has one.
+        const store = game.metadata.links?.store
+        return {
+          ...info,
+          provider: 'epic',
+          list: info.list.map((row) => ({ ...row, points: row.hidden ? 50 : 20 })),
+          points: { earned: info.unlocked * 20, total: info.total * 20 },
+          ...(store?.startsWith('https://store.epicgames.com/') ? { url: store } : {})
+        }
+      }
       return { ...info, provider: game.source === 'gog' ? 'gog' : 'steam' }
     },
     async getSteamScreenshots(gameId) {

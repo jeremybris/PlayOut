@@ -102,6 +102,14 @@ export interface AccountsService {
    */
   epicAccessToken(refresh?: boolean): Promise<string | null>
   /**
+   * The signed-in Epic account for Epic's achievements (achievements/epic.ts): its account id with a current access
+   * token, as epicAccessToken gives it (`refresh`: refreshed now, Epic refused it). Never logged. Null when Epic is
+   * signed out (or Epic ended the session); throws when the token could not be refreshed (Epic out of reach).
+   */
+  epicCredential(refresh?: boolean): Promise<{ accountId: string; accessToken: string } | null>
+  /** Whether an Epic account is signed in to PlayOut (stored; whether Epic still accepts it is not checked). */
+  epicSignedIn(): boolean
+  /**
    * The signed-in GOG account for GOG's achievements (achievements/gog.ts): its user id and refresh token, which GOG
    * exchanges for a game's own token as Galaxy does. Read after any refresh in progress; never changed here. Null when
    * GOG is signed out.
@@ -577,14 +585,28 @@ export async function createAccountsService(deps: AccountsDeps): Promise<Account
       : null
   }
 
-  const epicReads = new Map<boolean, Promise<string | null>>()
+  const epicReads = new Map<boolean, Promise<{ accountId: string; accessToken: string } | null>>()
 
   function epicAccessToken(force = false): Promise<string | null> {
+    // Install sizes only need a token or none: a refresh that could not reach Epic is "none" here.
+    return epicCredential(force).then(
+      (c) => c?.accessToken ?? null,
+      () => null
+    )
+  }
+
+  function epicCredential(
+    force = false
+  ): Promise<{ accountId: string; accessToken: string } | null> {
     if (!accounts.has('epic') || disposed) return Promise.resolve(null)
     // One at a time: a whole scan asks for the token, and every refresh writes the same store entry.
     const running = epicReads.get(force)
     if (running) return running
-    const task = (async (): Promise<string | null> => {
+    // The other kind of read still running (forced vs not): this one starts from what it stores, never from the same
+    // refresh token (Epic may have spent it, and refusing it would sign Epic out).
+    const other = epicReads.get(!force)
+    const task = (async (): Promise<{ accountId: string; accessToken: string } | null> => {
+      await other?.catch(() => null)
       // A forced refresh waits for one already running (the import's, an expiry refresh) and starts from what it
       // stored: the refresh token it used may be spent.
       if (force) await refreshes.get(refreshKey('epic'))?.catch(() => null)
@@ -599,8 +621,9 @@ export async function createAccountsService(deps: AccountsDeps): Promise<Account
         // A token that is not about to expire comes back as it is.
         refreshed = await sharedRefresh('epic', asked)
       } catch (err) {
+        // Epic could not be reached (still signed in): the caller tries again later, it is no sign-out.
         log.debug(`epic: token refresh failed: ${describeError(err)}`)
-        return null
+        throw err
       }
       if (disposed || generationOf('epic') !== started) return null
       if (!refreshed) {
@@ -609,7 +632,14 @@ export async function createAccountsService(deps: AccountsDeps): Promise<Account
         return null
       }
       if (refreshed !== tokens && refreshed !== asked) await tokenStore.set('epic', refreshed)
-      return typeof refreshed.accessToken === 'string' ? refreshed.accessToken : null
+      const accessToken = refreshed.accessToken
+      const accountId = refreshed.accountId ?? tokens.accountId
+      return typeof accessToken === 'string' &&
+        accessToken &&
+        typeof accountId === 'string' &&
+        accountId
+        ? { accountId, accessToken }
+        : null
     })().finally(() => epicReads.delete(force))
     epicReads.set(force, task)
     return task
@@ -715,6 +745,8 @@ export async function createAccountsService(deps: AccountsDeps): Promise<Account
     account,
     steamCredential,
     epicAccessToken,
+    epicCredential,
+    epicSignedIn: () => accounts.has('epic') && !disposed && tokenStore.has('epic'),
     gogCredential,
     async steamOwnedApps() {
       if (!accounts.has('steam') || disposed) return null

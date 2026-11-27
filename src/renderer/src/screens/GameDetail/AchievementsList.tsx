@@ -1,5 +1,5 @@
 import { recompAchievementsFor } from '@shared/recomp-play'
-import { storeAchievementsSource } from '@shared/store-achievements'
+import { EPIC_ACHIEVEMENTS_SOURCE, storeAchievementsSource } from '@shared/store-achievements'
 import type { AchievementsInfo, AchievementsProvider, Game } from '@shared/types'
 import { ExternalLink, Lock, Settings as SettingsIcon, Trophy } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactElement } from 'react'
@@ -36,7 +36,8 @@ type LoadState =
 const PROVIDER_NAMES: Record<Exclude<AchievementsProvider, 'recomp'>, string> = {
   steam: 'Steam',
   retroachievements: 'RetroAchievements',
-  gog: 'GOG'
+  gog: 'GOG',
+  epic: 'Epic Games'
 }
 
 /** The provider's name for the header and its link; null for a recompilation's own list. */
@@ -53,7 +54,7 @@ type Loaded = { gameId: string; state: Exclude<LoadState, { status: 'loading' }>
  * api.getAchievements: Steam for store games, RetroAchievements for ROMs, the recompilation's own for a game Play
  * starts a recompilation of whose achievements PlayOut reads (gamerscore, unlock dates from its unlock file). A null
  * result points to the sign-in the game needs (Steam account or key; the RetroAchievements account in Settings >
- * Emulators; for a paired host's ROM too, since this PC's account reads it), for a GOG game to the GOG sign-in, or for a
+ * Emulators; for a paired host's ROM too, since this PC's account reads it), for a GOG or Epic game to its store's sign-in, or for a
  * recompilation to playing it once. The header names the service the list came from, with a link to its page.
  * Rows are focusable so the gamepad can scroll the list; B collapses it.
  */
@@ -74,7 +75,7 @@ export function AchievementsList({
   // ROM file, which this PC's RetroAchievements account reads first.
   const hostGame = !!game.remote
   const hostRomSignIn = isHostRom(game) && isRom && !retroReady
-  const gog = !hostGame && storeAchievementsSource(game) !== null
+  const store = hostGame ? null : storeAchievementsSource(game)
   // The unavailable message offers a settings button when signing in would help.
   const settingsHint =
     !recomp &&
@@ -200,8 +201,14 @@ export function AchievementsList({
                   {t('gameDetail.achievements.openMetadataSettings')}
                 </Button>
               </>
-            ) : gog ? (
-              <p>{t('gameDetail.achievements.gogNone')}</p>
+            ) : store ? (
+              <p>
+                {t(
+                  store === EPIC_ACHIEVEMENTS_SOURCE
+                    ? 'gameDetail.achievements.epicNone'
+                    : 'gameDetail.achievements.gogNone'
+                )}
+              </p>
             ) : isRom && !retroReady ? (
               <>
                 <p>

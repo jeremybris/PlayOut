@@ -1,4 +1,4 @@
-// The background achievements scan of a store PlayOut reads achievements of with the store's own account (GOG):
+// The background achievements scan of a store PlayOut reads achievements of with the store's own account (GOG, Epic):
 // scheduled like the Steam scan (scan-scheduler.ts). Each of the store's games is read once when it joins the library
 // and again only after it was played since its last read; nothing is read while PlayOut is not signed in to the store,
 // and nothing while a game runs. A failed read waits out a growing pause (that game only, unless the store is out of
@@ -48,6 +48,8 @@ export interface StoreAchievementsProvider {
    */
   read(game: Game, key: string, priority: 'page' | 'scan'): Promise<StoreRead>
   isAuthError(err: unknown): boolean
+  /** Run at the start of every pass, before the due games are picked (tidying the cards the store's reads take over). */
+  beforePass?(): void
 }
 
 export interface StoreScanDeps {
@@ -180,6 +182,7 @@ export function createStoreScan(
       unparkPending = false
       for (const entry of Object.values(table)) unpark(entry)
     }
+    provider.beforePass?.()
     if (waiting) return
     if (deps.gameRunning()) {
       deferred = true

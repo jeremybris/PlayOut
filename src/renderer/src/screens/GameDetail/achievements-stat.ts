@@ -8,7 +8,8 @@ import type { AchievementsInfo, AchievementsProvider, Game } from '@shared/types
 const PROVIDER_HOSTS: Record<Exclude<AchievementsProvider, 'recomp'>, string[]> = {
   steam: ['steamcommunity.com', 'store.steampowered.com'],
   retroachievements: ['retroachievements.org'],
-  gog: ['gog.com']
+  gog: ['gog.com'],
+  epic: ['store.epicgames.com']
 }
 
 /**
@@ -48,8 +49,8 @@ export function isHostRom(game: Game): boolean {
  * ('achievements': a store game's, or the recompilation's Play starts when PlayOut reads its achievements). A paired
  * host's game shows it when the host's offer carries counts; a host's ROM file also like this PC's own ROMs (this PC's
  * RetroAchievements account reads it). A ROM (a recompilation's game too) known to have no RetroAchievements leaves it
- * out, unless its recompilation has achievements. A Steam game Steam says has no achievements, and a GOG game GOG says
- * has none, leave it out too (signed out or a failed read keep it, with its sign-in hint).
+ * out, unless its recompilation has achievements. A Steam game Steam says has no achievements, and a GOG or Epic game its
+ * store says has none, leave it out too (signed out or a failed read keep it, with its sign-in hint).
  */
 export function achievementsStat(game: Game): { show: boolean; label: 'retro' | 'achievements' } {
   const remote = !!game.remote

@@ -1059,13 +1059,13 @@ export interface MetadataCandidate {
 }
 
 export interface AchievementsInfo {
-  /** Where the list comes from: Steam for store games, RetroAchievements for ROMs, GOG for GOG games. Absent means Steam. */
+  /** Where the list comes from: Steam, RetroAchievements (ROMs), GOG or Epic (their games)... Absent means Steam. */
   provider?: AchievementsProvider
   total: number
   unlocked: number
-  /** RetroAchievements: points earned and possible; recomp: gamerscore. */
+  /** RetroAchievements: points earned and possible; recomp: gamerscore; Epic: XP. */
   points?: { earned: number; total: number }
-  /** RetroAchievements: the game's page. */
+  /** RetroAchievements: the game's page; GOG / Epic: the game's store page, when known. */
   url?: string
   list: {
     id: string
@@ -1084,9 +1084,10 @@ export interface AchievementsInfo {
 
 /**
  * 'recomp': an installed Xbox 360 recompilation's own unlock file and the game's own achievement table. 'gog': GOG's
- * achievements of a GOG game, read with the GOG account signed in to PlayOut.
+ * achievements of a GOG game, read with the GOG account signed in to PlayOut. 'epic': Epic's achievements of an Epic
+ * game, read with the Epic account signed in to PlayOut.
  */
-export type AchievementsProvider = 'steam' | 'retroachievements' | 'recomp' | 'gog'
+export type AchievementsProvider = 'steam' | 'retroachievements' | 'recomp' | 'gog' | 'epic'
 
 /** The RetroAchievements account of Settings > Emulators, as the last check or sync left it. */
 export interface RetroAchievementsStatus {

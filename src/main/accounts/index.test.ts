@@ -568,3 +568,121 @@ describe('steamOwnedApps', () => {
     expect(await service.steamOwnedApps()).toBeNull()
   })
 })
+
+describe('epicCredential', () => {
+  let epic: AccountsService
+  let refreshCalls: AccountTokens[]
+  let refreshActive: number
+  let refreshMax: number
+  let refreshImpl: (t: AccountTokens) => Promise<AccountTokens | null>
+  /** Storing a refreshed credential takes this long (ms). */
+  let storeDelay: number
+
+  /** A token store whose writes can be slow (the read-then-refresh race). */
+  class SlowStore extends TokenStore {
+    override async set(
+      source: Parameters<TokenStore['set']>[0],
+      tokens: AccountTokens
+    ): Promise<void> {
+      if (storeDelay) await new Promise((r) => setTimeout(r, storeDelay))
+      return super.set(source, tokens)
+    }
+  }
+
+  beforeEach(async () => {
+    storeDelay = 0
+    refreshCalls = []
+    refreshActive = 0
+    refreshMax = 0
+    refreshImpl = async (t) => t
+    epic = await createAccountsService({
+      settings,
+      library,
+      events: new EventBus(),
+      metadata: { enqueue: () => {} } as never,
+      window: { get: () => null, focus: () => {}, isFullscreen: () => false },
+      log: silentLog,
+      userData: dir,
+      resourcesDir: dir,
+      tokenStore: new SlowStore(join(dir, 'epic-accounts.json'), silentLog, crypto),
+      accounts: [
+        {
+          ...fakeStore(),
+          source: 'epic',
+          storeName: 'Epic Games',
+          signIn: async () => ({
+            kind: 'oauth',
+            accountId: 'test-account',
+            accessToken: 'test-access-1',
+            refreshToken: 'test-refresh-1',
+            expiresAt: new Date(Date.now() + 3_600_000).toISOString()
+          }),
+          refresh: async (t) => {
+            refreshCalls.push(t)
+            refreshActive++
+            refreshMax = Math.max(refreshMax, refreshActive)
+            try {
+              return await refreshImpl(t)
+            } finally {
+              refreshActive--
+            }
+          },
+          fetchOwned: async () => []
+        }
+      ],
+      authWindows: {
+        visible: () => ({ run: async () => null }),
+        hidden: () => hiddenWindow,
+        isOpen: () => false,
+        closeAll: () => {},
+        closeHidden: () => {}
+      },
+      clearPartition: async () => {}
+    })
+    await epic.signIn('epic')
+    await settle()
+    refreshCalls = []
+  })
+  afterEach(async () => {
+    await epic.dispose()
+  })
+
+  it('throws (still signed in) when the refresh could not reach Epic; install sizes just get no token', async () => {
+    refreshImpl = async () => {
+      throw new Error('fetch failed')
+    }
+    await expect(epic.epicCredential(true)).rejects.toThrow('fetch failed')
+    expect(await epic.epicAccessToken(true)).toBeNull()
+    expect(epic.epicSignedIn()).toBe(true)
+    expect((await epic.getAccounts()).find((r) => r.source === 'epic')?.signedIn).toBe(true)
+  })
+
+  it('is null and signed out when Epic ended the session', async () => {
+    refreshImpl = async () => null
+    expect(await epic.epicCredential(true)).toBeNull()
+    expect(epic.epicSignedIn()).toBe(false)
+  })
+
+  it('a forced refresh waits for a read in flight and starts from the token it stored', async () => {
+    let release!: () => void
+    const gate = new Promise<void>((r) => (release = r))
+    refreshImpl = async (t) => {
+      if (t.refreshToken === 'test-refresh-1') {
+        await gate
+        return { ...t, accessToken: 'test-access-2', refreshToken: 'test-refresh-2' }
+      }
+      return { ...t, accessToken: 'test-access-3', refreshToken: 'test-refresh-3' }
+    }
+    storeDelay = 30
+    const plain = epic.epicCredential(false)
+    await settle()
+    const forced = epic.epicCredential(true)
+    await settle()
+    expect(refreshCalls).toHaveLength(1)
+    release()
+    expect(await plain).toEqual({ accountId: 'test-account', accessToken: 'test-access-2' })
+    expect(await forced).toEqual({ accountId: 'test-account', accessToken: 'test-access-3' })
+    expect(refreshCalls.map((t) => t.refreshToken)).toEqual(['test-refresh-1', 'test-refresh-2'])
+    expect(refreshMax).toBe(1)
+  })
+})

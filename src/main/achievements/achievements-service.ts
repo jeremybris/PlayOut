@@ -43,8 +43,15 @@ import {
   readGogAchievements,
   type GogAccountCredential
 } from './gog'
+import { epicStoreUrl, readEpicAchievements, type EpicAccountCredential } from './epic'
 import { createStoreScan, type StoreRead } from './store-scan'
-import { GOG_ACHIEVEMENTS_SOURCE, storeAchievementsSource } from '../../shared/store-achievements'
+import {
+  EPIC_ACHIEVEMENTS_SOURCE,
+  epicSandboxOf,
+  GOG_ACHIEVEMENTS_SOURCE,
+  STORE_ACHIEVEMENTS_NONE,
+  storeAchievementsSource
+} from '../../shared/store-achievements'
 import {
   askedWait,
   createScanRecord,
@@ -82,8 +89,8 @@ const STEAM_KICK_DELAY_MS = 5 * 1000
 /** Between two one-game Steam requests of the scan: a few a second at most. */
 const STEAM_SCAN_GAP_MS = 400
 /**
- * The store scans (GOG) start after the Steam scan's start-up wait. No extra wait between two games: gog.ts already
- * paces every GOG request (about one a second, a page open's first).
+ * The store scans (GOG, Epic) start after the Steam scan's start-up wait. No extra wait between two games: gog.ts and
+ * epic.ts already pace every request of their store (about one a second, a page open's first).
  */
 const STORE_START_DELAY_MS = 90 * 1000
 const STORE_SCAN_GAP_MS = 0
@@ -165,6 +172,8 @@ export interface AchievementsOptions {
   steamBackoffMs?: number
   /** One GOG game's achievements (tests; default: gog.ts with the GOG account). */
   gogRead?: (productId: string, priority: 'page' | 'scan') => Promise<StoreRead>
+  /** One Epic game's achievements (tests; default: epic.ts with the Epic account). */
+  epicRead?: (sandboxId: string, priority: 'page' | 'scan') => Promise<StoreRead>
   /** The store scans' first pass after start (0: none until syncStore or kick). */
   storeStartDelayMs?: number
   /** Between two one-game store requests. */
@@ -217,7 +226,7 @@ export interface AchievementsService {
    * never while a game runs) hashes this PC's new ROMs for its paired clients, signed in or not.
    */
   kickRetro(delayMs?: number): void
-  /** A play session ended: whichever scan reads the game (Steam, RetroAchievements, GOG) reads it again. */
+  /** A play session ended: whichever scan reads the game (Steam, RetroAchievements, GOG, Epic) reads it again. */
   played(gameId: string, endedAt: string): void
   /** The library changed: the Steam and store scans run once things settle. */
   kick(): void
@@ -236,10 +245,19 @@ export interface AchievementsService {
   raHashOf(game: Game): string | undefined
   /** The accounts service is created after this one; it hands over the GOG account here. */
   useGogAccount(credential: () => Promise<GogAccountCredential | null>): void
+  /**
+   * The accounts service is created after this one; it hands over the Epic account here (`refresh`: a new access token
+   * first).
+   */
+  useEpicAccount(
+    credential: (refresh: boolean) => Promise<EpicAccountCredential | null>,
+    /** Whether an Epic account is signed in to PlayOut (no request): Epic's achievements replace Steam's only then. */
+    signedIn?: () => boolean
+  ): void
   /** A sign-in to the store or an owned import: its achievements scan runs (waiting games included). */
-  syncStore(source: 'gog'): Promise<void>
+  syncStore(source: 'gog' | 'epic'): Promise<void>
   /** Signed out of the store: its counts leave the cards. */
-  storeSignedOut(source: 'gog'): void
+  storeSignedOut(source: 'gog' | 'epic'): void
   /**
    * Recompilations were installed or changed (`recomp:changed` ids): the games Play starts them for read their
    * achievements now when their cards have none of theirs yet. No ids: the start-up read, after a short wait and never
@@ -434,6 +452,17 @@ export function createAchievementsService(
   let recompReader: RecompAchievementsReader | null = null
   /** Bumped by steamSignedOut: Steam work that started before it writes nothing. */
   let steamGeneration = 0
+  /** Whether an Epic account is signed in to PlayOut (useEpicAccount; unknown: taken as signed in). */
+  let epicSignedIn: (() => boolean) | null = null
+  /**
+   * An Epic game whose achievements Epic's own scan reads: one with its sandbox id while Epic is signed in to PlayOut.
+   * Play starts the Epic copy, so Epic's achievements are the ones the play earns, also for a game PlayOut knows a
+   * Steam app id of. While Epic is signed out, such a game keeps Steam's (the Steam scan reads it).
+   */
+  const epicOwns = (game: Game): boolean =>
+    !game.remote &&
+    storeAchievementsSource(game) === EPIC_ACHIEVEMENTS_SOURCE &&
+    (epicSignedIn?.() ?? true)
   let disposed = false
   const cache = new Map<string, { at: number; key: string; info: AchievementsInfo }>()
   const inflight = new Map<string, Promise<AchievementsInfo | null>>()
@@ -564,6 +593,8 @@ export function createAchievementsService(
   /** The Steam app id the scan reads a game by; null for ROMs, a paired host's games and games without one. */
   function scanAppId(game: Game): number | null {
     if (game.source === 'rom' || game.remote) return null
+    // An Epic game shows Epic's achievements while Epic is signed in (the Epic scan reads it), even with a Steam app id.
+    if (epicOwns(game)) return null
     return steamAppIdOf(game)
   }
 
@@ -923,7 +954,9 @@ export function createAchievementsService(
     for (const [id, entry] of cache) if (entry.key === 'steam') cache.delete(id)
     const ids = library
       .games()
-      .filter((g) => g.source !== 'rom' && steamAppIdOf(g) && g.metadata.achievements)
+      .filter(
+        (g) => g.source !== 'rom' && steamAppIdOf(g) && g.metadata.achievements && !epicOwns(g)
+      )
       .map((g) => g.id)
     announce(library.clearAchievements(ids))
     steamRunner.clearPause()
@@ -1823,7 +1856,7 @@ export function createAchievementsService(
       id: 'gog',
       source: GOG_ACHIEVEMENTS_SOURCE,
       keyOf: (game) => {
-        if (!storeAchievementsSource(game)) return null
+        if (storeAchievementsSource(game) !== GOG_ACHIEVEMENTS_SOURCE) return null
         const id = String(game.extra?.gogProductId ?? game.externalId).trim()
         return /^\d+$/.test(id) ? id : null
       },
@@ -1839,6 +1872,72 @@ export function createAchievementsService(
               priority
             ),
       isAuthError: (err) => err instanceof GogAuthError
+    },
+    {
+      library,
+      log,
+      cacheDir: deps.cacheDir,
+      write: (file, value) => writeJson(file, value),
+      writeCounts,
+      announce,
+      gameRunning,
+      startDelayMs: options.storeStartDelayMs ?? STORE_START_DELAY_MS,
+      kickDelayMs: options.steamKickDelayMs ?? STEAM_KICK_DELAY_MS,
+      gapMs: options.storeScanGapMs ?? STORE_SCAN_GAP_MS,
+      backoffMs: steamBackoffMs
+    }
+  )
+
+  // --- Epic ------------------------------------------------------------------------
+  // An Epic game's achievements, read the way Legendary and Heroic read them (epic.ts): the public definitions by the
+  // game's sandbox id, the unlocks with the Epic account signed in to PlayOut. Scheduled like GOG's (store-scan.ts).
+  // An Epic game PlayOut knows a Steam app id of shows Epic's too while Epic is signed in: Play starts the Epic copy,
+  // whose achievements the play earns (epicOwns); the Steam scan leaves it alone then. Signed out of Epic, it keeps
+  // Steam's.
+
+  let epicAccount: ((refresh: boolean) => Promise<EpicAccountCredential | null>) | null = null
+
+  /**
+   * Epic is signed in: counts the Steam scan wrote on an Epic game (or Steam's "none" mark) belong to another copy, they
+   * leave the card. Counts Epic gave stay. Signed out of Epic, nothing is taken.
+   */
+  function dropSteamFromEpicGames(): void {
+    const ids: string[] = []
+    for (const game of library.games()) {
+      if (!epicOwns(game)) continue
+      const sources = game.metadata.sources
+      if (sources?.[STEAM_ACHIEVEMENTS_SOURCE] === undefined) continue
+      const epic = sources[EPIC_ACHIEVEMENTS_SOURCE]
+      if (epic !== undefined && epic !== STORE_ACHIEVEMENTS_NONE) continue
+      if (sources[RECOMP_ACHIEVEMENTS_SOURCE]) continue
+      ids.push(game.id)
+    }
+    if (!ids.length) return
+    for (const id of ids) cache.delete(id)
+    announce(library.clearAchievements(ids, STEAM_ACHIEVEMENTS_SOURCE))
+  }
+
+  const epicScan = createStoreScan(
+    {
+      id: 'epic',
+      source: EPIC_ACHIEVEMENTS_SOURCE,
+      keyOf: (game) =>
+        storeAchievementsSource(game) === EPIC_ACHIEVEMENTS_SOURCE ? epicSandboxOf(game) : null,
+      read: (game, sandboxId, priority) =>
+        options.epicRead
+          ? options.epicRead(sandboxId, priority)
+          : readEpicAchievements(
+              sandboxId,
+              {
+                credential: (refresh) => epicAccount?.(refresh) ?? Promise.resolve(null),
+                locale: gogLocale,
+                storeUrl: epicStoreUrl(game.metadata.links?.store)
+              },
+              priority
+            ),
+      // Epic refusing the account's token even after a refresh is answered as signed out (epic.ts).
+      isAuthError: () => false,
+      beforePass: dropSteamFromEpicGames
     },
     {
       library,
@@ -1929,6 +2028,11 @@ export function createAchievementsService(
     }
     // A GOG game without a Steam app id: GOG's own achievements, with the GOG account signed in to PlayOut.
     if (gogScan.handles(game)) return gogScan.load(game)
+    // An Epic game: Epic's own achievements, with the Epic account signed in to PlayOut (also with a Steam app id).
+    if (epicScan.handles(game) && (epicOwns(game) || !steamAppIdOf(game))) {
+      dropSteamFromEpicGames()
+      return epicScan.load(game)
+    }
     const appId = steamAppIdOf(game)
     if (!appId) return null
     // Steam said the game has none: nothing to ask (the Steam scan asks again once it is played).
@@ -1993,7 +2097,9 @@ export function createAchievementsService(
         ? credentialKey(raCredentials())
         : gogScan.handles(game)
           ? `gog:${mainLanguage()}`
-          : 'steam'
+          : epicScan.handles(game) && (epicOwns(game) || !steamAppIdOf(game))
+            ? `epic:${mainLanguage()}`
+            : 'steam'
     const cached = cache.get(gameId)
     if (cached && cached.key === key && Date.now() - cached.at < LIVE_TTL_MS) return cached.info
     const running = inflight.get(gameId)
@@ -2176,12 +2282,14 @@ export function createAchievementsService(
       steamPlayed(gameId, endedAt)
       retroPlayed(gameId, endedAt)
       gogScan.played(gameId, endedAt)
+      epicScan.played(gameId, endedAt)
       // The start-up read of the recompilations waited for this game to end.
       if (recompStartPending) void recompChanged()
     },
     kick() {
       kickSteam()
       gogScan.kick()
+      epicScan.kick()
     },
     useRemote(source) {
       remoteSource = source
@@ -2192,10 +2300,32 @@ export function createAchievementsService(
     useGogAccount(credential) {
       gogAccount = credential
     },
-    syncStore() {
-      return gogScan.sync()
+    useEpicAccount(credential, signedIn) {
+      epicAccount = credential
+      epicSignedIn = signedIn ?? null
     },
-    storeSignedOut() {
+    syncStore(source) {
+      return source === 'epic' ? epicScan.sync() : gogScan.sync()
+    },
+    storeSignedOut(source) {
+      if (source === 'epic') {
+        for (const [id, entry] of cache) if (entry.key.startsWith('epic:')) cache.delete(id)
+        epicScan.signedOut()
+        // Epic copies PlayOut knows a Steam app id of show Steam's again: the Steam scan reads them anew.
+        const steamCopies = library
+          .games()
+          .filter(
+            (g) => storeAchievementsSource(g) === EPIC_ACHIEVEMENTS_SOURCE && scanAppId(g) !== null
+          )
+          .map((g) => g.id)
+        if (steamCopies.length) {
+          steamRecord.change((table) => {
+            for (const id of steamCopies) if (!table[id]?.none) delete table[id]
+          })
+          kickSteam()
+        }
+        return
+      }
       forgetGogTokens()
       for (const [id, entry] of cache) if (entry.key.startsWith('gog:')) cache.delete(id)
       gogScan.signedOut()
@@ -2210,6 +2340,7 @@ export function createAchievementsService(
       retroRunner.dispose()
       hashRunner.dispose()
       gogScan.dispose()
+      epicScan.dispose()
     }
   }
 }

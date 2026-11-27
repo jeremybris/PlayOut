@@ -275,6 +275,7 @@
     "raSignIn": "Sign in to RetroAchievements",
     "raUnknownRom": "RetroAchievements doesn't recognise this ROM, or the game has no achievements yet. Disc images are matched by title, so a renamed file may not be found.",
     "gogNone": "GOG didn't return achievements for this game. Sign in to GOG in the Library's Library Import to see them. If you are signed in, the game may have no achievements, or GOG Galaxy has not synced them yet.",
+    "epicNone": "Epic Games didn't return achievements for this game. Sign in to Epic Games in the Library's Library Import to see them. If you are signed in, Epic may not be answering right now.",
     "openProvider": "View on {provider}",
     "noData": "No achievement data is available for this game.",
     "noneInGame": "This game has no achievements.",

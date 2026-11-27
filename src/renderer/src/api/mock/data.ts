@@ -855,7 +855,7 @@ const STORE_GAMES: Seed[] = [
       '8376498631b089e52fb5c75ffe119e0de5e6aed1',
       '5a16ce565951479e142c56a23f19d88333d84945'
     ]),
-    extra: { appName: 'Calluna', namespace: 'calluna' }
+    extra: { appName: 'Calluna', namespace: 'calluna', epicNamespace: 'calluna' }
   },
   {
     source: 'epic',
@@ -889,7 +889,7 @@ const STORE_GAMES: Seed[] = [
       '+4fa01c320d22f31d78fd9fcb27dbd3bd8871b903',
       '+23e7d4fcf10475923be9078e55b449b7fc9792d9'
     ]),
-    extra: { appName: 'Sugar', namespace: 'sugar' }
+    extra: { appName: 'Sugar', namespace: 'sugar', epicNamespace: 'sugar' }
   },
   {
     source: 'epic',
@@ -909,7 +909,7 @@ const STORE_GAMES: Seed[] = [
     metadata: {},
     media: {},
     metadataStatus: 'failed',
-    extra: { appName: 'AlanWake2', namespace: 'alanwake2' }
+    extra: { appName: 'AlanWake2', namespace: 'alanwake2', epicNamespace: 'alanwake2' }
   },
   {
     source: 'gog',

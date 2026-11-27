@@ -16,6 +16,7 @@ import type {
 } from '../../shared/types'
 import { RA_NONE } from '../../shared/ra-consoles'
 import {
+  EPIC_ACHIEVEMENTS_SOURCE,
   GOG_ACHIEVEMENTS_SOURCE,
   knownWithoutStoreAchievements
 } from '../../shared/store-achievements'
@@ -2136,5 +2137,238 @@ describe('GOG achievements', () => {
     // The failed read waits its turn, then goes through by itself.
     await until(() => library.getGame(id)?.metadata.achievements?.unlocked === 3)
     expect(read).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('Epic achievements', () => {
+  const SANDBOX = 'min'
+
+  function addEpic(extra: Record<string, string | number | boolean> = {}): string {
+    return library.mergeScan('epic', [
+      scanned({
+        source: 'epic',
+        externalId: 'Hades',
+        platformId: 'epic',
+        title: 'Hades',
+        launch: { kind: 'uri', uri: 'com.epicgames.launcher://apps/Hades' },
+        extra: { epicNamespace: SANDBOX, ...extra }
+      })
+    ]).newGameIds[0]!
+  }
+
+  const epicList = (unlocked: number, total: number): StoreRead => ({
+    kind: 'list',
+    info: { provider: 'epic', total, unlocked, list: [] }
+  })
+
+  function epicService(
+    read: (sandboxId: string, priority: 'page' | 'scan') => Promise<StoreRead>,
+    options: AchievementsOptions = {}
+  ): AchievementsService {
+    return createService({ epicRead: read, storeStartDelayMs: 0, storeScanGapMs: 0, ...options })
+  }
+
+  it('reads an Epic game once when it joins the library, then only after it is played', async () => {
+    const id = addEpic()
+    let unlocked = 4
+    const read = vi.fn(async () => epicList(unlocked, 49))
+    const svc = epicService(read)
+    await svc.syncStore('epic')
+    expect(read).toHaveBeenCalledWith(SANDBOX, 'scan')
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 4, total: 49 })
+    expect(library.getGame(id)?.metadata.sources?.[EPIC_ACHIEVEMENTS_SOURCE]).toBe(SANDBOX)
+    await svc.syncStore('epic')
+    // A GOG sync reads no Epic game.
+    await svc.syncStore('gog')
+    expect(read).toHaveBeenCalledTimes(1)
+    unlocked = 7
+    svc.played(id, new Date(Date.now() + 1000).toISOString())
+    await until(() => library.getGame(id)?.metadata.achievements?.unlocked === 7)
+    expect(read).toHaveBeenCalledTimes(2)
+  })
+
+  it('waits while Epic is signed out, and reads once signed in', async () => {
+    const id = addEpic()
+    let signedIn = false
+    const read = vi.fn(async () =>
+      signedIn ? epicList(1, 3) : ({ kind: 'signed-out' } as StoreRead)
+    )
+    const svc = epicService(read)
+    await svc.syncStore('epic')
+    expect(library.getGame(id)?.metadata.achievements).toBeUndefined()
+    svc.kick()
+    await sleep(30)
+    expect(read).toHaveBeenCalledTimes(1)
+    signedIn = true
+    await svc.syncStore('epic')
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 1, total: 3 })
+  })
+
+  it('marks a game Epic has no achievements for, keeps the mark on sign-out and drops the counts', async () => {
+    const id = addEpic()
+    const read = vi.fn(async (): Promise<StoreRead> => ({ kind: 'none' }))
+    const svc = epicService(read)
+    await svc.syncStore('epic')
+    expect(knownWithoutStoreAchievements(library.getGame(id)!)).toBe(true)
+    read.mockImplementation(async () => epicList(2, 5))
+    const info = await svc.get(id)
+    expect(info?.provider).toBe('epic')
+    expect(read).toHaveBeenLastCalledWith(SANDBOX, 'page')
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 2, total: 5 })
+    svc.storeSignedOut('epic')
+    expect(library.getGame(id)?.metadata.achievements).toBeUndefined()
+    // A GOG sign-out leaves Epic's counts alone.
+    await svc.get(id)
+    expect(library.getGame(id)?.metadata.achievements).toBeDefined()
+    svc.storeSignedOut('gog')
+    expect(library.getGame(id)?.metadata.achievements).toBeDefined()
+  })
+
+  it("shows Epic's for an Epic copy with a Steam app id (Play starts it); the Steam scan leaves it alone", async () => {
+    const id = addEpic({ steamAppId: 1145360 })
+    // Counts the Steam scan wrote before Epic's were read belong to the Steam copy: they leave the card.
+    library.applyMetadata(
+      id,
+      {
+        metadata: {
+          achievements: { unlocked: 40, total: 49, updatedAt: new Date().toISOString() },
+          sources: { [STEAM_ACHIEVEMENTS_SOURCE]: '1145360' }
+        }
+      },
+      { overwrite: true, quiet: true }
+    )
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(async () => new Map())
+    const steamCount = vi.fn<Opt<'steamCount'>>(async () => 5)
+    const read = vi.fn(async (): Promise<StoreRead> => ({ kind: 'signed-out' }))
+    const svc = epicService(read, { steamProgress, steamCount })
+    svc.useSteamAccount(async () => ({ steamId64: '7656119', accessToken: 'stored' }))
+    await svc.syncSteam()
+    expect(steamProgress).not.toHaveBeenCalled()
+    expect(steamCount).not.toHaveBeenCalled()
+    await svc.syncStore('epic')
+    expect(read).toHaveBeenCalledWith(SANDBOX, 'scan')
+    expect(library.getGame(id)?.metadata.achievements).toBeUndefined()
+    expect(library.getGame(id)?.metadata.sources?.[STEAM_ACHIEVEMENTS_SOURCE]).toBeUndefined()
+    // Epic's counts, once read, are not taken by a Steam sign-out.
+    read.mockImplementation(async () => epicList(3, 49))
+    expect((await svc.get(id))?.provider).toBe('epic')
+    svc.steamSignedOut()
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 3, total: 49 })
+  })
+
+  it("keeps Steam's for an Epic copy with a Steam app id while Epic is signed out, Epic's once signed in", async () => {
+    const id = addEpic({ steamAppId: 1145360 })
+    setSteamKey()
+    let epicIn = false
+    const steamProgress = vi.fn<Opt<'steamProgress'>>(
+      async () => new Map<number, SteamProgress>([[1145360, { unlocked: 40, total: 49 }]])
+    )
+    const steamGame = vi.fn<Opt<'steamGame'>>(async () => listInfo(40, 49))
+    const read = vi.fn(async (): Promise<StoreRead> =>
+      epicIn ? epicList(3, 49) : { kind: 'signed-out' }
+    )
+    const svc = epicService(read, { steamProgress, steamGame })
+    svc.useEpicAccount(
+      async () => null,
+      () => epicIn
+    )
+    // Signed out of Epic: the Steam scan reads the game, and a pass of the Epic scan takes nothing off the card.
+    await svc.syncSteam()
+    expect(steamProgress).toHaveBeenCalledTimes(1)
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 40, total: 49 })
+    svc.kick()
+    await sleep(30)
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 40, total: 49 })
+    // The page shows Steam's list (Steam's own answer), not Epic's sign-in hint.
+    expect(await svc.get(id)).toMatchObject({ unlocked: 40, total: 49 })
+    expect(steamGame).toHaveBeenCalledWith(1145360, expect.anything())
+    expect(read).not.toHaveBeenCalledWith(SANDBOX, 'page')
+    // Signed in: Epic's replace Steam's.
+    epicIn = true
+    await svc.syncStore('epic')
+    expect(read).toHaveBeenCalledWith(SANDBOX, 'scan')
+    expect(library.getGame(id)?.metadata.achievements).toMatchObject({ unlocked: 3, total: 49 })
+    expect(library.getGame(id)?.metadata.sources?.[STEAM_ACHIEVEMENTS_SOURCE]).toBeUndefined()
+    expect((await svc.get(id))?.provider).toBe('epic')
+    // Signed out again: Epic's leave the card and the Steam scan reads the game anew.
+    epicIn = false
+    svc.storeSignedOut('epic')
+    await until(() => library.getGame(id)?.metadata.achievements?.unlocked === 40)
+    expect(steamProgress).toHaveBeenCalledTimes(2)
+  })
+
+  it('reads nothing before the start-up wait, even when an owned import syncs it', async () => {
+    addEpic()
+    const read = vi.fn(async () => epicList(1, 2))
+    const svc = createService({ epicRead: read, storeStartDelayMs: 60_000, storeScanGapMs: 0 })
+    await svc.syncStore('epic')
+    await sleep(20)
+    expect(read).not.toHaveBeenCalled()
+  })
+
+  it('pauses the whole scan when Epic is out of reach for everyone, and goes on by itself', async () => {
+    const a = addEpic()
+    const b = library.mergeScan('epic', [
+      scanned({
+        source: 'epic',
+        externalId: 'Other',
+        platformId: 'epic',
+        title: 'Other',
+        launch: { kind: 'uri', uri: 'com.epicgames.launcher://apps/Other' },
+        extra: { epicNamespace: 'other' }
+      })
+    ]).newGameIds[0]!
+    let offline = true
+    const read = vi.fn(async (): Promise<StoreRead> => {
+      if (offline)
+        throw new HttpError('Epic sign-in could not be refreshed', { status: 0, url: 'x' })
+      return epicList(1, 2)
+    })
+    const svc = epicService(read, { steamBackoffMs: 20 })
+    await svc.syncStore('epic')
+    // One request, not one per game; nothing waits for a sign-in.
+    expect(read).toHaveBeenCalledTimes(1)
+    offline = false
+    await until(
+      () =>
+        library.getGame(a)?.metadata.achievements?.total === 2 &&
+        library.getGame(b)?.metadata.achievements?.total === 2
+    )
+  })
+
+  it('leaves an Epic game without a sandbox id to Steam, as before', async () => {
+    const id = library.mergeScan('epic', [EPIC_WITH_APPID]).newGameIds[0]!
+    const read = vi.fn(async (): Promise<StoreRead> => epicList(1, 2))
+    const svc = epicService(read)
+    await svc.syncStore('epic')
+    expect(read).not.toHaveBeenCalled()
+    expect(library.getGame(id)?.metadata.sources?.[EPIC_ACHIEVEMENTS_SOURCE]).toBeUndefined()
+  })
+
+  it('does not stop on a failed read of one game; it tries again later', async () => {
+    const id = addEpic()
+    const read = vi
+      .fn<(sandboxId: string) => Promise<StoreRead>>()
+      .mockRejectedValueOnce(new HttpError('HTTP 500', { status: 500, url: 'https://epic' }))
+      .mockResolvedValue(epicList(3, 9))
+    const svc = epicService(read, { steamBackoffMs: 20 })
+    await svc.syncStore('epic')
+    await until(() => library.getGame(id)?.metadata.achievements?.unlocked === 3)
+    expect(read).toHaveBeenCalledTimes(2)
+  })
+
+  it('reads nothing while a game runs, and goes on when it ends', async () => {
+    const id = addEpic()
+    let running = true
+    const read = vi.fn(async () => epicList(1, 2))
+    const svc = createService(
+      { epicRead: read, storeStartDelayMs: 0, storeScanGapMs: 0 },
+      { gameRunning: () => running }
+    )
+    await svc.syncStore('epic')
+    expect(read).not.toHaveBeenCalled()
+    running = false
+    svc.played('other', new Date().toISOString())
+    await until(() => library.getGame(id)?.metadata.achievements?.total === 2)
   })
 })

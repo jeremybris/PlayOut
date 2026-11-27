@@ -35,6 +35,15 @@ describe('sanitizeAchievementsInfo', () => {
       list: [{ id: '7', name: 'Ring', unlocked: true, points: 10, hardcore: true }]
     }
     expect(sanitizeAchievementsInfo(retro)).toEqual(retro)
+    const epic = {
+      provider: 'epic',
+      total: 1,
+      unlocked: 1,
+      points: { earned: 5, total: 5 },
+      url: 'https://store.epicgames.com/en-US/p/hades',
+      list: [{ id: 'AchOne', name: 'One', unlocked: true, points: 5 }]
+    }
+    expect(sanitizeAchievementsInfo(epic)).toEqual(epic)
   })
 
   it('is null for what is not a list', () => {

@@ -160,11 +160,32 @@ describe("achievementsStat: a paired host's ROMs and GOG games", () => {
     ).toBe(false)
     expect(achievementsStat(gog({ extra: { steamAppId: 22380 } })).show).toBe(false)
   })
+
+  it('shows an Epic game with its sandbox id unless Epic said it has none, also with a Steam app id', () => {
+    const epic = (over: Partial<Game> = {}): Game =>
+      game({
+        id: 'epic:Hades',
+        source: 'epic',
+        platformId: 'epic',
+        romPath: undefined,
+        extra: { epicNamespace: 'min' },
+        ...over
+      })
+    expect(achievementsStat(epic())).toEqual({ show: true, label: 'achievements' })
+    expect(
+      achievementsStat(epic({ extra: { epicNamespace: 'min', steamAppId: 1145360 } })).show
+    ).toBe(true)
+    expect(
+      achievementsStat(epic({ metadata: { sources: { 'epic-achievements': 'none' } } })).show
+    ).toBe(false)
+    // Without a sandbox id PlayOut cannot ask Epic: only counts on the card show the stat.
+    expect(achievementsStat(epic({ extra: {} })).show).toBe(false)
+  })
 })
 
 describe('providerLink', () => {
   const info = (
-    provider: 'steam' | 'retroachievements' | 'gog' | 'recomp',
+    provider: 'steam' | 'retroachievements' | 'gog' | 'epic' | 'recomp',
     url?: string
   ): AchievementsInfo => ({
     provider,
@@ -184,6 +205,10 @@ describe('providerLink', () => {
     expect(providerLink(info('gog', 'https://www.gog.com/game/x'))).toBe(
       'https://www.gog.com/game/x'
     )
+    expect(providerLink(info('epic', 'https://store.epicgames.com/en-US/p/hades'))).toBe(
+      'https://store.epicgames.com/en-US/p/hades'
+    )
+    expect(providerLink(info('epic', 'https://www.gog.com/game/x'))).toBeUndefined()
     // A paired host's answer naming another site, a look-alike or plain http gets no link.
     expect(providerLink(info('retroachievements', 'https://evil.example/game/1'))).toBeUndefined()
     expect(
