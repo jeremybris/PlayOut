@@ -388,7 +388,11 @@ add or fix one, and [src/shared/i18n/EXTRACTION.md](src/shared/i18n/EXTRACTION.m
 
 ## Credits and licences
 
-PlayOut is released under the MIT licence (Copyright (c) 2026 Jeremy Bristol).
+PlayOut's source code is available to read, but it is not open for reuse: under the
+[PlayOut License](LICENSE) (Copyright (c) 2026 Jeremy Bristol), anyone may download and use the official releases
+and read the code, but must ask for permission (open an issue) before using the code in any other way. Versions up
+to 0.9.92 were released under the MIT licence and stay so. **PlayOut is planned to move to the Apache License 2.0 at
+a later date.** Third-party parts keep their own licences (below and in [docs/LICENSES.md](docs/LICENSES.md)).
 
 - The system definitions and emulator find rules (`resources/systems/*.json`) are derived from
   [ES-DE (EmulationStation Desktop Edition)](https://gitlab.com/es-de/emulationstation-de), MIT licence,

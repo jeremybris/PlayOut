@@ -20,7 +20,7 @@
   },
   "credits": {
     "title": "Créditos y licencias",
-    "note": "PlayOut es de código abierto bajo la licencia MIT. Se basa en los proyectos y servicios siguientes; los textos completos de las licencias están en docs/LICENSES.md.",
+    "note": "El código fuente de PlayOut se puede leer bajo la licencia PlayOut License; pide permiso antes de usarlo (está previsto que pase a la licencia Apache 2.0 más adelante). Se basa en los proyectos y servicios siguientes; los textos completos de las licencias están en docs/LICENSES.md.",
     "website": "Sitio web",
     "websiteLabel": "Abrir el sitio web de {name}",
     "esde": "Las definiciones de sistemas, las convenciones de carpetas de ROM, las reglas de búsqueda de emuladores y las plantillas de comandos de inicio derivan de EmulationStation Desktop Edition (licencia MIT, © Northwestern Software AB, Leon Styhre, Alec Lofquist).",

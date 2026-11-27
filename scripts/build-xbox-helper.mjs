@@ -68,7 +68,7 @@ const runtimeFolder = join(
 )
 
 let licences = `PlayOutXbox - PlayOut's Xbox / Xbox 360 disc image helper
-Part of PlayOut (MIT licence, Copyright (c) 2026 Jeremy Bristol).
+Part of PlayOut (PlayOut License, Copyright (c) 2026 Jeremy Bristol; see PlayOut's LICENSE).
 
 PlayOutXbox.exe contains the libraries below (MIT, by PureLogicCode.com / Peterson Fernandes - the engine of
 XISO Studio, https://github.com/purelogiccode/XISOStudio) and the .NET ${runtimeVersion} runtime. Their licence

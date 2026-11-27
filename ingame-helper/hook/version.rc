@@ -22,7 +22,7 @@ BEGIN
       VALUE "ProductVersion", PLAYOUT_INGAME_VERSION
       VALUE "OriginalFilename", "PlayOutOverlay64.dll"
       VALUE "InternalName", "PlayOutOverlay64.dll"
-      VALUE "LegalCopyright", "Copyright (c) 2026 Jeremy Bristol. MIT licence."
+      VALUE "LegalCopyright", "Copyright (c) 2026 Jeremy Bristol. PlayOut License."
     END
   END
   BLOCK "VarFileInfo"

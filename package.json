@@ -4,6 +4,7 @@
   "description": "PlayOut - console-style game launcher for Windows (stores, ROMs, emulators)",
   "main": "./out/main/index.js",
   "author": "Jeremy Bristol",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",

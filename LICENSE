@@ -1,21 +1,63 @@
-MIT License
+PlayOut License, version 1.0
+(source available; ask for permission before using the code)
 
-Copyright (c) 2026 Jeremy Bristol
+Copyright (c) 2026 Jeremy Bristol. All rights not granted below are reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. What's covered
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+"PlayOut" is the software in this repository (https://github.com/jeremybris/PlayOut): its source code, build
+scripts, documentation, data files, the PlayOut name and logo, and the official builds made from them, except the
+third-party parts listed in section 6.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Using the app: free, no need to ask
+
+You may download, install and run the official PlayOut releases published at
+https://github.com/jeremybris/PlayOut/releases, for free, on as many of your own computers as you like, and share
+links to those releases.
+
+3. Reading the code: free, no need to ask
+
+You may read and study the source code in this repository, and open issues or pull requests on it. Forking the
+repository on GitHub is allowed only as far as GitHub's Terms of Service require for that.
+
+4. Everything else needs permission first
+
+Using the code in any other way requires the copyright holder's written permission first. That includes copying,
+building, modifying, merging, publishing, distributing, sublicensing or selling PlayOut or any part of it, and using
+any part of its code, data or assets in other software or services.
+
+To ask, open an issue at https://github.com/jeremybris/PlayOut/issues. Permission is only valid in writing from the
+copyright holder, and only for what it names.
+
+5. Contributions
+
+If you send a contribution (for example a pull request), you agree that Jeremy Bristol may use, change and publish
+it as part of PlayOut under this license and under any later license of PlayOut, including the Apache License 2.0.
+
+6. Third-party parts
+
+Parts of this repository that come from other projects keep their own licenses, which this license does not change.
+They are listed in docs/LICENSES.md; for example the Co-Op helper in coop-helper/ is GPL-3.0, based on Nucleus
+Co-op.
+
+7. Earlier versions
+
+PlayOut versions published under the MIT License before this license was adopted (up to and including version
+0.9.92) stay under the MIT License for the copies of them that people already received. This license applies to
+every later version.
+
+8. Future license
+
+PlayOut is planned to move to the Apache License, Version 2.0 (https://www.apache.org/licenses/LICENSE-2.0) at a
+later date. Until that change is published in this file, this license applies.
+
+9. No warranty
+
+PLAYOUT IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH PLAYOUT OR THE USE OR OTHER DEALINGS IN PLAYOUT.
+
+10. Ending
+
+If you break these terms, the permissions in this license end for you.
