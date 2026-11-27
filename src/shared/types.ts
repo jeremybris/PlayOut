@@ -2039,10 +2039,16 @@ export interface SteamControls {
   controller: 'full' | 'partial' | null
   vr: 'only' | 'supported' | null
   /**
-   * Touch screen support (Filters > Controls > Touch). Optional and local only: no source sets it yet (Steam's store
-   * data read in main/scrapers/steam-tags.ts is where a future source would) and it is never sent to the cloud.
+   * Touch screen support (Filters > Controls > Touch). Optional: no scraper sets it yet (Steam's store data read in
+   * main/scrapers/steam-tags.ts is where a future source would); the Edit sheet's Touch choice (a local edit or a
+   * cloud entry, MetadataEdit.controls.touch) does.
    */
   touch?: 'supported'
+  /**
+   * Full mouse and keyboard support alongside the controller (the Edit sheet's "Mouse & Keyboard + Controller" and
+   * "All"; MetadataEdit.controls.keyboard). Optional: no scraper sets it.
+   */
+  keyboard?: 'full'
 }
 
 /** One PS3 game's update work, as the renderer shows it. */

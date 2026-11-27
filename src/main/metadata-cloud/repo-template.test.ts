@@ -113,6 +113,27 @@ describe('metadata-repo scripts', () => {
     expect(s.validateGameFile('steam-abc.json', record('steam-abc', {})).errors).not.toEqual([])
   })
 
+  it('accepts the controls touch and keyboard flags, and no other controls keys', () => {
+    for (const controls of [
+      { controller: 'none', vr: 'none', touch: true },
+      { controller: 'full', vr: 'none', keyboard: true },
+      { controller: 'full', vr: 'supported', keyboard: true }
+    ] as const) {
+      const edit: MetadataEdit = { controls: { ...controls } }
+      expect(safeParseMetadataEdit(edit)).toEqual(edit)
+      expect(s.validateGameFile('steam-620.json', record('steam-620', edit)).errors).toEqual([])
+    }
+    const odd = { controls: { controller: 'full', vr: 'none', mouse: true } }
+    expect(
+      s.validateGameFile('steam-620.json', record('steam-620', odd as MetadataEdit)).errors
+    ).not.toEqual([])
+    const notBool = { controls: { controller: 'full', vr: 'none', touch: 'yes' } }
+    expect(
+      s.validateGameFile('steam-620.json', record('steam-620', notBool as unknown as MetadataEdit))
+        .errors
+    ).not.toEqual([])
+  })
+
   it('PlayOut, the relay and the repository accept the same release dates', async () => {
     // The relay is a package of its own (no import across): loaded by path, as the scripts are.
     const relay = (await import(

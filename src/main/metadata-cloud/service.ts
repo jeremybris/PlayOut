@@ -244,6 +244,32 @@ function pick(edit: MetadataEdit, fields: readonly MetadataEditField[]): Metadat
   return out as MetadataEdit
 }
 
+/**
+ * The fields object a publish writes: `after`, except that a field this publish did not change keeps the file's own
+ * JSON. Parts a newer PlayOut added (keys this build's schema strips, such as a later controls flag, or a whole field
+ * it does not know) then survive an older build editing another field of the game. A known field that failed
+ * validation is still left out.
+ */
+export function keepUnknownParts(
+  raw: unknown,
+  before: MetadataEdit,
+  after: MetadataEdit
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {}
+  const known = new Set<string>(METADATA_EDIT_FIELDS)
+  if (raw && typeof raw === 'object' && !Array.isArray(raw))
+    for (const [f, value] of Object.entries(raw as Record<string, unknown>)) {
+      if (!known.has(f)) out[f] = value
+      else {
+        const was = before[f as MetadataEditField]
+        // mergeMetadataFields copies an untouched field as the same value, so identity says "not changed".
+        if (was !== undefined && was === after[f as MetadataEditField]) out[f] = value
+      }
+    }
+  for (const f of METADATA_EDIT_FIELDS) if (after[f] !== undefined && !(f in out)) out[f] = after[f]
+  return out
+}
+
 export class MetadataCloudService {
   private readonly config: JsonStore<CloudConfigFile>
   private readonly cache: JsonStore<CloudCacheFile>
@@ -1041,7 +1067,7 @@ export class MetadataCloudService {
           title:
             after.title ??
             (typeof record.title === 'string' && record.title ? record.title : title),
-          fields: after,
+          fields: keepUnknownParts(record.fields, before, after),
           updatedAt: new Date(this.now()).toISOString()
         }
         await gh.writeFile({

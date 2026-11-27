@@ -38,7 +38,16 @@ export interface MetadataFields {
   tags?: string[] | null
   /** Most local players; 0 = none shown. */
   localPlayers?: number | null
-  controls?: { controller: ControllerSupport; vr: VrSupport } | null
+  /**
+   * The controls badge. `touch` = touch screen support, `keyboard` = full mouse and keyboard support alongside a
+   * controller: each only present when true (a false one is dropped).
+   */
+  controls?: {
+    controller: ControllerSupport
+    vr: VrSupport
+    touch?: boolean
+    keyboard?: boolean
+  } | null
   /** HowLongToBeat hours; a time left out has none. */
   hltb?: { main?: number; extra?: number; completionist?: number; solo?: number } | null
   reviewScore?: { score?: number; source?: ReviewSource } | null
@@ -146,6 +155,11 @@ function checkObject(
   return v
 }
 
+function checkBoolean(name: string, v: unknown): boolean {
+  if (typeof v !== 'boolean') throw new Error(`${name} must be true or false`)
+  return v
+}
+
 function checkEnum<T extends string>(name: string, v: unknown, values: readonly T[]): T {
   if (typeof v !== 'string' || !(values as readonly string[]).includes(v)) {
     throw new Error(`${name} must be one of ${values.join(', ')}`)
@@ -180,11 +194,16 @@ const FIELD_VALIDATORS: { [K in keyof MetadataFields]-?: FieldValidator } = {
   tags: (v) => checkList('tags', v, 30, 60),
   localPlayers: (v) => checkNumber('localPlayers', v, 0, 64, true),
   controls: (v) => {
-    const o = checkObject('controls', v, ['controller', 'vr'])
-    return {
+    const o = checkObject('controls', v, ['controller', 'vr', 'touch', 'keyboard'])
+    const out: NonNullable<MetadataFields['controls']> = {
       controller: checkEnum('controls.controller', o.controller, CONTROLLER),
       vr: checkEnum('controls.vr', o.vr, VR)
     }
+    // Touch screen / full mouse and keyboard support: stored only when true.
+    if (o.touch !== undefined && checkBoolean('controls.touch', o.touch)) out.touch = true
+    if (o.keyboard !== undefined && checkBoolean('controls.keyboard', o.keyboard))
+      out.keyboard = true
+    return out
   },
   hltb: (v) => {
     const o = checkObject('hltb', v, HLTB_KEYS)

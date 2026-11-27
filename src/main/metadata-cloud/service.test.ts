@@ -411,6 +411,39 @@ describe('owner: publish', () => {
     expect(s.status().lastError).toBeNull()
   })
 
+  it('keeps parts of the file this build does not know when it publishes another field', async () => {
+    const files = new Map([
+      [
+        'games/steam-620.json',
+        {
+          text: JSON.stringify({
+            key: 'steam-620',
+            title: 'Portal 2',
+            fields: {
+              controls: { controller: 'full', vr: 'supported', keyboard: true, future: 'x' },
+              someLaterField: { a: 1 }
+            }
+          }),
+          sha: 'abc'
+        }
+      ]
+    ])
+    routes.push(allJson({}), tokenOk, repo(files))
+    const s = create()
+    await s.start()
+    await s.setConfig({ token: TOKEN })
+    await library.hook!(library.list[0]!, 'steam-620', {}, { set: { genres: ['Puzzle'] } })
+    const written = JSON.parse(files.get('games/steam-620.json')!.text) as {
+      fields: Record<string, unknown>
+    }
+    // the untouched controls keep their raw JSON (with keys this build strips) and an unknown field stays
+    expect(written.fields).toEqual({
+      controls: { controller: 'full', vr: 'supported', keyboard: true, future: 'x' },
+      someLaterField: { a: 1 },
+      genres: ['Puzzle']
+    })
+  })
+
   it("tidies the owner's edit of a host-only game too once all.json carries the publish", async () => {
     const files = new Map<string, { text: string; sha: string }>()
     routes.push(allJson({}), tokenOk, repo(files))

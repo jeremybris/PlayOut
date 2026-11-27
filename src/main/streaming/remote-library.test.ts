@@ -811,6 +811,18 @@ describe("the host's controls", () => {
     expect(missing).toEqual({ controller: 'full', vr: null })
     expect(missing).not.toHaveProperty('touch')
   })
+
+  it('keeps full mouse and keyboard support, and drops an unknown keyboard value', () => {
+    expect(withControls({ controller: 'full', vr: 'supported', keyboard: 'full' })).toEqual({
+      controller: 'full',
+      vr: 'supported',
+      keyboard: 'full'
+    })
+    expect(withControls({ controller: 'full', vr: null, keyboard: true })).toEqual({
+      controller: 'full',
+      vr: null
+    })
+  })
 })
 
 describe("the host's achievement counts", () => {

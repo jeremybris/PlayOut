@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  CONTROLS_CHOICES,
+  controlsChoice,
+  controlsForChoice,
   editableValues,
   effectiveGame,
   gameMetadataKey,
@@ -266,20 +269,48 @@ describe('effective metadata: scraped < cloud < local edit', () => {
     expect(shown.metadata.localPlayers?.max).toBeUndefined()
   })
 
-  it('keeps touch when the controls are edited, and never puts touch in an edit', () => {
+  it('sets touch and full mouse and keyboard from the controls edit, and clears them when it has none', () => {
     const g = game({
       metadata: {
-        steamTags: { tags: ['A'], controls: { controller: 'full', vr: null, touch: 'supported' } }
+        steamTags: {
+          tags: ['A'],
+          controls: { controller: 'full', vr: null, touch: 'supported', keyboard: 'full' }
+        }
       }
     })
+    expect(editableValues(g).controls).toEqual({
+      controller: 'full',
+      vr: 'none',
+      touch: true,
+      keyboard: true
+    })
     const shown = effectiveGame(g, { controls: { controller: 'partial', vr: 'none' } })
-    expect(shown.metadata.steamTags?.controls).toEqual({
-      controller: 'partial',
+    expect(shown.metadata.steamTags?.controls).toEqual({ controller: 'partial', vr: null })
+    const touch = effectiveGame(game(), {
+      controls: { controller: 'none', vr: 'none', touch: true }
+    })
+    expect(touch.metadata.steamTags?.controls).toEqual({
+      controller: null,
       vr: null,
       touch: 'supported'
     })
-    // The editable (and cloud) values carry only controller and VR.
-    expect(editableValues(g).controls).toEqual({ controller: 'full', vr: 'none' })
+  })
+
+  it.each(CONTROLS_CHOICES)('round-trips the Controls choice %s through the metadata', (choice) => {
+    const shown = effectiveGame(game(), { controls: controlsForChoice(choice) })
+    const back = editableValues(shown).controls!
+    expect(back).toEqual(controlsForChoice(choice))
+    expect(controlsChoice(back)).toBe(choice)
+  })
+
+  it('reads scraped controls as the nearest choice', () => {
+    expect(controlsChoice({ controller: 'full', vr: 'supported' })).toBe('full')
+    expect(controlsChoice({ controller: 'partial', vr: 'supported' })).toBe('partial')
+    expect(controlsChoice({ controller: 'none', vr: 'supported' })).toBe('vr')
+    // VR only wins: a headset is needed whatever else the entry says
+    expect(controlsChoice({ controller: 'full', vr: 'only', keyboard: true })).toBe('vr')
+    expect(controlsChoice({ controller: 'full', vr: 'none', touch: true })).toBe('full')
+    expect(controlsChoice({ controller: 'none', vr: 'none', touch: false })).toBe('keyboard')
   })
 
   it('keeps showing an edited field whatever the scrapers write later', () => {

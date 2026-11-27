@@ -148,8 +148,16 @@ function meta(m: MetaInput): GameMetadata {
     result.steamTags = {
       tags: [...m.genres, ...m.tags],
       updatedAt: daysAgo(3),
-      // Steam's controller support (the game page's controls badge): the action games play with a pad.
-      controls: { controller: m.genres.includes('Action') ? 'full' : null, vr: null }
+      // Steam's controller support (the game page's controls badge): the action games play with a pad, the action
+      // shooters fully with mouse and keyboard too (Mouse & Keyboard + Controller), the card games by touch.
+      controls: {
+        controller: m.genres.includes('Action') ? 'full' : null,
+        vr: null,
+        ...(m.genres.includes('Action') && m.genres.includes('Shooter')
+          ? { keyboard: 'full' as const }
+          : {}),
+        ...(m.genres.includes('Card Game') ? { touch: 'supported' as const } : {})
+      }
     }
   }
   if (m.rating !== undefined) {

@@ -416,3 +416,56 @@ describe('Edit sheet > Difficulty of a tool (Steam tag Utilities)', () => {
     expect(seen).not.toContain('N/A (Tools)')
   })
 })
+
+describe('Edit sheet > Controls', () => {
+  const controls = (): HTMLElement =>
+    document.querySelector<HTMLElement>('[role="group"][aria-label="Controls"]')!
+  const shown = (): string => controls().querySelector('.select__value')!.textContent ?? ''
+  const next = (): HTMLElement =>
+    controls().querySelector<HTMLElement>(
+      'button[aria-label="Next option"], button.select__arrow:last-of-type'
+    )!
+
+  it('is one list of the seven choices, and Save sends the picked one as the controls edit', async () => {
+    await openSheet()
+    // No separate VR or Touch list any more.
+    expect(document.querySelector('[role="group"][aria-label="VR"]')).toBeNull()
+    expect(document.querySelector('[role="group"][aria-label="Touch"]')).toBeNull()
+    expect(document.querySelector('[role="group"][aria-label="Controller"]')).toBeNull()
+    // A game without controls data shows Mouse & Keyboard.
+    expect(shown()).toBe('Mouse & Keyboard')
+    const seen = [shown()]
+    for (let i = 0; i < 6; i++) {
+      await click(next())
+      seen.push(shown())
+    }
+    // The list's order (VR first) read from Mouse & Keyboard on: it wraps round after All.
+    expect(seen).toEqual([
+      'Mouse & Keyboard',
+      'Mouse & Keyboard + Controller',
+      'All',
+      'VR',
+      'Touch',
+      'Full Controller Support',
+      'Partial Controller Support'
+    ])
+    // Round to All and save.
+    while (shown() !== 'All') await click(next())
+    await click(button('Save'))
+    expect(api.setMetadataEdit).toHaveBeenCalledWith(
+      'g1',
+      { controls: { controller: 'full', vr: 'supported', keyboard: true } },
+      []
+    )
+  })
+
+  it('does not save controls the user left alone', async () => {
+    await openSheet()
+    // Round the whole list back to where it started.
+    for (let i = 0; i < 7; i++) await click(next())
+    expect(shown()).toBe('Mouse & Keyboard')
+    await click(button('Save'))
+    for (const call of api.setMetadataEdit.mock.calls)
+      expect((call[1] as Record<string, unknown>).controls).toBeUndefined()
+  })
+})

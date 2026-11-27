@@ -39,6 +39,78 @@ export type VrSupport = 'only' | 'supported' | 'none'
 export type ReviewSource = 'steam' | 'igdb'
 
 /**
+ * A game's controls as an edit sets them (MetadataEdit.controls): Steam's controller and VR support, plus `touch`
+ * (touch screen support) and `keyboard` (full mouse and keyboard support alongside a controller), each only present
+ * when true. An entry without them (one an older PlayOut wrote) has neither.
+ */
+export interface ControlsEdit {
+  controller: ControllerSupport
+  vr: VrSupport
+  touch?: boolean
+  keyboard?: boolean
+}
+
+/**
+ * The Edit sheet's Controls choices, in its order: VR, Touch, Full Controller Support, Partial Controller Support,
+ * Mouse & Keyboard, Mouse & Keyboard + Controller ('both') and All (VR, full controller and mouse and keyboard).
+ */
+export const CONTROLS_CHOICES = [
+  'vr',
+  'touch',
+  'full',
+  'partial',
+  'keyboard',
+  'both',
+  'all'
+] as const
+export type ControlsChoice = (typeof CONTROLS_CHOICES)[number]
+
+/** The controls a choice saves (always the same for a choice, so it reads back as that choice). */
+export function controlsForChoice(choice: ControlsChoice): ControlsEdit {
+  switch (choice) {
+    case 'vr':
+      return { controller: 'none', vr: 'only' }
+    case 'touch':
+      return { controller: 'none', vr: 'none', touch: true }
+    case 'full':
+      return { controller: 'full', vr: 'none' }
+    case 'partial':
+      return { controller: 'partial', vr: 'none' }
+    case 'keyboard':
+      return { controller: 'none', vr: 'none' }
+    case 'both':
+      return { controller: 'full', vr: 'none', keyboard: true }
+    case 'all':
+      return { controller: 'full', vr: 'supported', keyboard: true }
+  }
+}
+
+/**
+ * The choice that describes a game's controls best (any controls: scraped ones too, like full controller with VR
+ * supported, which shows as Full Controller Support).
+ */
+export function controlsChoice(c: ControlsEdit): ControlsChoice {
+  if (c.touch && c.controller === 'none' && c.vr === 'none') return 'touch'
+  // VR only (a headset is needed) wins over the rest, as on the badge (renderer lib/controls.ts).
+  if (c.vr === 'only') return 'vr'
+  if (c.controller === 'full' && c.keyboard) return c.vr === 'supported' ? 'all' : 'both'
+  if (c.controller === 'full') return 'full'
+  if (c.controller === 'partial') return 'partial'
+  if (c.vr === 'supported') return 'vr'
+  return 'keyboard'
+}
+
+/** Controls with `touch` / `keyboard` only when true (a false one says the same as none). */
+export function normalizeControls(c: ControlsEdit): ControlsEdit {
+  return {
+    controller: c.controller,
+    vr: c.vr,
+    ...(c.touch ? { touch: true } : {}),
+    ...(c.keyboard ? { keyboard: true } : {})
+  }
+}
+
+/**
  * A set of corrected fields (a local edit or a cloud entry). A field that is present replaces the scraped value; an
  * empty one ('' / [] / 0 / no times / no score) says "the game has none" and hides the scraped value.
  */
@@ -55,8 +127,11 @@ export interface MetadataEdit {
   tags?: string[]
   /** Most local players (metadata.localPlayers.max); 0 = none shown. */
   localPlayers?: number
-  /** The controls badge (metadata.steamTags.controls). A console game (ROM) always shows "Pad". */
-  controls?: { controller: ControllerSupport; vr: VrSupport }
+  /**
+   * The controls badge and Filters > Controls (metadata.steamTags.controls): one of the Edit sheet's Controls choices
+   * (controlsForChoice). A console game (ROM) always shows "Pad".
+   */
+  controls?: ControlsEdit
   /** HowLongToBeat hours; a time left out has none. */
   hltb?: { main?: number; extra?: number; completionist?: number; solo?: number }
   /** The rating stat: 0-100 and whose wording it uses (Steam's percent positive or IGDB's rating). */
@@ -343,7 +418,13 @@ export function editableValues(game: Pick<Game, 'source' | 'title' | 'metadata'>
   if (meta.steamTags?.tags?.length) out.tags = [...meta.steamTags.tags]
   if (typeof meta.localPlayers?.max === 'number') out.localPlayers = meta.localPlayers.max
   const c = meta.steamTags?.controls
-  if (c) out.controls = { controller: c.controller ?? 'none', vr: c.vr ?? 'none' }
+  if (c)
+    out.controls = {
+      controller: c.controller ?? 'none',
+      vr: c.vr ?? 'none',
+      ...(c.touch === 'supported' ? { touch: true } : {}),
+      ...(c.keyboard === 'full' ? { keyboard: true } : {})
+    }
   const h = meta.hltb
   if (h && (h.main || h.extra || h.completionist || h.solo)) {
     out.hltb = {}
@@ -444,10 +525,11 @@ export function applyEditToMetadata(
     if (edit.tags !== undefined) st.tags = cleanList(edit.tags)
     if (edit.controls !== undefined)
       st.controls = {
-        // Touch is not edited here: kept as it was.
-        ...(st.controls?.touch ? { touch: st.controls.touch } : {}),
         controller: edit.controls.controller === 'none' ? null : edit.controls.controller,
-        vr: edit.controls.vr === 'none' ? null : edit.controls.vr
+        vr: edit.controls.vr === 'none' ? null : edit.controls.vr,
+        // Touch and full mouse and keyboard come from the edit too: an edit without them clears them.
+        ...(edit.controls.touch ? { touch: 'supported' as const } : {}),
+        ...(edit.controls.keyboard ? { keyboard: 'full' as const } : {})
       }
     m.steamTags = st
   }

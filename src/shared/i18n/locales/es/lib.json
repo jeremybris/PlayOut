@@ -37,25 +37,31 @@
   },
   "controls": {
     "filters": {
-      "vr": "RV",
+      "vr": "VR",
       "controller": "Mando",
       "keyboard": "Teclado y ratón",
       "touch": "Táctil"
     },
     "badge": {
       "pad": "Mando",
-      "vr": "RV",
+      "vr": "VR",
       "partial": "Parcial",
-      "keyboard": "T+R"
+      "keyboard": "T+R",
+      "touch": "Táctil",
+      "both": "Mando+TR",
+      "all": "Todo"
     },
     "console": "Se juega con mando (juego de consola)",
-    "vrOnly": "Solo RV: necesita un visor de RV",
+    "vrOnly": "Solo VR: necesita un visor de VR",
     "full": "Compatibilidad total con mando",
-    "fullVr": "Compatibilidad total con mando, compatible con RV",
+    "fullVr": "Compatibilidad total con mando, compatible con VR",
     "partial": "Compatibilidad parcial con mando",
-    "partialVr": "Compatibilidad parcial con mando, compatible con RV",
-    "vrSupported": "Compatible con RV; si no, teclado y ratón",
-    "keyboard": "Teclado y ratón"
+    "partialVr": "Compatibilidad parcial con mando, compatible con VR",
+    "vrSupported": "Compatible con VR; si no, teclado y ratón",
+    "keyboard": "Teclado y ratón",
+    "touch": "Pantalla táctil",
+    "both": "Compatibilidad total con mando y con ratón y teclado",
+    "all": "Compatible con VR, compatibilidad total con mando y con ratón y teclado"
   },
   "coop": {
     "layouts": {

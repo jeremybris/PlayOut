@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { z } from 'zod'
 import { MetadataCloudOverlay } from './cloud-overlay'
 import { parseMetadataEdit, safeParseMetadataEdit } from './schema'
 
@@ -64,6 +65,40 @@ describe('metadata edit schema', () => {
         extra: 'x'
       })
     ).toEqual({ title: 'Portal', hltb: { main: 8 }, reviewScore: { score: 90 } })
+  })
+
+  it('accepts the controls touch and keyboard flags, keeps them only when true and drops other keys', () => {
+    expect(
+      parseMetadataEdit({ controls: { controller: 'full', vr: 'supported', keyboard: true } })
+    ).toEqual({ controls: { controller: 'full', vr: 'supported', keyboard: true } })
+    expect(
+      parseMetadataEdit({
+        controls: { controller: 'none', vr: 'none', touch: true, keyboard: false }
+      })
+    ).toEqual({ controls: { controller: 'none', vr: 'none', touch: true } })
+    expect(
+      safeParseMetadataEdit({ controls: { controller: 'full', vr: 'none', mouse: true } })
+    ).toEqual({ controls: { controller: 'full', vr: 'none' } })
+    expect(() =>
+      parseMetadataEdit({ controls: { controller: 'full', vr: 'none', touch: 'yes' } })
+    ).toThrow()
+  })
+
+  it("an older PlayOut's controls schema drops touch and keyboard instead of refusing the entry", () => {
+    // The controls object of PlayOut 0.9.90 and before (src/main/metadata-edits/schema.ts): zod strips unknown keys.
+    const old = z.object({
+      controls: z
+        .object({
+          controller: z.enum(['full', 'partial', 'none']),
+          vr: z.enum(['only', 'supported', 'none'])
+        })
+        .optional()
+    })
+    const parsed = old.safeParse({
+      controls: { controller: 'full', vr: 'supported', keyboard: true, touch: true }
+    })
+    expect(parsed.success).toBe(true)
+    expect(parsed.data).toEqual({ controls: { controller: 'full', vr: 'supported' } })
   })
 
   it('refuses bad values', () => {

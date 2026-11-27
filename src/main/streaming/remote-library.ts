@@ -495,7 +495,12 @@ function controlsFrom(raw: unknown): { controls: SteamControls } | null {
   const controller = c.controller === 'full' || c.controller === 'partial' ? c.controller : null
   const vr = c.vr === 'only' || c.vr === 'supported' ? c.vr : null
   return {
-    controls: { controller, vr, ...(c.touch === 'supported' ? { touch: 'supported' } : {}) }
+    controls: {
+      controller,
+      vr,
+      ...(c.touch === 'supported' ? { touch: 'supported' } : {}),
+      ...(c.keyboard === 'full' ? { keyboard: 'full' } : {})
+    }
   }
 }
 

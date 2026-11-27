@@ -1,6 +1,15 @@
 import { difficultyLabel } from './difficulty'
 import type { Translate } from './i18n'
-import { METADATA_EDIT_FIELDS, type MetadataEdit, type MetadataEditField } from './metadata-edit'
+import {
+  METADATA_EDIT_FIELDS,
+  controlsChoice,
+  controlsForChoice,
+  normalizeControls,
+  type ControlsChoice,
+  type ControlsEdit,
+  type MetadataEdit,
+  type MetadataEditField
+} from './metadata-edit'
 
 /**
  * The PlayOut metadata cloud: the public GitHub repository jeremybris/PlayOut-metadata (one games/<key>.json per
@@ -252,6 +261,40 @@ function vrText(vr: string, t: Translate): string {
   }
 }
 
+/** An Edit sheet Controls choice's name (the same 7 as the sheet's Controls list). */
+function controlsChoiceText(choice: ControlsChoice, t: Translate): string {
+  switch (choice) {
+    case 'vr':
+      return t('metadataCloud.values.controlsVr')
+    case 'touch':
+      return t('metadataCloud.values.controlsTouch')
+    case 'full':
+      return t('metadataCloud.values.controlsFull')
+    case 'partial':
+      return t('metadataCloud.values.controlsPartial')
+    case 'keyboard':
+      return t('metadataCloud.values.controlsKeyboard')
+    case 'both':
+      return t('metadataCloud.values.controlsBoth')
+    case 'all':
+      return t('metadataCloud.values.controlsAll')
+  }
+}
+
+/**
+ * Controls as text: the Controls choice's name when they are exactly what that choice saves (everything the Edit sheet
+ * writes), else the parts (scraped controls like full controller with VR supported), so a change always reads as one.
+ */
+function controlsText(c: ControlsEdit, t: Translate): string {
+  const choice = controlsChoice(c)
+  if (sameMetadataValue(normalizeControls(c), controlsForChoice(choice)))
+    return controlsChoiceText(choice, t)
+  const parts = [controllerText(c.controller, t), vrText(c.vr, t)]
+  if (c.touch) parts.push(t('metadataCloud.values.touchSupported'))
+  if (c.keyboard) parts.push(t('metadataCloud.values.keyboardFull'))
+  return parts.join(', ')
+}
+
 const hours = (h: number): string => `${Math.round(h * 10) / 10}`
 
 /**
@@ -277,8 +320,7 @@ export function describeMetadataValue(
     case 'localPlayers':
       return (value as number) > 0 ? `${value as number}` : none
     case 'controls': {
-      const c = value as NonNullable<MetadataEdit['controls']>
-      return `${controllerText(c.controller, t)}, ${vrText(c.vr, t)}`
+      return controlsText(value as ControlsEdit, t)
     }
     case 'hltb': {
       const h = value as NonNullable<MetadataEdit['hltb']>
@@ -315,7 +357,8 @@ function stable(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`
   if (value && typeof value === 'object') {
     const entries = Object.entries(value as Record<string, unknown>)
-      .filter(([, v]) => v !== undefined)
+      // A controls flag set to false (touch, keyboard) says the same as none.
+      .filter(([k, v]) => v !== undefined && !(v === false && (k === 'touch' || k === 'keyboard')))
       .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${stable(v)}`).join(',')}}`
   }

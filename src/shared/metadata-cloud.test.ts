@@ -8,6 +8,7 @@ import {
   unsafeMetadataFields
 } from './metadata-cloud'
 import { createTranslator } from './i18n'
+import { CONTROLS_CHOICES, controlsForChoice } from './metadata-edit'
 
 // The words around the values in English, as the tests read them.
 const t = createTranslator('en')
@@ -56,7 +57,7 @@ describe('describeMetadataValue', () => {
     expect(describeMetadataValue({ localPlayers: 0 }, 'localPlayers', t)).toBe('(none)')
     expect(
       describeMetadataValue({ controls: { controller: 'full', vr: 'none' } }, 'controls', t)
-    ).toBe('Full controller, No VR')
+    ).toBe('Full Controller Support')
     expect(describeMetadataValue({ hltb: { main: 8.25, completionist: 20 } }, 'hltb', t)).toBe(
       'Main 8.3 h, Completionist 20 h'
     )
@@ -66,6 +67,60 @@ describe('describeMetadataValue', () => {
     expect(describeMetadataValue({ description: 'x'.repeat(200) }, 'description', t)).toHaveLength(
       160
     )
+  })
+})
+
+describe('describeMetadataValue: controls', () => {
+  it('names each Controls choice as the Edit sheet does, and other controls by their parts', () => {
+    expect(
+      CONTROLS_CHOICES.map((c) =>
+        describeMetadataValue({ controls: controlsForChoice(c) }, 'controls', t)
+      )
+    ).toEqual([
+      'VR',
+      'Touch',
+      'Full Controller Support',
+      'Partial Controller Support',
+      'Mouse & Keyboard',
+      'Mouse & Keyboard + Controller',
+      'All'
+    ])
+    expect(
+      describeMetadataValue({ controls: { controller: 'full', vr: 'supported' } }, 'controls', t)
+    ).toBe('Full controller, VR supported')
+    const es = createTranslator('es')
+    expect(describeMetadataValue({ controls: controlsForChoice('both') }, 'controls', es)).toBe(
+      'Ratón y teclado + mando'
+    )
+  })
+
+  it('takes a false touch or keyboard as the same as none', () => {
+    expect(
+      sameMetadataValue(
+        { controller: 'full', vr: 'none', touch: false, keyboard: false },
+        { controller: 'full', vr: 'none' }
+      )
+    ).toBe(true)
+    expect(
+      sameMetadataValue(
+        { controller: 'full', vr: 'none', keyboard: true },
+        { controller: 'full', vr: 'none' }
+      )
+    ).toBe(false)
+    expect(
+      diffMetadataFields(
+        { controls: { controller: 'full', vr: 'none' } },
+        { controls: { controller: 'full', vr: 'none', keyboard: true } },
+        t
+      )
+    ).toEqual([
+      {
+        field: 'controls',
+        label: 'Controls',
+        before: 'Full Controller Support',
+        after: 'Mouse & Keyboard + Controller'
+      }
+    ])
   })
 })
 

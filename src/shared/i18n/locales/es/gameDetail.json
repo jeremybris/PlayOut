@@ -400,14 +400,13 @@
       "controls": {
         "label": "Controles",
         "reset": "Restablecer controles",
-        "controller": "Control",
-        "vr": "RV",
+        "vr": "VR",
+        "touch": "Táctil",
         "full": "Compatibilidad total con mando",
         "partial": "Compatibilidad parcial con mando",
-        "keyboard": "Teclado y ratón",
-        "noVr": "Sin RV",
-        "vrSupported": "Compatible con RV",
-        "vrOnly": "Solo RV"
+        "keyboard": "Ratón y teclado",
+        "both": "Ratón y teclado + mando",
+        "all": "Todo"
       },
       "hltb": {
         "label": "How Long to Beat (horas)",

@@ -397,14 +397,13 @@
       "controls": {
         "label": "Controls",
         "reset": "Reset controls",
-        "controller": "Controller",
         "vr": "VR",
-        "full": "Full controller support",
-        "partial": "Partial controller support",
-        "keyboard": "Keyboard and mouse",
-        "noVr": "No VR",
-        "vrSupported": "VR supported",
-        "vrOnly": "VR only"
+        "touch": "Touch",
+        "full": "Full Controller Support",
+        "partial": "Partial Controller Support",
+        "keyboard": "Mouse & Keyboard",
+        "both": "Mouse & Keyboard + Controller",
+        "all": "All"
       },
       "hltb": {
         "label": "How Long to Beat (hours)",

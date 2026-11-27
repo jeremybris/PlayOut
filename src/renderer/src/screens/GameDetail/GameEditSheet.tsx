@@ -131,18 +131,16 @@ function playerOptionsOf(t: Translate): SelectOption[] {
     }))
   ]
 }
-function controllerOptions(t: Translate): SelectOption<MetadataForm['controller']>[] {
+/** The Controls choices (CONTROLS_CHOICES, in its order): what each saves is controlsForChoice's. */
+function controlsOptions(t: Translate): SelectOption<MetadataForm['controls']>[] {
   return [
+    { value: 'vr', label: t('gameDetail.edit.fields.controls.vr') },
+    { value: 'touch', label: t('gameDetail.edit.fields.controls.touch') },
     { value: 'full', label: t('gameDetail.edit.fields.controls.full') },
     { value: 'partial', label: t('gameDetail.edit.fields.controls.partial') },
-    { value: 'none', label: t('gameDetail.edit.fields.controls.keyboard') }
-  ]
-}
-function vrOptions(t: Translate): SelectOption<MetadataForm['vr']>[] {
-  return [
-    { value: 'none', label: t('gameDetail.edit.fields.controls.noVr') },
-    { value: 'supported', label: t('gameDetail.edit.fields.controls.vrSupported') },
-    { value: 'only', label: t('gameDetail.edit.fields.controls.vrOnly') }
+    { value: 'keyboard', label: t('gameDetail.edit.fields.controls.keyboard') },
+    { value: 'both', label: t('gameDetail.edit.fields.controls.both') },
+    { value: 'all', label: t('gameDetail.edit.fields.controls.all') }
   ]
 }
 function scoreSourceOptions(t: Translate): SelectOption<MetadataForm['scoreSource']>[] {
@@ -164,7 +162,7 @@ const FIELD_FOCUS: Record<MetadataEditField, string> = {
   genres: 'genresTags',
   tags: 'genresTags',
   localPlayers: 'localPlayers',
-  controls: 'controller',
+  controls: 'controls',
   hltb: 'hltb:main',
   reviewScore: 'score',
   difficulty: 'difficulty'
@@ -689,18 +687,11 @@ function EditForm({
               t('gameDetail.edit.fields.controls.reset')
             )}
             <SelectField
-              focusKey={fk('controller')}
-              label={t('gameDetail.edit.fields.controls.controller')}
-              value={form.controller}
-              options={controllerOptions(t)}
-              onChange={set('controller')}
-            />
-            <SelectField
-              focusKey={fk('vr')}
-              label={t('gameDetail.edit.fields.controls.vr')}
-              value={form.vr}
-              options={vrOptions(t)}
-              onChange={set('vr')}
+              focusKey={fk('controls')}
+              label={t('gameDetail.edit.fields.controls.label')}
+              value={form.controls}
+              options={controlsOptions(t)}
+              onChange={set('controls')}
             />
           </div>
         ) : null}

@@ -1,13 +1,14 @@
 import { isDifficultyId } from '@shared/difficulty'
 import {
   METADATA_EDIT_FIELDS,
-  type ControllerSupport,
+  controlsChoice,
+  controlsForChoice,
+  type ControlsChoice,
   type MetadataEdit,
   type MetadataEditField,
   type MetadataLayers,
   type MetadataOrigin,
-  type ReviewSource,
-  type VrSupport
+  type ReviewSource
 } from '@shared/metadata-edit'
 import { t } from '../i18n'
 
@@ -27,8 +28,11 @@ export interface MetadataForm {
   tags: string
   /** '' = not known, '0' = none, '1'..: the count. */
   localPlayers: string
-  controller: ControllerSupport
-  vr: VrSupport
+  /**
+   * The Controls choice (CONTROLS_CHOICES). Compared by choice, so controls that show as a choice (a scraped full
+   * controller with VR supported shows as Full Controller Support) are only rewritten when another choice is picked.
+   */
+  controls: ControlsChoice
   hltbMain: string
   hltbExtra: string
   hltbCompletionist: string
@@ -51,7 +55,7 @@ export const FIELD_FORM_KEYS: Record<MetadataEditField, readonly (keyof Metadata
   genres: ['genres'],
   tags: ['tags'],
   localPlayers: ['localPlayers'],
-  controls: ['controller', 'vr'],
+  controls: ['controls'],
   hltb: ['hltbMain', 'hltbExtra', 'hltbCompletionist', 'hltbSolo'],
   reviewScore: ['score', 'scoreSource'],
   difficulty: ['difficulty']
@@ -67,8 +71,7 @@ export const EMPTY_FORM: MetadataForm = {
   genres: '',
   tags: '',
   localPlayers: '',
-  controller: 'none',
-  vr: 'none',
+  controls: 'keyboard',
   hltbMain: '',
   hltbExtra: '',
   hltbCompletionist: '',
@@ -95,10 +98,7 @@ export function formFromEdit(edit: MetadataEdit, base: MetadataForm = EMPTY_FORM
   if (edit.genres !== undefined) f.genres = joinList(edit.genres)
   if (edit.tags !== undefined) f.tags = joinList(edit.tags)
   if (edit.localPlayers !== undefined) f.localPlayers = String(edit.localPlayers)
-  if (edit.controls !== undefined) {
-    f.controller = edit.controls.controller
-    f.vr = edit.controls.vr
-  }
+  if (edit.controls !== undefined) f.controls = controlsChoice(edit.controls)
   if (edit.hltb !== undefined) {
     f.hltbMain = num(edit.hltb.main)
     f.hltbExtra = num(edit.hltb.extra)
@@ -181,7 +181,7 @@ export function fieldEdit(form: MetadataForm, field: MetadataEditField): Metadat
       return { localPlayers: n === undefined || Number.isNaN(n) ? 0 : Math.round(n) }
     }
     case 'controls':
-      return { controls: { controller: form.controller, vr: form.vr } }
+      return { controls: controlsForChoice(form.controls) }
     case 'hltb': {
       const hltb: NonNullable<MetadataEdit['hltb']> = {}
       const pairs = [

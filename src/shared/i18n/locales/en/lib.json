@@ -46,7 +46,10 @@
       "pad": "Pad",
       "vr": "VR",
       "partial": "Partial",
-      "keyboard": "KB+M"
+      "keyboard": "KB+M",
+      "touch": "Touch",
+      "both": "Pad+KB+M",
+      "all": "All"
     },
     "console": "Played with a controller (console game)",
     "vrOnly": "VR only: needs a VR headset",
@@ -55,7 +58,10 @@
     "partial": "Partial controller support",
     "partialVr": "Partial controller support, VR supported",
     "vrSupported": "VR supported; keyboard and mouse otherwise",
-    "keyboard": "Keyboard and mouse"
+    "keyboard": "Keyboard and mouse",
+    "touch": "Touch screen",
+    "both": "Full controller support and full mouse and keyboard support",
+    "all": "VR supported, full controller support and full mouse and keyboard support"
   },
   "coop": {
     "layouts": {

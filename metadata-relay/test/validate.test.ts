@@ -110,6 +110,15 @@ describe('validateSuggestion', () => {
     [{ fields: { localPlayers: '5' } }, 'must be a number'],
     [{ fields: { controls: { controller: 'yes', vr: 'none' } } }, 'one of'],
     [{ fields: { controls: { controller: 'full' } } }, 'controls.vr'],
+    [{ fields: { controls: { controller: 'full', vr: 'none', touch: 'yes' } } }, 'controls.touch'],
+    [
+      { fields: { controls: { controller: 'full', vr: 'none', keyboard: 1 } } },
+      'controls.keyboard'
+    ],
+    [
+      { fields: { controls: { controller: 'full', vr: 'none', mouse: true } } },
+      'not an editable field'
+    ],
     [{ fields: { hltb: { main: -1 } } }, 'between'],
     [{ fields: { hltb: { story: 1 } } }, 'not an editable field'],
     [{ fields: { reviewScore: { score: 90, source: 'metacritic' } } }, 'one of'],
@@ -138,6 +147,29 @@ describe('validateSuggestion', () => {
   it('does not accept prototype names as fields', () => {
     expect(validateFields(JSON.parse('{"__proto__": {"x": 1}}')).ok).toBe(false)
     expect(validateFields({ toString: 'x' }).ok).toBe(false)
+  })
+})
+
+describe('controls: touch and keyboard', () => {
+  it('accepts touch and keyboard, keeping them only when true', () => {
+    const all = suggest({
+      fields: { controls: { controller: 'full', vr: 'supported', keyboard: true } }
+    })
+    expect(all.ok && all.value.fields.controls).toEqual({
+      controller: 'full',
+      vr: 'supported',
+      keyboard: true
+    })
+    const touch = suggest({ fields: { controls: { controller: 'none', vr: 'none', touch: true } } })
+    expect(touch.ok && touch.value.fields.controls).toEqual({
+      controller: 'none',
+      vr: 'none',
+      touch: true
+    })
+    const off = suggest({
+      fields: { controls: { controller: 'full', vr: 'none', touch: false, keyboard: false } }
+    })
+    expect(off.ok && off.value.fields.controls).toEqual({ controller: 'full', vr: 'none' })
   })
 })
 

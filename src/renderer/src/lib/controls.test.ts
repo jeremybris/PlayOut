@@ -1,3 +1,9 @@
+import {
+  CONTROLS_CHOICES,
+  applyEditToMetadata,
+  controlsForChoice,
+  type ControlsChoice
+} from '@shared/metadata-edit'
 import type { Game } from '@shared/types'
 import { describe, expect, it } from 'vitest'
 import {
@@ -12,6 +18,7 @@ const pc = (controls?: {
   controller: 'full' | 'partial' | null
   vr: 'only' | 'supported' | null
   touch?: 'supported'
+  keyboard?: 'full'
 }): Game =>
   ({
     source: 'steam',
@@ -75,10 +82,13 @@ describe('Controls filter: touch', () => {
       'controller',
       'touch'
     ])
+    // Touch only: under Touch alone.
     expect(controlsFilterIds(pc({ controller: null, vr: null, touch: 'supported' }))).toEqual([
-      'keyboard',
       'touch'
     ])
+    expect(
+      controlsFilterIds(pc({ controller: null, vr: 'supported', touch: 'supported' }))
+    ).toEqual(['vr', 'keyboard', 'touch'])
     expect(controlsFilterIds(pc({ controller: 'full', vr: null }))).not.toContain('touch')
   })
 })
@@ -108,5 +118,74 @@ describe('libraryControlsFilters', () => {
     expect(
       libraryControlsFilters([...today, pc({ controller: null, vr: null, touch: 'supported' })])
     ).toEqual(['vr', 'controller', 'keyboard', 'touch'])
+  })
+})
+
+describe('the Edit sheet Controls choices', () => {
+  // The game as the choice saved in the Edit sheet leaves it (the edit laid over its metadata).
+  const chosen = (choice: ControlsChoice): Game =>
+    ({
+      source: 'steam',
+      launch: { kind: 'uri', uri: '' },
+      metadata: applyEditToMetadata({}, { controls: controlsForChoice(choice) })
+    }) as unknown as Game
+
+  it('gives each choice its badge', () => {
+    expect(CONTROLS_CHOICES.map((c) => gameControls(chosen(c)).kind)).toEqual([
+      'vr-only',
+      'touch',
+      'controller',
+      'partial',
+      'keyboard',
+      'both',
+      'all'
+    ])
+    expect(CONTROLS_CHOICES.map((c) => gameControls(chosen(c)).label)).toEqual([
+      'VR',
+      'Touch',
+      'Pad',
+      'Partial',
+      'KB+M',
+      'Pad+KB+M',
+      'All'
+    ])
+    expect(gameControls(chosen('both')).text).toBe(
+      'Full controller support and full mouse and keyboard support'
+    )
+    expect(gameControls(chosen('touch')).text).toBe('Touch screen')
+  })
+
+  it('puts each choice under its Filters > Controls choices', () => {
+    expect(CONTROLS_CHOICES.map((c) => controlsFilterIds(chosen(c)))).toEqual([
+      ['vr'],
+      ['touch'],
+      ['controller'],
+      ['controller', 'keyboard'],
+      ['keyboard'],
+      ['controller', 'keyboard'],
+      ['vr', 'controller', 'keyboard']
+    ])
+    expect(libraryControlsFilters([chosen('touch')])).toEqual(['touch'])
+    expect(libraryControlsFilters([chosen('all'), chosen('touch')])).toEqual([
+      'vr',
+      'controller',
+      'keyboard',
+      'touch'
+    ])
+  })
+
+  it('lets VR only win over full controller and keyboard support', () => {
+    const game = pc({ controller: 'full', vr: 'only', keyboard: 'full' })
+    expect(gameControls(game).kind).toBe('vr-only')
+    expect(controlsFilterIds(game)).toEqual(['vr'])
+  })
+
+  it('keeps a console game on Pad whatever its metadata says', () => {
+    const rom = {
+      ...chosen('touch'),
+      source: 'rom',
+      launch: { kind: 'emulator', systemId: 'ps2', romPath: 'x' }
+    } as unknown as Game
+    expect(gameControls(rom).kind).toBe('controller')
   })
 })

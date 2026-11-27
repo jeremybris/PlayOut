@@ -55,7 +55,10 @@ function sampleSuggestions(): MetadataSuggestion[] {
       headSha: '1c0ffee0000000000000000000000000000000b2',
       changes: diffMetadataFields(
         { releaseDate: '2018-01-26' },
-        { releaseDate: '2018-01-25', controls: { controller: 'full', vr: 'none' } },
+        {
+          releaseDate: '2018-01-25',
+          controls: { controller: 'full', vr: 'none', keyboard: true }
+        },
         t
       )
     }

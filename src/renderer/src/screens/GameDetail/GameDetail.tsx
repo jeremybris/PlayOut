@@ -2,7 +2,7 @@ import type { Game, GameMetadata, InstallProgress } from '@shared/types'
 import type { RecompExecutables } from '@shared/recomp'
 import { playableHere, recompAddedId, recompOnlyKey, recompToPlay } from '@shared/recomp-play'
 import { upgradeRunningMessage } from '@shared/upgrades'
-import { Gamepad, Gamepad2, Glasses, Keyboard, Users, X } from 'lucide-react'
+import { Gamepad, Gamepad2, Glasses, Keyboard, Layers, Pointer, Users, X } from 'lucide-react'
 import {
   useCallback,
   useEffect,
@@ -1198,7 +1198,8 @@ function CoopBadge({ maxPlayers }: { maxPlayers?: number }): ReactElement {
 
 /**
  * How the game is played (lib/controls.ts): a controller (full or partial support, Steam's categories; every console
- * game), VR, else keyboard and mouse. The word above its icon, left of the players badge.
+ * game; also full controller with full mouse and keyboard), VR, touch (a pointing hand), all of them (layers), else
+ * keyboard and mouse. The word above its icon, left of the players badge.
  */
 function ControlsBadge({ game }: { game: Game }): ReactElement {
   const controls = gameControls(game)
@@ -1207,6 +1208,10 @@ function ControlsBadge({ game }: { game: Game }): ReactElement {
       <Glasses className="gdetail__players-icon" aria-hidden="true" />
     ) : controls.kind === 'keyboard' ? (
       <Keyboard className="gdetail__players-icon" aria-hidden="true" />
+    ) : controls.kind === 'touch' ? (
+      <Pointer className="gdetail__players-icon" aria-hidden="true" />
+    ) : controls.kind === 'all' ? (
+      <Layers className="gdetail__players-icon" aria-hidden="true" />
     ) : (
       <Gamepad className="gdetail__players-icon" aria-hidden="true" />
     )

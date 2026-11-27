@@ -1,4 +1,11 @@
-import type { MetadataLayers } from '@shared/metadata-edit'
+import {
+  CONTROLS_CHOICES,
+  applyEditToMetadata,
+  controlsForChoice,
+  editableValues,
+  type MetadataLayers
+} from '@shared/metadata-edit'
+import type { Game } from '@shared/types'
 import { describe, expect, it } from 'vitest'
 import {
   fallbackForm,
@@ -90,8 +97,8 @@ describe('metadata form', () => {
     expect(fieldEdit({ ...form, score: '' }, 'reviewScore')).toEqual({
       reviewScore: { source: 'steam' }
     })
-    expect(fieldEdit({ ...form, controller: 'partial', vr: 'only' }, 'controls')).toEqual({
-      controls: { controller: 'partial', vr: 'only' }
+    expect(fieldEdit({ ...form, controls: 'partial' }, 'controls')).toEqual({
+      controls: { controller: 'partial', vr: 'none' }
     })
   })
 
@@ -117,6 +124,77 @@ describe('metadata form', () => {
     expect(after.local).toEqual({ genres: ['Puzzle', 'Co-op'], localPlayers: 2 })
     expect(formSave(shownForm(after), after, new Set())).toEqual({ edit: {}, clear: [] })
     expect(formSave(form, after, new Set(['developers']))).toEqual({ edit: {}, clear: [] })
+  })
+})
+
+describe('metadata form: controls', () => {
+  const plain = (scraped: MetadataLayers['scraped']): MetadataLayers => ({
+    key: 'steam-620',
+    scraped,
+    cloud: null,
+    local: {}
+  })
+
+  it('saves each choice as its controls', () => {
+    const base = shownForm(plain({}))
+    expect(base.controls).toBe('keyboard')
+    expect(CONTROLS_CHOICES.map((c) => fieldEdit({ ...base, controls: c }, 'controls'))).toEqual([
+      { controls: { controller: 'none', vr: 'only' } },
+      { controls: { controller: 'none', vr: 'none', touch: true } },
+      { controls: { controller: 'full', vr: 'none' } },
+      { controls: { controller: 'partial', vr: 'none' } },
+      { controls: { controller: 'none', vr: 'none' } },
+      { controls: { controller: 'full', vr: 'none', keyboard: true } },
+      { controls: { controller: 'full', vr: 'supported', keyboard: true } }
+    ])
+  })
+
+  it.each(CONTROLS_CHOICES)(
+    'round-trips %s: form, edit, applied metadata, form again',
+    (choice) => {
+      // From a game whose metadata is another choice, so the pick is always a change.
+      const other = choice === 'full' ? 'keyboard' : 'full'
+      const layers = plain({ controls: controlsForChoice(other) })
+      const plan = formSave({ ...shownForm(layers), controls: choice }, layers, new Set())
+      expect(plan).toEqual({ edit: { controls: controlsForChoice(choice) }, clear: [] })
+      const game = {
+        source: 'steam',
+        title: 'Portal 2',
+        metadata: applyEditToMetadata({}, plan.edit)
+      } as unknown as Game
+      const back = shownForm(plain(editableValues(game)))
+      expect(back.controls).toBe(choice)
+      // Saved again unchanged: nothing is sent.
+      expect(
+        formSave(shownForm(layersAfterSave(layers, plan)), layersAfterSave(layers, plan), new Set())
+      ).toEqual({ edit: {}, clear: [] })
+    }
+  )
+
+  it('does not rewrite controls the user left alone, even ones that are not exactly a choice', () => {
+    const scraped = plain({ controls: { controller: 'full', vr: 'supported' } })
+    expect(shownForm(scraped).controls).toBe('full')
+    expect(fieldChanged(shownForm(scraped), scraped, 'controls')).toBe(false)
+    expect(formSave(shownForm(scraped), scraped, new Set()).edit).toEqual({})
+    // Picking another choice and back is no change either.
+    expect(formSave({ ...shownForm(scraped), controls: 'full' }, scraped, new Set()).edit).toEqual(
+      {}
+    )
+    expect(formSave({ ...shownForm(scraped), controls: 'all' }, scraped, new Set()).edit).toEqual({
+      controls: { controller: 'full', vr: 'supported', keyboard: true }
+    })
+  })
+
+  it('reads each kind of existing controls as its choice', () => {
+    const choice = (c: NonNullable<MetadataLayers['scraped']['controls']>): string =>
+      shownForm(plain({ controls: c })).controls
+    expect(choice({ controller: 'none', vr: 'none', touch: true })).toBe('touch')
+    expect(choice({ controller: 'full', vr: 'only', keyboard: true })).toBe('vr')
+    expect(choice({ controller: 'full', vr: 'none', keyboard: true })).toBe('both')
+    expect(choice({ controller: 'none', vr: 'only' })).toBe('vr')
+    expect(choice({ controller: 'partial', vr: 'supported' })).toBe('partial')
+    expect(choice({ controller: 'none', vr: 'supported' })).toBe('vr')
+    expect(choice({ controller: 'none', vr: 'none' })).toBe('keyboard')
   })
 })
 

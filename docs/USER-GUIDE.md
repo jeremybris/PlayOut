@@ -465,8 +465,9 @@ _Released <date> · developer · publisher_ and the action bar:
   a paired PC shows the download's size. Enter your own in the game's **Edit** sheet (pen) → **Install size** ("45
   GB", "800 MB"); it is used instead.
 - **Controls**: at the top left of the page, left of the players badge, how the game is played: **Pad** (full
-  controller support), **Partial** (partial controller support), **VR** (a VR game, or VR supported), or **KB+M**
-  (keyboard and mouse). PC games take this from Steam's store (its controller and VR support), read with the Steam
+  controller support), **Partial** (partial controller support), **VR** (a VR game, or VR supported), **KB+M**
+  (keyboard and mouse), **Touch** (a touch screen only), **Pad+KB+M** (full controller and full mouse and keyboard
+  support) or **All** (VR, full controller and mouse and keyboard). PC games take this from Steam's store (its controller and VR support), read with the Steam
   tags, also for copies from other stores that PlayOut matches to a Steam app; a game Steam says nothing about, or
   that PlayOut cannot match, shows keyboard and mouse. Console games (ROMs) always show a controller.
 - **Players**: at the top left of the page, a controller with a number above it shows how many people can play
@@ -528,8 +529,13 @@ about the game:
   exactly as ticking it in the dropdown would, and the box clears for the next search, one pick at a time. **Up** from
   the first match goes back to the box; **B** / `Esc` closes the matches (`Enter` then shows them again rather than
   adding one you cannot see).
-- **Players and controls**: how many players on one PC (the players badge), and for PC games the controller and VR
-  support (the controls badge; console games always show a controller).
+- **Players and controls**: how many players on one PC (the players badge), and for PC games one **Controls**
+  choice (the controls badge and Filters › Controls): **VR** (needs a headset), **Touch** (a touch screen only),
+  **Full Controller Support**, **Partial Controller Support** (a controller for some of it, mouse and keyboard for
+  the rest), **Mouse & Keyboard**, **Mouse & Keyboard + Controller** (plays fully with either) or **All** (VR, a full
+  controller and mouse and keyboard). Console games always show a controller and have no Controls choice. A game
+  whose scraped controls are not exactly one of these shows the nearest (full controller with VR as an option shows
+  as Full Controller Support) and is left as it is unless you pick another choice.
 - **Time to beat, rating and difficulty**: the How Long to Beat hours (main story, main + extras, completionist,
   solo), the rating (0-100), shown as Steam's percent positive or IGDB's rating, and the difficulty for Filters ›
   Difficulty: **Default** or Story, Easy, Medium, Hard or Impossible. Default is the level the game's Steam tags give
@@ -1874,14 +1880,16 @@ The controller rumbles briefly on activation when _Vibration_ is on and the cont
   copies uses the score of the copy shown, else another copy's. Games without a review score are left out while a band
   is picked.
 - **Filters → Controls** (its left arrow opens the list): **VR**, **Controller**, **Mouse and Keyboard** and **Touch**, from the
-  same facts as the controls badge on a game's page (Steam's controller and VR support; console games play with a
-  controller). A game can be under more than one: partial controller support counts as Controller and as Mouse and
-  Keyboard, and a game where VR is an option (not required) as VR and as Mouse and Keyboard. VR-only games are only
-  under VR; a PC game Steam says nothing about counts as Mouse and Keyboard. **Touch** is for games played on a touch
-  screen (as well as under their other choices); no source says which games support touch yet, so no game is under it
-  for now. The list offers only the choices at least one game in the list falls under (plus any you have picked, so it
-  can be turned off); **All Controls** is always there. With no games under any choice, only All Controls shows, and
-  Touch stays hidden until a game supports touch.
+  same facts as the controls badge on a game's page (Steam's controller and VR support, or the game's **Controls**
+  choice in its Edit sheet; console games play with a controller). A game can be under more than one: partial
+  controller support counts as Controller and as Mouse and Keyboard, **Mouse & Keyboard + Controller** too, **All**
+  as VR, Controller and Mouse and Keyboard, and a game where VR is an option (not required) as VR and as Mouse and
+  Keyboard. VR-only games are only under VR, and **Touch** games (the Edit sheet's Touch choice) only under Touch; a
+  PC game Steam says nothing about counts as Mouse and Keyboard. No metadata source says which games support touch
+  yet, so a game is under Touch once you or the PlayOut cloud set its Controls to Touch. The list offers only the
+  choices at least one game in the list falls under (plus any you have picked, so it can be turned off); **All
+  Controls** is always there. With no games under any choice, only All Controls shows, and Touch stays hidden until a
+  game supports touch.
 
 **Touch and mouse**
 
