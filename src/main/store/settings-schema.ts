@@ -302,7 +302,9 @@ const ui = {
   libraryPositions: z.record(shortId, z.string().min(1).max(300)),
   libraryScroll: z.record(shortId, libraryScrollPosition),
   // Snapped to the nearest step (out of range = the nearest end); not a number = the default on load.
-  libraryCoverScale: z.number().transform((scale) => nearestCoverScale(scale))
+  libraryCoverScale: z.number().transform((scale) => nearestCoverScale(scale)),
+  // Missing (a settings.json written before 0.9.98) or malformed: the default, on.
+  libraryTabIcons: z.boolean()
 }
 const input = {
   deadzone: z.number().min(0).max(0.9),

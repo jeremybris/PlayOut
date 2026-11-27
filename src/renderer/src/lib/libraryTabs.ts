@@ -387,6 +387,83 @@ useLanguageStore.subscribe(() => {
 const sizeLabel = (id: string): string => SIZE_BUCKETS.find((b) => b.id === id)?.label ?? id
 const hltbLabel = (id: string): string => HLTB_BUCKETS.find((b) => b.id === id)?.label ?? id
 
+/** Which filter a part of a tab's name comes from (TabNamePart): the icon the tab shows for it when "Icons for tabs" is on. */
+export type TabNameKind =
+  | 'platform'
+  | 'store'
+  | 'genreName'
+  | 'era'
+  | 'genre'
+  | 'size'
+  | 'hltb'
+  | 'difficulty'
+  | 'reviews'
+  | 'controls'
+  | 'players'
+  | 'online'
+  | 'coop'
+  | 'recomp'
+  | 'developer'
+  | 'publisher'
+  | 'custom'
+  | 'favorites'
+  | 'hidden'
+
+/** One active choice of a tab's filters: its filter, its id (a name for a developer / publisher) and its words. */
+export interface TabNamePart {
+  kind: TabNameKind
+  id: string
+  label: string
+}
+
+/**
+ * A tab's active choices, one list per filter (the choices tabName joins by "+"; the lists it joins by " · "), in
+ * tabName's order; [] with none (All Games). Settings > Library "Icons for tabs" draws them as icons (TabStrip.tsx).
+ */
+export function tabNameGroups(
+  filters: LibraryTabFilters,
+  platformLabel: (id: string) => string = (id) => id,
+  customName: (id: string) => string | undefined = () => undefined
+): TabNamePart[][] {
+  const parts = (
+    kind: TabNameKind,
+    ids: readonly string[],
+    label: (id: string) => string
+  ): TabNamePart[] => ids.map((id) => ({ kind, id, label: label(id) }))
+  const flag = (kind: TabNameKind, on: boolean | undefined, label: string): TabNamePart[] =>
+    on ? [{ kind, id: kind, label }] : []
+  return [
+    parts('platform', filters.platforms, platformLabel),
+    parts('store', filters.stores, storeFilterLabel),
+    parts('genreName', filters.genres, (name) => name),
+    parts('era', filters.eras, releaseEraLabel),
+    parts('genre', filters.tags, tagFilterLabel),
+    parts('size', filters.sizes, sizeLabel),
+    parts('hltb', filters.hltb, hltbLabel),
+    parts('difficulty', filters.difficulty ?? [], difficultyLabel),
+    parts('reviews', filters.reviews ?? [], reviewBandLabel),
+    parts('controls', filters.controls ?? [], controlsFilterLabel),
+    parts('players', filters.players ?? [], localMultiplayerLabel),
+    parts('online', filters.online ?? [], onlineMultiplayerLabel),
+    flag('coop', filters.coop, t('lib.tabs.coop')),
+    flag('recomp', filters.recomp, t('lib.tabs.recomp')),
+    parts('developer', creatorNames(filters.developers), (name) => name),
+    // A publisher that is also a developer picked is named once.
+    parts(
+      'publisher',
+      creatorNames(filters.publishers).filter((name) => !hasName(filters.developers, name)),
+      (name) => name
+    ),
+    // A custom filter this PC does not know is left out.
+    (filters.custom ?? []).flatMap((id): TabNamePart[] => {
+      const name = customName(id)
+      return name ? [{ kind: 'custom', id, label: name }] : []
+    }),
+    flag('favorites', filters.favorites, t('lib.tabs.favorites')),
+    flag('hidden', filters.hidden, t('lib.tabs.hidden'))
+  ].filter((list) => list.length > 0)
+}
+
 /**
  * A tab's name, from its filters: every active choice, the choices of one filter joined by "+" and the filters by
  * " · " ("Epic · RPG · 2020-2025", "Epic + G.O.G · RPG"); "All Games" with none. Platform first, then PC (stores),
@@ -398,31 +475,44 @@ export function tabName(
   platformLabel: (id: string) => string = (id) => id,
   customName: (id: string) => string | undefined = () => undefined
 ): string {
-  const parts = [
-    filters.platforms.map(platformLabel),
-    filters.stores.map(storeFilterLabel),
-    filters.genres,
-    filters.eras.map(releaseEraLabel),
-    filters.tags.map(tagFilterLabel),
-    filters.sizes.map(sizeLabel),
-    filters.hltb.map(hltbLabel),
-    (filters.difficulty ?? []).map(difficultyLabel),
-    (filters.reviews ?? []).map(reviewBandLabel),
-    (filters.controls ?? []).map(controlsFilterLabel),
-    (filters.players ?? []).map(localMultiplayerLabel),
-    (filters.online ?? []).map(onlineMultiplayerLabel),
-    filters.coop ? [t('lib.tabs.coop')] : [],
-    filters.recomp ? [t('lib.tabs.recomp')] : [],
-    creatorNames(filters.developers),
-    // A publisher that is also a developer picked is named once.
-    creatorNames(filters.publishers).filter((name) => !hasName(filters.developers, name)),
-    (filters.custom ?? []).map(customName).filter((name): name is string => !!name),
-    filters.favorites ? [t('lib.tabs.favorites')] : [],
-    filters.hidden ? [t('lib.tabs.hidden')] : []
-  ]
-    .filter((list) => list.length > 0)
-    .map((list) => list.join(' + '))
-  return parts.length ? parts.join(' · ') : ALL_GAMES_NAME
+  return nameOfGroups(tabNameGroups(filters, platformLabel, customName))
+}
+
+/** Most choices a tab draws as icons (TabStrip.tsx); the rest are counted in a "+N". */
+export const MAX_TAB_ICONS = 5
+
+/**
+ * The choices a tab draws while "Icons for tabs" is on, in tabNameGroups' order: every choice up to and including the
+ * `max`-th one drawn as an icon (`isIcon`; a choice kept as words does not count toward the limit), a filter's list cut
+ * short where the limit falls, and how many choices are left after it (shown as "+N").
+ */
+export function cappedTabGroups<P>(
+  groups: readonly (readonly P[])[],
+  isIcon: (part: P) => boolean = () => true,
+  max = MAX_TAB_ICONS
+): { groups: P[][]; more: number } {
+  const out: P[][] = []
+  let icons = 0
+  let more = 0
+  for (const group of groups) {
+    const kept: P[] = []
+    for (const part of group) {
+      if (icons >= max) more++
+      else {
+        kept.push(part)
+        if (isIcon(part)) icons++
+      }
+    }
+    if (kept.length) out.push(kept)
+  }
+  return { groups: out, more }
+}
+
+/** tabNameGroups' words as one name ("All Games" with none). */
+function nameOfGroups(groups: readonly TabNamePart[][]): string {
+  return groups.length
+    ? groups.map((list) => list.map((part) => part.label).join(' + ')).join(' · ')
+    : ALL_GAMES_NAME
 }
 
 /** The platform label tabName uses: its short name ("SNES"), as the strip showed platform tabs. */
@@ -436,7 +526,7 @@ export function platformLabelOf(
   }
 }
 
-/** The strip's tabs: Settings first, then the user's tabs, each named by its filters. */
+/** The strip's tabs: Settings first, then the user's tabs, each named by its filters (its choices kept for their icons). */
 export function stripTabs(
   defs: readonly LibraryTabDef[],
   platformLabel: (id: string) => string,
@@ -444,7 +534,10 @@ export function stripTabs(
 ): LibraryTab[] {
   return [
     { id: LIBRARY_SETTINGS_TAB, label: t('lib.tabs.settings') },
-    ...defs.map((def) => ({ id: def.id, label: tabName(def.filters, platformLabel, customName) }))
+    ...defs.map((def) => {
+      const groups = tabNameGroups(def.filters, platformLabel, customName)
+      return { id: def.id, label: nameOfGroups(groups), groups }
+    })
   ]
 }
 

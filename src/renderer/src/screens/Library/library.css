@@ -176,6 +176,70 @@
   color: var(--color-accent);
 }
 
+/*
+ * Settings > Library "Icons for tabs" (TabStrip.tsx TabIcons): a tab's choices as the Filters sub-menus draw them, in a
+ * row one text line tall (1.25 x the tab text, its line height), so the tab is as tall as with words. The sub-menus'
+ * 40u icon box is scaled to 32.5u (1.25 x 26u) as a whole, keeping each icon's own proportions and colours.
+ */
+.library__tab-icons {
+  display: inline-flex;
+  align-items: center;
+  height: calc(var(--library-tab-fs) * var(--lh-tight));
+  vertical-align: top;
+  /* hover lands on the tab, so its tooltip is the tab's full name, never a store badge's own title */
+  pointer-events: none;
+}
+
+/*
+ * an inactive tab's icons are a little dimmed, as its words are greyed; words kept as words already take the tab's
+ * colour, and Hidden / Favorites / Recompilations stay at full strength, as in the Filters menu
+ */
+.library__tab-choice:not(:has(.library__tab-flag)) {
+  opacity: 0.75;
+  transition: opacity var(--dur-focus) var(--ease-linear);
+}
+
+/* the flags are drawn in the line icons' box, without their 0.7 opacity (the Filters menu's are not dimmed) */
+.console-icon .library__tab-flag {
+  opacity: 1;
+}
+
+.library__tab:hover .library__tab-choice,
+.library__tab--active .library__tab-choice,
+.library__tab[data-focused='true'] .library__tab-choice {
+  opacity: 1;
+}
+
+/* one filter's choices: a thin gap apart */
+.library__tab-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(4 * var(--u));
+}
+
+/* the next filter: a wider gap */
+.library__tab-filter--gap {
+  margin-left: calc(14 * var(--u));
+}
+
+.library__tab-choice {
+  display: inline-flex;
+  flex: none;
+  zoom: 0.8125;
+}
+
+/* a "·" between filters where a choice keeps its words, a "+" between two such choices of one filter */
+.library__tab-sep {
+  margin-inline: calc(8 * var(--u));
+  opacity: 0.6;
+}
+
+.library__tab-more {
+  margin-left: calc(8 * var(--u));
+  font-size: 0.8em;
+  font-variant-numeric: tabular-nums;
+}
+
 .library__tabs--dragging .library__tab {
   pointer-events: none;
 }

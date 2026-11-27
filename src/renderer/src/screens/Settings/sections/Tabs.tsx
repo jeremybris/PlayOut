@@ -1,9 +1,10 @@
 import type { LibraryTabDef, LibraryTabFilters } from '@shared/types'
 import { withSortIcons } from '../../../components/SortIcon'
-import { ChevronLeft, ChevronRight, Columns3, Plus, Star, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Columns3, Plus, Shapes, Star, Trash2 } from 'lucide-react'
 import { memo, useCallback, useMemo, type ReactElement } from 'react'
 import { Button } from '../../../components/Button'
 import { SelectField } from '../../../components/SelectField'
+import { Toggle } from '../../../components/Toggle'
 import { useLanguage, useT, type Translate } from '../../../i18n'
 import { setFocus } from '../../../input/focus'
 import { libraryControlsFilters } from '../../../lib/controls'
@@ -33,7 +34,7 @@ import { useCustomFilters } from '../../../state/customFilters'
 import { useLibraryStore } from '../../../state/library'
 import { addTab, libraryTabDefs, setTabs } from '../../../state/libraryTabs'
 import { FiltersPill } from '../../Library/FiltersPill'
-import { fk, type SectionProps } from '../common'
+import { fk, useSettingsPatch, type SectionProps } from '../common'
 
 // Part of Settings › Library (the Library's tabs used to be a section of their own): its focus keys are the Library
 // section's, under 'tabs:'.
@@ -62,6 +63,7 @@ interface FilterOptions {
  */
 export function LibraryTabsSettings({ settings }: Pick<SectionProps, 'settings'>): ReactElement {
   const t = useT()
+  const patch = useSettingsPatch()
   const defs = settings.ui.libraryTabs ?? []
   const games = useLibraryStore((s) => s.games)
   const platforms = useLibraryStore((s) => s.platforms)
@@ -105,6 +107,16 @@ export function LibraryTabsSettings({ settings }: Pick<SectionProps, 'settings'>
       <div className="section">
         <div className="section__title">{t('settingsTabs.title')}</div>
         <p className="settings-note">{t('settingsTabs.note')}</p>
+        {/* The tabs at the top of the Library show their filters' icons instead of their names (TabStrip.tsx); the
+            list below keeps the names, which say what each tab is. */}
+        <Toggle
+          focusKey={tabKey('icons')}
+          icon={<Shapes />}
+          label={t('settingsTabs.icons.label')}
+          description={t('settingsTabs.icons.description')}
+          checked={settings.ui.libraryTabIcons ?? true}
+          onChange={(v) => patch({ ui: { libraryTabIcons: v } })}
+        />
         {defs.map((def, index) => (
           <TabRow
             key={def.id}

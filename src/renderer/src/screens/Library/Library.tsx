@@ -160,6 +160,8 @@ export function LibraryScreen({ leaving, onLeft }: LibraryScreenProps): ReactEle
   const showDuplicates = useSettingsStore((s) => s.settings?.library.showDuplicates ?? false)
   // One cover size for every tab (the slider left of the grid); followed by both windows like other ui settings.
   const coverScale = useSettingsStore((s) => s.settings?.ui.libraryCoverScale ?? 1)
+  // Settings > Library "Icons for tabs": the tabs show their filters' icons instead of their names.
+  const tabIcons = useSettingsStore((s) => s.settings?.ui.libraryTabIcons ?? true)
   const onCoverScale = useCallback((scale: number) => {
     void useSettingsStore.getState().update({ ui: { libraryCoverScale: scale } })
   }, [])
@@ -821,6 +823,7 @@ export function LibraryScreen({ leaving, onLeft }: LibraryScreenProps): ReactEle
             onUp={close}
             onAdd={onAddTab}
             shown={active}
+            icons={tabIcons}
           />
         </div>
 

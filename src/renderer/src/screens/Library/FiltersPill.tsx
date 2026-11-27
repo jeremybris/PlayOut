@@ -1,26 +1,5 @@
 import { DIFFICULTIES, difficultyLabel } from '@shared/difficulty'
-import {
-  ArrowBigUp,
-  Check,
-  ChevronDown,
-  ChevronLeft,
-  EyeClosed,
-  Globe,
-  Handshake,
-  Heart,
-  HeartHandshake,
-  Network,
-  Palette,
-  PartyPopper,
-  Pencil,
-  Sword,
-  Swords,
-  Trash2,
-  Trophy,
-  Users,
-  X,
-  type LucideIcon
-} from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, Palette, Pencil, Trash2, X } from 'lucide-react'
 import {
   Fragment,
   memo,
@@ -51,23 +30,26 @@ import {
   PLAYER_BANDS
 } from '../../lib/localMultiplayer'
 import { ONLINE_CHOICES, onlineMultiplayerLabel } from '../../lib/onlineMultiplayer'
+import { GENRE_COLORS } from '../../lib/filterColors'
 import {
-  CONTROLS_COLORS,
-  GENRE_COLORS,
-  HIDDEN_COLOR,
-  LOCAL_COLORS,
-  ONLINE_COLORS
-} from '../../lib/filterColors'
+  COOP_CHOICE,
+  controlsChoiceIcon,
+  customChoiceIcon,
+  difficultyChoiceIcon,
+  eraChoiceIcon,
+  favoritesIcon,
+  hiddenIcon,
+  hltbChoiceIcon,
+  localChoiceIcon,
+  onlineChoiceIcon,
+  recompIcon,
+  reviewChoiceIcon,
+  sizeChoiceIcon,
+  storeChoiceIcon,
+  tinted
+} from '../../lib/filterChoiceIcons'
 import { ConsoleIcon } from '../../components/ConsoleIcon'
-import { ControlsIcon } from '../../components/ControlsIcon'
-import { DifficultyIcon } from '../../components/DifficultyIcon'
-import { EraIcon } from '../../components/EraIcon'
 import { GenreIcon } from '../../components/GenreIcon'
-import { HltbClock } from '../../components/HltbClock'
-import { ReviewStarIcon } from '../../components/ReviewStarIcon'
-import { SizePie } from '../../components/SizePie'
-import { StoreIcon } from '../../components/StoreIcon'
-import { PlayersArt } from '../../components/PlayersArt'
 import { SIZE_BUCKETS } from '../../lib/installSize'
 import { REVIEW_BANDS, reviewBandLabel } from '../../lib/reviews'
 import { withoutChoice } from '../../lib/libraryTabs'
@@ -237,53 +219,11 @@ const STORE_PREFIX = 'store:'
 /** The line between Filters > Platform's systems and its stores. */
 const SEPARATOR_OPTION: Option = { value: '--separator', label: '', separator: true }
 
-/** Its Nucleus Co-Op choice (the tab's `coop`), at the bottom of the Local Multiplayer sub-menu. */
-const COOP_CHOICE = 'nucleus-coop'
-
-/** Online Multiplayer's choices' icons ("All Online Multiplayer" has none, like every sub-menu's All). */
-const ONLINE_ICONS: Readonly<Partial<Record<string, LucideIcon>>> = {
-  pvp: Swords,
-  coop: Handshake,
-  esports: Trophy,
-  mmo: Globe,
-  versus: Sword,
-  team: Users
-}
-
-const ONLINE_OPTIONS: readonly Option[] = ONLINE_CHOICES.map((c) => {
-  const Icon = ONLINE_ICONS[c.id]
-  return {
-    value: c.id,
-    label: c.label,
-    icon: Icon ? menuIcon(Icon, ONLINE_COLORS[c.id]) : undefined
-  }
-})
-
-/** A line icon in the box Platform's console pictures use, so the sub-menu's names line up, in its colour. */
-function menuIcon(Icon: LucideIcon, color?: string): ReactNode {
-  return (
-    <span className="console-icon" aria-hidden="true" style={color ? { color } : undefined}>
-      <Icon className="console-icon__generic" />
-    </span>
-  )
-}
-
-/** Local Multiplayer's length choices' icons: a party for Party Games, a heart handshake for S.O. Games. */
-const LOCAL_LENGTH_ICONS: Readonly<Record<string, LucideIcon>> = {
-  party: PartyPopper,
-  so: HeartHandshake
-}
-
-/** An icon drawn in the text colour, in `color` instead (lib/filterColors.ts); `display: contents` adds no box. */
-function tinted(icon: ReactNode, color: string | undefined): ReactNode {
-  return color ? (
-    <span className="filters-menu__tint" style={{ color }}>
-      {icon}
-    </span>
-  ) : (
-    icon
-  )
-}
+const ONLINE_OPTIONS: readonly Option[] = ONLINE_CHOICES.map((c) => ({
+  value: c.id,
+  label: c.label,
+  icon: onlineChoiceIcon(c.id) ?? undefined
+}))
 
 /*
  * The sub-menus' option lists below are functions of `t`, not constants: their "All …" rows are translated, and a
@@ -296,39 +236,35 @@ const playersOptions = (t: Translate): readonly Option[] => [
   ...LOCAL_LENGTH_CHOICES.map((choice) => ({
     value: choice.id,
     label: choice.label,
-    icon: menuIcon(LOCAL_LENGTH_ICONS[choice.id]!, LOCAL_COLORS[choice.id])
+    icon: localChoiceIcon(choice.id)
   })),
   // The games PeerParty is offered for, with the game page's PeerParty square's icon.
   {
     value: LAN_PARTY.id,
     label: LAN_PARTY.label,
-    icon: menuIcon(Network, LOCAL_COLORS[LAN_PARTY.id])
+    icon: localChoiceIcon(LAN_PARTY.id)
   },
   // The player counts: their picture (a controller with the number) as the icon, then the words ("2-4 Players").
   ...PLAYER_BANDS.map((band) => ({
     value: band.id,
     label: band.label,
-    icon: (
-      <span className="console-icon" aria-hidden="true" style={{ color: LOCAL_COLORS[band.id] }}>
-        <PlayersArt count={band.badge} />
-      </span>
-    )
+    icon: localChoiceIcon(band.id)
   })),
   // With the game page's Co-Op square's icon.
   {
     value: COOP_CHOICE,
     label: t('library.filters.nucleusCoop'),
-    icon: menuIcon(Users, LOCAL_COLORS[COOP_CHOICE])
+    icon: localChoiceIcon(COOP_CHOICE)
   }
 ]
 
 const sizeOptions = (t: Translate): readonly Option[] => [
   { value: ALL, label: t('library.filters.allSizes') },
   // Each band with its pie ("All Sizes" has none): more filled and bigger as the band grows.
-  ...SIZE_BUCKETS.map((bucket, i) => ({
+  ...SIZE_BUCKETS.map((bucket) => ({
     value: bucket.id,
     label: bucket.label,
-    icon: <SizePie step={i + 1} steps={SIZE_BUCKETS.length} colored />
+    icon: sizeChoiceIcon(bucket.id)
   }))
 ]
 
@@ -345,17 +281,17 @@ const controlsOptions = (
   ...CONTROLS_FILTERS.filter((c) => available.includes(c.id) || picked.includes(c.id)).map((c) => ({
     value: c.id,
     label: c.label,
-    icon: tinted(<ControlsIcon controlsId={c.id} />, CONTROLS_COLORS[c.id])
+    icon: controlsChoiceIcon(c.id)
   }))
 ]
 
 const hltbOptions = (t: Translate): readonly Option[] => [
   { value: ALL, label: t('library.filters.allTimes') },
   // Each band with its stopwatch ("All Times" has none): more filled and bigger as the band grows.
-  ...HLTB_BUCKETS.map((bucket, i) => ({
+  ...HLTB_BUCKETS.map((bucket) => ({
     value: bucket.id,
     label: bucket.label,
-    icon: <HltbClock step={i + 1} steps={HLTB_BUCKETS.length} redSlice />
+    icon: hltbChoiceIcon(bucket.id)
   }))
 ]
 
@@ -365,17 +301,17 @@ const difficultyOptions = (t: Translate): readonly Option[] => [
   ...DIFFICULTIES.map((d) => ({
     value: d.id,
     label: d.label,
-    icon: <DifficultyIcon difficultyId={d.id} />
+    icon: difficultyChoiceIcon(d.id)
   }))
 ]
 
 const reviewsOptions = (t: Translate): readonly Option[] => [
   { value: ALL, label: t('library.filters.allReviews') },
   // Each band with its star, best first ("All Reviews" has none): full and brightest gold for 95-100, a dim sliver for 0-40.
-  ...REVIEW_BANDS.map((band, i) => ({
+  ...REVIEW_BANDS.map((band) => ({
     value: band.id,
     label: band.label,
-    icon: <ReviewStarIcon step={REVIEW_BANDS.length - i} steps={REVIEW_BANDS.length} gold />
+    icon: reviewChoiceIcon(band.id)
   }))
 ]
 
@@ -757,7 +693,7 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
           ...storeOptions.map((s) => ({
             value: s.id,
             label: s.label,
-            icon: <StoreIcon storeId={s.id} />
+            icon: storeChoiceIcon(s.id)
           })),
           // A picked store no game in this list is from any more stays listed, so it can be turned off.
           ...stores
@@ -765,7 +701,7 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
             .map((id) => ({
               value: id,
               label: storeFilterLabel(id),
-              icon: <StoreIcon storeId={id} />
+              icon: storeChoiceIcon(id)
             }))
         ].map((option) => ({ ...option, value: STORE_PREFIX + option.value }))
       : []),
@@ -774,7 +710,9 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
       ? [
           // Every ROM game (no PC game); picked again, the systems' filter is off.
           { value: ALL_ROM_PLATFORMS, label: ALL_ROM_PLATFORMS_LABEL },
-          // Each platform with its console's picture before its name ("All Platforms" has none).
+          // Each platform with its console's picture before its name ("All Platforms" has none). Drawn here, not with
+          // platformChoiceIcon (lib/filterChoiceIcons.tsx), because the menu shows a plain controller for a system
+          // without a picture while a tab keeps that system's words (Genre's sub-menu likewise keeps an empty box).
           ...platformOptions.map((p) => ({
             value: p.id,
             label: p.label,
@@ -1052,11 +990,7 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
                 hiddenCount,
                 onHidden,
                 // A closed eye: the games kept out of sight.
-                <EyeClosed
-                  className="filters-menu__arrow"
-                  style={{ color: HIDDEN_COLOR }}
-                  aria-hidden="true"
-                />
+                hiddenIcon('filters-menu__arrow')
               )}
               {toggleRow(
                 'favorites',
@@ -1065,11 +999,7 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
                 favoriteCount,
                 onFavorites,
                 // Filled while the filter is on, like the game page's favourite button.
-                <Heart
-                  className="filters-menu__arrow filters-menu__icon--favorite"
-                  fill={favorites ? 'currentColor' : 'none'}
-                  aria-hidden="true"
-                />
+                favoritesIcon('filters-menu__arrow', favorites)
               )}
               {toggleRow(
                 'recomp',
@@ -1078,11 +1008,7 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
                 recompCount,
                 onRecomp,
                 // The recompilation mark (the UP button beside Play), filled while the filter is on.
-                <ArrowBigUp
-                  className="filters-menu__arrow filters-menu__icon--recomp"
-                  fill={recomp ? 'currentColor' : 'none'}
-                  aria-hidden="true"
-                />
+                recompIcon('filters-menu__arrow', recomp)
               )}
             </Menu>
             {full ? (
@@ -1173,7 +1099,7 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
             ...eraOptions.map((e) => ({
               value: e.id,
               label: e.label,
-              icon: <EraIcon eraId={e.id} />
+              icon: eraChoiceIcon(e.id)
             })),
             // A picked era no game in this list is from any more stays listed, so it can be turned off.
             ...eras
@@ -1181,7 +1107,7 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
               .map((id) => ({
                 value: id,
                 label: releaseEraLabel(id),
-                icon: <EraIcon eraId={id} />
+                icon: eraChoiceIcon(id)
               }))
           ]}
           onPick={(value) => onEras(value === ALL ? [] : toggleChoice(eras, value))}
@@ -1673,14 +1599,7 @@ function CustomSubMenu({
                       key={filter.id}
                       focusKey={itemKey(filter.id)}
                       label={filter.name}
-                      icon={
-                        <span className="console-icon" aria-hidden="true">
-                          <CustomFilterIconView
-                            icon={filter.icon}
-                            className="console-icon__generic"
-                          />
-                        </span>
-                      }
+                      icon={customChoiceIcon(filter.icon)}
                       selected={on}
                       className={blocked ? 'control--disabled' : undefined}
                       trailing={

@@ -112,8 +112,9 @@ describe('stripTabs', () => {
     const defs = [newTabDef({}, 'a'), newTabDef({ filters: { genres: ['RPG'] } }, 'b')]
     expect(stripTabs(defs, (id) => id)).toEqual([
       { id: LIBRARY_SETTINGS_TAB, label: 'Settings' },
-      { id: 'a', label: ALL_GAMES_NAME },
-      { id: 'b', label: 'RPG' }
+      { id: 'a', label: ALL_GAMES_NAME, groups: [] },
+      // Its choices kept for "Icons for tabs".
+      { id: 'b', label: 'RPG', groups: [[{ kind: 'genreName', id: 'RPG', label: 'RPG' }]] }
     ])
   })
 })

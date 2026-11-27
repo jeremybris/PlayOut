@@ -55,8 +55,8 @@ describe('Filters icon colours', () => {
   it('gives every genre drawn in the text colour a colour (line icons and black pictures)', () => {
     const source = readFileSync(join(here, '../components/GenreIcon.tsx'), 'utf8')
     const block = source.slice(
-      source.indexOf('const ICONS'),
-      source.indexOf('}', source.indexOf('const ICONS'))
+      source.indexOf('const GENRE_LINE_ICONS'),
+      source.indexOf('}', source.indexOf('const GENRE_LINE_ICONS'))
     )
     const ids = [...block.matchAll(/^\s+(?:'([^']+)'|([a-z]+)):/gm)].map((m) => m[1] ?? m[2])
     expect(ids.length).toBeGreaterThan(50)

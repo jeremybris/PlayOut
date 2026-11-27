@@ -92,7 +92,7 @@ const Roguelike: LucideIcon = (({ className }: { className?: string }) => (
  * Filters > Genre's line icon per choice (lib/steamTags.ts TAG_FILTERS ids). The genres no line icon fits use the
  * user's pictures instead (lib/genrePictures.ts).
  */
-const ICONS: Readonly<Partial<Record<string, LucideIcon>>> = {
+export const GENRE_LINE_ICONS: Readonly<Partial<Record<string, LucideIcon>>> = {
   action: Zap,
   'action rpg': Swords,
   adventure: Compass,
@@ -162,7 +162,7 @@ const ICONS: Readonly<Partial<Record<string, LucideIcon>>> = {
  * empty box for a genre without any).
  */
 export function GenreIcon({ genreId }: { genreId: string }): ReactElement {
-  const Icon = ICONS[genreId]
+  const Icon = GENRE_LINE_ICONS[genreId]
   const picture = Icon ? undefined : genrePicture(genreId)
   return (
     <span className="console-icon" aria-hidden="true">

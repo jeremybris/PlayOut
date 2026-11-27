@@ -1486,6 +1486,12 @@ export interface Settings {
      * (shared/cover-scale.ts) times the original 240x360u. Default 1 (the original size).
      */
     libraryCoverScale: number
+    /**
+     * The Library's tabs show the icons of their filters' choices (the Filters sub-menus' icons) instead of their names
+     * (Settings > Library "Icons for tabs"); a choice without an icon keeps its words. Default on. This PC only (the
+     * tabs themselves sync with paired PCs, this does not).
+     */
+    libraryTabIcons: boolean
   }
   input: {
     /** 0-1 analog stick deadzone. */

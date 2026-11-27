@@ -1613,7 +1613,9 @@ PlayOut stops asking it for an hour. Images are cached in `%APPDATA%\PlayOut\med
 Open Settings from the pill above the rows, the Menu (Start) button or `Tab`, or switch to the **Settings** tab of
 the Library (the gear and wrench left of _All_), which shows the same menu in place of the games.
 
-- **Tabs**: the Library's tabs, left to right. Each row shows the tab's name and sort, with **‹ ›** to move it
+- **Tabs**: **Icons for tabs** (on by default; this PC only) makes the tabs at the top of the Library show the
+  icons of their filters instead of their names (see _In the library_ below). Then the Library's tabs, left to right
+  (named in words here). Each row shows the tab's name and sort, with **‹ ›** to move it
   left or right, its **Sort** and **Filters** pills (the same menus as the Library header) and a bin to delete it
   (the last tab cannot be deleted). **Add tab** adds All on A-Z with playable games first at the end and moves to its Filters pill. **Recommended tabs**
   adds ready-made tabs with one press: _All_ (every store, A-Z, playable games first; it counts as added when a tab with no filters
@@ -1816,7 +1818,13 @@ The controller rumbles briefly on activation when _Vibration_ is on and the cont
 
 - **Tabs.** Each tab is a set of filters and a sort, and is named by its filters: every choice, the choices of one
   filter joined by "+" and the filters by "·" (_Epic · RPG · 2020-2025_, _Epic + G.O.G_); a tab with no filter is
-  _All_. Change a tab's filters or sort and its name follows. Every tab keeps its own filters, sort, search
+  _All_. Change a tab's filters or sort and its name follows. With Settings → Library → **Icons for tabs** on (the
+  default), a tab shows its choices as the icons the Filters menu draws for them (a store's badge, a console's
+  picture, a genre's icon, a size pie, a stopwatch, a star, a custom filter's icon, the heart of Favorites...) instead
+  of its name: the choices of one filter close together, the filters a little further apart, at most five icons,
+  then "+N". A choice without an icon (a developer, a publisher, _All Stores_, a system or genre without a picture)
+  keeps its words, with a "+" or "·" beside it as in the name. _All_, and a tab none of whose choices has an icon,
+  keep their names, and pointing at a tab shows its full name. Turn it off for names everywhere. Every tab keeps its own filters, sort, search
   and the card you were on, and PlayOut reopens on the tab you used last, all between sessions. The **+** after the
   last tab adds a tab (All on A-Z, playable games first); the **X** right of the Filters pill deletes the tab shown, after a
   _Delete Tab_ prompt (**Yes** / **No**; not the last tab). When the tabs do not all fit across the top, a scroll bar

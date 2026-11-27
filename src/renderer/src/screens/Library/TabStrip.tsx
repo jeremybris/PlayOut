@@ -1,4 +1,14 @@
-import { memo, useCallback, useEffect, useLayoutEffect, useRef, type ReactElement } from 'react'
+import {
+  Fragment,
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  type ReactElement,
+  type ReactNode
+} from 'react'
 import { useFocusableControl } from '../../hooks/useFocusableControl'
 import { useLayerId } from '../../hooks/useActionHandlers'
 import { FocusContext, useFocusable, type Direction } from '../../input/focus'
@@ -6,6 +16,9 @@ import { useT } from '../../i18n'
 import { cx } from '../../lib/cx'
 import { revealLeft } from '../../lib/hScroll'
 import { LIBRARY_SETTINGS_TAB, type LibraryTab } from '../../lib/libraryView'
+import { cappedTabGroups, type TabNamePart } from '../../lib/libraryTabs'
+import { tabPartIcon } from '../../lib/filterChoiceIcons'
+import { useCustomFilters } from '../../state/customFilters'
 import { SettingsTabIcon } from '../../components/SettingsTabIcon'
 import { Plus } from 'lucide-react'
 import { ADD_TAB_KEY, TABS_KEY, tabFocusKey } from './keys'
@@ -22,6 +35,11 @@ export interface TabStripProps {
   onAdd: () => void
   /** The Library is the shown screen: the right stick's left / right scrolls the tabs when they do not fit. */
   shown?: boolean
+  /**
+   * Settings > Library "Icons for tabs": a tab with filters shows its choices' icons (the Filters sub-menus' ones)
+   * instead of its name, which stays its tooltip and accessible name.
+   */
+  icons?: boolean
 }
 
 const UNDERLINE_ON = 'library__tab-underline--on'
@@ -41,7 +59,8 @@ export const TabStrip = memo(function TabStrip({
   onSelect,
   onUp,
   onAdd,
-  shown = true
+  shown = true,
+  icons = false
 }: TabStripProps): ReactElement {
   const t = useT()
   const { ref, focusKey } = useFocusable<object, HTMLDivElement>({
@@ -95,7 +114,7 @@ export const TabStrip = memo(function TabStrip({
     const left = revealLeft(tab.offsetLeft, tab.offsetWidth, metrics, fade)
     if (Math.abs(left - metrics.scrollLeft) < 1) return
     viewport.scrollTo({ left, behavior: smoothScrolls() ? 'smooth' : 'auto' })
-  }, [measure, active, tabs])
+  }, [measure, active, tabs, icons])
 
   useEffect(() => {
     const strip = stripRef.current
@@ -120,7 +139,7 @@ export const TabStrip = memo(function TabStrip({
       cancelled = true
       observer.disconnect()
     }
-  }, [measure, tabs])
+  }, [measure, tabs, icons])
 
   return (
     <FocusContext.Provider value={focusKey}>
@@ -141,6 +160,7 @@ export const TabStrip = memo(function TabStrip({
                   key={tab.id}
                   tab={tab}
                   active={tab.id === active}
+                  icons={icons}
                   onSelect={onSelect}
                   onUp={onUp}
                 />
@@ -162,11 +182,12 @@ export const TabStrip = memo(function TabStrip({
 interface TabProps {
   tab: LibraryTab
   active: boolean
+  icons: boolean
   onSelect: (tabId: string) => void
   onUp: () => boolean
 }
 
-const Tab = memo(function Tab({ tab, active, onSelect, onUp }: TabProps): ReactElement {
+const Tab = memo(function Tab({ tab, active, icons, onSelect, onUp }: TabProps): ReactElement {
   const onPress = useCallback(() => onSelect(tab.id), [onSelect, tab.id])
   const onArrowPress = useCallback(
     (direction: Direction): boolean => (direction === 'up' ? !onUp() : true),
@@ -178,24 +199,100 @@ const Tab = memo(function Tab({ tab, active, onSelect, onUp }: TabProps): ReactE
     onArrowPress,
     scroll: { inline: 'nearest', block: 'nearest' }
   })
+  const settings = tab.id === LIBRARY_SETTINGS_TAB
+  const customFilters = useCustomFilters()
+  // "Icons for tabs": a tab with filters draws them, each choice its icon or else its words. All Games (no filters)
+  // and a tab none of whose choices has an icon (only developers, say) keep their name.
+  const parts = useMemo(() => {
+    if (settings || !icons || !tab.groups?.length) return null
+    const customIcons = new Map(customFilters.map((f) => [f.id, f.icon]))
+    const groups = tab.groups.map((group): DrawnPart[] =>
+      group.map((part) => ({ part, icon: tabPartIcon(part, (id) => customIcons.get(id)) }))
+    )
+    return groups.some((group) => group.some((p) => p.icon != null)) ? groups : null
+  }, [settings, icons, tab.groups, customFilters])
+  const drawn = parts !== null
   return (
     <button
       ref={ref}
       type="button"
       role="tab"
       aria-selected={active}
-      className={cx('library__tab', active && 'library__tab--active')}
+      className={cx(
+        'library__tab',
+        active && 'library__tab--active',
+        drawn && 'library__tab--icons'
+      )}
       data-tab-id={tab.id}
       {...controlProps}
-      // The Settings tab shows a gear and wrench instead of its word; its name stays for screen readers and the tooltip.
-      {...(tab.id === LIBRARY_SETTINGS_TAB ? { 'aria-label': tab.label, title: tab.label } : {})}
+      // The Settings tab shows a gear and wrench instead of its word, and a tab its filters' icons with "Icons for
+      // tabs" on: the name stays for screen readers and the tooltip.
+      {...(settings || drawn ? { 'aria-label': tab.label, title: tab.label } : {})}
     >
-      {tab.id === LIBRARY_SETTINGS_TAB ? (
+      {settings ? (
         <SettingsTabIcon className="library__tab-icon" />
+      ) : drawn ? (
+        <TabIcons groups={parts} />
       ) : (
         tab.label
       )}
     </button>
+  )
+})
+
+/** One choice of a tab with "Icons for tabs" on: its icon, or its words when it has none. */
+interface DrawnPart {
+  part: TabNamePart
+  icon: ReactNode
+}
+
+/**
+ * A tab's choices as icons (lib/filterChoiceIcons.ts tabPartIcon: the Filters sub-menus' icons): a filter's choices a
+ * thin gap apart, filters a wider gap apart, with a "·" between filters and a "+" between choices of one filter
+ * wherever a choice without an icon keeps its words, as the tab's name joins them. At most MAX_TAB_ICONS icons, then
+ * "+N".
+ */
+const TabIcons = memo(function TabIcons({
+  groups
+}: {
+  groups: readonly (readonly DrawnPart[])[]
+}): ReactElement {
+  const drawn = useMemo(() => cappedTabGroups(groups, (p) => p.icon != null), [groups])
+  return (
+    <span className="library__tab-icons" aria-hidden="true">
+      {drawn.groups.map((group, g) => {
+        const prev = drawn.groups[g - 1]
+        // A "·" between two filters where either side is words; between two icons the wider gap says it.
+        const dot = !!prev && (!prev[prev.length - 1]!.icon || !group[0]!.icon)
+        return (
+          <Fragment key={`${group[0]!.part.kind}:${g}`}>
+            {dot ? <span className="library__tab-sep">·</span> : null}
+            <span
+              className={cx('library__tab-filter', g > 0 && !dot && 'library__tab-filter--gap')}
+            >
+              {group.map(({ part, icon }, i) => (
+                <Fragment key={`${part.kind}:${part.id}`}>
+                  {/* A "+" wherever either neighbour is words; between two icons the thin gap says it. */}
+                  {i > 0 && (!icon || !group[i - 1]!.icon) ? (
+                    <span className="library__tab-sep">+</span>
+                  ) : null}
+                  {icon ? (
+                    <span className="library__tab-choice" data-choice={`${part.kind}:${part.id}`}>
+                      {icon}
+                    </span>
+                  ) : (
+                    <span className="library__tab-word" data-choice={`${part.kind}:${part.id}`}>
+                      {part.label}
+                    </span>
+                  )}
+                </Fragment>
+              ))}
+            </span>
+          </Fragment>
+        )
+      })}
+      {drawn.more > 0 ? <span className="library__tab-more">+{drawn.more}</span> : null}
+    </span>
   )
 })
 

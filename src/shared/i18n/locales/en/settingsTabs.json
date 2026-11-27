@@ -1,6 +1,10 @@
 {
   "title": "Tabs",
   "note": "The Library's tabs, left to right. Each tab keeps its own filters, sort, search and place, and is named by its filters.",
+  "icons": {
+    "label": "Icons for tabs",
+    "description": "Tabs at the top of the Library show their filters' icons instead of their names."
+  },
   "full": "Up to {max} tabs: delete one to add another.",
   "newTab": "A new tab shows All Games on A-Z with playable games first (the Library button beside the search turns that off); pick its filters and sort here or in the Library.",
   "add": "Add tab",

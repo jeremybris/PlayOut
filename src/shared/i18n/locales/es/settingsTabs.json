@@ -1,6 +1,10 @@
 {
   "title": "Pestañas",
   "note": "Las pestañas de la Biblioteca, de izquierda a derecha. Cada pestaña guarda sus propios filtros, orden, búsqueda y posición, y se nombra según sus filtros.",
+  "icons": {
+    "label": "Iconos en las pestañas",
+    "description": "Las pestañas de la Biblioteca muestran los iconos de sus filtros en lugar de sus nombres."
+  },
   "full": "Hasta {max} pestañas: elimina una para añadir otra.",
   "newTab": "Una pestaña nueva muestra Todos los juegos por A-Z con los juegos jugables primero (el botón Biblioteca junto a la búsqueda lo desactiva); elige sus filtros y su orden aquí o en la Biblioteca.",
   "add": "Añadir pestaña",

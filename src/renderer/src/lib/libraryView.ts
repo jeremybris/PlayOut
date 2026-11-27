@@ -14,6 +14,7 @@ import { currentLanguage, t } from '../i18n'
 import { hltbHours } from './hltb'
 import { installSizeBytes } from './installSize'
 import { compareByTitle, displayTitle, type PlatformGroup } from './library'
+import type { TabNamePart } from './libraryTabs'
 import { hasTagFilter } from './steamTags'
 import { releaseTime } from './releaseEras'
 import { reviewValueOf, type ReviewValue } from './reviews'
@@ -208,6 +209,11 @@ export interface LibraryTab {
   platform?: Platform
   /** The Other tab only: the platform ids folded into it. */
   platformIds?: readonly string[]
+  /**
+   * A user's tab (lib/libraryTabs.ts stripTabs): its active choices, one list per filter (tabNameGroups), which the
+   * strip draws as icons while Settings > Library "Icons for tabs" is on; [] for All Games.
+   */
+  groups?: readonly (readonly TabNamePart[])[]
 }
 
 /**
