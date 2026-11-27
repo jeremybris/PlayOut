@@ -332,10 +332,15 @@
 /* ---- web viewer (a Steam game's Store / Workshop / PCGamingWiki / Guides page inside PlayOut, WebViewer.tsx) ----
    The page itself is a native view main lays over .web-viewer__page; nothing PlayOut draws can sit on top of it. */
 
-/* The game page's own place (between the system bar and the button hints), so neither covers the bar or the page. */
+/* While the viewer is open it takes the window's top: Home's system bar steps aside so it never covers Close. */
+body:has(.modal.web-viewer) .system-bar {
+  visibility: hidden;
+}
+
 .modal.web-viewer {
   position: absolute;
-  top: var(--panel-top);
+  /* as wide as the game's panel behind it, and up over the library tabs to near the window's top */
+  top: calc(12 * var(--u) + var(--safe-y));
   right: var(--panel-inset-x);
   bottom: var(--panel-bottom);
   left: var(--panel-inset-x);

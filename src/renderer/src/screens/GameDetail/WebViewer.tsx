@@ -1,6 +1,7 @@
 import type { SteamLinkKind, WebViewerState } from '@shared/web-viewer'
 import { ArrowLeft, ArrowRight, ExternalLink, RotateCw, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react'
+import { createPortal } from 'react-dom'
 import { api, isMock } from '../../api/client'
 import { Button } from '../../components/Button'
 import { ButtonHints } from '../../components/ButtonHints'
@@ -136,7 +137,9 @@ export function WebViewer({ kind, appId, title, onClose }: WebViewerProps): Reac
       ? t('webViewer.viewer.loading')
       : null
 
-  return (
+  // Rendered at the window's top level, not inside the game panel: the panel's entrance animation (will-change:
+  // transform) would hold the viewer inside its box, below the library tabs and inset on every side.
+  return createPortal(
     <Modal
       size="dialog"
       bare
@@ -236,7 +239,8 @@ export function WebViewer({ kind, appId, title, onClose }: WebViewerProps): Reac
           { button: 'y', label: t('webViewer.hints.external') }
         ]}
       />
-    </Modal>
+    </Modal>,
+    document.body
   )
 }
 
