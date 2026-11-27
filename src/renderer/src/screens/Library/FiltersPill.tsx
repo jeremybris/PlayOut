@@ -47,6 +47,13 @@ import {
   PLAYER_BANDS
 } from '../../lib/localMultiplayer'
 import { ONLINE_CHOICES, onlineMultiplayerLabel } from '../../lib/onlineMultiplayer'
+import {
+  CONTROLS_COLORS,
+  GENRE_COLORS,
+  HIDDEN_COLOR,
+  LOCAL_COLORS,
+  ONLINE_COLORS
+} from '../../lib/filterColors'
 import { ConsoleIcon } from '../../components/ConsoleIcon'
 import { ControlsIcon } from '../../components/ControlsIcon'
 import { DifficultyIcon } from '../../components/DifficultyIcon'
@@ -224,13 +231,17 @@ const ONLINE_ICONS: Readonly<Partial<Record<string, LucideIcon>>> = {
 
 const ONLINE_OPTIONS: readonly Option[] = ONLINE_CHOICES.map((c) => {
   const Icon = ONLINE_ICONS[c.id]
-  return { value: c.id, label: c.label, icon: Icon ? menuIcon(Icon) : undefined }
+  return {
+    value: c.id,
+    label: c.label,
+    icon: Icon ? menuIcon(Icon, ONLINE_COLORS[c.id]) : undefined
+  }
 })
 
-/** A line icon in the box Platform's console pictures use, so the sub-menu's names line up. */
-function menuIcon(Icon: LucideIcon): ReactNode {
+/** A line icon in the box Platform's console pictures use, so the sub-menu's names line up, in its colour. */
+function menuIcon(Icon: LucideIcon, color?: string): ReactNode {
   return (
-    <span className="console-icon" aria-hidden="true">
+    <span className="console-icon" aria-hidden="true" style={color ? { color } : undefined}>
       <Icon className="console-icon__generic" />
     </span>
   )
@@ -240,6 +251,17 @@ function menuIcon(Icon: LucideIcon): ReactNode {
 const LOCAL_LENGTH_ICONS: Readonly<Record<string, LucideIcon>> = {
   party: PartyPopper,
   so: HeartHandshake
+}
+
+/** An icon drawn in the text colour, in `color` instead (lib/filterColors.ts); `display: contents` adds no box. */
+function tinted(icon: ReactNode, color: string | undefined): ReactNode {
+  return color ? (
+    <span className="filters-menu__tint" style={{ color }}>
+      {icon}
+    </span>
+  ) : (
+    icon
+  )
 }
 
 /*
@@ -253,22 +275,30 @@ const playersOptions = (t: Translate): readonly Option[] => [
   ...LOCAL_LENGTH_CHOICES.map((choice) => ({
     value: choice.id,
     label: choice.label,
-    icon: menuIcon(LOCAL_LENGTH_ICONS[choice.id]!)
+    icon: menuIcon(LOCAL_LENGTH_ICONS[choice.id]!, LOCAL_COLORS[choice.id])
   })),
   // The games PeerParty is offered for, with the game page's PeerParty square's icon.
-  { value: LAN_PARTY.id, label: LAN_PARTY.label, icon: menuIcon(Network) },
+  {
+    value: LAN_PARTY.id,
+    label: LAN_PARTY.label,
+    icon: menuIcon(Network, LOCAL_COLORS[LAN_PARTY.id])
+  },
   // The player counts: their picture (a controller with the number) as the icon, then the words ("2-4 Players").
   ...PLAYER_BANDS.map((band) => ({
     value: band.id,
     label: band.label,
     icon: (
-      <span className="console-icon" aria-hidden="true">
+      <span className="console-icon" aria-hidden="true" style={{ color: LOCAL_COLORS[band.id] }}>
         <PlayersArt count={band.badge} />
       </span>
     )
   })),
   // With the game page's Co-Op square's icon.
-  { value: COOP_CHOICE, label: t('library.filters.nucleusCoop'), icon: menuIcon(Users) }
+  {
+    value: COOP_CHOICE,
+    label: t('library.filters.nucleusCoop'),
+    icon: menuIcon(Users, LOCAL_COLORS[COOP_CHOICE])
+  }
 ]
 
 const sizeOptions = (t: Translate): readonly Option[] => [
@@ -294,7 +324,7 @@ const controlsOptions = (
   ...CONTROLS_FILTERS.filter((c) => available.includes(c.id) || picked.includes(c.id)).map((c) => ({
     value: c.id,
     label: c.label,
-    icon: <ControlsIcon controlsId={c.id} />
+    icon: tinted(<ControlsIcon controlsId={c.id} />, CONTROLS_COLORS[c.id])
   }))
 ]
 
@@ -787,7 +817,11 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
                 hiddenCount,
                 onHidden,
                 // A closed eye: the games kept out of sight.
-                <EyeClosed className="filters-menu__arrow" aria-hidden="true" />
+                <EyeClosed
+                  className="filters-menu__arrow"
+                  style={{ color: HIDDEN_COLOR }}
+                  aria-hidden="true"
+                />
               )}
               {toggleRow(
                 'favorites',
@@ -873,7 +907,7 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
             ...tagOptions.map((tag) => ({
               value: tag.id,
               label: tag.label,
-              icon: <GenreIcon genreId={tag.id} />
+              icon: tinted(<GenreIcon genreId={tag.id} />, GENRE_COLORS[tag.id])
             })),
             // A picked genre no game in this list has any more stays listed, so it can be turned off.
             ...tags
@@ -881,7 +915,7 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
               .map((id) => ({
                 value: id,
                 label: tagFilterLabel(id),
-                icon: <GenreIcon genreId={id} />
+                icon: tinted(<GenreIcon genreId={id} />, GENRE_COLORS[id])
               }))
           ]}
           onPick={(value) => onTags(value === ALL ? [] : toggleChoice(tags, value))}

@@ -401,6 +401,11 @@
   margin-right: -0.8rem;
 }
 
+/* An icon coloured by lib/filterColors.ts: the colour without a box of its own */
+.filters-menu__tint {
+  display: contents;
+}
+
 /* Favorites' heart in red, Recompilations' arrow in the Recomp badge's blue */
 .filters-menu__icon--favorite {
   color: var(--color-favorite);
