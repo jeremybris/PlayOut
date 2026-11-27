@@ -13,11 +13,16 @@ dashboard. PlayOut never signs in to a store; version 1 works from local install
 
 ## Screenshots
 
-| Home                                      | Game detail                                 |
-| ----------------------------------------- | ------------------------------------------- |
-| ![Home screen](docs/screenshots/home.png) | ![Game detail](docs/screenshots/detail.png) |
+| Home                                      | Game detail                                       |
+| ----------------------------------------- | ------------------------------------------------- |
+| ![Home screen](docs/screenshots/home.png) | ![Game detail](docs/screenshots/game-detail.webp) |
 
-The screenshots are produced by `npm run screenshot` (see [Development](#development)).
+| Library: Filters › Reviews                                      | Library: Filters › Platform                                       |
+| --------------------------------------------------------------- | ----------------------------------------------------------------- |
+| ![Reviews filter](docs/screenshots/library-reviews-filter.webp) | ![Platform filter](docs/screenshots/library-platform-filter.webp) |
+
+The game detail and library pictures are from PlayOut running on a real library; the home screen is produced by
+`npm run screenshot` (see [Development](#development)).
 
 ## Features
 
