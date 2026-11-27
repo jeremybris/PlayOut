@@ -135,3 +135,14 @@ export function reviewGold(step: number, steps: number): string {
   const mix = (from: number, to: number): number => Math.round((from + (to - from) * t) * 10) / 10
   return `hsl(${mix(40, 48)} ${mix(55, 100)}% ${mix(28, 62)}%)`
 }
+
+/**
+ * Filters > Size's colour for band `step` of `steps` (1 = smallest): blue for the smallest games, through yellow in
+ * the middle, to red for the largest, like a heat scale.
+ */
+export function sizeColor(step: number, steps: number): string {
+  const t = steps > 1 ? Math.min(1, Math.max(0, (step - 1) / (steps - 1))) : 1
+  // Blue (215°) to yellow (50°) over the first half, yellow to red (0°) over the second.
+  const hue = t <= 0.5 ? 215 - (215 - 50) * (t / 0.5) : 50 - 50 * ((t - 0.5) / 0.5)
+  return `hsl(${Math.round(hue)} 85% 58%)`
+}

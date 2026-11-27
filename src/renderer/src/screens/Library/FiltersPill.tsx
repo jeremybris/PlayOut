@@ -277,7 +277,7 @@ const sizeOptions = (t: Translate): readonly Option[] => [
   ...SIZE_BUCKETS.map((bucket, i) => ({
     value: bucket.id,
     label: bucket.label,
-    icon: <SizePie step={i + 1} steps={SIZE_BUCKETS.length} />
+    icon: <SizePie step={i + 1} steps={SIZE_BUCKETS.length} colored />
   }))
 ]
 
