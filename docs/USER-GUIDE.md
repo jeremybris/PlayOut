@@ -620,10 +620,14 @@ What happens when you **Save** an edit:
 **Steam links (Steam games).** A Steam game's page has a second grid of four squares right of the feature squares
 (right of **Play** when the game has none of those): top left the game's **Steam store page** (the Steam logo), top
 right its **Steam Workshop** (a wrench), bottom left its **PCGamingWiki** page (an open book: fixes, settings, save
-locations) and bottom right its **Steam Guides** (a scroll). Other games have no such grid. The Workshop square stays
-empty when Steam says the game has no Workshop; a game PlayOut has not asked Steam about yet keeps the square until
-you press **Refresh metadata** on its page (nothing is looked up in the background for this). A square opens the
-page **inside PlayOut**, in a large panel over the game page:
+locations) and bottom right its **Steam Guides** (a scroll). Other games have no such grid. The Workshop square shows
+only when Steam says the game has a Workshop (most games have none, and their square stays empty). When PlayOut does
+not know yet, opening the game's page asks Steam about that one game, once per game each time PlayOut runs, and the
+square appears a moment later if the game has a Workshop; if Steam does not answer, the square simply stays empty.
+Nothing is looked up in the background for this, and nothing is asked while **Steam tags** is off in
+Settings > Metadata; **Refresh metadata** on the page reads it again with the game's Steam tags. A paired host's Steam game
+works the same way: the host's own answer counts, and this PC asks Steam only when the host has none. A square opens
+the page **inside PlayOut**, in a large panel over the game page:
 
 - The bar on top shows the page's title and site, with **Back**, **Forward**, **Reload**, **Open in browser** and
   **Close**. Mouse, touch and keyboard work in the page as in a browser (Escape in the page goes back, or closes

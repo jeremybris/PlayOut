@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi, type Mock } from 'vitest'
 import type { Game, GameMetadata, Settings } from '../../shared/types'
 import { defaultSettings } from '../../shared/defaults'
 import {
@@ -443,5 +443,169 @@ describe('Steam Workshop flag (the game page Workshop link)', () => {
     service.refreshed(['old'])
     await service.idle()
     expect(fetchTagIds).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe("the game page's Workshop check (checkWorkshop)", () => {
+  const item = (workshop: boolean | undefined): SteamTagItem => ({
+    tagIds: [1],
+    controls: { controller: null, vr: null },
+    vac: false,
+    ...(workshop !== undefined ? { workshop } : {})
+  })
+  type FetchIds = (ids: readonly number[]) => Promise<Map<number, SteamTagItem>>
+  const answering = (workshop: boolean | undefined): Mock<FetchIds> =>
+    vi.fn<FetchIds>(async (ids) => new Map(ids.map((id) => [id, item(workshop)])))
+  const read = {
+    tags: ['Action'],
+    appId: 4300,
+    updatedAt: iso(NOW),
+    controls: { controller: null, vr: null },
+    vac: false
+  }
+
+  it('asks Steam for that one app and keeps the answer in the Steam tags record', async () => {
+    const game = makeGame('g', { externalId: '4300' }, { steamTags: read })
+    const { deps } = setup([game])
+    const fetchTagIds = answering(true)
+    const service = createSteamTags({ ...deps, fetchTagIds })
+    await expect(service.checkWorkshop('g')).resolves.toBe(true)
+    expect(fetchTagIds.mock.calls).toEqual([[[4300]]])
+    expect(game.metadata.steamTags).toEqual({ ...read, workshop: true })
+    // Not quiet: the page hears 'library:changed' and shows the square.
+    expect(deps.library.applyMetadata.mock.calls[0][2]).toEqual({ overwrite: true })
+    // Known now: asking again is answered without Steam.
+    await expect(service.checkWorkshop('g')).resolves.toBe(true)
+    expect(fetchTagIds).toHaveBeenCalledTimes(1)
+  })
+
+  it('asks nothing when the answer is known already, or for a game with no Steam links', async () => {
+    const known = makeGame('k', { externalId: '4301' }, { steamTags: { ...read, workshop: false } })
+    const gog = makeGame('o', { source: 'gog', externalId: 'x' }, { sources: { steam: '4302' } })
+    const { deps } = setup([known, gog])
+    const fetchTagIds = answering(true)
+    const service = createSteamTags({ ...deps, fetchTagIds })
+    await expect(service.checkWorkshop('k')).resolves.toBe(false)
+    await expect(service.checkWorkshop('o')).resolves.toBeNull()
+    await expect(service.checkWorkshop('missing')).resolves.toBeNull()
+    expect(fetchTagIds).not.toHaveBeenCalled()
+  })
+
+  it('asks once per game per run, even when Steam does not answer, and stays hidden quietly', async () => {
+    const failing = makeGame('f', { externalId: '4400' }, { steamTags: read })
+    const unsaid = makeGame('u', { externalId: '4401' }, { steamTags: read })
+    const { deps } = setup([failing, unsaid])
+    const fetchTagIds = vi.fn(async (ids: readonly number[]) => {
+      if (ids.includes(4400)) throw new Error('offline')
+      // An app Steam does not show: no Workshop answer.
+      return new Map(ids.map((id) => [id, { tagIds: [] } as SteamTagItem]))
+    })
+    const service = createSteamTags({ ...deps, fetchTagIds })
+    await expect(service.checkWorkshop('f')).resolves.toBeNull()
+    await expect(service.checkWorkshop('u')).resolves.toBeNull()
+    await expect(service.checkWorkshop('f')).resolves.toBeNull()
+    await expect(service.checkWorkshop('u')).resolves.toBeNull()
+    expect(fetchTagIds).toHaveBeenCalledTimes(2)
+    expect(deps.library.applyMetadata).not.toHaveBeenCalled()
+    expect(deps.log.error).not.toHaveBeenCalled()
+    expect(deps.log.debug).toHaveBeenCalled()
+    expect(failing.metadata.steamTags?.workshop).toBeUndefined()
+  })
+
+  it('asks nothing while the Steam tags are off', async () => {
+    const game = makeGame('g', { externalId: '4500' }, { steamTags: read })
+    const { deps, value } = setup([game])
+    value.scrapers.steamTags.enabled = false
+    const fetchTagIds = answering(true)
+    const service = createSteamTags({ ...deps, fetchTagIds })
+    await expect(service.checkWorkshop('g')).resolves.toBeNull()
+    expect(fetchTagIds).not.toHaveBeenCalled()
+    // Turned on again: the page's next open asks.
+    value.scrapers.steamTags.enabled = true
+    await expect(service.checkWorkshop('g')).resolves.toBe(true)
+  })
+
+  it("stores a game with no tags record so its tags are still read, then the pass's answer replaces it", async () => {
+    const game = makeGame('n', { externalId: '4600' })
+    const { deps } = setup([game])
+    const fetchTagIds = answering(true)
+    const service = createSteamTags({ ...deps, fetchTagIds })
+    await expect(service.checkWorkshop('n')).resolves.toBe(true)
+    expect(game.metadata.steamTags).toEqual({ tags: [], workshop: true })
+    expect(steamTagsDue(game, NOW)).toBe(true)
+    service.kick()
+    await service.idle()
+    expect(game.metadata.steamTags).toMatchObject({
+      appId: 4600,
+      tags: ['Roguelike'],
+      updatedAt: iso(NOW),
+      workshop: true
+    })
+    expect(steamTagsDue(game, NOW)).toBe(false)
+  })
+
+  it('keeps an answer the tags pass wrote while the check was on its way', async () => {
+    const game = makeGame('r', { externalId: '4700' }, { steamTags: read })
+    const { deps } = setup([game])
+    const fetchTagIds = vi.fn(async (ids: readonly number[]) => {
+      game.metadata = { ...game.metadata, steamTags: { ...read, workshop: false } }
+      return new Map(ids.map((id) => [id, item(true)]))
+    })
+    const service = createSteamTags({ ...deps, fetchTagIds })
+    await service.checkWorkshop('r')
+    expect(game.metadata.steamTags?.workshop).toBe(false)
+    expect(deps.library.applyMetadata).not.toHaveBeenCalled()
+  })
+
+  it("keeps a paired host's game's answer in memory and shows the remote library again", async () => {
+    const hostGame = makeGame('remote:h1:steam:4800', { externalId: '4800' })
+    const told = makeGame(
+      'remote:h1:steam:4801',
+      { externalId: '4801' },
+      { steamTags: { tags: [], workshop: false } }
+    )
+    const { deps } = setup([])
+    const fetchTagIds = answering(true)
+    const service = createSteamTags({ ...deps, fetchTagIds })
+    const changed = vi.fn()
+    const remoteGames = new Map([hostGame, told].map((g) => [g.id, g]))
+    service.useRemote({ game: async (id) => remoteGames.get(id), changed })
+    await expect(service.checkWorkshop(hostGame.id)).resolves.toBe(true)
+    expect(service.remoteWorkshop(hostGame.id)).toBe(true)
+    expect(changed).toHaveBeenCalledTimes(1)
+    // The host's next offer still has no answer: this PC's own is kept, and nothing is asked again.
+    await expect(service.checkWorkshop(hostGame.id)).resolves.toBe(true)
+    // The host's own answer is not asked about.
+    await expect(service.checkWorkshop(told.id)).resolves.toBe(false)
+    expect(fetchTagIds).toHaveBeenCalledTimes(1)
+    expect(deps.library.applyMetadata).not.toHaveBeenCalled()
+  })
+})
+
+describe('steamTagsDue with only the Workshop answer', () => {
+  it('counts a record holding only the Workshop answer as unread, and a read one as read', () => {
+    const onlyWorkshop = makeGame('a', {}, { steamTags: { tags: [], workshop: false } })
+    expect(steamTagsDue(onlyWorkshop, NOW)).toBe(true)
+    const gog = makeGame(
+      'b',
+      { source: 'gog', externalId: 'x' },
+      { steamTags: { tags: [], workshop: true } }
+    )
+    expect(steamTagsDue(gog, NOW)).toBe(true)
+    const read = makeGame(
+      'c',
+      {},
+      {
+        steamTags: {
+          tags: ['Action'],
+          appId: 100,
+          updatedAt: iso(NOW),
+          controls: { controller: null, vr: null },
+          vac: false,
+          workshop: true
+        }
+      }
+    )
+    expect(steamTagsDue(read, NOW)).toBe(false)
   })
 })

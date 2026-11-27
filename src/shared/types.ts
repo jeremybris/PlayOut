@@ -389,7 +389,8 @@ export interface GameMetadata {
     vac?: boolean
     /**
      * Steam lists the Steam Workshop for the app (its feature category 30), from the same Steam answer: the game page
-     * leaves its Workshop link out when false. Absent: not read yet (read with the next Steam tags; shown meanwhile).
+     * shows its Workshop link only when true. Absent: not read yet (hidden meanwhile; the game page asks Steam for it
+     * when it opens, SteamTagsService.checkWorkshop, which may store a record holding only `tags: []` and this).
      */
     workshop?: boolean
   }

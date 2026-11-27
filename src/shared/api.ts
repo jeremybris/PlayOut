@@ -345,6 +345,13 @@ export interface PlayOutApi {
    */
   openWebViewer(kind: SteamLinkKind, appId: number): Promise<WebViewerState>
   closeWebViewer(): Promise<void>
+  /**
+   * The game's page opened on a Steam game whose Workshop answer is not known (shared/web-viewer steamWorkshopUnknown):
+   * main asks Steam for that one app, once per game per run (not while the Steam tags are off), and keeps the answer;
+   * the game comes again with 'library:changed' (a paired host's game: 'streaming:library'), its Workshop square shown
+   * when it has one. Resolves with the answer, null when there is none.
+   */
+  steamWorkshopCheck(gameId: string): Promise<boolean | null>
   /** The viewer's Back / Forward / Reload / Open in browser. */
   webViewerAction(action: WebViewerAction): Promise<void>
   /** Scroll the viewer's page by `deltaY` CSS pixels (down positive): the controller's D-pad and right stick. */
@@ -847,6 +854,7 @@ export const API_METHODS = [
   'openExternal',
   'openWebViewer',
   'closeWebViewer',
+  'steamWorkshopCheck',
   'webViewerAction',
   'scrollWebViewer',
   'setWebViewerBounds',

@@ -1,8 +1,9 @@
 import type { Game } from '@shared/types'
-import type { SteamLinkKind } from '@shared/web-viewer'
+import { steamWorkshopUnknown, type SteamLinkKind } from '@shared/web-viewer'
 import { siSteam } from 'simple-icons'
 import { BookOpen, ScrollText, Wrench } from 'lucide-react'
-import { useState, type ReactElement } from 'react'
+import { useEffect, useState, type ReactElement } from 'react'
+import { api } from '../../api/client'
 import { useFocusableControl } from '../../hooks/useFocusableControl'
 import { useT } from '../../i18n'
 import { FocusContext, useFocusable } from '../../input/focus'
@@ -32,13 +33,23 @@ const SLOTS: readonly SteamLinkKind[] = ['store', 'workshop', 'pcgamingwiki', 'g
 /**
  * The Steam links of a Steam game, a second four-square grid right of the feature grid (right of Play when the game
  * has no features), the same squares: Steam store page, Workshop, PCGamingWiki and Steam Guides, top left to bottom
- * right. Workshop leaves its square empty when Steam says the game has none. A square opens its page in the in-app
- * web viewer (WebViewer.tsx), so the user stays in PlayOut. Right from the feature grid (or Play) enters it on the
- * last square used, else the first one. Nothing shows for any other game.
+ * right. Workshop leaves its square empty unless Steam says the game has one; when that is not known yet the page
+ * asks main (api.steamWorkshopCheck, once per game per run there) and the square appears with the game's next
+ * update if Steam says yes. A square opens its page in the in-app web viewer (WebViewer.tsx), so the user stays in
+ * PlayOut. Right from the feature grid (or Play) enters it on the last square used, else the first one. Nothing
+ * shows for any other game.
  */
 export function SteamLinksGrid({ game }: { game: Game }): ReactElement | null {
   const t = useT()
   const links = steamLinksOf(game)
+  const unknown = steamWorkshopUnknown(game)
+  useEffect(() => {
+    if (!unknown) return
+    // The answer comes back as the game's own update; no answer leaves the square empty.
+    void Promise.resolve()
+      .then(() => api.steamWorkshopCheck(game.id))
+      .catch(() => undefined)
+  }, [game.id, unknown])
   const [viewing, setViewing] = useState<SteamLinkKind | null>(null)
   const first = links?.kinds[0]
   const { ref, focusKey } = useFocusable<object, HTMLDivElement>({

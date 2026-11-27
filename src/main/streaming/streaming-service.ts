@@ -126,6 +126,7 @@ import {
   sanitizeHostGame,
   surelySameGame,
   withRemoteRetro,
+  withRemoteWorkshop,
   type HostGame,
   type HostOfferInput,
   type RemoteRetroAnswer
@@ -342,6 +343,11 @@ export interface StreamingServiceDeps {
    */
   remoteRetro?(gameId: string): RemoteRetroAnswer | undefined
   /**
+   * A host-only Steam game's Workshop answer this PC asked Steam for when its page opened
+   * (SteamTagsService.remoteWorkshop): laid over the card when the host sent none. Undefined: not asked here.
+   */
+  remoteWorkshop?(gameId: string): boolean | undefined
+  /**
    * A host-only game's recompilations, matched with this PC's catalogs (main/recomp recompForGame): its
    * metadata.recomp here, for Filters > Recompilations (a host's own match is not taken from its offer). Null = none;
    * undefined = not known yet.
@@ -431,7 +437,10 @@ export interface StreamingService {
    */
   setHostAddress(hostId: string, address: string | null): Promise<StreamingStatus>
   remoteLibrary(): Promise<RemoteLibrary>
-  /** This PC's own counts of the hosts' ROMs changed (remoteRetro): the remote library is shown again (no request). */
+  /**
+   * This PC's own counts of the hosts' ROMs (remoteRetro) or its own Workshop answers (remoteWorkshop) changed: the
+   * remote library is shown again (no request).
+   */
   remoteAchievementsChanged(): void
   /**
    * A host-only game (`remote:` id) as its host offers it, before this PC's cloud and edits are laid over it (the
@@ -3846,6 +3855,12 @@ export function createStreamingService(deps: StreamingServiceDeps): StreamingSer
       remote = {
         ...remote,
         games: remote.games.map((g) => withRemoteRetro(g, deps.remoteRetro!(g.id)))
+      }
+    // A host's Steam game this PC asked Steam about (its page opened) when the host had no Workshop answer for it.
+    if (deps.remoteWorkshop)
+      remote = {
+        ...remote,
+        games: remote.games.map((g) => withRemoteWorkshop(g, deps.remoteWorkshop!(g.id)))
       }
     remoteBase = new Map(remote.games.map((g) => [g.id, g]))
     // This PC's cloud and the user's own edits of host-only games (LibraryService.viewRemote).

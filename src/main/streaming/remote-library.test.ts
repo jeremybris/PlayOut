@@ -16,6 +16,7 @@ import {
   offeredId,
   romStem,
   withRemoteRetro,
+  withRemoteWorkshop,
   type HostGame,
   type HostOfferInput
 } from './remote-library'
@@ -782,6 +783,51 @@ describe('metadata shared with clients', () => {
     expect(kept.reviewScore).toBeUndefined()
     expect(kept.steamScreenshots).toBeUndefined()
     expect(kept.steamTags).toBeUndefined()
+  })
+})
+
+describe("the host's Workshop answer", () => {
+  const sent = (steamTags: unknown): unknown =>
+    sanitizeHostGame({
+      id: 'steam:1',
+      source: 'steam',
+      title: 'X',
+      platformId: 'steam',
+      externalId: '1',
+      metadata: { steamTags }
+    })!.metadata.steamTags
+
+  it('comes with the tags, and alone when the host has no tags', () => {
+    expect(sent({ tags: ['A'], workshop: true })).toEqual({ tags: ['A'], workshop: true })
+    expect(sent({ tags: [], workshop: false })).toEqual({ tags: [], workshop: false })
+    expect(sent({ tags: ['A'] })).toEqual({ tags: ['A'] })
+    expect(sent({ tags: [], workshop: 'yes' })).toBeUndefined()
+  })
+
+  it("lays this PC's own answer over a host-only card only when the host sent none", () => {
+    const card = (steamTags?: { tags: string[]; workshop?: boolean }): Game =>
+      ({
+        ...game({ id: 'remote:h:steam:1', source: 'steam', title: 'X' }),
+        metadata: steamTags ? { steamTags } : {},
+        remote: { hostId: 'h' }
+      }) as unknown as Game
+    expect(withRemoteWorkshop(card(), true).metadata.steamTags).toEqual({
+      tags: [],
+      workshop: true
+    })
+    expect(withRemoteWorkshop(card({ tags: ['A'] }), true).metadata.steamTags).toEqual({
+      tags: ['A'],
+      workshop: true
+    })
+    // The host's own answer wins.
+    expect(
+      withRemoteWorkshop(card({ tags: [], workshop: false }), true).metadata.steamTags?.workshop
+    ).toBe(false)
+    const unasked = card()
+    expect(withRemoteWorkshop(unasked, undefined)).toBe(unasked)
+    // Not a host's card: untouched.
+    const local = { ...unasked, remote: undefined } as Game
+    expect(withRemoteWorkshop(local, true)).toBe(local)
   })
 })
 

@@ -7,7 +7,8 @@ import type { WebViewerState } from '@shared/web-viewer'
 
 /**
  * The Steam links grid right of the feature grid: Store, Workshop, PCGamingWiki and Guides in that order, Steam games
- * only, an empty Workshop square when Steam said the game has none, and the in-app web viewer a square opens.
+ * only, an empty Workshop square unless Steam said the game has one (not known: the page asks main), and the in-app
+ * web viewer a square opens.
  */
 
 const listeners = new Map<string, Set<(payload: unknown) => void>>()
@@ -29,7 +30,8 @@ const api = {
   webViewerAction: vi.fn<(action: string) => Promise<void>>(async () => undefined),
   scrollWebViewer: vi.fn<(deltaY: number) => Promise<void>>(async () => undefined),
   setWebViewerBounds: vi.fn(async () => undefined),
-  setWebViewerVisible: vi.fn<(visible: boolean) => Promise<void>>(async () => undefined)
+  setWebViewerVisible: vi.fn<(visible: boolean) => Promise<void>>(async () => undefined),
+  steamWorkshopCheck: vi.fn<(gameId: string) => Promise<boolean | null>>(async () => null)
 }
 const emit = (event: string, payload: unknown): void => {
   for (const l of listeners.get(event) ?? []) l(payload)
@@ -71,7 +73,8 @@ const steamGame = (over: Partial<Game> = {}): Game =>
     source: 'steam',
     externalId: '620',
     title: 'Portal 2',
-    metadata: {},
+    // Steam said the app has a Workshop: all four squares.
+    metadata: { steamTags: { tags: [], workshop: true } },
     ...over
   }) as Game
 
@@ -96,7 +99,7 @@ const flush = async (): Promise<void> => {
 }
 
 describe('steamLinksOf', () => {
-  it('is for Steam games only, Workshop left out when Steam says there is none', () => {
+  it('is for Steam games only, Workshop only when Steam says there is one', () => {
     expect(steamLinksOf(steamGame())).toEqual({
       appId: 620,
       kinds: ['store', 'workshop', 'pcgamingwiki', 'guides']
@@ -104,6 +107,15 @@ describe('steamLinksOf', () => {
     expect(
       steamLinksOf(steamGame({ metadata: { steamTags: { tags: [], workshop: false } } }))?.kinds
     ).toEqual(['store', 'pcgamingwiki', 'guides'])
+    // Not known yet: left out too.
+    expect(steamLinksOf(steamGame({ metadata: {} }))?.kinds).toEqual([
+      'store',
+      'pcgamingwiki',
+      'guides'
+    ])
+    expect(presentSteamLinks(steamGame({ metadata: { steamTags: { tags: ['Action'] } } }))).toBe(
+      'store|pcgamingwiki|guides'
+    )
     expect(steamLinksOf(steamGame({ source: 'gog', extra: { steamAppId: 620 } }))).toBeNull()
     expect(presentSteamLinks(steamGame({ source: 'rom', externalId: 'x.sfc' }))).toBe('')
   })
@@ -120,10 +132,46 @@ describe('SteamLinksGrid', () => {
     }
   })
 
-  it('leaves the Workshop square empty when the game has none', () => {
+  it('leaves the Workshop square empty when the game has none, and asks nothing', () => {
     const grid = render(steamGame({ metadata: { steamTags: { tags: [], workshop: false } } }))!
     expect(cells(grid)).toEqual(['store', 'empty', 'pcgamingwiki', 'guides'])
     expect(grid.querySelector('.gdetail__features-empty')?.getAttribute('aria-hidden')).toBe('true')
+    expect(api.steamWorkshopCheck).not.toHaveBeenCalled()
+  })
+
+  it('asks nothing when the game has a Workshop', () => {
+    render(steamGame())
+    expect(api.steamWorkshopCheck).not.toHaveBeenCalled()
+  })
+
+  it('leaves the square empty while not known, asks main once, and shows it when Steam says yes', async () => {
+    const unknown = steamGame({ metadata: { steamTags: { tags: ['Action'] } } })
+    const grid = render(unknown)!
+    expect(cells(grid)).toEqual(['store', 'empty', 'pcgamingwiki', 'guides'])
+    await flush()
+    expect(api.steamWorkshopCheck.mock.calls).toEqual([['steam:620']])
+    // The same game again (another update of it): not asked again.
+    render({ ...unknown, title: 'Portal 2 (again)' })
+    await flush()
+    expect(api.steamWorkshopCheck).toHaveBeenCalledTimes(1)
+    // The answer arrives as the game's own update.
+    render(steamGame({ metadata: { steamTags: { tags: ['Action'], workshop: true } } }))
+    expect(cells(grid)).toEqual(['store', 'workshop', 'pcgamingwiki', 'guides'])
+    expect(api.steamWorkshopCheck).toHaveBeenCalledTimes(1)
+  })
+
+  it('stays empty when main has no answer (the request failed)', async () => {
+    api.steamWorkshopCheck.mockRejectedValueOnce(new Error('offline'))
+    const grid = render(steamGame({ metadata: {} }))!
+    await flush()
+    expect(api.steamWorkshopCheck).toHaveBeenCalledTimes(1)
+    expect(cells(grid)).toEqual(['store', 'empty', 'pcgamingwiki', 'guides'])
+  })
+
+  it('asks nothing for a game that is not a Steam game', async () => {
+    render(steamGame({ source: 'epic', externalId: 'abc', metadata: {} }))
+    await flush()
+    expect(api.steamWorkshopCheck).not.toHaveBeenCalled()
   })
 
   it('shows nothing for a game that is not a Steam game', () => {

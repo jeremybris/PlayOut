@@ -14,7 +14,7 @@ function services(): {
     'open' | 'close' | 'action' | 'scroll' | 'setBounds' | 'setVisible',
     ReturnType<typeof vi.fn>
   >
-  steamTags: { refreshed: ReturnType<typeof vi.fn> }
+  steamTags: { refreshed: ReturnType<typeof vi.fn>; checkWorkshop: ReturnType<typeof vi.fn> }
   metadata: { enqueue: ReturnType<typeof vi.fn> }
   handlers: ReturnType<typeof createHandlers>
 } {
@@ -26,7 +26,7 @@ function services(): {
     setBounds: vi.fn(),
     setVisible: vi.fn()
   }
-  const steamTags = { refreshed: vi.fn() }
+  const steamTags = { refreshed: vi.fn(), checkWorkshop: vi.fn(async () => true) }
   const metadata = { enqueue: vi.fn(() => 1) }
   return {
     webViewer,
@@ -84,5 +84,24 @@ describe('web viewer handlers', () => {
     await handlers.refreshMetadata(['g1', 'g2'])
     expect(metadata.enqueue).toHaveBeenCalled()
     expect(steamTags.refreshed).toHaveBeenCalledWith(['g1', 'g2'])
+  })
+
+  it("asks the Steam tags about a game page's Workshop, for a valid game id only", async () => {
+    const { steamTags, handlers } = services()
+    await expect(handlers.steamWorkshopCheck('steam:620')).resolves.toBe(true)
+    expect(steamTags.checkWorkshop).toHaveBeenCalledWith('steam:620')
+    await expect(handlers.steamWorkshopCheck('' as never)).rejects.toThrow()
+    await expect(handlers.steamWorkshopCheck(620 as never)).rejects.toThrow()
+    expect(steamTags.checkWorkshop).toHaveBeenCalledTimes(1)
+    steamTags.checkWorkshop.mockResolvedValueOnce(null)
+    await expect(handlers.steamWorkshopCheck('steam:1')).resolves.toBeNull()
+  })
+
+  it('answers null without the Steam tags service', async () => {
+    const handlers = createHandlers({
+      log: { error: vi.fn(), warn: vi.fn(), info: vi.fn() },
+      window: { get: () => null }
+    } as unknown as AppServices)
+    await expect(handlers.steamWorkshopCheck('steam:620')).resolves.toBeNull()
   })
 })

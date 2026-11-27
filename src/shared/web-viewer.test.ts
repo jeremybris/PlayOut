@@ -5,7 +5,8 @@ import {
   STEAM_LINK_KINDS,
   steamLinksAppId,
   steamLinkUrl,
-  steamWorkshopShown
+  steamWorkshopShown,
+  steamWorkshopUnknown
 } from './web-viewer'
 
 const game = (over: Partial<Game>): Game =>
@@ -53,13 +54,29 @@ describe('steamLinksAppId', () => {
 })
 
 describe('steamWorkshopShown', () => {
-  it('hides the Workshop only when Steam said there is none', () => {
-    expect(steamWorkshopShown(game({}))).toBe(true)
+  it('shows the Workshop only when Steam said there is one', () => {
+    expect(steamWorkshopShown(game({}))).toBe(false)
+    expect(steamWorkshopShown(game({ metadata: { steamTags: { tags: ['Action'] } } }))).toBe(false)
     expect(
       steamWorkshopShown(game({ metadata: { steamTags: { tags: [], workshop: true } } }))
     ).toBe(true)
     expect(
       steamWorkshopShown(game({ metadata: { steamTags: { tags: [], workshop: false } } }))
     ).toBe(false)
+  })
+})
+
+describe('steamWorkshopUnknown', () => {
+  it('is a Steam game with links whose Workshop answer is not known: the page asks main', () => {
+    expect(steamWorkshopUnknown(game({}))).toBe(true)
+    expect(steamWorkshopUnknown(game({ metadata: { steamTags: { tags: ['Action'] } } }))).toBe(true)
+    expect(
+      steamWorkshopUnknown(game({ metadata: { steamTags: { tags: [], workshop: false } } }))
+    ).toBe(false)
+    expect(
+      steamWorkshopUnknown(game({ metadata: { steamTags: { tags: [], workshop: true } } }))
+    ).toBe(false)
+    expect(steamWorkshopUnknown(game({ source: 'gog', extra: { steamAppId: 620 } }))).toBe(false)
+    expect(steamWorkshopUnknown(game({ externalId: 'x' }))).toBe(false)
   })
 })

@@ -121,8 +121,11 @@ export interface AppServices {
   friends: FriendsService
   /** The in-app web viewer of the game page's Steam links (main/web-viewer). */
   webViewer: WebViewer
-  /** Steam tags: a refreshed game whose Steam answer predates the Workshop flag is read again (scrapers/steam-tags). */
-  steamTags?: Pick<SteamTagsService, 'refreshed'>
+  /**
+   * Steam tags: a refreshed game whose Steam answer predates the Workshop flag is read again, and a game page asks
+   * Steam about its Workshop when that is not known (scrapers/steam-tags).
+   */
+  steamTags?: Pick<SteamTagsService, 'refreshed' | 'checkWorkshop'>
   events: EventBus
   log: Logger
   window: {
@@ -1313,6 +1316,9 @@ export function createHandlers(s: AppServices): ApiHandlers {
     },
     async closeWebViewer() {
       s.webViewer.close()
+    },
+    async steamWorkshopCheck(gameId) {
+      return (await s.steamTags?.checkWorkshop(idSchema.parse(gameId))) ?? null
     },
     async webViewerAction(action) {
       await s.webViewer.action(z.enum(WEB_VIEWER_ACTIONS).parse(action))

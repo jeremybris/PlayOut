@@ -61,11 +61,22 @@ function appIdOf(raw: unknown): number | null {
 }
 
 /**
- * Whether the Workshop square shows: unless Steam said the app has no Workshop (its store category 30, read with the
- * Steam tags into `metadata.steamTags.workshop`). Not read yet (absent): shown.
+ * Whether the Workshop square shows: only when Steam said the app has a Workshop (its store category 30, read with
+ * the Steam tags into `metadata.steamTags.workshop`, or asked for when the game's page opens: api.steamWorkshopCheck).
+ * Not known yet (absent) or none: hidden, since most Steam games have no Workshop.
  */
 export function steamWorkshopShown(game: Pick<Game, 'metadata'>): boolean {
-  return game.metadata.steamTags?.workshop !== false
+  return game.metadata.steamTags?.workshop === true
+}
+
+/**
+ * Whether the game's page asks Steam about its Workshop when it opens (api.steamWorkshopCheck): a Steam game with an
+ * app id whose Workshop answer is not known yet. Main asks once per game per run, and not while the Steam tags are off.
+ */
+export function steamWorkshopUnknown(
+  game: Pick<Game, 'source' | 'externalId' | 'extra' | 'metadata'>
+): boolean {
+  return steamLinksAppId(game) !== null && game.metadata.steamTags?.workshop === undefined
 }
 
 /** What the viewer shows, sent with every change (event 'web-viewer:state'). */

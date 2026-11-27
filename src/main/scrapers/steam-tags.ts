@@ -6,6 +6,7 @@
 // Kept in `metadata.steamTags`, apart from `metadata.tags`: the text scrapers write that field (Steam's feature
 // categories, IGDB themes, age ratings) and a forced refresh replaces it, which would lose the user tags.
 import type { Game, GameMetadata, Settings, SteamControls } from '../../shared/types'
+import { steamLinksAppId } from '../../shared/web-viewer'
 import type { Logger } from '../logger'
 import { buildUrl, httpJson, RateLimiter } from './http'
 import { describeError, steamAppIdOf } from './steam-store'
@@ -234,12 +235,27 @@ export function sameRelease(gameYear: number | undefined, steamYear: number | un
   return gameYear === undefined || steamYear === undefined || Math.abs(gameYear - steamYear) <= 1
 }
 
+/**
+ * Whether a Steam tags record comes from a tags read (or a title search): it names the Steam app, the title searched
+ * for, or when it was read / missed. A record without any of them holds only the game page's own Workshop answer
+ * (SteamTagsService.checkWorkshop): the game's tags are still unread.
+ */
+export function steamTagsRead(record: SteamTagsRecord): boolean {
+  return (
+    record.appId !== undefined ||
+    record.title !== undefined ||
+    !!record.missedAt ||
+    !!record.updatedAt
+  )
+}
+
 /** Whether a game's tags should be read now. */
 export function steamTagsDue(game: Game, now: number): boolean {
   if (NO_STEAM_SOURCES.has(game.source)) return false
   if (!titleOf(game)) return false
   const record = game.metadata.steamTags
-  if (!record) return true
+  // No record, or only the Workshop answer the game page asked for (checkWorkshop): not read yet.
+  if (!record || !steamTagsRead(record)) return true
   const known = knownSteamAppId(game)
   // The game was matched to a Steam app since (a picked metadata match, a size lookup), or to another one.
   if (known && known.appId !== record.appId) return true
@@ -290,7 +306,25 @@ export interface SteamTagsService {
    * read again in the next pass, so its game page learns whether it has a Workshop. Nothing reads it in the background.
    */
   refreshed(gameIds: readonly string[]): void
+  /**
+   * The game's page opened (api.steamWorkshopCheck): a Steam game whose Workshop answer is not known asks Steam for
+   * that one app, once per game per run, and keeps the answer (metadata.steamTags.workshop; a paired host's game: in
+   * memory, laid over its card by remoteWorkshop). Resolves with the answer, or null when none (not a Steam game, the
+   * Steam tags off, asked already, Steam did not answer). Never a background pass; failures stay quiet.
+   */
+  checkWorkshop(gameId: string): Promise<boolean | null>
+  /** This PC's own Workshop answer for a paired host's game the host sent none for (undefined: none). */
+  remoteWorkshop(gameId: string): boolean | undefined
+  /** The paired hosts' games (streaming service), for checkWorkshop on a host-only game. */
+  useRemote(remote: SteamTagsRemote): void
   dispose(): void
+}
+
+/** A paired host's games as this PC shows them (streaming service remoteLibrary). */
+export interface SteamTagsRemote {
+  game(gameId: string): Promise<Game | undefined>
+  /** remoteWorkshop's answers changed: the remote library is shown again. */
+  changed(): void
 }
 
 /**
@@ -319,6 +353,10 @@ export function createSteamTags(deps: SteamTagsDeps): SteamTagsService {
   let names: { at: number; map: Map<number, string> } | null = null
   // Games the user refreshed whose Steam answer predates the Workshop flag (refreshed / workshopUnread).
   const refreshAsked = new Set<string>()
+  // Games whose page asked Steam about their Workshop this run (checkWorkshop), and the answers for host-only games.
+  const workshopAsked = new Set<string>()
+  const remoteAnswers = new Map<string, boolean>()
+  let remote: SteamTagsRemote | null = null
   const isDue = (game: Game): boolean =>
     steamTagsDue(game, now()) || (refreshAsked.has(game.id) && workshopUnread(game))
 
@@ -509,8 +547,55 @@ export function createSteamTags(deps: SteamTagsDeps): SteamTagsService {
       }
       if (any) kick()
     },
+    checkWorkshop,
+    remoteWorkshop(gameId) {
+      return remoteAnswers.get(gameId)
+    },
+    useRemote(next) {
+      remote = next
+    },
     dispose() {
       disposed = true
     }
+  }
+
+  async function checkWorkshop(gameId: string): Promise<boolean | null> {
+    if (!enabled()) return null
+    const local = library.getGame(gameId)
+    const game = local ?? (await remote?.game(gameId))
+    if (!game) return null
+    const known = game.metadata.steamTags?.workshop ?? remoteAnswers.get(gameId)
+    if (known !== undefined) return known
+    const appId = steamLinksAppId(game)
+    if (appId === null || workshopAsked.has(gameId)) return null
+    // Once per game per run, answered or not: opening the page again does not ask again.
+    workshopAsked.add(gameId)
+    let workshop: boolean | undefined
+    try {
+      workshop = (await getIds([appId])).get(appId)?.workshop
+    } catch (err) {
+      log.debug(`Steam Workshop of app ${appId}: ${describeError(err)}`)
+      return null
+    }
+    if (workshop === undefined) {
+      log.debug(`Steam Workshop of app ${appId}: Steam did not say`)
+      return null
+    }
+    if (disposed) return workshop
+    if (!local) {
+      remoteAnswers.set(gameId, workshop)
+      remote?.changed()
+      return workshop
+    }
+    const current = library.getGame(gameId)
+    // Gone meanwhile, or the tags pass wrote an answer while this one was on its way.
+    if (!current || current.metadata.steamTags?.workshop !== undefined) return workshop
+    // Laid into the game's record (none yet: one holding only this, which steamTagsDue still counts as unread).
+    library.applyMetadata(
+      gameId,
+      { metadata: { steamTags: { ...(current.metadata.steamTags ?? { tags: [] }), workshop } } },
+      { overwrite: true }
+    )
+    return workshop
   }
 }

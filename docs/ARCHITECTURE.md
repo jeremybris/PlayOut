@@ -1034,8 +1034,13 @@ nothing it draws can cover the native view; hiding hands the keyboard back to th
 `web-viewer:state`; `session:started` closes the view, and so does the renderer's unmount (the game page closing).
 The renderer keeps the controller working while the view has the keyboard focus through `setGamepadActiveElsewhere`
 (fed by `window:focus`). The Workshop square reads `metadata.steamTags.workshop` (GetItems feature category 30, written
-by `scrapers/steam-tags.ts`); records from before it are read again only when the user refreshes the game's metadata
-(`SteamTagsService.refreshed`), never by the background pass.
+by `scrapers/steam-tags.ts`) and shows only when it is `true`. Records from before it are read again when the user
+refreshes the game's metadata (`SteamTagsService.refreshed`), never by the background pass; and the game page itself
+asks for an unknown one when it opens (`steamWorkshopCheck` -> `SteamTagsService.checkWorkshop`: one GetItems app on
+the tags' limiter, once per game per run, not while the Steam tags are off, failures quiet). The answer is laid into
+`metadata.steamTags` (a game with no record gets `{ tags: [], workshop }`, which `steamTagsRead` / `steamTagsDue` still
+count as unread); a paired host's game keeps it in memory (`remoteWorkshop`, laid over the card by `withRemoteWorkshop`
+only when the host sent no answer).
 
 ### 4.9 App updates (`updates/index.ts`)
 

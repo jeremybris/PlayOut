@@ -1053,6 +1053,8 @@ async function main(cli: CliOptions): Promise<void> {
     // ROMs show this PC's own RetroAchievements counts once its scan read them.
     raHash: (game) => achievements.raHashOf(game),
     remoteRetro: (gameId) => achievements.remoteRetro(gameId),
+    // A host's Steam game whose page asked Steam about its Workshop here (the host had no answer for it).
+    remoteWorkshop: (gameId) => steamTags.remoteWorkshop(gameId),
     launcher,
     scan,
     emulationDir: () => emulationDirOf(settings.get(), userData),
@@ -1168,6 +1170,11 @@ async function main(cli: CliOptions): Promise<void> {
   achievements.useRemote({
     games: async () => (await streaming.remoteLibrary()).games,
     pairedHosts: async () => (await streaming.status()).client.hosts.length,
+    changed: () => streaming.remoteAchievementsChanged()
+  })
+  // A host-only Steam game's page asks Steam about its Workshop like a local game's does (steam-tags checkWorkshop).
+  steamTags.useRemote({
+    game: async (gameId) => (await streaming.remoteLibrary()).games.find((g) => g.id === gameId),
     changed: () => streaming.remoteAchievementsChanged()
   })
   // Host-only ROMs that are new to this PC (a host's offer arrived) reach the RetroAchievements scan.

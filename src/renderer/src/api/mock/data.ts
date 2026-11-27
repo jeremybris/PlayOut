@@ -158,8 +158,9 @@ function meta(m: MetaInput): GameMetadata {
           : {}),
         ...(m.genres.includes('Card Game') ? { touch: 'supported' as const } : {})
       },
-      // Steam Workshop (the game page's Workshop link): the card games have none, so their square is empty.
-      workshop: !m.genres.includes('Card Game')
+      // Steam Workshop (the game page's Workshop link): the card games have none, so their square is empty. The
+      // metroidvanias were read before the Workshop flag (not known): their page asks the mock, and the square appears.
+      ...(m.genres.includes('Metroidvania') ? {} : { workshop: !m.genres.includes('Card Game') })
     }
   }
   if (m.rating !== undefined) {

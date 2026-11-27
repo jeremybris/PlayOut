@@ -24,8 +24,8 @@ export interface SteamLinks {
 }
 
 /**
- * The links a game shows: Steam games with a Steam app id only (a paired host's too). Workshop is left out when Steam
- * said the app has none; the other three always show.
+ * The links a game shows: Steam games with a Steam app id only (a paired host's too). Workshop shows only when Steam
+ * said the app has one (not known yet or none: left out); the other three always show.
  */
 export function steamLinksOf(
   game: Pick<Game, 'source' | 'externalId' | 'extra' | 'metadata'>

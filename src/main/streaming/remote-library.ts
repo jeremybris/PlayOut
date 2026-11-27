@@ -596,12 +596,13 @@ function sanitizeMetadata(raw: unknown): GameMetadata {
   if (isDifficultyId(m.difficulty)) out.difficulty = m.difficulty
   const steamTags = obj(m.steamTags)
   const tagList = steamTags ? strings(steamTags.tags) : undefined
-  if (steamTags && tagList)
+  // A record with no tags still counts for its Workshop answer (a game whose page asked Steam: checkWorkshop).
+  if (steamTags && (tagList || typeof steamTags.workshop === 'boolean'))
     out.steamTags = {
-      tags: tagList.slice(0, 50),
+      tags: (tagList ?? []).slice(0, 50),
       ...(str(steamTags.updatedAt) ? { updatedAt: steamTags.updatedAt } : {}),
       ...(controlsFrom(steamTags.controls) ?? {}),
-      // The game page's Workshop link: left out only when the host knows the app has none.
+      // The game page's Workshop link: shown only when the host knows the app has one.
       ...(typeof steamTags.workshop === 'boolean' ? { workshop: steamTags.workshop } : {})
     }
   const shots = obj(m.steamScreenshots)
@@ -944,6 +945,22 @@ export function buildRemoteLibrary(
   }
 
   return { games, alsoOnHost, updatedAt: stamp }
+}
+
+/**
+ * A host-only game with this PC's own Steam Workshop answer (SteamTagsService.remoteWorkshop: its page asked Steam)
+ * when the host sent none. The host's own true / false always wins.
+ */
+export function withRemoteWorkshop(game: Game, workshop: boolean | undefined): Game {
+  if (workshop === undefined || !game.remote) return game
+  if (game.metadata.steamTags?.workshop !== undefined) return game
+  return {
+    ...game,
+    metadata: {
+      ...game.metadata,
+      steamTags: { ...(game.metadata.steamTags ?? { tags: [] }), workshop }
+    }
+  }
 }
 
 /** This PC's own RetroAchievements answer for a host's ROM (main achievements-service.ts remoteRetro). */

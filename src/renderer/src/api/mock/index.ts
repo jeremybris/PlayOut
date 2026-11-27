@@ -16,6 +16,7 @@ import {
   withoutMetadataEdit
 } from '@shared/metadata-edit'
 import { PC_PLATFORM, STORE_PLATFORMS } from '@shared/platforms'
+import { steamWorkshopUnknown } from '@shared/web-viewer'
 import { RECOMP_ACHIEVEMENTS_SOURCE, recompAchievementsFor } from '@shared/recomp-play'
 import {
   STORE_SOURCES,
@@ -1355,6 +1356,25 @@ export function createMockApi(options: MockOptions = {}): PlayOutApi {
 
   // The game page's Steam links (mock/webViewer.ts): the viewer opens a placeholder, no web page.
   const webViewer = createWebViewerMock(emitter, log)
+  // The game page asks about a Steam game's Workshop when it is not known (main steam-tags checkWorkshop): once per
+  // game, answered after a moment (the card games have none), so the preview shows the square appearing.
+  const workshopAsked = new Set<string>()
+  async function steamWorkshopCheck(gameId: string): Promise<boolean | null> {
+    const game = games.get(gameId)
+    if (!game) return null
+    if (!steamWorkshopUnknown(game) || workshopAsked.has(gameId))
+      return game.metadata.steamTags?.workshop ?? null
+    workshopAsked.add(gameId)
+    await sleep(800)
+    const workshop = !(game.metadata.genres ?? []).includes('Card Game')
+    game.metadata = {
+      ...game.metadata,
+      steamTags: { ...(game.metadata.steamTags ?? { tags: [] }), workshop }
+    }
+    log(`steamWorkshopCheck(${gameId}) -> ${workshop}`)
+    emitter.emit('library:changed', { reason: 'metadata', gameIds: [gameId] })
+    return workshop
+  }
 
   if (flags.installing) {
     const [seeded, ...rest] = ownedGamesInOrder(games.values())
@@ -2314,6 +2334,7 @@ ${apiKey}`
     ...overlay.api,
     ...friends.api,
     ...webViewer.api,
+    steamWorkshopCheck,
 
     // --- Recompilations (mock/recomp.ts) ----------------------------------------------
     ...recomp.api,
