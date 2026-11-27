@@ -503,6 +503,18 @@
   color: var(--color-recomp);
 }
 
+/* Clear filters with its sub-menu: the arrow on the left, like the other sub-menu rows, then the X */
+.filters-menu__clear-icons {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.filters-menu__clear-icons .filters-menu__arrow {
+  margin-right: 0;
+}
+
 .filters-menu__indented .u-grow {
   padding-left: calc(var(--icon-sm) + 0.8rem);
 }

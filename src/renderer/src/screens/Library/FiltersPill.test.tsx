@@ -242,12 +242,48 @@ describe('Filters > Clear filters sub-menu', () => {
     expect(getCurrentFocusKey()).toBe(`${MENU}:clear`)
   })
 
-  it('removes the last row of a tab with nothing else on: focus on the first row (Controls), as Clear filters goes', async () => {
-    await openClearSubMenu({ developers: ['Atlus'] })
-    await click(row(subMenu(), 'Atlus'))
+  it('with one filter on, Clear filters is a plain row (no arrow) that clears it at once', async () => {
+    act(() => root.render(<Harness start={{ difficulty: ['hard'] }} />))
+    await click(pill())
+    const clear = row(filtersMenu(), 'Clear filters')!
+    expect(clear.querySelector('.filters-menu__clear-icons')).toBeNull()
+    await click(clear)
+    expect(onClearFilters).toHaveBeenCalledTimes(1)
     expect(subMenu()).toBeNull()
-    expect(row(filtersMenu(), 'Clear filters')).toBeUndefined()
-    expect(getCurrentFocusKey()).toBe(`${MENU}:controls`)
+  })
+
+  it('with more than one filter on, lists every one of them under All, whatever its filter, arrow on the left', async () => {
+    await openClearSubMenu({
+      difficulty: ['hard'],
+      reviews: ['r95'],
+      controls: ['vr'],
+      developers: ['Atlus'],
+      favorites: true
+    })
+    const clear = row(filtersMenu(), 'Clear filters')!
+    const icons = clear.querySelector('.filters-menu__clear-icons')!
+    // The arrow first, then the X, then the name.
+    expect(icons.firstElementChild!.classList.contains('filters-menu__arrow')).toBe(true)
+    const labels = rowsOf(subMenu()).map((r) => r.textContent)
+    expect(labels[0]).toBe('All')
+    expect(labels).toEqual(
+      expect.arrayContaining([
+        'HardDifficulty',
+        '95-100Reviews',
+        'VRControls',
+        'AtlusDeveloper',
+        'FavoritesFilters'
+      ])
+    )
+    expect(labels).toHaveLength(6)
+  })
+
+  it('removing one of two leaves a plain Clear filters, focus on it', async () => {
+    await openClearSubMenu({ difficulty: ['hard'], reviews: ['r95'] })
+    await click(row(subMenu(), 'Hard'))
+    expect(subMenu()).toBeNull()
+    expect(row(filtersMenu(), 'Clear filters')).toBeDefined()
+    expect(getCurrentFocusKey()).toBe(`${MENU}:clear`)
   })
 
   it('All turns every filter off once and closes the sub-menu', async () => {
@@ -330,6 +366,7 @@ describe('Filters > Difficulty', () => {
     await click(pill())
     expect(filtersMenu()!.textContent).toContain('filters at once')
     await click(row(filtersMenu(), 'Clear filters'))
+    await click(row(subMenu(), 'All'))
     expect(onClearFilters).toHaveBeenCalledTimes(1)
     expect(pill().textContent).not.toContain('(')
   })
@@ -410,6 +447,7 @@ describe('Filters > Reviews', () => {
     expect(pill().textContent).toContain('Filters (2)')
     await click(pill())
     await click(row(filtersMenu(), 'Clear filters'))
+    await click(row(subMenu(), 'All'))
     expect(onClearFilters).toHaveBeenCalledTimes(1)
     expect(pill().textContent).not.toContain('(')
   })
@@ -688,6 +726,7 @@ describe('Filters > Custom', () => {
     expect(pill().textContent).toContain('Filters (2)')
     await click(pill())
     await click(row(filtersMenu(), 'Clear filters'))
+    await click(row(subMenu(), 'All'))
     expect(onClearFilters).toHaveBeenCalledTimes(1)
     expect(pill().textContent).not.toContain('(')
   })

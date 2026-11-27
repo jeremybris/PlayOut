@@ -70,7 +70,7 @@ import { StoreIcon } from '../../components/StoreIcon'
 import { PlayersArt } from '../../components/PlayersArt'
 import { SIZE_BUCKETS } from '../../lib/installSize'
 import { REVIEW_BANDS, reviewBandLabel } from '../../lib/reviews'
-import { clearableChoices, withoutChoice, type ClearableChoice } from '../../lib/libraryTabs'
+import { withoutChoice } from '../../lib/libraryTabs'
 import {
   MAX_FILTER_CHOICES,
   filterChoiceCount,
@@ -454,6 +454,14 @@ interface FiltersMenuProps extends FiltersPillProps {
   onClose: () => void
 }
 
+/** A row of Filters > Clear filters: one filter choice that is on, with its filter's name and how to turn it off. */
+interface ClearRow {
+  key: string
+  label: string
+  hint: string
+  remove: () => void
+}
+
 /** The Filters menu's sub-menu rows (the keys of their sub-menus). */
 type FilterRow =
   | 'genre'
@@ -706,28 +714,6 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
   const counted = { ...props, custom: customPicked }
   const active = filterChoiceCount(counted)
   const full = limitedChoiceCount(counted) >= MAX_FILTER_CHOICES
-  // Clear filters' sub-menu rows: the developers, publishers and genres on.
-  const clearable = clearableChoices({ developers, publishers, tags }, tagFilterLabel)
-  /**
-   * Clear filters > a developer, publisher or genre: only that one goes. The sub-menu stays open on the next row (the
-   * one before when it was the last); with none of them left it closes, focus on Clear filters (or on Genre when no
-   * filter is left, as that row goes too).
-   */
-  const removeChoice = (key: string): void => {
-    const index = clearable.findIndex((c) => c.key === key)
-    const entry = clearable[index]
-    if (!entry || !sub) return
-    const patch = withoutChoice({ developers, publishers, tags }, entry.choice)
-    if (patch.developers) onDevelopers(patch.developers)
-    if (patch.publishers) onPublishers(patch.publishers)
-    if (patch.tags) onTags(patch.tags)
-    const next = clearable[index + 1] ?? clearable[index - 1]
-    if (next) {
-      const target = `${subMenuKey(baseKey, 'clear')}:${next.key}`
-      setTimeout(() => void setFocus(target), 0)
-    } else setSub({ ...sub, leaving: active > 1 ? `${focusKey}:clear` : `${focusKey}:${firstRow}` })
-  }
-
   /** A row whose left arrow (or A) opens its sub-menu; with that sub-menu open, left moves into it. */
   const subRow = (
     kind: SubMenuKind,
@@ -804,6 +790,135 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
   const sizeLabel = (id: string): string => SIZE_BUCKETS.find((b) => b.id === id)?.label ?? id
   const hltbLabel = (id: string): string => HLTB_BUCKETS.find((b) => b.id === id)?.label ?? id
   /**
+   * Clear filters' sub-menu rows: every filter choice on, in the Filters menu's order of its filters (then the
+   * developers and publishers a game page added, and Hidden, Favorites, Recompilations), each with its filter's name.
+   */
+  const without = (list: readonly string[], id: string): string[] => list.filter((v) => v !== id)
+  const clearable: ClearRow[] = (() => {
+    const rows: ClearRow[] = []
+    const add = (
+      filter: string,
+      hint: string,
+      picked: readonly string[],
+      labelOf: (id: string) => string,
+      set: (next: string[]) => void
+    ): void => {
+      for (const id of picked)
+        rows.push({
+          key: `${filter}:${id}`,
+          label: labelOf(id),
+          hint,
+          remove: () => set(without(picked, id))
+        })
+    }
+    const byRow: Record<FilterRow, () => void> = {
+      controls: () =>
+        add('controls', t('library.filters.controls'), controls, controlsFilterLabel, onControls),
+      custom: () =>
+        add(
+          'custom',
+          t('library.filters.custom'),
+          customPicked,
+          (id) => customName(id) ?? id,
+          (next) => onCustom(next)
+        ),
+      difficulty: () =>
+        add(
+          'difficulty',
+          t('library.filters.difficulty'),
+          difficulty,
+          difficultyLabel,
+          onDifficulty
+        ),
+      genre: () => add('genre', t('library.filters.genre'), tags, tagFilterLabel, onTags),
+      hltb: () => add('hltb', t('library.filters.hltb'), hltb, hltbLabel, onHltb),
+      players: () => {
+        add(
+          'players',
+          t('library.filters.localMultiplayer'),
+          players,
+          localMultiplayerLabel,
+          onPlayers
+        )
+        if (coop)
+          rows.push({
+            key: 'players:' + COOP_CHOICE,
+            label: t('library.filters.coop'),
+            hint: t('library.filters.localMultiplayer'),
+            remove: () => onCoop(false)
+          })
+      },
+      online: () =>
+        add(
+          'online',
+          t('library.filters.onlineMultiplayer'),
+          online,
+          onlineMultiplayerLabel,
+          onOnline
+        ),
+      platform: () => {
+        add('store', t('library.filters.platform'), stores, storeFilterLabel, onStores)
+        add('platform', t('library.filters.platform'), platforms, platformLabel, onPlatforms)
+      },
+      era: () => add('era', t('library.filters.release'), eras, releaseEraLabel, onEras),
+      reviews: () =>
+        add('reviews', t('library.filters.reviews'), reviews, reviewBandLabel, onReviews),
+      size: () => add('size', t('library.filters.size'), sizes, sizeLabel, onSizes)
+    }
+    // Every filter's choices, also of a filter whose row is not shown now (a picked platform with no games left).
+    const order = [
+      ...rowOrder,
+      ...(Object.keys(byRow) as FilterRow[]).filter((r) => !rowOrder.includes(r))
+    ]
+    for (const row of order) byRow[row]()
+    for (const name of developers ?? [])
+      rows.push({
+        key: `developer:${name.toLowerCase()}`,
+        label: name,
+        hint: t('lib.tabs.hint.developer'),
+        remove: () =>
+          onDevelopers(
+            withoutChoice({ developers, publishers, tags }, { kind: 'developer', name })
+              .developers ?? []
+          )
+      })
+    for (const name of publishers ?? [])
+      rows.push({
+        key: `publisher:${name.toLowerCase()}`,
+        label: name,
+        hint: t('lib.tabs.hint.publisher'),
+        remove: () =>
+          onPublishers(
+            withoutChoice({ developers, publishers, tags }, { kind: 'publisher', name })
+              .publishers ?? []
+          )
+      })
+    const toggle = (key: string, label: string, on: boolean, set: (v: boolean) => void): void => {
+      if (on) rows.push({ key, label, hint: t('library.filters.pill'), remove: () => set(false) })
+    }
+    toggle('hidden', t('library.filters.hidden'), hidden, onHidden)
+    toggle('favorites', t('library.filters.favorites'), favorites, onFavorites)
+    toggle('recomp', t('library.filters.recompilations'), recomp, onRecomp)
+    return rows
+  })()
+  /**
+   * Clear filters > one filter choice: only that one goes. The sub-menu stays open on the next row (the one before
+   * when it was the last); once a single choice is left (no sub-menu any more) it closes, focus on Clear filters (or on
+   * the first row when no filter is left, as that row goes too).
+   */
+  const removeChoice = (key: string): void => {
+    const index = clearable.findIndex((c) => c.key === key)
+    const entry = clearable[index]
+    if (!entry || !sub) return
+    entry.remove()
+    const next = clearable[index + 1] ?? clearable[index - 1]
+    if (next && active - 1 > 1) {
+      const target = `${subMenuKey(baseKey, 'clear')}:${next.key}`
+      setTimeout(() => void setFocus(target), 0)
+    } else setSub({ ...sub, leaving: active > 1 ? `${focusKey}:clear` : `${focusKey}:${firstRow}` })
+  }
+
+  /**
    * Hidden / Favorites / Recompilations: a toggle; turning one on is not possible while the menu is full. `icon`
    * sits where the other rows have their arrow (Hidden's closed eye, Favorites' heart, Recompilations' up arrow), so
    * the names still line up; without one the name is indented instead.
@@ -847,14 +962,18 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
             data-focus-key={focusKey}
           >
             <Menu>
-              {active && clearable.length ? (
-                // With a developer, publisher or genre on: a sub-menu with All and one row for each of them.
+              {active > 1 ? (
+                // With more than one filter on: a sub-menu with All and one row for each of them. Its arrow sits on
+                // the left like the other sub-menu rows', before the X.
                 subRow(
                   'clear',
                   t('library.filters.clear'),
                   null,
-                  <X aria-hidden="true" />,
-                  <ChevronLeft className="filters-menu__arrow" aria-hidden="true" />
+                  <span className="filters-menu__clear-icons" aria-hidden="true">
+                    <ChevronLeft className="filters-menu__arrow" />
+                    <X />
+                  </span>,
+                  undefined
                 )
               ) : active ? (
                 <MenuItem
@@ -1343,7 +1462,7 @@ function ClearSubMenu({
 }: {
   baseKey: string
   style: CSSProperties
-  choices: readonly ClearableChoice[]
+  choices: readonly ClearRow[]
   onAll: () => void
   /** A row pressed: its ClearableChoice.key. */
   onRemove: (key: string) => void
