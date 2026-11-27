@@ -16,9 +16,20 @@ const MARKS = Array.from({ length: 12 }, (_, i) => {
  * A Filters > H.L.T.B. band's stopwatch before its name: band `step` of `steps` (1 = shortest). The slice starts at
  * the top of the dial and fills clockwise one seventh per band, so the longest band is almost full (6/7), with the hand
  * at the slice's edge; the whole stopwatch grows with the band, like Filters > Size's pies (SizePie.tsx). Drawn in
- * the text colour, like the pies, in the box Platform's console pictures use so the rows line up.
+ * the text colour, like the pies, in the box Platform's console pictures use so the rows line up. In Filters > H.L.T.B.
+ * the time slice is red (`redSlice`); the Sort menu's stopwatch stays all in the text colour.
  */
-export function HltbClock({ step, steps }: { step: number; steps: number }): ReactElement {
+export const HLTB_SLICE_RED = '#f2453d'
+
+export function HltbClock({
+  step,
+  steps,
+  redSlice = false
+}: {
+  step: number
+  steps: number
+  redSlice?: boolean
+}): ReactElement {
   const fill = bandFill(step, steps)
   const size = bandIconSize(step, steps)
   const angle = 2 * Math.PI * fill
@@ -48,7 +59,10 @@ export function HltbClock({ step, steps }: { step: number; steps: number }): Rea
           strokeWidth="2.2"
         />
         <circle cx={CX} cy={CY} r={FACE} opacity="0.14" />
-        <path d={slicePath(CX, CY, FACE, fill)} opacity="0.45" />
+        <path
+          d={slicePath(CX, CY, FACE, fill)}
+          {...(redSlice ? { fill: HLTB_SLICE_RED, opacity: 0.9 } : { opacity: 0.45 })}
+        />
         {MARKS.map((m, i) => (
           <circle key={i} cx={m.x} cy={m.y} r="0.6" />
         ))}

@@ -334,7 +334,7 @@ const hltbOptions = (t: Translate): readonly Option[] => [
   ...HLTB_BUCKETS.map((bucket, i) => ({
     value: bucket.id,
     label: bucket.label,
-    icon: <HltbClock step={i + 1} steps={HLTB_BUCKETS.length} />
+    icon: <HltbClock step={i + 1} steps={HLTB_BUCKETS.length} redSlice />
   }))
 ]
 
