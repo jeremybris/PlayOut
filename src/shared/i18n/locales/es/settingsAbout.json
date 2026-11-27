@@ -44,7 +44,10 @@
     "donate": "Donar",
     "discord": "Servidor de Discord",
     "discordDescription": "Pide ayuda, comparte ideas e informa de errores con otros jugadores.",
-    "join": "Unirse"
+    "join": "Unirse",
+    "feedback": "Informar de un error/sugerencias",
+    "feedbackDescription": "¿Has encontrado un error o tienes una idea? Abre una incidencia en la página de GitHub de PlayOut.",
+    "report": "Informar"
   },
   "links": {
     "title": "Enlaces",

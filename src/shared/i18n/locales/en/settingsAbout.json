@@ -44,7 +44,10 @@
     "donate": "Donate",
     "discord": "Discord server",
     "discordDescription": "Get help, share ideas and report bugs with other players.",
-    "join": "Join"
+    "join": "Join",
+    "feedback": "Report a bug/feedback",
+    "feedbackDescription": "Found a bug or have an idea? Open an issue on PlayOut's GitHub page.",
+    "report": "Report"
   },
   "links": {
     "title": "Links",

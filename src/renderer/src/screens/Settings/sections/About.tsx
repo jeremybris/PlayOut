@@ -1,7 +1,7 @@
 import { PEERPARTY_REPO_URL } from '@shared/peerparty'
 import type { AppInfo, UpdateStatus } from '@shared/types'
 import { siDiscord, siKofi } from 'simple-icons'
-import { Download, ExternalLink, FolderOpen, Info, RefreshCw, RotateCw } from 'lucide-react'
+import { Bug, Download, ExternalLink, FolderOpen, Info, RefreshCw, RotateCw } from 'lucide-react'
 import { useCallback, useEffect, useState, type CSSProperties, type ReactElement } from 'react'
 import { api } from '../../../api/client'
 import { Button } from '../../../components/Button'
@@ -117,6 +117,8 @@ function links(t: Translate): { id: string; label: string; url: string }[] {
 /** PlayOut's author's Ko-fi page (donations) and Discord server. */
 export const KOFI_URL = 'https://ko-fi.com/jeremyb'
 export const DISCORD_URL = 'https://discord.gg/Cxj8cBTP6'
+/** A new issue on PlayOut's GitHub repository: bug reports and feedback. */
+export const ISSUES_URL = 'https://github.com/jeremybris/PlayOut/issues/new'
 
 /** A Simple Icons brand mark in the current text colour. */
 function BrandMark({ path }: { path: string }): ReactElement {
@@ -317,6 +319,26 @@ export function AboutSection(): ReactElement {
               onPress={() => openExternal(DISCORD_URL)}
             >
               {t('settingsAbout.support.join')}
+            </Button>
+          </div>
+        </div>
+        <div className="settings-row">
+          <span className="control__icon">
+            <Bug />
+          </span>
+          <div className="settings-row__text">
+            <span className="settings-row__label">{t('settingsAbout.support.feedback')}</span>
+            <span className="settings-row__desc">
+              {t('settingsAbout.support.feedbackDescription')}
+            </span>
+          </div>
+          <div className="settings-row__actions">
+            <Button
+              focusKey={fk(SECTION, 'feedback')}
+              icon={<Bug />}
+              onPress={() => openExternal(ISSUES_URL)}
+            >
+              {t('settingsAbout.support.report')}
             </Button>
           </div>
         </div>
