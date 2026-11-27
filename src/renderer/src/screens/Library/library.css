@@ -226,6 +226,14 @@
   display: inline-flex;
   flex: none;
   zoom: 0.8125;
+  /* a grey disc (the Filters menu's own background) behind each icon, so an icon close to the band's colour still
+     reads; tabs only, the Filters menus draw their icons on that grey already */
+  align-items: center;
+  justify-content: center;
+  width: calc(48 * var(--u));
+  height: calc(48 * var(--u));
+  border-radius: 50%;
+  background: var(--color-surface);
 }
 
 /* a "·" between filters where a choice keeps its words, a "+" between two such choices of one filter */
