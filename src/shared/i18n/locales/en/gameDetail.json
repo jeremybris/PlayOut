@@ -346,7 +346,7 @@
     "sections": {
       "info": "Game information",
       "players": "Players and controls",
-      "time": "Time to beat, rating and difficulty",
+      "time": "Time to beat, review score and difficulty",
       "settings": "Settings",
       "artwork": "Artwork"
     },
@@ -414,9 +414,9 @@
         "solo": "Solo"
       },
       "rating": {
-        "label": "Rating",
-        "reset": "Reset rating",
-        "aria": "Rating, 0 to 100",
+        "label": "Review score",
+        "reset": "Reset review score",
+        "aria": "Review score, 0 to 100",
         "shownAs": "Shown as",
         "steam": "Steam reviews (% positive)",
         "igdb": "IGDB rating (0-100)"

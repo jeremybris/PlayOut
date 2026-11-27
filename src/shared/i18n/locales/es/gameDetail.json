@@ -346,7 +346,7 @@
     "sections": {
       "info": "Información del juego",
       "players": "Jugadores y controles",
-      "time": "Duración, calificación y dificultad",
+      "time": "Duración, puntuación de reseñas y dificultad",
       "settings": "Ajustes",
       "artwork": "Imágenes"
     },
@@ -417,9 +417,9 @@
         "solo": "Solo"
       },
       "rating": {
-        "label": "Calificación",
-        "reset": "Restablecer calificación",
-        "aria": "Calificación, de 0 a 100",
+        "label": "Puntuación de reseñas",
+        "reset": "Restablecer puntuación de reseñas",
+        "aria": "Puntuación de reseñas, de 0 a 100",
         "shownAs": "Se muestra como",
         "steam": "Reseñas de Steam (% positivas)",
         "igdb": "Calificación de IGDB (0-100)"
