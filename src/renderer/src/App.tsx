@@ -30,6 +30,7 @@ import { HomeScreen } from './screens/Home'
 import { LibraryScreen } from './screens/Library'
 import { QuickPanel } from './screens/QuickPanel'
 import { RecompBrowser, RecompHeldDialog, RecompImageDialog, RecompPage } from './screens/Recomp'
+import { RecompImportDialog } from './screens/Settings/RecompImportDialog'
 import { VrBrowser } from './screens/VrMods'
 import { FirstStartHosts } from './screens/FirstStart/FirstStartHosts'
 import { EmulationMoveDialog } from './screens/Settings/EmulationMoveDialog'
@@ -554,6 +555,8 @@ function ModalView({ modal, onClose }: { modal: OpenModal; onClose: () => void }
       return <RecompHeldDialog item={modal.item} onClose={onClose} />
     case 'recomp-browser':
       return <RecompBrowser onClose={onClose} />
+    case 'recomp-import':
+      return <RecompImportDialog onClose={onClose} />
     case 'vr-browser':
       return <VrBrowser onClose={onClose} />
     case 'first-start-hosts':

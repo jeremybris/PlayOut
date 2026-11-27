@@ -523,6 +523,57 @@ describe('recomp service: installs and updates', () => {
     expect(await h.service.checkRecompUpdates()).toEqual({})
   })
 
+  it('an import whose version is unknown is offered the newest release, and its update installs it', async () => {
+    const root = join(tmp, 'Recompilations')
+    const dir = join(root, 'Zelda 64 Recompiled (imported)')
+    await fs.mkdir(dir, { recursive: true })
+    await fs.writeFile(join(dir, 'Zelda64Recompiled.exe'), 'MZ')
+    await createRecompState(root).update((m) => {
+      m.savesMigrated = true
+      m.installed[ZELDA] = {
+        id: ZELDA,
+        dir,
+        tag: 'V3',
+        asset: '',
+        downloadBytes: 0,
+        diskBytes: 1,
+        sha256: '',
+        verified: 'unverified',
+        exe: 'Zelda64Recompiled.exe',
+        installedAt: '2026-01-01T00:00:00Z',
+        updatedAt: '2026-01-01T00:00:00Z',
+        releaseFiles: [],
+        autoUpdate: false,
+        gameFiles: {},
+        savePaths: [],
+        saveSource: null,
+        cloud: defaultCloudState(),
+        prevTag: null,
+        imported: {
+          from: 'quiver',
+          at: '2026-11-27T00:00:00Z',
+          fromDir: 'C:\\Quiver Launcher\\apps\\Zelda',
+          versionKnown: false
+        }
+      }
+    })
+    const h = await harness()
+    expect(await h.service.checkRecompUpdates()).toEqual({ [ZELDA]: 'v2.0.0' })
+    // Not in Update all (it may be that release already): its own Update installs it.
+    await h.service.updateAllRecomps()
+    await new Promise((r) => setTimeout(r, 50))
+    expect(h.installs).toHaveLength(0)
+    await h.service.updateRecomp(ZELDA)
+    await until(() => expect(h.installs).toHaveLength(1))
+    expect(h.installs[0]).toMatchObject({ tag: 'v2.0.0', previous: { tag: 'V3' } })
+    await until(async () =>
+      expect((await h.service.getRecompSettings()).rows[0]?.installed.tag).toBe('v2.0.0')
+    )
+    // Installed by PlayOut now: no longer an unknown version.
+    expect((await h.service.getRecompSettings()).rows[0]?.installed.imported).toBeUndefined()
+    expect(await h.service.checkRecompUpdates()).toEqual({})
+  })
+
   it('updates a rolling tag published again with another build', async () => {
     const releases = [release('nightly', '2026-10-01T00:00:00Z')]
     const h = await harness({ releases })

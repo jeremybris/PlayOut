@@ -48,6 +48,7 @@ import { useUiStore } from '../../../state/ui'
 import { OriginalImageDelete } from '../../Recomp/OriginalImageDelete'
 import { hostName } from '../../Recomp/recompView'
 import { backToLatest } from '../../Recomp/recompVersions'
+import { installedVersionUnknown } from '../../Recomp/versionView'
 import { VersionManager } from '../../Recomp/VersionManager'
 import { fk, log, shortPath } from '../common'
 import {
@@ -145,7 +146,11 @@ export function RecompilationsSection(): ReactElement {
     api
       .checkRecompUpdates()
       .then((updates) => {
-        const n = Object.keys(updates).length
+        // An import of an unknown version is offered the newest release on its own row, not counted here.
+        const unknown = new Set(
+          rows.filter((r) => installedVersionUnknown(r.installed)).map((r) => r.entry.id)
+        )
+        const n = Object.keys(updates).filter((id) => !unknown.has(id)).length
         toast(
           n
             ? t('settingsRecomp.installed.updatesAvailable', { count: n })
@@ -166,7 +171,9 @@ export function RecompilationsSection(): ReactElement {
   }
 
   const rows = view?.rows ?? []
-  const updates = rows.filter((r) => r.update && !recompBusy(progress[r.entry.id])).length
+  const updates = rows.filter(
+    (r) => r.update && !installedVersionUnknown(r.installed) && !recompBusy(progress[r.entry.id])
+  ).length
 
   return (
     <>
@@ -271,6 +278,24 @@ export function RecompilationsSection(): ReactElement {
                   }
                 >
                   {t('settingsRecomp.open')}
+                </Button>
+              </div>
+            </div>
+            <div className="settings-row">
+              <span className="control__icon">
+                <FolderInput />
+              </span>
+              <div className="settings-row__text">
+                <span className="settings-row__label">{t('settingsRecomp.import.label')}</span>
+                <span className="settings-row__desc">{t('settingsRecomp.import.desc')}</span>
+              </div>
+              <div className="settings-row__actions">
+                <Button
+                  focusKey={fk(SECTION, 'import')}
+                  icon={<FolderInput />}
+                  onPress={() => openModal({ type: 'recomp-import' })}
+                >
+                  {t('settingsRecomp.import.button')}
                 </Button>
               </div>
             </div>

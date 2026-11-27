@@ -230,5 +230,35 @@
     "gameNotPlain": "The game’s name cannot contain HTML or script links.",
     "consoleUnknown": "Pick a console from the list.",
     "notAdded": "That recompilation was not added on this PC."
+  },
+  "import": {
+    "chooseFolders": "Choose the other launcher's folders (or app folders) to import",
+    "busy": "An import is already running.",
+    "notScanned": "That folder was not in the list PlayOut found; press Import and look again.",
+    "alreadyInstalled": "{name} is already installed in PlayOut.",
+    "chosenTwice": "{name} was chosen for two folders.",
+    "targetTaken": "Something is already in {path}.",
+    "running": "{program} is running from this folder: close it first.",
+    "launcherRunning": "{launcher} is open: close it first.",
+    "recompBusy": "That recompilation is installing or running in PlayOut: wait until it finishes.",
+    "gone": "The folder is no longer there.",
+    "isLink": "The folder is a link to another place, not the folder itself.",
+    "notWindows": "Decomp Buddy set this one up for a console or another device, not for Windows.",
+    "noSpace": "Not enough free space on the drive of the Recompilations folder: {needed} needed, {free} free.",
+    "inUse": "Windows would not move the folder: a program still has one of its files open. Close the game and {launcher}, then try again.",
+    "stranded": "The folder could not be put back and is now in {path}.",
+    "noteInstaller": "Only the setup program is in this folder: after the import, choose the installed game's program on its Recompilation page.",
+    "noteGameInPlace": "This recompilation reads your game files from where they are: PlayOut uses the game in your library, or asks for them on the first start.",
+    "noteBackups": "RecompLauncher's save backups stay in {path}.",
+    "noteVersionUnknown": "Version unknown: PlayOut offers the newest release as an update on its page (not in Update all).",
+    "launcher": {
+      "quiver": "Quiver Launcher",
+      "recomplauncher": "RecompLauncher",
+      "decompbuddy": "Decomp Buddy"
+    },
+    "protected": "{path} is a folder PlayOut or Windows needs where it is (the Emulation folder, PlayOut's own folders, your user folders or a whole drive): it is never moved.",
+    "processesUnknown": "PlayOut could not check which programs are running, so it does not move this folder now. Try again.",
+    "noteDuplicate": "Also installed with {launcher} in {folder}, which is chosen. Choose this one instead if you prefer it.",
+    "noteNameDiffers": "{launcher} calls it {name}, but the catalog lists it under {game}: check that it is the right game."
   }
 }

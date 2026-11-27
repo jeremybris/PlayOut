@@ -178,6 +178,7 @@ import {
   type RecompUnpackedFolderRecord
 } from './state'
 import { displayTitle } from '../util/game-title'
+import { createRecompImporter } from './import-run'
 import { tMain } from '../i18n'
 import {
   createKeyedLock,
@@ -228,6 +229,9 @@ export type RecompMethods = Pick<
   | 'addRecomp'
   | 'removeAddedRecomp'
   | 'readRecompClipboard'
+  | 'scanRecompImport'
+  | 'importRecomps'
+  | 'cancelRecompImport'
 >
 
 /**
@@ -302,6 +306,8 @@ export interface RecompDialogs {
     defaultPath?: string
   }): Promise<string | null>
   chooseFolder(title: string): Promise<string | null>
+  /** Several folders at once (Import); absent: one folder through chooseFolder. Empty = cancelled. */
+  chooseFolders?(title: string): Promise<string[]>
 }
 
 export type SpawnFn = (file: string, args: string[], options: SpawnOptions) => ChildProcess
@@ -411,6 +417,11 @@ export interface RecompServiceDeps {
   /** The clipboard's text (the Add dialog's Paste). */
   clipboardText?: () => string | Promise<string>
   log: Logger
+  /**
+   * Every running process with its program's path (the launcher's process monitor): Import refuses a folder a running
+   * program was started from, and while the other launcher is open. Absent: not checked.
+   */
+  processes?: () => Promise<{ name: string; path: string | null }[]>
   /** The user's Documents folder (it may be redirected to OneDrive). */
   documents?: string
   /**
@@ -535,6 +546,14 @@ export function stubEntry(id: string, installed: InstalledRecomp | null): Recomp
     archived: false,
     sources: []
   }
+}
+
+/**
+ * An install another launcher made at a version PlayOut could not find among the project's releases (Import): the
+ * update check offers the newest release, and an update installs it.
+ */
+export function versionUnknown(installed: Pick<InstalledRecomp, 'imported'>): boolean {
+  return !!installed.imported && !installed.imported.versionKnown
 }
 
 /** PlayOut's own pick of the program of an install (not the one the user chose instead). */
@@ -758,10 +777,15 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
     events.emit('recomp:progress', p)
   }
 
-  const busy = (id: string): boolean => {
+  /** Installing or updating (its progress shows). */
+  const installing = (id: string): boolean => {
     const p = progress.get(id)
     return !!p && p.phase !== 'done' && p.phase !== 'failed'
   }
+  /** Settings › Recompilations › Import moving its folder in now (set once the importer exists). */
+  let importing: (id: string) => boolean = () => false
+  /** Installing, updating, or being imported: no other install, update, uninstall or start of it now. */
+  const busy = (id: string): boolean => installing(id) || importing(id)
 
   function gameOf(gameId: string): Game {
     const game = library.getGame(gameId)
@@ -1299,6 +1323,49 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
     return matching
   }
 
+  /** Settings › Recompilations › Import (import-run.ts). */
+  const importer = createRecompImporter({
+    root,
+    state,
+    catalog: () => catalog,
+    busy: (id) => installing(id) || inUse(id),
+    ...(deps.processes ? { processes: deps.processes } : {}),
+    // Never moved: the Emulation folder, PlayOut's own folders, the user's profile folders.
+    protectedDirs: async () => {
+      const home = deps.homedir?.() ?? osHomedir()
+      return {
+        inside: [emulationDir(), deps.exeDir, deps.userData],
+        holds: [
+          home,
+          deps.documents ?? join(home, 'Documents'),
+          join(home, 'Documents'),
+          join(home, 'Desktop'),
+          join(home, 'Downloads'),
+          join(home, 'OneDrive')
+        ]
+      }
+    },
+    ready: async () => {
+      await ensureCatalog()
+    },
+    releasesOf: (entry) => releasesOf(entry),
+    readProfile: (dir) => readDeveloperProfile(dir),
+    afterImport: async (ids) => {
+      for (const id of ids)
+        await findSaves(id).catch((err) =>
+          log.warn(`recomp: looking for the saves of ${id} failed (${message(err)})`)
+        )
+      await rematch()
+      changed(ids)
+      // The update check learns the imported versions (an unknown one is offered the newest release).
+      void checkUpdates(false).catch((err) => log.warn('recomp: update check failed', err))
+    },
+    emit: (p) => events.emit('recomp:import-progress', p),
+    log,
+    now
+  })
+  importing = (id) => importer.importing(id)
+
   // --- updates ----------------------------------------------------------------------------------------------------
 
   async function releasesOf(entry: RecompEntry, force = false): Promise<GhRelease[]> {
@@ -1331,10 +1398,13 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
           updates.delete(now.id)
           continue
         }
-        const latest = latestRelease(releases, now.tag, hint)
+        // Imported from another launcher at a version PlayOut could not find: the newest release is offered.
+        const unknown = versionUnknown(now)
+        const latest = latestRelease(releases, unknown ? null : now.tag, hint)
         if (
           latest &&
-          (isNewer(latest.tag_name, now.tag, releases) ||
+          (unknown ||
+            isNewer(latest.tag_name, now.tag, releases) ||
             isRepublished(latest, now, hint) ||
             replacesSidePiece(latest, now, hint))
         )
@@ -1427,7 +1497,11 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
         ? releases.find((x) => sameTag(x.tag_name, tag))
         : previous?.pinnedTag
           ? newestRelease(releases, hint)
-          : latestRelease(releases, previous?.tag ?? null, hint)
+          : latestRelease(
+              releases,
+              previous && !versionUnknown(previous) ? previous.tag : null,
+              hint
+            )
       if (!release)
         throw new Error(
           tag
@@ -1437,6 +1511,7 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
       if (
         previous &&
         !tag &&
+        !versionUnknown(previous) &&
         sameTag(release.tag_name, previous.tag) &&
         !isRepublished(release, previous, hint) &&
         !replacesSidePiece(release, previous, hint)
@@ -3736,8 +3811,16 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
 
     async updateAllRecomps() {
       const m = await (await state()).read()
+      // An import of an unknown version is offered the newest release on its own (it may be that release already):
+      // never all of them downloaded again at once.
       for (const id of updates.keys())
-        if (m.installed[id] && !m.installed[id].pinnedTag && !busy(id) && !inUse(id))
+        if (
+          m.installed[id] &&
+          !m.installed[id].pinnedTag &&
+          !versionUnknown(m.installed[id]) &&
+          !busy(id) &&
+          !inUse(id)
+        )
           enqueue(id, undefined)
     },
 
@@ -3851,6 +3934,28 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
       })
       if (!path) return executablesOf(recompId)
       return setExecutable(recompId, path)
+    },
+
+    async scanRecompImport(paths) {
+      await ensureCatalog()
+      let picked = paths ?? null
+      if (!picked) {
+        const title = tMain('mainRecomp.import.chooseFolders')
+        picked = deps.dialog.chooseFolders
+          ? await deps.dialog.chooseFolders(title)
+          : [await deps.dialog.chooseFolder(title)].filter((p): p is string => !!p)
+      }
+      if (!picked.length) return null
+      return importer.scan(picked)
+    },
+
+    async importRecomps(items) {
+      await ensureCatalog()
+      return importer.run(items)
+    },
+
+    async cancelRecompImport() {
+      importer.cancel()
     },
 
     async getRecompSettings() {
@@ -4326,6 +4431,10 @@ export function createRecompService(deps: RecompServiceDeps): RecompService {
     start(): void {
       if (disposed) return
       void root().catch((err) => log.error('recomp: no install folder', err))
+      // An import PlayOut was closed in the middle of: finished or undone.
+      void importer
+        .recover()
+        .catch((err) => log.warn('recomp: could not check for an interrupted import', err))
       // PlayOut's list of recompilations changed (a download, the owner's publish): shown at once, and the adds it
       // carries now are tidied away.
       const offCloud = deps.cloud?.onCloudRecomps(() => {

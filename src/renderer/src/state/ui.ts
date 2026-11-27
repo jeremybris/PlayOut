@@ -33,6 +33,8 @@ export type Modal =
   | { type: 'recomp-held'; item: import('@shared/recomp').RecompHeldImage }
   /** Every recompilation in the catalogs (Settings › Recompilations › Browse recompilations). */
   | { type: 'recomp-browser' }
+  /** Recompilations another launcher installed, moved into PlayOut (Settings › Recompilations › Import). */
+  | { type: 'recomp-import' }
   /** Every mod on the VR mod list (Settings › VR › Browse). */
   | { type: 'vr-browser' }
   /** PlayOut's first start found PlayOut hosts on the network: offer to pair with one (screens/FirstStart). */

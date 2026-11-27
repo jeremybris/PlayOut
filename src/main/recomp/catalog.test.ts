@@ -11,6 +11,7 @@ import {
   listDate,
   loadCatalog,
   parseSize,
+  rlGameContradicted,
   slugOf,
   type RecompCatalog
 } from './catalog'
@@ -1799,5 +1800,46 @@ describe('buildCatalog: Xbox 360 user data (achievements)', () => {
     const parts = [...c.entries.values()].filter((e) => e.repo === 'dev/collection')
     expect(parts).toHaveLength(2)
     expect(parts.every((e) => e.rl === undefined)).toBe(true)
+  })
+})
+
+describe('rlGameContradicted', () => {
+  const app = (
+    game: string,
+    name: string | null,
+    blurb: string
+  ): Parameters<typeof rlGameContradicted>[0] => ({
+    game,
+    name,
+    blurb,
+    description: null
+  })
+  it("prefers decomp-buddy's game when RecompLauncher's is plainly another game", () => {
+    expect(
+      rlGameContradicted(
+        app('NEO Scavenger', 'NeoTS2', 'A new, open, 64-bit engine for The Sims 2.'),
+        'The Sims 2 (NeoTS2)'
+      )
+    ).toBe(true)
+  })
+  it('never for two spellings of one game, a text about its own game, or a project named as the game', () => {
+    expect(rlGameContradicted(app('Fallout 1', null, 'Fallout, the 1997 game'), 'Fallout')).toBe(
+      false
+    )
+    expect(rlGameContradicted(app('Laserlords', null, 'Laser Lords on PC'), 'Laser Lords')).toBe(
+      false
+    )
+    expect(
+      rlGameContradicted(
+        app('Unreal / Unreal Tournament', null, 'Surreal Engine runs Unreal'),
+        'Surreal Engine (Unreal Engine 1 reimplementation)'
+      )
+    ).toBe(false)
+    expect(
+      rlGameContradicted(
+        app('Diddy Kong Racing', 'Golden Balloon', 'Golden Balloon, a kart racer port'),
+        'Golden Balloon'
+      )
+    ).toBe(false)
   })
 })

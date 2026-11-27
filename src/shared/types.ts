@@ -1981,6 +1981,8 @@ export interface PlayOutEvents {
   'trim:skipped': { title: string; reason: string; count?: number }
   /** A recompilation installing / updating (main/recomp), a few times a second at most. */
   'recomp:progress': import('./recomp').RecompProgress
+  /** Settings › Recompilations › Import moving the folders (main/recomp/import-run.ts). */
+  'recomp:import-progress': import('./recomp').RecompImportProgress
   /** This PC took a paired host's logins for these services (it had none of its own). */
   'streaming:logins': { hostName: string; services: string[] }
   /**

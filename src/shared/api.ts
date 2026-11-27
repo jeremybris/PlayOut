@@ -76,6 +76,9 @@ import type {
   RecompImageOffer,
   RecompLaunchResult,
   RecompRelease,
+  RecompImportRequest,
+  RecompImportResult,
+  RecompImportScan,
   RecompSaves,
   RecompSettingsView
 } from './recomp'
@@ -493,6 +496,19 @@ export interface PlayOutApi {
   removeAddedRecomp(recompId: string, uninstall: boolean): Promise<void>
   /** The clipboard's text (trimmed, at most 2 KB): the Add dialog's Paste. */
   readRecompClipboard(): Promise<string>
+  /**
+   * Settings › Recompilations › Import: the recompilations another launcher (Quiver Launcher, RecompLauncher, Decomp
+   * Buddy) installed in `paths` (absent: the folders the user picks; null = the picker was cancelled). Only those
+   * folders and their own app folders are read; nothing moves.
+   */
+  scanRecompImport(paths?: string[]): Promise<RecompImportScan | null>
+  /**
+   * Move each folder (from the last scan) into the Recompilations folder as that recompilation and record it as
+   * installed, one after another (progress on 'recomp:import-progress').
+   */
+  importRecomps(items: RecompImportRequest[]): Promise<RecompImportResult>
+  /** Stop the import: the folder being copied is put back, the rest are not started. */
+  cancelRecompImport(): Promise<void>
   /** Fetch both catalogs again and re-match the library. */
   refreshRecompCatalog(): Promise<RecompCatalogStatus>
   setRecompAutoUpdate(recompId: string, on: boolean): Promise<void>
@@ -883,6 +899,9 @@ export const API_METHODS = [
   'addRecomp',
   'removeAddedRecomp',
   'readRecompClipboard',
+  'scanRecompImport',
+  'importRecomps',
+  'cancelRecompImport',
   'refreshRecompCatalog',
   'setRecompAutoUpdate',
   'setRecompSavePaths',

@@ -1237,6 +1237,53 @@ once a day). Started offline, it uses the copy from last time and checks as soon
     whether to **also uninstall it** (its folder goes to the Recycle Bin) or keep it installed (it then leaves the
     browser but stays under Settings › Recompilations, where you can uninstall it later). If decomp-buddy or
     RecompLauncher lists the repository later, their entry takes its place (an install moves to it).
+  - **Import** (_Import from another launcher_, under _Installed in_) takes over recompilations you installed with
+    **Quiver Launcher**, **RecompLauncher** or **Decomp Buddy**, without downloading them again:
+    - Press **Import** and choose one or more folders (Ctrl / Shift pick several): the launcher's own folder (Quiver
+      Launcher's folder, such as `Desktop\Quiver Launcher`, or its `apps` folder), the RecompLauncher library (such as
+      `C:\Recomp Library`), the Decomp Buddy games folder (by default `%USERPROFILE%\Games\Decomp Buddy`), or one app's
+      own folder. PlayOut looks only in the folders you chose and the app folders directly in them; it never searches
+      the rest of the PC.
+    - It tells each app folder's launcher by what that launcher leaves: Quiver Launcher's `apps.json` and the
+      `version.txt` / `installed-build.txt` in each app folder, RecompLauncher's library folders (each named after the
+      app) and the project's own `recomplauncher.json`, Decomp Buddy's `decomp-buddy.json`. Placeholder folders with
+      nothing installed are left out.
+    - Nothing moves yet: a list shows each folder found, the launcher, its size, the version the launcher recorded
+      (or _version unknown_: RecompLauncher does not write it down) and the recompilation it is, with a dropdown. A
+      recompilation found by its project (the repository) or RecompLauncher's own id for it is chosen already; when
+      several fit (a repository with several games), the one the other launcher names is chosen when exactly one
+      does; otherwise, when only the name matched, or nothing matched, the row starts at **Skip**. The dropdown lists
+      the likely ones, and **Choose another…** opens a search of every recompilation in the catalog. A folder
+      RecompLauncher named only by its id shows the recompilation it matched. When the same recompilation is
+      installed with two launchers, only one row starts chosen (the one with the game in it and a known version); the
+      other says where the chosen one is. Each row
+      says where it moves (`<Recompilations folder>\<name> (<id>)`), or why it cannot: the recompilation is already
+      installed in PlayOut, something is already in that folder, a program started from the folder is running, the
+      launcher itself is open (close Quiver Launcher, RecompLauncher or Decomp Buddy first), PlayOut could not check
+      which programs are running, the folder is one PlayOut or Windows needs where it is (the Emulation folder,
+      PlayOut's own folders, your user folders such as Documents or Desktop, a whole drive), or Decomp Buddy set it up
+      for a console or phone. A note asks you to check when the launcher's name for the app and the catalog's game
+      disagree. Notes say when only the setup program is in the folder (choose the installed game's
+      program on its Recompilation page afterwards), when the recompilation reads your game files from where they
+      are, and that RecompLauncher's own save backups (`<library>\.backups`) stay where they are.
+    - **Import** moves the chosen folders one at a time, with progress; **Stop** puts back the folder being copied
+      and leaves the rest where they are. On the same drive a folder is simply renamed into the Recompilations
+      folder; on another drive it is copied, checked file by file, and only then recorded and deleted from the old
+      place (a file that changed meanwhile stays there, and the summary says so). Anything that fails before the
+      folder is recorded puts it back as it was, and if PlayOut closes in the middle it finishes or undoes the move at
+      its next start. An existing install is never overwritten.
+    - Each imported recompilation is then installed for PlayOut: its game (or a card of its own when the game is not
+      in your library) shows it as installed, UP starts it, and its saves are looked for. Saves inside the app's
+      folder move with it; saves elsewhere (AppData, Documents) stay where they are and PlayOut finds them. The
+      program you chose in Quiver Launcher stays chosen, and the app's small settings files that named its old folder
+      are changed to the new one (each kept beside it first as `.playout-old`, or `.playout-old-2`… when that name is
+      taken). A link inside the folder that Windows will not make again (a file link needs Developer Mode) is left as
+      it is, and the summary says so.
+    - A version PlayOut finds among the project's releases is used as it is. An unknown version shows as _version
+      unknown_ (or _<tag> (not checked)_), with a _Version unknown_ chip, and its page offers the newest release as an
+      update. It is not counted in _N updates available_ nor installed by **Update all** (it may already be that
+      release); updating keeps your files in the folder (any it replaces are kept as `.playout-old`).
+    - The other launcher's own records are not changed: it simply no longer finds the moved folders.
   - **Check for updates** and **Update all**. Installed recompilations are also checked when PlayOut starts; the
     ones with **Update automatically** on are then updated by themselves.
   - One card per installed recompilation: version, size on disk, **Update to vX**, **Update automatically**, the

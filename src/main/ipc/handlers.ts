@@ -1092,6 +1092,27 @@ export function createHandlers(s: AppServices): ApiHandlers {
     readRecompClipboard() {
       return s.recomp.readRecompClipboard()
     },
+    scanRecompImport(paths) {
+      return s.recomp.scanRecompImport(
+        z
+          .array(pathSchema)
+          .max(64)
+          .optional()
+          .parse(paths ?? undefined)
+      )
+    },
+    importRecomps(items) {
+      notWhileMoving()
+      return s.recomp.importRecomps(
+        z
+          .array(z.object({ folder: pathSchema, recompId: recompIdSchema }).strict())
+          .max(1000)
+          .parse(items)
+      )
+    },
+    cancelRecompImport() {
+      return s.recomp.cancelRecompImport()
+    },
     refreshRecompCatalog() {
       return s.recomp.refreshRecompCatalog()
     },

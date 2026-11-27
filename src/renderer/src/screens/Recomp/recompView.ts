@@ -20,6 +20,7 @@ import type { GameRecompInfo } from '@shared/types'
 import { t } from '../../i18n'
 import { formatBytes, formatDate } from '../../lib/format'
 import { recompBusy } from '../../state/recomp'
+import { installedTagText } from './versionView'
 
 /** The UP button left of Play (ActionBar `recomp`). */
 export interface RecompButtonState {
@@ -358,7 +359,8 @@ export function entryFacts(
 ): Fact[] {
   const facts: Fact[] = []
   const latest = update ?? entry.latestTag
-  if (installed) facts.push({ label: t('recomp.facts.installedVersion'), value: installed.tag })
+  if (installed)
+    facts.push({ label: t('recomp.facts.installedVersion'), value: installedTagText(installed) })
   if (latest && latest !== installed?.tag)
     facts.push({ label: t('recomp.facts.latestVersion'), value: latest })
   // Released: the project's first release when its releases are at hand (Last updated is its newest), else the

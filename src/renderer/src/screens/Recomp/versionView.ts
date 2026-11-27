@@ -15,8 +15,24 @@ export function sameRecompTag(a: string, b: string): boolean {
   return norm(a) === norm(b)
 }
 
+/**
+ * Imported from another launcher at a version PlayOut could not find among the releases (main's versionUnknown): its
+ * tag, if any, is the other launcher's word for it, and its date the day of the import.
+ */
+export function installedVersionUnknown(installed: Pick<InstalledRecomp, 'imported'>): boolean {
+  return !!installed.imported && !installed.imported.versionKnown
+}
+
+/** The version in use in words: its tag, or (an import PlayOut could not check) what is known of it. */
+export function installedTagText(installed: Pick<InstalledRecomp, 'tag' | 'imported'>): string {
+  if (!installedVersionUnknown(installed)) return installed.tag
+  return installed.tag
+    ? t('recomp.version.notChecked', { tag: installed.tag })
+    : t('recomp.version.unknown')
+}
+
 /** Which chip the Version row shows (an id: versionChipText words it). */
-export type VersionChip = 'Latest' | 'Older version' | 'Pre-release'
+export type VersionChip = 'Latest' | 'Older version' | 'Pre-release' | 'Version unknown'
 
 /** The Version row's chip in the current language. */
 export function versionChipText(chip: VersionChip): string {
@@ -27,6 +43,8 @@ export function versionChipText(chip: VersionChip): string {
       return t('recomp.version.older')
     case 'Pre-release':
       return t('recomp.version.prerelease')
+    case 'Version unknown':
+      return t('recomp.version.unknownChip')
   }
 }
 
@@ -36,9 +54,10 @@ export function versionChipText(chip: VersionChip): string {
  */
 export function versionChip(
   row: Pick<RecompRow, 'update' | 'release'> & {
-    installed: Pick<InstalledRecomp, 'tag' | 'pinnedTag'>
+    installed: Pick<InstalledRecomp, 'tag' | 'pinnedTag' | 'imported'>
   }
 ): VersionChip | null {
+  if (!row.installed.pinnedTag && installedVersionUnknown(row.installed)) return 'Version unknown'
   if (row.installed.pinnedTag || row.update) return 'Older version'
   if (!row.release) return null
   if (row.release.prerelease) return 'Pre-release'
@@ -47,10 +66,14 @@ export function versionChip(
     : null
 }
 
-/** The Version row's value: the tag in use and when it was published (else installed). */
+/**
+ * The Version row's value: the tag in use and when it was published (else installed). An import PlayOut could not
+ * check: what is known of its version, without a date (the import's own day says nothing of the release).
+ */
 export function versionText(
-  installed: Pick<InstalledRecomp, 'tag' | 'publishedAt' | 'updatedAt'>
+  installed: Pick<InstalledRecomp, 'tag' | 'publishedAt' | 'updatedAt' | 'imported'>
 ): string {
+  if (installedVersionUnknown(installed)) return installedTagText(installed)
   const date = formatDate(installed.publishedAt ?? installed.updatedAt, 'medium')
   return date ? `${installed.tag} · ${date}` : installed.tag
 }

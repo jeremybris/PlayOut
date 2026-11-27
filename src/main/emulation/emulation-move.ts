@@ -78,6 +78,12 @@ export interface MoveFolderOptions {
    * whether it changed after it was copied, so its bytes are compared before the old copy is deleted.
    */
   since?: number
+  /**
+   * A move on one drive: a link inside the folder that cannot be pointed at the new place (a file link needs Developer
+   * Mode or administrator rights) is only warned about and left as it is, instead of putting the folder back. The
+   * default (false) puts it back. Pointing the links back after a failed switch is always strict.
+   */
+  lenientRelink?: boolean
 }
 
 export interface MoveOutcome {
@@ -771,7 +777,7 @@ async function moveWhole(
 
   if (renamed) {
     try {
-      await relinkTree(to, from, to, options.warn, true)
+      await relinkTree(to, from, to, options.warn, !options.lenientRelink)
       options.onProgress?.({ phase: 'switching', bytesDone: 0, filesDone: 0 })
       await options.commit()
     } catch (err) {

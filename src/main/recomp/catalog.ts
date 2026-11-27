@@ -10,7 +10,7 @@ import { cacheKey, cachedFetch } from './http-cache'
 import { originDisplayName, systemIdForConsole } from './consoles'
 import { isSidePiece, notForWindows } from './assets'
 import { systemGroup } from './match'
-import { normalizeGameTitle, titleKeyOf, withoutVersionWord } from './titles'
+import { normalizeGameTitle, titleKeyOf, withoutBrackets, withoutVersionWord } from './titles'
 import type {
   AddedRecomp,
   CloudRecomp,
@@ -37,6 +37,11 @@ export interface RecompCatalog {
   titles: Map<string, RecompTitle>
   /** "host:owner/repo" lowercase -> entry ids (several for a multi-game repo). */
   byRepo: Map<string, string[]>
+  /**
+   * RecompLauncher's app id (its pc-catalog id, the folder name in its library) -> entry ids. Absent in catalogs made
+   * by hand (tests).
+   */
+  byRl?: Map<string, string[]>
   fetchedAt: { 'decomp-buddy': string | null; recomplauncher: string | null }
   /** Sources that could not be reached (a cached copy, or nothing, in use). */
   offline: string[]
@@ -804,6 +809,48 @@ function otherNamesOf(d: Draft, game: string, systemId: string): string[] {
   return norm && norm !== normalizeGameTitle(withoutConsoleNote(game) || game) ? [name] : []
 }
 
+/** The words (3+ letters or digits, lowercase, accents dropped) of a text. */
+function wordSet(text: string): Set<string> {
+  return new Set(
+    text
+      .normalize('NFKD')
+      .replace(/[̀-ͯ]/g, '')
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter((w) => w.length >= 3 && w !== 'the' && w !== 'and')
+  )
+}
+
+/**
+ * RecompLauncher's game for an app that is plainly another game: decomp-buddy names a different one that shares no
+ * word with it, and RecompLauncher's own words about the app name decomp-buddy's game and no word of its own ("NeoTS2",
+ * listed under "NEO Scavenger", is "A new, open, 64-bit engine for The Sims 2"). Decomp-buddy's game is then the
+ * entry's. Never for two spellings of one game (they share a word, or read the same without spaces), when the app's
+ * text speaks of its own game, nor when decomp-buddy's "game" is only the project's own name ("Golden Balloon", a
+ * Diddy Kong Racing port).
+ */
+export function rlGameContradicted(
+  rl: {
+    game: string | null
+    name: string | null
+    blurb: string | null
+    description: string | null
+  } | null,
+  dbGame: string | null | undefined
+): boolean {
+  if (!rl?.game || !dbGame) return false
+  const base = withoutBrackets(dbGame) ?? dbGame
+  const theirs = normalizeGameTitle(base)
+  if (theirs.length < 4 || theirs === normalizeGameTitle(rl.game)) return false
+  if (rl.name && normalizeGameTitle(rl.name) === theirs) return false
+  const own = wordSet(rl.game)
+  const dbWords = wordSet(dbGame)
+  if (!own.size || [...own].some((w) => dbWords.has(w))) return false
+  const text = `${rl.blurb ?? ''} ${rl.description ?? ''}`
+  const textWords = wordSet(text)
+  return normalizeGameTitle(text).includes(theirs) && ![...own].some((w) => textWords.has(w))
+}
+
 function finalize(d: Draft): RecompEntry | null {
   const { db, rl } = d
   const rlRepo = d.rlRepo ?? rl
@@ -811,7 +858,8 @@ function finalize(d: Draft): RecompEntry | null {
   const repoName = d.repo.split('/').pop() ?? d.repo
   const owner = d.repo.split('/')[0]
 
-  const game = (d.multi ? (db?.game ?? rl?.game) : (rl?.game ?? db?.game)) || finds?.title || ''
+  const rlGame = rlGameContradicted(rl, db?.game) ? null : rl?.game
+  const game = (d.multi ? (db?.game ?? rl?.game) : (rlGame ?? db?.game)) || finds?.title || ''
   if (!game) return null
   const fromOrigin = rl?.origin ? systemIdForConsole(rl.origin) : null
   const fromText = db?.consoleText ? systemIdForConsole(db.consoleText) : null
@@ -1247,10 +1295,17 @@ export function buildCatalog(input: {
     })
   }
 
+  const byRl = new Map<string, string[]>()
+  for (const [rlId, ids] of rlToEntries) {
+    const there = ids.filter((id) => entries.has(id))
+    if (there.length) byRl.set(rlId.toLowerCase(), there)
+  }
+
   return {
     entries,
     titles,
     byRepo,
+    byRl,
     fetchedAt: input.fetchedAt,
     offline: [...new Set(input.offline)]
   }

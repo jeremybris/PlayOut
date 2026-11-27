@@ -264,6 +264,11 @@ export interface InstalledRecomp {
    * uninstalling clears it. Null (absent in records from older PlayOut versions) = follows the newest release.
    */
   pinnedTag?: string | null
+  /**
+   * Installed by another launcher (Quiver Launcher, RecompLauncher, Decomp Buddy) and moved here by Settings ›
+   * Recompilations › Import. Absent: installed by PlayOut. Cleared by PlayOut's first update of it.
+   */
+  imported?: RecompImportedFrom
 }
 
 /**
@@ -762,4 +767,122 @@ export interface RecompBrowseView {
   titles: RecompBrowseTitle[]
   /** Recompilations marked new. */
   newCount: number
+}
+
+// --- Import (Settings › Recompilations › Import: main/recomp/import.ts, import-run.ts) -------------------------------
+
+/** The other launchers whose installed recompilations PlayOut can take over. */
+export type RecompImportLauncher = 'quiver' | 'recomplauncher' | 'decompbuddy'
+
+/** What PlayOut knows of an imported install (InstalledRecomp.imported). */
+export interface RecompImportedFrom {
+  from: RecompImportLauncher
+  /** When it was imported (ISO). */
+  at: string
+  /** The folder it was moved from. */
+  fromDir: string
+  /**
+   * The version the other launcher installed is a release PlayOut found. False: unknown, so the update check offers
+   * the project's newest release (an update then installs it over the folder, the player's files kept).
+   */
+  versionKnown: boolean
+}
+
+/** A recompilation an import row may become. */
+export interface RecompImportChoice {
+  id: string
+  name: string
+  game: string
+  console: string
+  /** Installed in PlayOut already: the row cannot be imported as this one. */
+  installed: boolean
+  /** The folder it would be moved to (<Recompilations>\<name> (<id>)); `targetTaken` when something is there. */
+  target: string
+  targetTaken: boolean
+}
+
+/** One app folder found in the folders the user picked. */
+export interface RecompImportItem {
+  /** The folder (full path): the row's key. */
+  folder: string
+  /** Its name (the folder's own name, or the other launcher's name for it). */
+  name: string
+  launcher: RecompImportLauncher
+  /** Bytes on disk (null when it could not be measured). */
+  bytes: number | null
+  /**
+   * How `recompId` was found: 'repo' (the other launcher's record names the project), 'launcher-id' (RecompLauncher's
+   * own id for it), 'title' (only by name: the user confirms it), 'none' (pick one or skip).
+   */
+  match: 'repo' | 'launcher-id' | 'title' | 'none'
+  /** PlayOut's pick (null: none; with several choices the user picks). */
+  recompId: string | null
+  /** The recompilations it may be (the pick first); empty when nothing matched. */
+  choices: RecompImportChoice[]
+  /** The version the other launcher recorded (null: unknown). */
+  version: string | null
+  /** Why it cannot be imported at all (a running program, a folder in the way …); null: it can. */
+  blocked: string | null
+  /** Things to know (only the setup program is there, the game image is kept elsewhere …). */
+  notes: string[]
+}
+
+export interface RecompImportScan {
+  /** The folders the user picked. */
+  picked: string[]
+  items: RecompImportItem[]
+  /** Folders looked at that no supported launcher made (or that hold nothing installed). */
+  ignored: number
+  /**
+   * Every recompilation of the catalog, for a row nothing matched (sorted by name), with whether it is installed
+   * already and whether something is in the way at its folder (as RecompImportChoice).
+   */
+  catalog: {
+    id: string
+    name: string
+    game: string
+    console: string
+    installed: boolean
+    target: string
+    targetTaken: boolean
+  }[]
+}
+
+/** One folder to import as one recompilation. */
+export interface RecompImportRequest {
+  folder: string
+  recompId: string
+}
+
+export interface RecompImportProgress {
+  /** 1-based number of the folder being moved, of `total`. */
+  index: number
+  total: number
+  folder: string
+  name: string
+  phase: 'checking' | 'moving' | 'copying' | 'verifying' | 'switching' | 'cleaning' | 'done'
+  bytesDone: number
+  bytesTotal: number | null
+}
+
+export interface RecompImportResult {
+  imported: {
+    folder: string
+    recompId: string
+    name: string
+    dir: string
+    /** Moved by one rename (same drive) rather than copied. */
+    renamed: boolean
+    /** Files left in the old folder (changed during the copy, or could not be removed). */
+    leftInOld: number
+    /**
+     * Links inside the folder that still point at the old folder: they could not be made again (a file link needs
+     * Developer Mode or administrator rights).
+     */
+    linksNotFixed: number
+    versionKnown: boolean
+  }[]
+  failed: { folder: string; recompId: string; message: string }[]
+  /** Cancel was pressed: these were not started (nothing of them moved). */
+  notStarted: string[]
 }

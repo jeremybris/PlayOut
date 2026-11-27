@@ -916,7 +916,25 @@ async function main(cli: CliOptions): Promise<void> {
           ...(defaultPath ? { defaultPath } : {}),
           properties: ['openFile']
         }),
-      chooseFolder: (title) => recompDialog({ title, properties: ['openDirectory'] })
+      chooseFolder: (title) => recompDialog({ title, properties: ['openDirectory'] }),
+      // Import: the other launchers' folders, several at once.
+      chooseFolders: async (title) => {
+        const owner = window.get()
+        const options: Electron.OpenDialogOptions = {
+          title,
+          properties: ['openDirectory', 'multiSelections']
+        }
+        const picked = owner
+          ? await dialog.showOpenDialog(owner, options)
+          : await dialog.showOpenDialog(options)
+        return picked.canceled ? [] : picked.filePaths
+      }
+    },
+    // Import refuses a folder a running program was started from (the process monitor's list). No list: the import
+    // does not move anything (whether a program runs from the folder is unknown).
+    processes: async () => {
+      if (!launcher.processes) throw new Error('the process list is not available')
+      return launcher.processes()
     },
     openPath: async (path) => {
       const failure = await shell.openPath(path)

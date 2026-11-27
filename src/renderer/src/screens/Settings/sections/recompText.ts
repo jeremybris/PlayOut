@@ -112,7 +112,15 @@ export function progressText(p: RecompProgress): string {
 export function rowDetail(row: RecompRow, gameName: string | null): string {
   const parts: string[] = []
   if (gameName) parts.push(gameName)
-  parts.push(row.installed.tag)
+  const imported = row.installed.imported
+  // Imported from another launcher at a version PlayOut could not find among the releases.
+  if (imported && !imported.versionKnown)
+    parts.push(
+      row.installed.tag
+        ? t('settingsRecomp.text.importedTag', { tag: row.installed.tag })
+        : t('settingsRecomp.text.versionUnknown')
+    )
+  else parts.push(row.installed.tag)
   if (row.installed.diskBytes !== null)
     parts.push(t('settingsRecomp.text.onDisk', { size: formatBytes(row.installed.diskBytes) }))
   if (row.installed.verified === 'unverified') parts.push(t('settingsRecomp.text.notVerified'))

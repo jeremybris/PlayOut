@@ -230,5 +230,35 @@
     "gameNotPlain": "El nombre del juego no puede contener HTML ni enlaces de script.",
     "consoleUnknown": "Elige una consola de la lista.",
     "notAdded": "Esa recompilación no se añadió en este PC."
+  },
+  "import": {
+    "chooseFolders": "Elige las carpetas (o carpetas de aplicaciones) del otro lanzador que quieres importar",
+    "busy": "Ya hay una importación en marcha.",
+    "notScanned": "Esa carpeta no estaba en la lista que encontró PlayOut; pulsa Importar y vuelve a buscar.",
+    "alreadyInstalled": "{name} ya está instalada en PlayOut.",
+    "chosenTwice": "{name} se ha elegido para dos carpetas.",
+    "targetTaken": "Ya hay algo en {path}.",
+    "running": "{program} se está ejecutando desde esta carpeta: ciérralo primero.",
+    "launcherRunning": "{launcher} está abierto: ciérralo primero.",
+    "recompBusy": "Esa recompilación se está instalando o ejecutando en PlayOut: espera a que termine.",
+    "gone": "La carpeta ya no está.",
+    "isLink": "La carpeta es un enlace a otro sitio, no la propia carpeta.",
+    "notWindows": "Decomp Buddy la preparó para una consola u otro dispositivo, no para Windows.",
+    "noSpace": "No hay espacio suficiente en la unidad de la carpeta Recompilations: hacen falta {needed} y hay {free} libres.",
+    "inUse": "Windows no ha podido mover la carpeta: un programa aún tiene abierto uno de sus archivos. Cierra el juego y {launcher} y vuelve a intentarlo.",
+    "stranded": "No se ha podido devolver la carpeta a su sitio y ahora está en {path}.",
+    "noteInstaller": "En esta carpeta solo está el programa de instalación: tras importarla, elige el programa del juego instalado en su página de Recompilación.",
+    "noteGameInPlace": "Esta recompilación lee los archivos de tu juego desde donde están: PlayOut usa el juego de tu biblioteca o te los pide en el primer inicio.",
+    "noteBackups": "Las copias de seguridad de partidas de RecompLauncher se quedan en {path}.",
+    "noteVersionUnknown": "Versión desconocida: PlayOut ofrece la versión más reciente como actualización en su página (no en Actualizar todo).",
+    "launcher": {
+      "quiver": "Quiver Launcher",
+      "recomplauncher": "RecompLauncher",
+      "decompbuddy": "Decomp Buddy"
+    },
+    "protected": "{path} es una carpeta que PlayOut o Windows necesitan donde está (la carpeta Emulation, las carpetas de PlayOut, tus carpetas de usuario o una unidad entera): nunca se mueve.",
+    "processesUnknown": "PlayOut no ha podido comprobar qué programas se están ejecutando, así que no mueve esta carpeta ahora. Vuelve a intentarlo.",
+    "noteDuplicate": "También está instalada con {launcher} en {folder}, que es la elegida. Elige esta si la prefieres.",
+    "noteNameDiffers": "{launcher} la llama {name}, pero el catálogo la incluye como {game}: comprueba que es el juego correcto."
   }
 }

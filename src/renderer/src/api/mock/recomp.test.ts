@@ -599,3 +599,46 @@ describe('mock recompilations: the unpacked game folder', () => {
     expect(offer).toMatchObject({ fileName: 'Burnout Revenge (USA).iso', folder: null })
   })
 })
+
+describe('mock recompilations: Import', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('previews the found folders, then imports the chosen ones as installed (version unknown marked)', async () => {
+    vi.useFakeTimers()
+    const api = createMockApi({ search: '' })
+    const progress = vi.fn()
+    api.on('recomp:import-progress', progress)
+    const [scan] = await Promise.all([api.scanRecompImport(), vi.advanceTimersByTimeAsync(700)])
+    expect(scan!.items.map((i) => [i.launcher, i.match])).toEqual([
+      ['recomplauncher', 'launcher-id'],
+      ['decompbuddy', 'repo'],
+      ['quiver', 'repo'],
+      ['recomplauncher', 'none'],
+      ['quiver', 'none']
+    ])
+    expect(scan!.items[2]!.choices[0]!.installed).toBe(true)
+    expect(scan!.items[4]!.blocked).toMatch(/running/)
+    const doom = scan!.items[0]!
+    const sonic = scan!.items[1]!
+    const run = api.importRecomps([
+      { folder: doom.folder, recompId: DOOM64EX },
+      { folder: sonic.folder, recompId: SONIC2_DECOMP },
+      { folder: scan!.items[2]!.folder, recompId: XERENGE }
+    ])
+    await vi.advanceTimersByTimeAsync(5000)
+    const result = await run
+    expect(result.imported.map((r) => [r.recompId, r.versionKnown])).toEqual([
+      [DOOM64EX, false],
+      [SONIC2_DECOMP, true]
+    ])
+    expect(result.failed.map((f) => f.recompId)).toEqual([XERENGE])
+    expect(progress).toHaveBeenCalledWith(expect.objectContaining({ phase: 'done' }))
+    const rows = (await api.getRecompSettings()).rows
+    expect(rows.find((r) => r.entry.id === DOOM64EX)!.installed.imported).toMatchObject({
+      from: 'recomplauncher',
+      versionKnown: false
+    })
+  })
+})

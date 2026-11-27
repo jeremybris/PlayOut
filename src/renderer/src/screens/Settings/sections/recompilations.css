@@ -170,3 +170,42 @@
 .settings-recomp-versions > .btn {
   align-self: flex-start;
 }
+
+/* Settings › Recompilations › Import (RecompImportDialog.tsx): what was found, one row per app folder. */
+.recomp-import__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.recomp-import__row .settings-row__text {
+  min-width: 0;
+}
+
+.recomp-import__warn {
+  color: var(--color-warning);
+}
+
+.recomp-import .dialog__message + .dialog__message,
+.recomp-import .dialog__message + .dlq__bar {
+  margin-top: 0.8rem;
+}
+
+.recomp-import .dlq__bar {
+  display: block;
+}
+
+/* A row's "Choose another…": the search of the whole catalog and its results. */
+.recomp-import__search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.recomp-import__results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

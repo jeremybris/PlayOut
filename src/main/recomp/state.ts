@@ -257,7 +257,21 @@ function normalizeInstalled(id: string, v: unknown): InstalledRecomp | null {
     prevTag: str(v.prevTag),
     // Absent in records from older PlayOut versions: follows the newest release.
     pinnedTag: str(v.pinnedTag),
-    ...(str(v.publishedAt) ? { publishedAt: str(v.publishedAt) } : {})
+    ...(str(v.publishedAt) ? { publishedAt: str(v.publishedAt) } : {}),
+    ...(importedOf(v.imported) ? { imported: importedOf(v.imported)! } : {})
+  }
+}
+
+const IMPORT_LAUNCHERS = new Set(['quiver', 'recomplauncher', 'decompbuddy'])
+
+/** A stored InstalledRecomp.imported, or null when it is not one. */
+function importedOf(v: unknown): InstalledRecomp['imported'] | null {
+  if (!isObject(v) || !IMPORT_LAUNCHERS.has(v.from as string)) return null
+  return {
+    from: v.from as NonNullable<InstalledRecomp['imported']>['from'],
+    at: str(v.at) ?? new Date(0).toISOString(),
+    fromDir: str(v.fromDir) ?? '',
+    versionKnown: v.versionKnown === true
   }
 }
 

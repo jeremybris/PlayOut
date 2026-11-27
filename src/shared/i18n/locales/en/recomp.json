@@ -142,7 +142,10 @@
     "hideVersions": "Hide the versions of {name}",
     "change": "Change version",
     "installingLatest": "Installing the latest {name}",
-    "updateFailed": "Could not update {name}"
+    "updateFailed": "Could not update {name}",
+    "unknown": "Version unknown",
+    "notChecked": "{tag} (not checked)",
+    "unknownChip": "Version unknown"
   },
   "releases": {
     "label": "Releases",

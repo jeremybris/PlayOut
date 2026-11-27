@@ -44,6 +44,10 @@ import {
   type RecompExecutable,
   type RecompExecutables,
   type RecompHeldImage,
+  type RecompImportChoice,
+  type RecompImportItem,
+  type RecompImportResult,
+  type RecompImportScan,
   type RecompImageOffer,
   type RecompOriginalImage,
   type RecompProgress,
@@ -100,6 +104,9 @@ export type RecompApi = Pick<
   | 'addRecomp'
   | 'removeAddedRecomp'
   | 'readRecompClipboard'
+  | 'scanRecompImport'
+  | 'importRecomps'
+  | 'cancelRecompImport'
 >
 
 /** The consoles the mock's Add offers (main: consoles.ts RECOMP_CONSOLE_IDS). */
@@ -1616,7 +1623,210 @@ export function createRecompMock(deps: RecompMockDeps): RecompMock {
     }
   }
 
+  // --- Import (main: recomp/import.ts, import-run.ts) ---------------------------------------------------------------
+  // The picked folders always "hold" the same five app folders: Doom64EX from a RecompLauncher library (matched by its
+  // app id), the Sonic decompilation from Decomp Buddy (a multi-game repository: pick Sonic 1 or 2), Xerenge from
+  // Quiver Launcher (installed in PlayOut already), an app nothing matched (pick one or skip) and one whose program
+  // is running (refused).
+  let importCancelled = false
+  const importChoice = (id: string): RecompImportChoice => {
+    const e = entries.get(id)!
+    return {
+      id,
+      name: e.name,
+      game: e.game,
+      console: e.console,
+      installed: installed.has(id),
+      target: `${MOCK_RECOMP_ROOT}\\${safeFolder(e)}`,
+      targetTaken: false
+    }
+  }
+  const importItems = (): RecompImportItem[] => [
+    {
+      folder: 'C:\\Recomp Library\\doom64ex',
+      name: 'Doom 64',
+      launcher: 'recomplauncher',
+      bytes: 41 * MB,
+      match: 'launcher-id',
+      recompId: DOOM64EX,
+      choices: [importChoice(DOOM64EX)],
+      version: null,
+      blocked: null,
+      notes: ['Version unknown: PlayOut offers the newest release as an update.']
+    },
+    {
+      folder: 'C:\\Users\\Player\\Games\\Decomp Buddy\\Sonic the Hedgehog 2 - Genesis',
+      name: 'Sonic the Hedgehog 2',
+      launcher: 'decompbuddy',
+      bytes: 18 * MB,
+      match: 'repo',
+      recompId: null,
+      choices: [importChoice(SONIC2_DECOMP), importChoice(SONIC1_DECOMP)],
+      version: 'v1.3.2',
+      blocked: null,
+      notes: []
+    },
+    {
+      folder: 'C:\\Users\\Player\\Desktop\\Quiver Launcher\\apps\\BurnoutRevenge-Xerenge',
+      name: 'Burnout Revenge',
+      launcher: 'quiver',
+      bytes: 12 * MB,
+      match: 'repo',
+      recompId: XERENGE,
+      choices: [importChoice(XERENGE)],
+      version: 'v1.0.4',
+      blocked: null,
+      notes: [
+        "Only the setup program is in this folder: after the import, choose the installed game's program on its Recompilation page."
+      ]
+    },
+    {
+      folder: 'C:\\Recomp Library\\metroidprime2port',
+      name: 'metroidprime2port',
+      launcher: 'recomplauncher',
+      bytes: 230 * MB,
+      match: 'none',
+      recompId: null,
+      choices: [],
+      version: null,
+      blocked: null,
+      notes: ['Version unknown: PlayOut offers the newest release as an update.']
+    },
+    {
+      folder: 'C:\\Users\\Player\\Desktop\\Quiver Launcher\\apps\\Skate-Skate1Recompiled',
+      name: 'Skate',
+      launcher: 'quiver',
+      bytes: 3100 * MB,
+      match: 'none',
+      recompId: null,
+      choices: [],
+      version: 'v0.2.0',
+      blocked: 'skate1.exe is running from this folder: close it first.',
+      notes: []
+    }
+  ]
+
   const api: RecompApi = {
+    async scanRecompImport(paths) {
+      await sleep(600)
+      const scan: RecompImportScan = {
+        picked: paths ?? ['C:\\Recomp Library', 'C:\\Users\\Player\\Desktop\\Quiver Launcher'],
+        items: importItems(),
+        ignored: 2,
+        catalog: [...entries.values()]
+          .map((e) => ({
+            id: e.id,
+            name: e.name,
+            game: e.game,
+            console: e.console,
+            installed: installed.has(e.id),
+            target: `${MOCK_RECOMP_ROOT}\\${safeFolder(e)}`,
+            targetTaken: false
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name))
+      }
+      return scan
+    },
+    async importRecomps(items) {
+      importCancelled = false
+      const result: RecompImportResult = { imported: [], failed: [], notStarted: [] }
+      const known = new Map(importItems().map((i) => [i.folder, i]))
+      for (let i = 0; i < items.length; i++) {
+        const req = items[i]!
+        const item = known.get(req.folder)
+        const e = entries.get(req.recompId)
+        if (importCancelled) {
+          result.notStarted.push(req.folder)
+          continue
+        }
+        if (!item || !e) {
+          result.failed.push({ ...req, message: 'That folder was not in the list PlayOut found.' })
+          continue
+        }
+        if (installed.has(e.id) || item.blocked) {
+          result.failed.push({
+            ...req,
+            message: item.blocked ?? `${e.name} is already installed in PlayOut.`
+          })
+          continue
+        }
+        const bytesTotal = item.bytes ?? 0
+        for (const phase of ['checking', 'moving', 'switching'] as const) {
+          emitter.emit('recomp:import-progress', {
+            index: i + 1,
+            total: items.length,
+            folder: req.folder,
+            name: e.name,
+            phase,
+            bytesDone: 0,
+            bytesTotal
+          })
+          await sleep(STEP_MS)
+        }
+        const dir = `${MOCK_RECOMP_ROOT}\\${safeFolder(e)}`
+        installed.set(e.id, {
+          id: e.id,
+          dir,
+          tag: item.version ?? '',
+          publishedAt: null,
+          asset: '',
+          downloadBytes: 0,
+          diskBytes: item.bytes,
+          sha256: '',
+          verified: 'unverified',
+          exe: e.exe,
+          installedAt: now(),
+          updatedAt: now(),
+          releaseFiles: [],
+          autoUpdate: false,
+          gameFiles: {},
+          savePaths: [],
+          saveSource: null,
+          cloud: {
+            enabled: true,
+            syncedHash: null,
+            localHash: null,
+            syncedAt: null,
+            pending: false,
+            error: null,
+            conflict: null
+          },
+          prevTag: null,
+          pinnedTag: null,
+          imported: {
+            from: item.launcher,
+            at: now(),
+            fromDir: req.folder,
+            versionKnown: !!item.version
+          }
+        })
+        emitter.emit('recomp:import-progress', {
+          index: i + 1,
+          total: items.length,
+          folder: req.folder,
+          name: e.name,
+          phase: 'done',
+          bytesDone: bytesTotal,
+          bytesTotal
+        })
+        result.imported.push({
+          folder: req.folder,
+          recompId: e.id,
+          name: e.name,
+          dir,
+          renamed: true,
+          leftInOld: 0,
+          linksNotFixed: 0,
+          versionKnown: !!item.version
+        })
+      }
+      if (result.imported.length) changed(result.imported.map((r) => r.recompId))
+      log('importRecomps', result)
+      return clone(result)
+    },
+    async cancelRecompImport() {
+      importCancelled = true
+    },
     async getGameRecomps(gameId) {
       const game = games.get(gameId)
       const key = game ? titleKeyFor(game) : null

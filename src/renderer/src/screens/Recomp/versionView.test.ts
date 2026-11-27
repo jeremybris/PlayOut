@@ -1,6 +1,7 @@
 import type { RecompRelease } from '@shared/recomp'
 import { describe, expect, it } from 'vitest'
 import {
+  installedTagText,
   newestInstallable,
   releaseInfo,
   sameRecompTag,
@@ -144,5 +145,35 @@ describe('versionView', () => {
     expect(switchConfirm('Doom64EX+', at('v2')).message).toMatch(
       /^Your saves and settings are kept\. PlayOut stays on v2/
     )
+  })
+})
+
+describe('an import whose version PlayOut could not check', () => {
+  const imported = {
+    from: 'recomplauncher' as const,
+    at: '2026-11-27T00:00:00Z',
+    fromDir: 'C:/L/a',
+    versionKnown: false
+  }
+  it('shows what is known of the version, never an empty tag or the import day', () => {
+    expect(
+      versionText({ tag: '', publishedAt: null, updatedAt: '2026-11-27T00:00:00Z', imported })
+    ).toBe('Version unknown')
+    expect(
+      versionText({ tag: 'V3', publishedAt: null, updatedAt: '2026-11-27T00:00:00Z', imported })
+    ).toBe('V3 (not checked)')
+    expect(installedTagText({ tag: '', imported })).toBe('Version unknown')
+    expect(installedTagText({ tag: 'v1', imported: { ...imported, versionKnown: true } })).toBe(
+      'v1'
+    )
+  })
+  it('its chip says the version is unknown, not that it is older', () => {
+    expect(
+      versionChip({
+        installed: { tag: '', pinnedTag: null, imported },
+        update: 'v2',
+        release: null
+      })
+    ).toBe('Version unknown')
   })
 })

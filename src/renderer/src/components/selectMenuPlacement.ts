@@ -39,6 +39,8 @@ export function placeSelectMenu(
   const style: CSSProperties = {
     left: Math.round(rect.left),
     minWidth: Math.round(rect.width),
+    // Never past the window's right edge: a long option's name is cut short (…) instead.
+    maxWidth: Math.max(Math.round(rect.width), Math.round(window.innerWidth - rect.left - gap)),
     // At least a few rows, should the anchor sit at the very edge.
     maxHeight: Math.round(
       Math.min(window.innerHeight * 0.8, Math.max(room, 3 * MENU_ITEM_U * unit + MENU_PAD_U * unit))
