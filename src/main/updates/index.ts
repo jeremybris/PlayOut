@@ -9,13 +9,21 @@ import { tMain } from '../i18n'
 /** Keep in step with `publish:` in electron-builder.yml (updates/index.test.ts compares them). */
 export const UPDATE_REPO = { owner: 'jeremybris', repo: 'PlayOut' } as const
 const RELEASES_URL = `https://github.com/${UPDATE_REPO.owner}/${UPDATE_REPO.repo}/releases/latest`
+/**
+ * Where the updater reads latest.yml and the installer: the newest published release's files, through GitHub's
+ * /releases/latest/download/<file> redirect. electron-updater's own GitHub provider first opens the
+ * /releases/latest web page to learn the tag, and that page can fail for hours (HTTP 504 while GitHub's file downloads
+ * and API still work), which left PlayOut unable to update. The download redirect only ever serves a published
+ * release (never a draft), so a release still being uploaded is not offered.
+ */
+export const UPDATE_FEED_URL = `${RELEASES_URL}/download`
 
 /** The part of electron-updater's AppUpdater this service uses. */
 export interface UpdaterLike {
   autoDownload: boolean
   autoInstallOnAppQuit: boolean
   logger: unknown
-  setFeedURL(options: { provider: 'github'; owner: string; repo: string }): void
+  setFeedURL(options: { provider: 'generic'; url: string }): void
   on(event: string, listener: (...args: never[]) => void): unknown
   checkForUpdates(): Promise<unknown>
   downloadUpdate(): Promise<unknown>
@@ -117,7 +125,7 @@ export function createUpdateService(deps: UpdateServiceDeps): UpdateService {
     u.autoDownload = false
     u.autoInstallOnAppQuit = false
     u.logger = log
-    u.setFeedURL({ provider: 'github', ...UPDATE_REPO })
+    u.setFeedURL({ provider: 'generic', url: UPDATE_FEED_URL })
     u.on('update-available', (info: { version: string }) => {
       set('available', { version: info.version })
     })

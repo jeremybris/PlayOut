@@ -61,7 +61,10 @@ describe('update service', () => {
     expect(await updates.check()).toMatchObject({ state: 'available', version: '0.2.0' })
     expect(fake.autoDownload).toBe(false)
     expect(fake.autoInstallOnAppQuit).toBe(false)
-    expect(fake.setFeedURL).toHaveBeenCalledWith({ provider: 'github', ...UPDATE_REPO })
+    expect(fake.setFeedURL).toHaveBeenCalledWith({
+      provider: 'generic',
+      url: 'https://github.com/jeremybris/PlayOut/releases/latest/download'
+    })
 
     expect(await updates.download()).toMatchObject({ state: 'downloaded', percent: 100 })
     expect(emitted.map((s) => s.state)).toEqual([
