@@ -168,11 +168,16 @@ export function genreTagSuggestions(
   const groups: GenreTagRow[][] = [[], [], []]
   for (const row of [...choices, ...others]) {
     if (row.checked) continue
-    const name = fold(row.label)
-    const at = name.indexOf(q)
-    if (at < 0) continue
-    const wordStart = name.split(/[^\p{L}\p{N}]+/u).some((word) => word.startsWith(q))
-    groups[at === 0 ? 0 : wordStart ? 1 : 2]!.push(row)
+    // The name shown, and the choice's own short name too ("FPS" finds "1st-Person Shooter", "JRPG" its long name).
+    const names = [row.label, row.filter?.name].filter((n): n is string => !!n).map(fold)
+    let best = 3
+    for (const name of names) {
+      const at = name.indexOf(q)
+      if (at < 0) continue
+      const wordStart = name.split(/[^\p{L}\p{N}]+/u).some((word) => word.startsWith(q))
+      best = Math.min(best, at === 0 ? 0 : wordStart ? 1 : 2)
+    }
+    if (best < 3) groups[best]!.push(row)
   }
   return groups.flatMap((group) => group.sort(byLabel)).slice(0, max)
 }

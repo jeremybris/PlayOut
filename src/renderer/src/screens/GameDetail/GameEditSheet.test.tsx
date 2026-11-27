@@ -127,12 +127,12 @@ describe('Edit sheet > Genres & Tags', () => {
     await openSheet()
     expect(document.querySelector('[aria-label="Genres"]')).toBeNull()
     expect(document.querySelector('[aria-label="Tags"]')).toBeNull()
-    expect(field().textContent).toBe('RPG, Indie +2')
+    expect(field().textContent).toBe('Role Playing Game (RPG), Indie +2')
     await openList()
     expect(list()).not.toBeNull()
     expect(list()!.getAttribute('aria-multiselectable')).toBe('true')
     // The choices (alphabetical), then the game's own others after the separator.
-    expect(ticked()).toEqual(['RPG', 'Science Fiction', 'Atmospheric', 'Indie'])
+    expect(ticked()).toEqual(['Role Playing Game (RPG)', 'Science Fiction', 'Atmospheric', 'Indie'])
     expect(list()!.querySelector('[role="separator"]')).not.toBeNull()
     expect(getCurrentFocusKey()).toBe('gedit:genresTags:menu:rpg')
   })
@@ -175,12 +175,12 @@ describe('Edit sheet > Genres & Tags', () => {
   it('Reset puts back both the genres and the tags', async () => {
     await openSheet()
     await openList()
-    await click(row('RPG'))
+    await click(row('Role Playing Game (RPG)'))
     await click(row('Action'))
     act(() => void dispatchAction('back', 'keyboard'))
     await settle()
     await click(button('Reset genres & tags'))
-    expect(field().textContent).toBe('RPG, Indie +2')
+    expect(field().textContent).toBe('Role Playing Game (RPG), Indie +2')
     expect(button('Reset genres & tags')).toBeUndefined()
     await click(button('Save'))
     expect(api.setMetadataEdit).not.toHaveBeenCalled()
@@ -217,7 +217,7 @@ describe('Edit sheet > Genres & Tags search', () => {
     // Names the game has (RPG, Indie, ...) are left out; starts-with first.
     expect(suggestions()).toEqual(['Puzzle', 'Puzzle Platformer'])
     await type('rpg')
-    expect(suggestions()).toEqual(['Action RPG', 'JRPG'])
+    expect(suggestions()).toEqual(['Action RPG', 'Japan Role Playing Game'])
     await type('zzz')
     expect(suggestions()).toEqual([])
     expect(suggestionList()!.textContent).toBe('No matching genre or tag')
@@ -234,9 +234,15 @@ describe('Edit sheet > Genres & Tags search', () => {
     await click(puzzle)
     expect(suggestionList()).toBeNull()
     expect(box().value).toBe('')
-    expect(field().textContent).toBe('RPG, Indie +3')
+    expect(field().textContent).toBe('Role Playing Game (RPG), Indie +3')
     await openList()
-    expect(ticked()).toEqual(['Puzzle', 'RPG', 'Science Fiction', 'Atmospheric', 'Indie'])
+    expect(ticked()).toEqual([
+      'Puzzle',
+      'Role Playing Game (RPG)',
+      'Science Fiction',
+      'Atmospheric',
+      'Indie'
+    ])
     act(() => void dispatchAction('back', 'keyboard'))
     await settle()
     await click(button('Save'))
@@ -283,7 +289,7 @@ describe('Edit sheet > Genres & Tags search', () => {
     act(() => void dispatchAction('accept', 'gamepad'))
     await settle()
     expect(suggestionList()).toBeNull()
-    expect(field().textContent).toBe('RPG, Indie +3')
+    expect(field().textContent).toBe('Role Playing Game (RPG), Indie +3')
   })
 
   const keydown = (key: string): void =>
@@ -310,11 +316,11 @@ describe('Edit sheet > Genres & Tags search', () => {
     keydown('Enter')
     await settle()
     expect(suggestions()).toEqual(['Puzzle', 'Puzzle Platformer'])
-    expect(field().textContent).toBe('RPG, Indie +2')
+    expect(field().textContent).toBe('Role Playing Game (RPG), Indie +2')
     keydown('Enter')
     await settle()
     expect(suggestionList()).toBeNull()
-    expect(field().textContent).toBe('RPG, Indie +3')
+    expect(field().textContent).toBe('Role Playing Game (RPG), Indie +3')
   })
 
   describe('with the controller', () => {
@@ -366,7 +372,7 @@ describe('Edit sheet > Genres & Tags search', () => {
       expect(document.querySelector('.osk')).toBeNull()
       expect(box().value).toBe('')
       expect(suggestionList()).toBeNull()
-      expect(field().textContent).toBe('RPG, Indie +3')
+      expect(field().textContent).toBe('Role Playing Game (RPG), Indie +3')
       expect(getCurrentFocusKey()).toBe('gedit:genresTags:search:box')
     })
   })

@@ -103,14 +103,16 @@ describe('tabName', () => {
     const name = tabName(tabFiltersOf({ stores: ['epic'], genres: ['RPG'], eras: ['y-2020-2025'] }))
     expect(name.split(' · ')).toHaveLength(3)
     expect(name).toContain('RPG')
-    expect(tabName(tabFiltersOf({ genres: ['RPG', 'Action'] }))).toBe('RPG + Action')
+    expect(tabName(tabFiltersOf({ genres: ['RPG', 'Action'] }))).toBe(
+      'Role Playing Game (RPG) + Action'
+    )
   })
 
   it('puts the platform first and Favorites and Hidden last', () => {
     const label = (id: string): string => (id === 'snes' ? 'SNES' : id)
     expect(
       tabName(tabFiltersOf({ platforms: ['snes'], genres: ['RPG'], favorites: true }), label)
-    ).toBe('SNES · RPG · Favorites')
+    ).toBe('SNES · Role Playing Game (RPG) · Favorites')
     expect(tabName(tabFiltersOf({ hidden: true, favorites: true }))).toBe('Favorites · Hidden')
   })
 })
@@ -334,7 +336,7 @@ describe('developer / publisher filters (a game page button)', () => {
 
   it('name the tab after its other filters', () => {
     expect(tabName(tabFiltersOf({ genres: ['RPG'], developers: ['Atlus'], favorites: true }))).toBe(
-      'RPG · Atlus · Favorites'
+      'Role Playing Game (RPG) · Atlus · Favorites'
     )
     expect(tabName(tabFiltersOf({ developers: ['Atlus'], publishers: ['Sega'] }))).toBe(
       'Atlus · Sega'
@@ -434,7 +436,7 @@ describe('Controls filter in tabs', () => {
     expect(sameTabFilters(a, tabFiltersOf({ controls: ['keyboard', 'vr'] }))).toBe(true)
     expect(sameTabFilters(a, tabFiltersOf({ controls: ['vr'] }))).toBe(false)
     expect(tabName(tabFiltersOf({ genres: ['RPG'], controls: ['vr', 'controller'] }))).toBe(
-      'RPG · VR + Controller'
+      'Role Playing Game (RPG) · VR + Controller'
     )
   })
 })

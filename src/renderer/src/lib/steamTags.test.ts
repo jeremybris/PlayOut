@@ -218,7 +218,14 @@ describe('Filters > Tags', () => {
   // tagFilterLabel builds its keys (lib.tags.<name in camelCase>), which the locales test cannot see: every choice
   // needs its English label, and English reads as the name the choice is matched by.
   it('has an English label for every choice, the same as its name', () => {
-    for (const filter of TAG_FILTERS) expect(filter.label).toBe(filter.name)
+    // Four choices show a longer name than the tag they cover (the owner's names); the rest read as their name.
+    const renamed: Record<string, string> = {
+      FPS: '1st-Person Shooter',
+      JRPG: 'Japan Role Playing Game',
+      RPG: 'Role Playing Game (RPG)',
+      RTS: 'Real Time Strategy (RTS)'
+    }
+    for (const filter of TAG_FILTERS) expect(filter.label).toBe(renamed[filter.name] ?? filter.name)
     expect(tagFilterKey('Point & Click')).toBe('pointClick')
     expect(tagFilterKey('2D')).toBe('2d')
   })
@@ -241,7 +248,7 @@ describe('tagFilterFor', () => {
     expect(genreFilterFor('Flight Simulator')?.label).toBe('Flight')
     expect(genreFilterFor('Platform')?.label).toBe('Platformer')
     expect(genreFilterFor('Vehicle Simulation')?.label).toBe('Driving')
-    expect(genreFilterFor('Real Time Strategy (RTS)')?.label).toBe('RTS')
+    expect(genreFilterFor('Real Time Strategy (RTS)')?.label).toBe('Real Time Strategy (RTS)')
     expect(genreFilterFor('Massively Multiplayer')?.label).toBe('Massively Multiplayer')
     for (const gone of [
       'Indie',
@@ -260,6 +267,6 @@ describe('tagFilterFor', () => {
       metadata: { genres: ['Action'], launchboxGenres: { genres: ['Sports'] } }
     }
     expect([...genreFilterIdsOf(rom as never)]).toEqual(['sports'])
-    expect(libraryTagFilters([rpg]).map((f) => f.label)).toEqual(['RPG'])
+    expect(libraryTagFilters([rpg]).map((f) => f.label)).toEqual(['Role Playing Game (RPG)'])
   })
 })

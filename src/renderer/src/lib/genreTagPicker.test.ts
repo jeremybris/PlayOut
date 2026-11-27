@@ -72,10 +72,12 @@ describe('Genres & Tags rows', () => {
 
   it('sums up the ticked rows in the game order', () => {
     expect(genreTagSummary({ genres: '', tags: '' })).toBe('None')
-    expect(genreTagSummary({ genres: 'Role-playing (RPG)', tags: '' })).toBe('RPG')
+    expect(genreTagSummary({ genres: 'Role-playing (RPG)', tags: '' })).toBe(
+      'Role Playing Game (RPG)'
+    )
     expect(
       genreTagSummary({ genres: 'Action, RPG', tags: 'RPG, Indie, Sci-fi, Atmospheric' })
-    ).toBe('Action, RPG +3')
+    ).toBe('Action, Role Playing Game (RPG) +3')
   })
 })
 
@@ -184,9 +186,16 @@ describe('Genres & Tags search suggestions', () => {
   const labels = (rows: GenreTagRow[]): string[] => rows.map((r) => r.label)
 
   it('lists names starting with the text, then a word starting with it, then other matches', () => {
-    expect(labels(genreTagSuggestions('rpg', none))).toEqual(['RPG', 'Action RPG', 'JRPG'])
+    expect(labels(genreTagSuggestions('rpg', none))).toEqual([
+      'Role Playing Game (RPG)',
+      'Action RPG',
+      'Japan Role Playing Game'
+    ])
     expect(labels(genreTagSuggestions('cl', none))).toEqual(['Classic', 'Point & Click'])
     expect(labels(genreTagSuggestions('puzzle', none))).toEqual(['Puzzle', 'Puzzle Platformer'])
+    // A renamed choice is still found by its short name.
+    expect(labels(genreTagSuggestions('fps', none))).toEqual(['1st-Person Shooter'])
+    expect(labels(genreTagSuggestions('jrpg', none))).toEqual(['Japan Role Playing Game'])
   })
 
   it('ignores case and accents, in the text and in the names', () => {
@@ -198,7 +207,10 @@ describe('Genres & Tags search suggestions', () => {
 
   it('leaves out what the game already has, by any spelling', () => {
     const form = { genres: 'Role-playing (RPG), Acción', tags: 'Sci-fi' }
-    expect(labels(genreTagSuggestions('rpg', form))).toEqual(['Action RPG', 'JRPG'])
+    expect(labels(genreTagSuggestions('rpg', form))).toEqual([
+      'Action RPG',
+      'Japan Role Playing Game'
+    ])
     expect(labels(genreTagSuggestions('science', form))).toEqual([])
     expect(labels(genreTagSuggestions('acc', form, [form]))).toEqual([])
   })
