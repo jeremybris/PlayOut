@@ -125,3 +125,13 @@ export function starClipTop(step: number, steps: number): number {
   }
   return (lo + hi) / 2
 }
+
+/**
+ * Filters > Reviews' gold for band `step` of `steps` (1 = lowest): the same gold hue throughout, brighter for better
+ * reviews, so 95-100 is the brightest and 0-40 the dimmest.
+ */
+export function reviewGold(step: number, steps: number): string {
+  const t = steps > 1 ? Math.min(1, Math.max(0, (step - 1) / (steps - 1))) : 1
+  const mix = (from: number, to: number): number => Math.round((from + (to - from) * t) * 10) / 10
+  return `hsl(${mix(40, 48)} ${mix(55, 100)}% ${mix(28, 62)}%)`
+}

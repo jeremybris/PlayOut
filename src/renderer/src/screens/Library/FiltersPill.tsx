@@ -320,11 +320,11 @@ const difficultyOptions = (t: Translate): readonly Option[] => [
 
 const reviewsOptions = (t: Translate): readonly Option[] => [
   { value: ALL, label: t('library.filters.allReviews') },
-  // Each band with its star, best first ("All Reviews" has none): full for 95-100, a sliver for 0-40.
+  // Each band with its star, best first ("All Reviews" has none): full and brightest gold for 95-100, a dim sliver for 0-40.
   ...REVIEW_BANDS.map((band, i) => ({
     value: band.id,
     label: band.label,
-    icon: <ReviewStarIcon step={REVIEW_BANDS.length - i} steps={REVIEW_BANDS.length} />
+    icon: <ReviewStarIcon step={REVIEW_BANDS.length - i} steps={REVIEW_BANDS.length} gold />
   }))
 ]
 
@@ -797,7 +797,7 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
                 onFavorites,
                 // Filled while the filter is on, like the game page's favourite button.
                 <Heart
-                  className="filters-menu__arrow"
+                  className="filters-menu__arrow filters-menu__icon--favorite"
                   fill={favorites ? 'currentColor' : 'none'}
                   aria-hidden="true"
                 />
@@ -810,7 +810,7 @@ function FiltersMenu(props: FiltersMenuProps): ReactElement {
                 onRecomp,
                 // The recompilation mark (the UP button beside Play), filled while the filter is on.
                 <ArrowBigUp
-                  className="filters-menu__arrow"
+                  className="filters-menu__arrow filters-menu__icon--recomp"
                   fill={recomp ? 'currentColor' : 'none'}
                   aria-hidden="true"
                 />

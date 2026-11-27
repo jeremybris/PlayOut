@@ -401,6 +401,15 @@
   margin-right: -0.8rem;
 }
 
+/* Favorites' heart in red, Recompilations' arrow in the Recomp badge's blue */
+.filters-menu__icon--favorite {
+  color: var(--color-favorite);
+}
+
+.filters-menu__icon--recomp {
+  color: var(--color-recomp);
+}
+
 .filters-menu__indented .u-grow {
   padding-left: calc(var(--icon-sm) + 0.8rem);
 }

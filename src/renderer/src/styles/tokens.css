@@ -47,6 +47,8 @@
   --color-focus-ring: var(--color-accent);
   --color-danger: #e81123;
   --color-success: #6ccb5f;
+  --color-favorite: #ff4d5e; /* Filters > Favorites' heart */
+  --color-recomp: #3a96ff; /* Filters > Recompilations' arrow: the Recomp badge's blue, lighter to read on the menu */
   --color-warning: #fce100; /* Windows caution yellow: notices about other services (a store outage) */
 
   /* ---- colour: store badges (simple-icons hex unless noted) ----------- */

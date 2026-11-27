@@ -2,7 +2,7 @@
 import { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { describe, expect, it } from 'vitest'
-import { STAR_INNER, starVisibleFillBelow } from '../lib/bandIcon'
+import { reviewGold, STAR_INNER, starVisibleFillBelow } from '../lib/bandIcon'
 import { ReviewStarIcon } from './ReviewStarIcon'
 
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
@@ -69,5 +69,34 @@ describe('ReviewStarIcon', () => {
     expect(new Set(ids).size).toBe(4)
     for (const [i, s] of stars.entries())
       expect(s.querySelector('path[clip-path]')!.getAttribute('clip-path')).toBe(`url(#${ids[i]})`)
+  })
+})
+
+describe('Filters > Reviews gold', () => {
+  const lightness = (hsl: string): number => Number(/(\d+(?:\.\d+)?)%\)$/.exec(hsl)![1])
+
+  it('is gold throughout and brighter for better bands: 95-100 brightest, 0-40 dimmest', () => {
+    const golds = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((step) => reviewGold(step, 9))
+    for (const g of golds) expect(g).toMatch(/^hsl\((4\d)(\.\d)? /)
+    for (let i = 1; i < golds.length; i++)
+      expect(lightness(golds[i]!)).toBeGreaterThan(lightness(golds[i - 1]!))
+  })
+
+  it('colours a star only when asked (the Sort menu keeps the text colour)', () => {
+    const host = document.createElement('div')
+    const root = createRoot(host)
+    act(() =>
+      root.render(
+        <>
+          <ReviewStarIcon step={9} steps={9} gold />
+          <ReviewStarIcon step={9} steps={9} />
+        </>
+      )
+    )
+    const [gold, plain] = [...host.querySelectorAll('svg')]
+    // jsdom writes the colour back as rgb(): only that one is coloured.
+    expect(gold!.getAttribute('style')).toMatch(/^color: /)
+    expect(plain!.getAttribute('style')).toBeNull()
+    act(() => root.unmount())
   })
 })
