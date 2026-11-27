@@ -1,0 +1,70 @@
+{
+  "presetsFailed": "{name} was set up, but its fullscreen and controller settings could not be applied: {error}",
+  "noDownload": "no download found",
+  "coresMissing": "RetroArch cores were not found after unpacking",
+  "exeNotDownloaded": "{file} is not in the downloaded files",
+  "exeNotInDrive": "{file} is not in the Drive folder",
+  "runtimesFailed": "The Visual C++ / DirectX runtimes could not be installed: {error}",
+  "foldersNotSet": "{name} was installed, but its folders could not be set: {error}",
+  "processesUnreadable": "the list of running programs could not be read, so it was not touched",
+  "update": {
+    "exeMissingBack": "{file} is missing after the update; the earlier build was put back",
+    "exeMissingPending": "{file} is missing after the update, and some earlier files could not be put back yet (PlayOut retries at its next start)",
+    "incompleteBack": "the update could not be completed ({error}); the earlier build was put back",
+    "incompletePending": "the update could not be completed ({error}); PlayOut puts the earlier build back at its next start",
+    "foldersNotSet": "{name} was updated, but its folders could not be set: {error}",
+    "undoPending": "{name}: an interrupted update could not be fully undone yet; PlayOut tries again at its next start",
+    "earlierKept": "an earlier update of this folder could not be undone; its files are kept in {folder}",
+    "notPutBack": "{error}; some files could not be put back (kept in {folder})"
+  },
+  "bios": {
+    "failed": "{emulator}: the BIOS files could not be set up ({error}).",
+    "ps3Firmware": "RPCS3: the PS3 firmware could not be installed from {file}.",
+    "switchKeys": "Ryujinx: the Switch keys could not be copied from {file}.",
+    "switchFirmware": "Ryujinx: the Switch firmware could not be installed from {folder}.",
+    "gamecubeIpl": "Dolphin: the GameCube IPL could not be copied for {regions}.",
+    "mgba": "mGBA: the BIOS paths could not be written to config.ini."
+  },
+  "runtimes": {
+    "vcStillMissing": "The Visual C++ runtime still looks missing after its install; restarting Windows may help.",
+    "dxStillMissing": "The DirectX 9 runtime still looks missing after its install; restarting Windows may help.",
+    "vcDeclined": "Visual C++ runtime install was declined; some emulators will not start until it is installed.",
+    "vcFailed": "The Visual C++ runtime install failed (code {code}).",
+    "dxIncomplete": "The DirectX 9 runtime download was incomplete ({size} of {expected} bytes).",
+    "dxDeclined": "DirectX 9 runtime install was declined; some emulators will not start until it is installed.",
+    "dxFailed": "The DirectX 9 runtime install failed (code {code}).",
+    "vcInstallError": "The Visual C++ runtime could not be installed: {error}",
+    "dxInstallError": "The DirectX 9 runtime could not be installed: {error}"
+  },
+  "download": {
+    "rateLimit": "GitHub's API rate limit was reached (60 lookups an hour per address); try again later",
+    "refused": "GitHub's API refused the lookup (HTTP {status}, probably its rate limit); try again later",
+    "stalled": "the download stalled",
+    "noData": "{file}: the server sent no data",
+    "wrongSize": "{file}: downloaded {size} bytes, expected {expected} (damaged download)",
+    "checksum": "{file}: the download is damaged or not the expected file (checksum mismatch)"
+  },
+  "drive": {
+    "tooDeep": "the Drive folder is more than {max} folders deep",
+    "tooManyFolders": "the Drive folder has more than {max} folders",
+    "notListed": "Drive folder {folder} could not be listed (is it shared publicly?)",
+    "tooManyFiles": "the Drive folder has more than {max} files",
+    "webPage": "Google Drive sent a web page instead of the file (download limit?)",
+    "empty": "the Drive folder is empty"
+  },
+  "archive": {
+    "notArchive": "{file} is not a zip, 7z or self-extracting archive",
+    "tarFailed": "could not unpack {file} (tar exit {code}: {output})",
+    "unpackFailed": "could not unpack {file} ({error})",
+    "sfxFailed": "could not unpack {file} (self-extractor exit {code}: {output})"
+  },
+  "junction": {
+    "inTheWay": "Cannot link: {path} is in the way (remove it and try again)",
+    "failed": "Could not link {link} to {target}: {reason}. The Emulation folder must be on a local NTFS drive.",
+    "self": "Junction {link} would point at itself",
+    "fileInTheWay": "Cannot link {link}: a file is in the way"
+  },
+  "hdd": {
+    "notMoved": "the PS3 HDD has not fully moved to Updates and DLC: {error}"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "title": "VR",
+  "lead": "Mods that let you play flat PC games in VR.",
+  "readFailed": "Could not read the VR mods.",
+  "tryAgain": "Try again",
+  "reading": "Reading the VR mods",
+  "mods": {
+    "title": "VR mods",
+    "note": "The list comes from the Flat2VR community's release list. Mods on GitHub can be downloaded here into the VR Mods folder, one folder per mod; PlayOut only keeps them and never runs them. Follow each mod's own instructions to use it with your game.",
+    "browser": "VR mod browser",
+    "browseCount_one": "{count} mod to browse, {github} with a download on GitHub",
+    "browseCount_other": "{count} mods to browse, {github} with a download on GitHub",
+    "browse": "Browse",
+    "downloadedTo": "Downloaded to",
+    "open": "Open"
+  },
+  "downloaded": {
+    "title": "Downloaded VR mods",
+    "updatesAvailable_one": "{count} update available",
+    "updatesAvailable_other": "{count} updates available",
+    "updates": "Updates",
+    "updatesNote": "Asks GitHub for each downloaded mod's newest release. Your own files in a mod's folder are backed up before it updates.",
+    "check": "Check for updates",
+    "none": "None yet. Open the browser to download a VR mod."
+  },
+  "upToDate": "Every VR mod is up to date",
+  "checkFailed": "Could not check for updates",
+  "openFolderFailed": "Could not open the folder",
+  "remove": {
+    "title": "Remove {title}?",
+    "message": "Its folder in the VR Mods folder is deleted, with anything you put in it (your own files are zipped into the backups first).",
+    "confirm": "Remove",
+    "done": "{title} removed",
+    "failed": "Could not remove {title}"
+  },
+  "card": {
+    "onDisk": "{size} on disk",
+    "notVerified": "not verified",
+    "available": "{version} available",
+    "removing": "Removing…",
+    "downloading": "Downloading…",
+    "updateTo": "Update to {version}",
+    "updateFailed": "Could not update {title}",
+    "openFolder": "Open folder",
+    "remove": "Remove"
+  }
+}

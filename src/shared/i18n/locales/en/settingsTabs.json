@@ -1,0 +1,24 @@
+{
+  "title": "Tabs",
+  "note": "The Library's tabs, left to right. Each tab keeps its own filters, sort, search and place, and is named by its filters.",
+  "full": "Up to {max} tabs: delete one to add another.",
+  "newTab": "A new tab shows All Games on A-Z with playable games first (the Library button beside the search turns that off); pick its filters and sort here or in the Library.",
+  "add": "Add tab",
+  "recommended": {
+    "title": "Recommended tabs",
+    "description": "{description} Sort: {sort}.",
+    "add": "Add",
+    "addAgain": "Add again"
+  },
+  "row": {
+    "sortReversed": "{sort} (reversed)",
+    "sortPlayableFirst": "{sort}, playable first",
+    "sortReversedPlayableFirst": "{sort} (reversed), playable first",
+    "searching": "{sort} · searching “{query}”",
+    "moveLeft": "Move left",
+    "moveRight": "Move right",
+    "sort": "Sort",
+    "delete": "Delete tab",
+    "lastTab": "The last tab cannot be deleted"
+  }
+}

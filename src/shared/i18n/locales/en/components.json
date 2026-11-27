@@ -1,0 +1,149 @@
+{
+  "spinner": {
+    "loading": "Loading"
+  },
+  "starRating": {
+    "label": "{stars} out of 5 stars",
+    "labelWithSource": "{stars} out of 5 stars ({source})"
+  },
+  "confirmDialog": {
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "modal": {
+    "close": "Close"
+  },
+  "textField": {
+    "clear": "Clear"
+  },
+  "selectField": {
+    "reversed": "reversed",
+    "previousOption": "Previous option",
+    "nextOption": "Next option"
+  },
+  "recompBadge": {
+    "label": "Recomp",
+    "title": "Recomp: played from its recompilation"
+  },
+  "keyboard": {
+    "label": "On-screen keyboard",
+    "shift": "Shift",
+    "letters": "Letters",
+    "symbols": "Symbols",
+    "space": "Space",
+    "backspace": "Backspace",
+    "done": "Done"
+  },
+  "gameCard": {
+    "favourite": "{title} (favourite)",
+    "completed": "Completed",
+    "queued": "Queued · {place}",
+    "pausedInQueue": "Paused · {place}",
+    "paused": "Paused",
+    "remoteLabel": "From other PCs: on {host}",
+    "remoteTitle": "On {host}",
+    "notInstalled": "Not installed",
+    "copies_one": "{count} copy",
+    "copies_other": "{count} copies",
+    "starting": "Starting",
+    "downloading": "Downloading",
+    "installing": "Installing",
+    "addGames": "Add games",
+    "coverSignIn": "Sign in for covers · Settings › Metadata",
+    "coverSignInTitle": "Sign in to SteamGridDB in Settings › Metadata to get this cover"
+  },
+  "launchError": {
+    "title": {
+      "emulatorMissing": "Emulator not found",
+      "coreMissing": "RetroArch core not found",
+      "clientMissing": "Store client not found",
+      "fileMissing": "Game files not found",
+      "failed": "Could not launch"
+    },
+    "subtitle": "Couldn't launch {title}",
+    "subtitleUnknown": "Couldn't launch this game",
+    "emulator": "Emulator: {name}",
+    "core": "Core: {file}",
+    "searched": "Searched: {paths}",
+    "close": "Close",
+    "download": "Download {name}",
+    "emulatorSettings": "Emulator settings",
+    "librarySettings": "Library settings",
+    "rescan": "Rescan",
+    "rescanning": "Rescanning {source}…",
+    "rescanFailed": "Rescan failed",
+    "downloadPageFailed": "Could not open the download page"
+  },
+  "downloadQueue": {
+    "label": "Downloads",
+    "empty": "No downloads",
+    "pauseAll": "Pause all",
+    "resumeAll": "Resume all",
+    "fromHost": "From {host}",
+    "waiting": "Waiting",
+    "starting": "Starting…",
+    "waitingDetail": "{from} · {status} · {place}",
+    "activeDetail": "{from} · {status}",
+    "percent": "{percent}%",
+    "bytes": "{done} of {total}",
+    "progressLabel": "{title}: {status}",
+    "pause": "Pause {title}",
+    "resume": "Resume {title}",
+    "moveUp": "Move {title} up",
+    "moveDown": "Move {title} down",
+    "stop": {
+      "remove": {
+        "label": "Remove from queue",
+        "aria": "Remove from queue: {title}"
+      },
+      "cancelDownload": {
+        "label": "Cancel download",
+        "aria": "Cancel download: {title}",
+        "confirmTitle": "Cancel download?",
+        "confirmMessage": "The download of {title} from {from} stops, and the next game in the queue starts."
+      },
+      "cancelInstall": {
+        "label": "Cancel install",
+        "aria": "Cancel install: {title}",
+        "confirmTitle": "Cancel install?",
+        "confirmMessage": "PlayOut stops waiting for {from} to start the install of {title} and starts the next game in the queue."
+      },
+      "stopTracking": {
+        "label": "Stop tracking",
+        "aria": "Stop tracking: {title}",
+        "confirmTitle": "Stop tracking?",
+        "confirmMessage": "PlayOut stops following the install of {title} and starts the next game in the queue. {from} may keep downloading it."
+      }
+    }
+  },
+  "coverMenu": {
+    "label": "{title} options",
+    "pauseDownload": "Pause Download",
+    "resumeDownload": "Resume Download",
+    "removeFromQueue": "Remove from Queue",
+    "cancelDownload": "Cancel Download",
+    "download": "Download",
+    "stopStreaming": "Stop Streaming",
+    "cancelStream": "Cancel Stream",
+    "stream": "Stream",
+    "streamFrom": "Stream from {host}",
+    "details": "Details",
+    "stopTracking": "Stop Tracking",
+    "starting": "Starting…",
+    "paused": "Paused",
+    "downloading": "Downloading",
+    "showInFolder": "Show in Folder",
+    "recompilation": "Recompilation",
+    "notInstalled": "Not installed",
+    "installed": "Installed",
+    "recompFolderFailed": "Could not open the recompilation folder",
+    "manageDlc": "Manage DLC",
+    "markCompleted": "Mark as Completed",
+    "unmarkCompleted": "Unmark as Completed",
+    "preferredCopy": "Preferred Copy",
+    "copies_one": "{count} copy",
+    "copies_other": "{count} copies",
+    "copiesLabel": "Copies",
+    "deleteLocal": "Delete from this PC"
+  }
+}

@@ -1,0 +1,6 @@
+PlayOutPs5Pkg 1.0.0
+Source https://github.com/jeremybris/PlayOut-PS5PKG
+PS5PKGTool 40832abcc6f4444e4e4c54f5080a92b2547e87ac
+ProsperoPkgTool 035c0e285e01d5596ec57991235c868423ff476d
+.NET 10.0.15
+built 2026-11-19T02:02:23.082Z

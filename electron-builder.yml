@@ -1,0 +1,72 @@
+appId: com.playout.app
+productName: PlayOut
+copyright: Copyright © 2026 Jeremy Bristol
+directories:
+  buildResources: build
+  output: dist
+# Only out/main, out/preload, out/renderer, resources/ and the production node_modules (package.json
+# `dependencies`, i.e. the packages the main bundle externalises) belong in app.asar. Renderer-only
+# packages are bundled by Vite and live in devDependencies; the browser-only web build (out/web) and
+# every config file stay out.
+# Listed in (not only left out): a stray file or folder in the project (notes, test logs) never ends up in the app.
+files:
+  - 'out/**'
+  - 'resources/**'
+  - 'package.json'
+  - 'LICENSE'
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!docs/*'
+  - '!scripts/*'
+  - '!out/web/**'
+  - '!coop-handlers/**'
+  - '!coop-helper/**'
+  # The Xbox helper's C# project; its build (resources/xbox) ships unpacked like resources/coop.
+  - '!xbox-helper/**'
+  # The in-game overlay's C++ sources (and their build folder); its build (resources/ingame) ships unpacked.
+  - '!ingame-helper/**'
+  # The PS5 package helper's C# project (GPL, published on its own); its build (resources/ps5pkg) ships unpacked.
+  - '!ps5pkg-helper/**'
+  # The metadata suggestion relay: a Cloudflare Worker deployed on its own (metadata-relay/SETUP.md).
+  - '!metadata-relay/**'
+  # The PlayOut-metadata repository's template (README, schema, Actions); pushed to its own public repository.
+  - '!metadata-repo/**'
+  # The PlayOut database's template (README); pushed as the `database` branch of PlayOut-metadata.
+  - '!database-repo/**'
+  - '!.claude/**'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!vite.web.config.{js,ts,mjs,cjs}'
+  - '!vitest.config.{js,ts,mjs,cjs}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json,*.tsbuildinfo}'
+asarUnpack:
+  - resources/**
+win:
+  executableName: PlayOut
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+nsis:
+  artifactName: ${productName}-${version}-setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  # customRemoveFiles: uninstall and update keep Emulators, Emulation, Recompilations, VR Mods and Upgrades in the
+  # install dir (build/installer.nsh). deleteAppDataOnUninstall stays off: %APPDATA%\playout (library.json) is kept.
+  include: build/installer.nsh
+portable:
+  artifactName: ${productName}-${version}-portable.${ext}
+npmRebuild: false
+# Keep in step with UPDATE_REPO in src/main/updates/index.ts. `draft`: latest.yml uploads last, so a release made
+# public from the start breaks every update check until the upload ends (or for good, if it fails). Publish the
+# draft once it is complete. GH_TOKEN is only needed by `npm run release:win`.
+publish:
+  provider: github
+  owner: jeremybris
+  repo: PlayOut
+  releaseType: draft

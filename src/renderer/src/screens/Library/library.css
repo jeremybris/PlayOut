@@ -1,0 +1,936 @@
+/*
+ * Library view layout (screens/Library): the translucent tab band over the hero art, the game count
+ * header, the windowed cover grid and the translucent bottom band. Sizes come from the library tokens in
+ * tokens.css (1u = one 1080p canvas pixel) or are written in rem (1rem = 10u). The view sits above Home
+ * (whose backdrop shows through the bands) and below the modal layer.
+ */
+
+.library-page {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  overflow: clip;
+  /* vertical swipes at the top return Home (Library.tsx); the grid viewport pans itself */
+  touch-action: pan-y;
+  animation: library-enter var(--dur-screen) var(--ease-enter);
+}
+
+.library-page--leaving {
+  animation: library-exit var(--dur-screen) var(--ease-exit-soft) forwards;
+  pointer-events: none;
+}
+
+@keyframes library-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes library-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(6rem);
+  }
+}
+
+/* ---- the page's own blurred hero: the bands blur it into one flat tint ------------------------------ */
+
+/* the settled game's hero art, full-bleed and heavily blurred (Library.tsx renders Home's layered
+   HeroBackdrop inside, without its gradients, so the art crossfades once loaded and never flashes to the
+   page colour); the opaque body covers its middle, so only the two bands show it */
+.library__backdrop {
+  position: absolute;
+  inset: -6rem;
+  z-index: 0;
+  overflow: hidden;
+  filter: blur(60px) saturate(1.05) brightness(0.8);
+  pointer-events: none;
+}
+
+.library__backdrop .backdrop__art {
+  object-position: 50% 50%;
+}
+
+/* ---- translucent bands: the blurred hero art tints them ------------------------------------------- */
+
+.library__band,
+.library__bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  /* a flat, slightly darkened, barely lifted tone: no art structure survives the double blur */
+  background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)) rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(90px) saturate(1.05);
+  backdrop-filter: blur(90px) saturate(1.05);
+}
+
+.library__band {
+  top: 0;
+  height: var(--library-band-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--pill-right);
+}
+
+.library__bar {
+  bottom: var(--scan-bar-h, 0px);
+  height: var(--library-bar-h);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--pill-right) 0 4.6rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ---- tab strip ------------------------------------------------------------------------------------ */
+
+/* glyph -> first tab: this gap plus the strip's 2.4rem padding and the tab's 0.4rem padding (~40u) */
+.library__tabs-group {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* white bumper-shaped pills with dark lettering (overrides the generic .hint__glyph--lb/--rb look) */
+.library__tabs-group .library__tabs-glyph {
+  flex: none;
+  min-width: 4.4rem;
+  width: 4.4rem;
+  height: 2.4rem;
+  padding: 0;
+  border-radius: 1rem 1rem 0.5rem 0.5rem;
+  background: #ffffff;
+  color: #1f1f1f;
+  font-size: 1.2rem;
+}
+
+.library__tabs {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  /* when the tabs still overflow (many platforms at a narrow width) the ends fade instead of clipping */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 2.4rem,
+    #000 calc(100% - 2.4rem),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 2.4rem,
+    #000 calc(100% - 2.4rem),
+    transparent
+  );
+}
+
+.library__tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.library__tabs-strip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--library-tab-gap);
+  width: max-content;
+  margin: 0 auto;
+  /* the side padding keeps the first and last tab out of the mask's fade */
+  padding: 0 2.4rem 1rem;
+}
+
+.library__tab {
+  flex: none;
+  padding: 1rem 0.4rem;
+  border-radius: var(--radius-button);
+  font-family: var(--font-ui);
+  font-size: var(--library-tab-fs);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-tight);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  outline: var(--ring-w) solid transparent;
+  outline-offset: 0;
+  transition:
+    color var(--dur-focus) var(--ease-linear),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.library__tab:hover {
+  color: var(--color-text);
+}
+
+.library__tab--active {
+  color: var(--color-text);
+  font-weight: var(--fw-semibold);
+}
+
+.library__tab[data-focused='true'] {
+  color: var(--color-text);
+  outline-color: var(--ring);
+}
+
+/* TabStrip.tsx sets --x and the --on / --slide classes: the first position paints without a transition */
+.library__tab-underline {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: var(--library-tab-underline-w);
+  height: var(--library-tab-underline-h);
+  border-radius: calc(var(--library-tab-underline-h) / 2);
+  background: var(--color-accent);
+  opacity: 0;
+  transform: translateX(var(--x, 0px));
+}
+
+.library__tab-underline--on {
+  opacity: 1;
+}
+
+.library__tab-underline--slide {
+  transition: transform var(--dur-tab) var(--ease-p2p);
+}
+
+/* ---- body: header and grid on the dark page background ------------------------------------------- */
+
+.library__body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--library-band-h);
+  bottom: calc(var(--library-bar-h) + var(--scan-bar-h, 0px));
+  z-index: 1;
+  background: var(--color-bg);
+}
+
+.library__header {
+  position: absolute;
+  z-index: 1;
+  left: var(--library-header-inset-l);
+  right: var(--library-header-inset-r);
+  top: calc(var(--library-header-top) - var(--library-band-h));
+  display: flex;
+  align-items: center;
+  gap: 3.6rem;
+  height: var(--library-header-h);
+}
+
+/* takes what the fixed-width search field and pills leave: a long count truncates, the field never shrinks */
+.library__title-block {
+  display: flex;
+  align-items: baseline;
+  gap: 4rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.library__title {
+  font-family: var(--font-ui);
+  font-size: var(--library-title-fs);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-tight);
+  color: var(--color-text);
+}
+
+.library__count {
+  min-width: 0;
+  font-family: var(--font-ui);
+  font-size: var(--library-count-fs);
+  color: var(--color-icon-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* the reference's field: 836u wide between the title block and the sort pill; on a narrower window it gives way
+   (down to 240u) so the pills and the tab's X stay on screen */
+.library__search {
+  flex: 0 1 83.6rem;
+  min-width: 24rem;
+}
+
+.library__search .textfield__box {
+  height: var(--library-header-h);
+  padding: 0 2.4rem;
+  border-radius: var(--radius-pill);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.library__search .textfield__input {
+  text-align: center;
+  font-size: var(--library-count-fs);
+}
+
+.library__search .textfield__input:focus {
+  text-align: left;
+}
+
+.library__select {
+  flex: none;
+  height: var(--library-header-h);
+  padding: 0 2rem 0 2rem;
+  font-size: var(--library-count-fs);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.library__select--sort {
+  min-width: 27rem;
+}
+
+.library__select--category {
+  min-width: 29.8rem;
+}
+
+/* the sort and category pills sit 1.4rem apart (the header's 3.6rem gap is the search-to-sort spacing) */
+.library__select--sort + .library__select--category {
+  margin-left: -2.2rem;
+}
+
+/* the playable-first button between the search and the Sort pill: a round pill-height bubble like the X, 1.4rem
+   from the search field and from the pill; while on (aria-pressed) it glows in the accent colour */
+.library__playable {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--library-header-h);
+  height: var(--library-header-h);
+  margin: 0 -2.2rem;
+  border: var(--border-w, 1px) solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+  outline: var(--ring-w) solid transparent;
+  transition:
+    color var(--dur-focus) var(--ease-linear),
+    background-color var(--dur-focus) var(--ease-linear),
+    border-color var(--dur-focus) var(--ease-linear),
+    box-shadow var(--dur-focus) var(--ease-linear),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.library__playable svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.library__playable:hover,
+.library__playable[data-focused='true'] {
+  color: var(--color-text);
+}
+
+.library__playable[data-focused='true'] {
+  outline-color: var(--ring);
+}
+
+.library__playable--on {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+  box-shadow: var(--glow-accent);
+}
+
+/* the X right of the Filters pill (deletes the tab shown): a round pill-height button, 1.4rem from the pill */
+.library__delete-tab {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--library-header-h);
+  height: var(--library-header-h);
+  margin-left: -2.2rem;
+  border: var(--border-w, 1px) solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+  outline: var(--ring-w) solid transparent;
+  transition:
+    color var(--dur-focus) var(--ease-linear),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.library__delete-tab svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.library__delete-tab:hover,
+.library__delete-tab[data-focused='true'] {
+  color: var(--color-text);
+}
+
+.library__delete-tab[data-focused='true'] {
+  outline-color: var(--ring);
+}
+
+.library__delete-tab[aria-disabled='true'] {
+  opacity: 0.4;
+}
+
+/* the "+" after the last tab */
+.library__tab--add {
+  display: grid;
+  place-items: center;
+  padding: 1rem 0.8rem;
+}
+
+.library__tab--add svg {
+  width: var(--library-tab-fs);
+  height: var(--library-tab-fs);
+}
+
+/* the Filters menu (portaled to <body>): the arrow says the Genre row opens to the left; Hidden lines up with its label */
+.filters-menu__arrow {
+  flex: none;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  margin-right: -0.8rem;
+}
+
+.filters-menu__indented .u-grow {
+  padding-left: calc(var(--icon-sm) + 0.8rem);
+}
+
+.filters-menu__value {
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+}
+
+/* under the Filters menu once it holds its 3 choices: the rows that would add a fourth are disabled */
+.filters-menu__note {
+  max-width: 30rem;
+  padding: 0.8rem 2rem 1.2rem;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  line-height: 1.3;
+  color: var(--color-text-tertiary);
+}
+
+.filters-menu--genres {
+  min-width: 26rem;
+  transform-origin: top right;
+}
+
+/* ---- the grid viewport ----------------------------------------------------------------------------- */
+
+.library__viewport {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--library-grid-top) - var(--library-band-h));
+  bottom: 0;
+  overflow-y: auto;
+  overflow-x: clip;
+  overscroll-behavior: contain;
+  padding: var(--library-grid-pad-top) var(--library-grid-inset-x) 4rem;
+  /* the scaled, ringed card stays fully visible when it scrolls into view */
+  scroll-padding-block: 3rem;
+  /* a row cut by the header or the bottom band fades out instead of being sliced mid-cover: the edge
+     fades below, driven by the scroll position, so the resting first row and the last row at the end of
+     the scroll are untouched */
+  -webkit-mask-image: var(--library-edge-mask);
+  mask-image: var(--library-edge-mask);
+  animation:
+    library-fade-top linear both,
+    library-fade-bottom linear both;
+  animation-timeline: scroll(self), scroll(self);
+  animation-range:
+    0 4rem,
+    calc(100% - 4rem) 100%;
+}
+
+/*
+ * Edge fades of a vertical scroller (the grid viewport and the settings list): a mask whose top and bottom
+ * fades are --library-fade-top / --library-fade-bottom. Two scroll-driven animations grow the top fade
+ * over the first few rem of scroll and shrink the bottom one over the last few, so a clipped row fades and
+ * a fully visible edge row never dims; while nothing scrolls the timeline is inactive and both stay 0.
+ */
+@property --library-fade-top {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --library-fade-bottom {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+.library__viewport {
+  --library-edge-mask: linear-gradient(
+    to bottom,
+    transparent,
+    #000 var(--library-fade-top),
+    #000 calc(100% - var(--library-fade-bottom)),
+    transparent
+  );
+}
+
+@keyframes library-fade-top {
+  from {
+    --library-fade-top: 0px;
+  }
+  to {
+    --library-fade-top: 3rem;
+  }
+}
+
+@keyframes library-fade-bottom {
+  from {
+    --library-fade-bottom: 3rem;
+  }
+  to {
+    --library-fade-bottom: 0px;
+  }
+}
+
+/* a tab switch slides the grid (or the accounts panel) 16u in from the side the new tab is on */
+.library__viewport--from-right {
+  animation: library-grid-in-right var(--dur-tab) var(--ease-enter);
+}
+
+.library__viewport--from-left {
+  animation: library-grid-in-left var(--dur-tab) var(--ease-enter);
+}
+
+/* on the grid viewport the edge fades ride along (the shorthand above would drop them) */
+.library__viewport.library__viewport--from-right {
+  animation:
+    library-grid-in-right var(--dur-tab) var(--ease-enter),
+    library-fade-top linear both,
+    library-fade-bottom linear both;
+  animation-timeline: auto, scroll(self), scroll(self);
+  animation-range:
+    normal,
+    0 4rem,
+    calc(100% - 4rem) 100%;
+}
+
+.library__viewport.library__viewport--from-left {
+  animation:
+    library-grid-in-left var(--dur-tab) var(--ease-enter),
+    library-fade-top linear both,
+    library-fade-bottom linear both;
+  animation-timeline: auto, scroll(self), scroll(self);
+  animation-range:
+    normal,
+    0 4rem,
+    calc(100% - 4rem) 100%;
+}
+
+@keyframes library-grid-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(1.6rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes library-grid-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-1.6rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* the cover size (the slider left of the grid): LibraryGrid.tsx sets --library-cover-scale on the viewport, a step of
+   shared/cover-scale.ts; the cards (and the probe below) follow it. The store badge and its count follow it only
+   between 80% and 130%, so they stay readable on small covers and do not grow huge on big ones. */
+.library__viewport {
+  --library-badge-scale: clamp(0.8, var(--library-cover-scale, 1), 1.3);
+  --card-w: calc(240 * var(--u) * var(--library-cover-scale, 1));
+  --card-h: calc(360 * var(--u) * var(--library-cover-scale, 1));
+  --badge-size: calc(36 * var(--u) * var(--library-badge-scale));
+  --badge-inset: calc(12 * var(--u) * var(--library-badge-scale));
+}
+
+/* cards without cover art on smaller covers: the placeholder's padding, title and "sign in for covers" chip shrink
+   with the cover (never below a readable 10-11px, never above today's size), and the title keeps to three lines above
+   the store badge at the bottom-right */
+.library__viewport {
+  --library-text-scale: min(1, var(--library-cover-scale, 1));
+}
+
+.library__viewport .card__placeholder {
+  padding: calc(2rem * var(--library-text-scale));
+  /* the title ends above the store badge (bottom-right), so the two never overlap */
+  padding-bottom: calc(var(--badge-inset) + var(--badge-size) + 0.4rem);
+}
+
+.library__viewport .card__placeholder-title {
+  font-size: max(11px, calc(var(--fs-meta) * var(--library-text-scale)));
+  -webkit-line-clamp: 3;
+}
+
+.library__viewport .card__placeholder-notice {
+  top: calc(1rem * var(--library-text-scale));
+  left: calc(1rem * var(--library-text-scale));
+  right: calc(6.4rem * var(--library-text-scale));
+  padding: calc(0.5rem * var(--library-text-scale)) calc(0.8rem * var(--library-text-scale));
+  font-size: max(10px, calc(var(--fs-caption) * var(--library-text-scale)));
+}
+
+/* the gamepad glyph at the top-right shrinks with the chip, so the two keep clear of each other */
+.library__viewport .card__placeholder-icon {
+  top: calc(2rem * var(--library-text-scale));
+  right: calc(2rem * var(--library-text-scale));
+  width: calc(4rem * var(--library-text-scale));
+  height: calc(4rem * var(--library-text-scale));
+}
+
+/* sized like a card so the grid can measure the card size and gap in px (LibraryGrid.tsx) */
+.library__probe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--card-w);
+  height: var(--card-h);
+  margin-left: var(--library-grid-gap);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.library__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 6), var(--card-w));
+  grid-auto-rows: var(--card-h);
+  gap: var(--library-grid-gap);
+  justify-content: center;
+}
+
+/* stands in for omitted rows: LibraryGrid.tsx gives it `grid-row: span N`, so it occupies N implicit
+   card-height tracks and the gaps between them add up exactly (an explicit height on one track would not
+   grow the track and would overflow the rows below) */
+.library__spacer {
+  grid-column: 1 / -1;
+  pointer-events: none;
+}
+
+/* cards scale from their centre with the accent ring (the row cards scale from their bottom edge) */
+.library__grid .card {
+  transform-origin: 50% 50%;
+  outline: var(--ring-w) solid transparent;
+}
+
+.library__grid .card[data-focused='true'] {
+  transform: scale(var(--library-card-scale));
+  outline-color: var(--color-accent);
+}
+
+/* ---- bottom band ----------------------------------------------------------------------------------- */
+
+.library__import {
+  display: inline-flex;
+  align-items: center;
+  gap: 4.8rem;
+  height: var(--pill-hit);
+  padding: 0 1.6rem;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-ui);
+  font-size: var(--library-count-fs);
+  font-weight: var(--fw-regular);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  outline: var(--ring-w) solid transparent;
+  outline-offset: 0;
+  transition:
+    background var(--dur-instant) var(--ease-linear),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.library__import:hover,
+.library__import[data-focused='true'] {
+  background: var(--color-glass-hover);
+}
+
+.library__import[data-focused='true'] {
+  outline-color: var(--ring);
+}
+
+.library__import > svg {
+  width: 4.2rem;
+  height: 4.2rem;
+  stroke-width: 1.2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .library__tab-underline--slide {
+    transition: none;
+  }
+}
+
+/* ---- the Settings tab: the Settings menu (SettingsTab.tsx, the Settings modal's panel) ------------------- */
+
+/* fills the body like the header + grid do, on a panel like the Settings modal's so its text reads over the hero
+   art; the section list on the left, the section's controls on the right (Settings/settings.css); slides in with
+   the grid's own entrance keyframes on a tab switch */
+.library__settings {
+  position: absolute;
+  left: var(--library-header-inset-l);
+  right: var(--library-header-inset-r);
+  top: calc(var(--library-header-top) - var(--library-band-h));
+  bottom: 3rem;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--color-surface-translucent);
+  border: 1px solid var(--color-control-stroke);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+}
+
+.library__settings .settings__nav {
+  padding-top: 2.4rem;
+}
+
+.library__settings .settings__content {
+  padding-top: 2.4rem;
+}
+
+/* ---- section rail: A–Z (or the sort's sections) in the right gutter beside the grid ---------------------
+   Outside the scrolling viewport (whose edge mask and tab slide would fade or move it); centred in the gap
+   between the grid's right edge and the screen edge. A click jumps; a controller uses the D-pad instead. */
+
+.library__rail {
+  position: absolute;
+  top: calc(var(--library-grid-top) - var(--library-band-h) + var(--library-grid-pad-top));
+  bottom: calc(32 * var(--u));
+  right: calc(var(--library-grid-inset-x) / 2 - var(--library-rail-w) / 2);
+  width: var(--library-rail-w);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(8 * var(--u)) 0;
+  border-radius: calc(var(--library-rail-w) / 2);
+  background: rgba(255, 255, 255, 0.04);
+  --library-rail-w: calc(44 * var(--u));
+}
+
+.library__rail-entry {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-ui);
+  font-size: clamp(9px, calc(17 * var(--u)), 22px);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-enter);
+}
+
+.library__rail-entry:hover {
+  color: var(--color-text);
+}
+
+.library__rail-entry--current {
+  color: var(--color-accent);
+}
+
+.library__rail-entry--empty {
+  color: var(--color-text-tertiary, rgba(255, 255, 255, 0.25));
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ---- cover-size slider: − / a track with a diamond / + in the left gutter (CoverSizeSlider.tsx) -------------------
+   The rail's mirror: centred in the gap between the screen edge and the grid's left edge (the columns fit between the
+   side insets, so it never covers a card), over the same height, its own height capped and centred. Top = smallest. */
+
+.library__cover-size {
+  --cover-size-w: calc(44 * var(--u));
+  position: absolute;
+  top: calc(var(--library-grid-top) - var(--library-band-h) + var(--library-grid-pad-top));
+  bottom: calc(32 * var(--u));
+  left: calc(var(--library-grid-inset-x) / 2 - var(--cover-size-w) / 2);
+  width: var(--cover-size-w);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(10 * var(--u));
+}
+
+.library__cover-size-button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--cover-size-w);
+  height: var(--cover-size-w);
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  outline: var(--ring-w) solid transparent;
+  outline-offset: 0;
+  transition:
+    background var(--dur-instant) var(--ease-linear),
+    color var(--dur-instant) var(--ease-linear),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.library__cover-size-button:hover,
+.library__cover-size-button[data-focused='true'] {
+  background: var(--color-glass-hover);
+  color: var(--color-text);
+}
+
+.library__cover-size-button[data-focused='true'] {
+  outline-color: var(--ring);
+}
+
+.library__cover-size-button[aria-disabled='true'] {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.library__cover-size-button > svg {
+  width: 60%;
+  height: 60%;
+  stroke-width: 2;
+}
+
+/* the track: the whole column between the buttons takes taps and drags; the thin rail inside it is the scale */
+.library__cover-size-track {
+  position: relative;
+  /* a comfortable fixed height (with the buttons about 560u), centred; shorter when the gutter is */
+  flex: 0 1 calc(450 * var(--u));
+  min-height: calc(120 * var(--u));
+  width: var(--cover-size-w);
+  padding: calc(16 * var(--u)) 0;
+  box-sizing: border-box;
+  border-radius: calc(var(--cover-size-w) / 2);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  touch-action: none;
+  outline: var(--ring-w) solid transparent;
+  outline-offset: 0;
+  transition: outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.library__cover-size-track[data-focused='true'] {
+  outline-color: var(--ring);
+}
+
+.library__cover-size-rail {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.library__cover-size-rail::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: calc(3 * var(--u));
+  min-width: 2px;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.library__cover-size-tick {
+  position: absolute;
+  left: 50%;
+  width: calc(10 * var(--u));
+  height: calc(2 * var(--u));
+  min-height: 1px;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* today's size (the default) gets a longer tick */
+.library__cover-size-tick--default {
+  width: calc(18 * var(--u));
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* the diamond: a rotated square on the current step */
+.library__cover-size-thumb {
+  position: absolute;
+  left: 50%;
+  width: calc(20 * var(--u));
+  height: calc(20 * var(--u));
+  min-width: 12px;
+  min-height: 12px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border-radius: calc(3 * var(--u));
+  background: var(--color-text);
+  box-shadow: 0 0 calc(8 * var(--u)) rgba(0, 0, 0, 0.5);
+  transition:
+    top var(--dur-fast) var(--ease-enter),
+    background var(--dur-instant) var(--ease-linear);
+  pointer-events: none;
+}
+
+.library__cover-size-track[data-focused='true'] .library__cover-size-thumb,
+.library__cover-size-track--drag .library__cover-size-thumb {
+  background: var(--color-accent);
+}
+
+.library__cover-size-track--drag .library__cover-size-thumb {
+  transition: background var(--dur-instant) var(--ease-linear);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .library__cover-size-thumb {
+    transition: none;
+  }
+}
+
+/* The folder button where the game count was (a tab with Platform / PC filters): the Playable first button's look,
+   without its pull into the search field's gap. */
+.library__folders {
+  margin: 0 -2.2rem 0 0;
+}
+
+/* Filters > Platform: the line between the systems and the stores (not a choice, never focused). */
+.filters-menu__sep {
+  flex: none;
+  height: 1px;
+  margin: 0.8rem 1.6rem;
+  background: var(--color-divider);
+}

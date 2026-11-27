@@ -1,0 +1,102 @@
+{
+  "folder": {
+    "programOutside": "The game's program is not inside its folder",
+    "none": "The game has no install folder",
+    "driveTop": "The game is at the top of a drive",
+    "inWindows": "The game is inside the Windows folder",
+    "systemFolder": "{folder} is a system or user folder (or holds one), so it is not deleted",
+    "playoutFolder": "{folder} holds PlayOut, its data or your ROM / Emulation folder, so it is not deleted",
+    "belowDriveTop": "{folder} sits right below the top of its drive, so it may hold more than one game",
+    "storeLibrary": "{folder} is a store's game library or a store's own folder",
+    "inStoreLibrary": "{folder} is in a store's game library ({library}); uninstall it from that store",
+    "inStoreFolder": "{folder} is in a store's library or folder ({store}); uninstall it from that store",
+    "notOnPc": "{folder} is not on this PC",
+    "tooManyFiles": "{folder} holds too many files to check",
+    "tooLarge": "{folder} is larger than 200 GB",
+    "unreadable": "{folder} cannot be read",
+    "holdsStore": "{folder} holds {name}, a store's folder or program",
+    "mixedGames": "{folder} holds programs of different games ({first}, {second})",
+    "tooManyFolders": "{folder} holds too many folders to check",
+    "holdsStoreInner": "{folder} holds {name}, a store's folder or program",
+    "holdsOtherGame": "{folder} also holds {name}, which looks like another game"
+  },
+  "uninstaller": {
+    "storeProgram": "Its uninstaller is a store's program ({name}); uninstall it from that store",
+    "removesOther": "{reason}, so its uninstaller would remove that game too"
+  },
+  "refused": {
+    "notInLibrary": "This game is not in the library",
+    "otherPc": "{title} is on another PC; there is nothing to delete here",
+    "notInstalled": "{title} is not installed on this PC",
+    "running": "{title} is running. Quit it first.",
+    "queued": "{title} is in the download queue. Remove it from the queue first.",
+    "notHere": "This game cannot be deleted from here",
+    "cannotDelete": "This game cannot be deleted"
+  },
+  "rom": {
+    "outsideFolder": "{path} is outside the ROM folder",
+    "systemFolder": "{path} is a system folder of the ROM folder",
+    "savesOrBios": "{path} holds saves or BIOS files",
+    "noFolder": "No ROM folder is set, so the files cannot be checked",
+    "converting": "A conversion is running. Wait for it to finish.",
+    "heldImage": "{path} holds a disc image PlayOut keeps aside while it checks a recompilation; answer that question first",
+    "sharedWith": "{path} also holds {title}",
+    "allShared": "Every file of this game is also used by another game",
+    "clash": "{path} also holds {title}"
+  },
+  "image": {
+    "inRecycleBin": "The disc image of {title} is already in the Recycle Bin (it starts its recompilation)",
+    "none": "{title} has no disc image on this PC",
+    "cannotMove": "Its files cannot be moved",
+    "downloading": "A paired PC is downloading it right now",
+    "gameGone": "the game is not in the library",
+    "noRecycleBin": "{file} could not be moved to the Recycle Bin (a network drive or a drive without one?). Nothing was deleted.",
+    "partial": "Only {moved} of {total} files went to the Recycle Bin (restore them from there); {file} could not be moved.",
+    "moved": "Moved {file} to the Recycle Bin"
+  },
+  "uninstall": {
+    "settingsOpen": "Windows Settings is open: uninstall {title} from Apps there",
+    "storeUninstalling": "{store} is uninstalling {title}",
+    "storeOpen": "{store} is open: uninstall {title} from its library",
+    "notFound": "The uninstaller of {title} was not found",
+    "open": "{title}'s uninstaller is open"
+  },
+  "files": {
+    "noRecycleBin": "{title} could not be moved to the Recycle Bin (a network drive or a drive without one?). Nothing was deleted.",
+    "partial": "Only {moved} of {total} files of {title} went to the Recycle Bin (restore them from there); {file} could not be moved.",
+    "movedExtrasFailed": "Moved {title} to the Recycle Bin; {failed} of its updates and DLC could not be moved ({files})",
+    "movedWithExtras": "Moved {title} and its updates and DLC to the Recycle Bin",
+    "moved": "Moved {title} to the Recycle Bin",
+    "couldNotDelete": "Could not delete {title}: {error}"
+  },
+  "nothingDeleted": "Nothing was deleted: {why}.",
+  "unpacked": {
+    "systemFolder": "{folder} sits right in a system or user folder, so it is not deleted",
+    "saves": "{folder} holds or is in your saves, states or BIOS, so it is not deleted",
+    "link": "{folder} is a link to another folder, so it is not deleted",
+    "gone": "{folder} is not there any more",
+    "notFolder": "{folder} is not a folder",
+    "downloading": "A paired PC is downloading from it right now",
+    "noRecycleBin": "{folder} could not be moved to the Recycle Bin (a network drive or a drive without one?). Nothing was deleted.",
+    "moved": "Moved {folder} to the Recycle Bin"
+  },
+  "held": {
+    "noteFailed": "Nothing was deleted: PlayOut could not note what it moves ({error}).",
+    "stuck": "{error}; {files} file(s) could not be put back and stay kept aside (PlayOut asks what to do with them).",
+    "movedAside": "Moved aside",
+    "cannotMoveAside": "{path} cannot be moved aside",
+    "otherDrive": "{file} could not be moved aside on its own drive",
+    "couldNotMoveAside": "{file} could not be moved aside ({error})",
+    "notMovedByPlayOut": "{path} is not a file PlayOut moved aside; nothing was restored.",
+    "blocked": "Something is at {path} now, so nothing was restored (PlayOut never overwrites it). Move it away and choose Restore again.",
+    "couldNotPutBack": "{file} could not be put back ({error})",
+    "stillAside": "{error}. It is still kept aside; choose Restore again.",
+    "restoredMissing": "Restored what was left; {files} was no longer there.",
+    "notMovedByPlayOutDelete": "{path} is not a file PlayOut moved aside; nothing more was deleted.",
+    "recycleFailed": "{file} could not be moved to the Recycle Bin ({error}); it is still kept aside.",
+    "moved": "Moved to the Recycle Bin",
+    "movedFileAside": "Moved {file} aside"
+  },
+  "nothingDeletedError": "Nothing was deleted: {error}.",
+  "hostGamesReadOnly": "Host games cannot be edited on this PC"
+}

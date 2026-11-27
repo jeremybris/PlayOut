@@ -1,0 +1,159 @@
+{
+  "status": {
+    "moonlightRetry": "Streaming not paired yet: it is retried when you stream",
+    "doubleNat": "This network is behind another router or your provider's shared address (CGNAT)",
+    "streamPorts": "Streaming ports could not be forwarded: games can be listed and downloaded over the internet but not streamed"
+  },
+  "download": {
+    "tooMuchData": "The host sent more data than expected",
+    "noFiles": "{name} lists no files for this game",
+    "notScanned": "{title} was downloaded, but the ROM scan did not add it: check its system folder in Settings > Library",
+    "failed": "Download failed: {error}",
+    "onlyHostGames": "Only games from another PC can be downloaded",
+    "chooseEmulationFolder": "Choose your Emulation folder in Settings > Library first",
+    "notOffered": "{name} does not offer this game right now",
+    "notDownloadable": "This game cannot be downloaded",
+    "closing": "PlayOut is closing",
+    "cancelled": "Download cancelled",
+    "romFolder": "ROM folder",
+    "noSpace": "Not enough free space in the {place} ({needed} needed, {free} free)",
+    "tooMuchDataFor": "The host sent more data than expected for {file}",
+    "stoppedEarly": "The download of {file} stopped before the end"
+  },
+  "net": {
+    "refused": "PlayOut is not accepting connections there",
+    "notFound": "that computer name was not found",
+    "noAnswer": "no answer: is it on and on this network?",
+    "cut": "the connection was cut",
+    "failed": "the network failed"
+  },
+  "address": {
+    "portNumber": "The port after \":\" must be a number",
+    "ipv4": "Use the computer's IPv4 address (for example 192.168.1.20)",
+    "enter": "Enter an IP address or computer name, for example 192.168.1.20",
+    "badPort": "That port is not valid"
+  },
+  "stream": {
+    "moonlightClosed": "Moonlight closed: {line}",
+    "imageInRecycleBin": "its disc image is in the Recycle Bin",
+    "notPaired": "That computer is no longer paired",
+    "busy": "{name} is already running another game",
+    "notInstalled": "This game is no longer installed on {name}",
+    "unauthorized": "{name} no longer knows this PC: pair again",
+    "noAnswer": "{name} did not answer: {error}",
+    "alreadyRunning": "A stream is already running: stop it first",
+    "hostCouldNotStart": "The host could not start the game: {error}",
+    "moonlightClosedEarly": "Moonlight closed before the stream started",
+    "moonlightClosedEarlyCode": "Moonlight closed before the stream started (exit {code})"
+  },
+  "host": {
+    "turnedOff": "streaming is turned off",
+    "gameNotInstalledOn": "This game is no longer installed on {name}",
+    "busyOtherGame": "{name} is already running another game",
+    "busyOtherClient": "{name} is streaming to another computer",
+    "notReady": "Streaming is not ready on {name}: {error}",
+    "portsWarning": "{name} could not forward its streaming ports, so it may only stream on its own network",
+    "pinNeeded": "a 4-digit PIN is needed",
+    "notReadyLower": "streaming is not ready on {name}: {error}",
+    "pairingTimeout": "Moonlight did not finish pairing in time",
+    "nothingToStart": "nothing to start: no PlayOut computer asked for a game",
+    "gameGone": "the game is no longer installed",
+    "otherGameRunning": "another game is already running",
+    "gameCouldNotStart": "the game could not start",
+    "certificate": "Could not create this PC's security certificate: {error}",
+    "portInUse": "Port {port} is used by another program: choose another port",
+    "couldNotStart": "The host service could not start: {error}",
+    "discovery": "Other PCs cannot find this one on the network (UDP {port}: {error}).",
+    "launchPipe": "Games cannot be started for a stream: {error}.",
+    "hostCertificate": "Could not create the host certificate"
+  },
+  "router": {
+    "noAddress": "This PC has no address on the router's network",
+    "refused": "The router refused to forward the port"
+  },
+  "hosts": {
+    "noAddress": "no address is known for {name}",
+    "otherComputer": "{address} is another PlayOut computer now",
+    "offline": "{name} is offline or cannot be reached ({error})",
+    "unreachable": "{name} could not be reached: {error}",
+    "noneOffers": "No paired computer offers this game",
+    "alsoClient": "{name} is also a client of this PC: remove one of the two pairings",
+    "forgotThisPc": "{name} no longer knows this PC: remove it and pair again"
+  },
+  "favourites": {
+    "needSync": "Favourites of host games need \"Sync favourites\" (Settings › Streaming)",
+    "notHostGame": "Not a game of a paired computer",
+    "hostOff": "{name} does not sync favourites (switched off there, or an older PlayOut)"
+  },
+  "emuSync": {
+    "gameRunningHere": "a game is running on this PC",
+    "stoppedGameStarted": "stopped: a game started on this PC",
+    "syncOff": "{name} has the Emulation folder sync turned off",
+    "gameRunningThere": "a game is running on {name}",
+    "folderMissing": "the Emulation folder is missing ({folder})",
+    "folderUnreadable": "a folder could not be read ({folder}): {error}",
+    "tooManyFiles": "the Emulation folder holds more than {max} files",
+    "hostDriveFull": "the host’s drive is full"
+  },
+  "pair": {
+    "moonlightClosed": "Moonlight closed before the pairing finished",
+    "notAccepted": "the host did not accept the pairing",
+    "stillNotPaired": "Moonlight is still not paired with the host",
+    "wrongPin": "Wrong PIN: check the PIN shown on the other PC",
+    "expired": "The PIN expired: show a new one on the other PC",
+    "locked": "Too many wrong PINs: the other PC refuses pairing for 10 minutes",
+    "notShowing": "The other PC is not showing a PIN: press Show PIN under \"Pair a computer\" on it first",
+    "isHost": "The other PC is already a host for this PC: a host cannot also be its client",
+    "unreachable": "Could not reach PlayOut at {address}: {error}",
+    "moonlightFailed": "Moonlight could not pair with {name}: {error}",
+    "lockedHost": "Too many wrong PINs: pairing is locked for a while"
+  },
+  "pin": {
+    "hostingOff": "Turn on \"Let other PlayOut computers connect\" first",
+    "hostNotRunning": "The host service is not running: see the message in Settings > Streaming"
+  },
+  "add": {
+    "unusableId": "That computer answered with an unusable id",
+    "thisPc": "That address is this PC",
+    "isClient": "{name} is a client of this PC: a client cannot also be its host"
+  },
+  "wan": {
+    "notPaired": "That computer is not paired any more",
+    "lanAddress": "That is an address on a local network: enter the host's internet address or name",
+    "portMismatch": "{name} listens on port {port}: forward that same port on its router and leave the port out"
+  },
+  "rom": {
+    "outside": "This ROM is outside the ROM folder",
+    "gone": "This ROM is no longer on this PC",
+    "tooManyFiles": "This ROM folder holds too many files to download",
+    "noFiles": "This ROM has no files that can be downloaded",
+    "fileGone": "This ROM file is no longer on this PC"
+  },
+  "client": {
+    "certificateChanged": "The host's security certificate changed; pair with it again if this is expected",
+    "noCertificate": "The host presented no certificate",
+    "tooMuchData": "The host sent too much data",
+    "unreadable": "The host sent an unreadable answer",
+    "wholeFile": "The host sent the whole file instead of the missing part",
+    "sessionClosed": "This download session is closed"
+  },
+  "sunshine": {
+    "notInstalled": "Sunshine is not installed",
+    "keepsClosing": "Sunshine keeps closing; see its log in the streaming folder",
+    "otherCopy": "another copy of Sunshine is already running on this PC (ports {port} and {port2} are in use)",
+    "notConfigured": "Sunshine is not configured yet",
+    "loginNotSaved": "Sunshine could not save its login (exit {code})",
+    "closedWhileStarting": "Sunshine closed while starting",
+    "closedWhileStartingWhy": "Sunshine closed while starting ({error})",
+    "notStarted": "Sunshine did not start in time",
+    "notStartedWhy": "Sunshine did not start in time ({error})"
+  },
+  "firewall": {
+    "blockedRetry": "Windows Firewall blocks other PCs from reaching this one (port {port}): switch hosting off and on to be asked for admin rights again.",
+    "blocked": "Windows Firewall blocks other PCs from reaching this one: allow TCP {tcp} and UDP {udp} in Windows Security › Firewall, or switch hosting off and on to try again."
+  },
+  "moonlight": {
+    "notInstalled": "Moonlight is not installed"
+  },
+  "hostOffline": "Waiting for {host} to come back online"
+}

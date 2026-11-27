@@ -1,0 +1,78 @@
+{
+  "unavailable": {
+    "theStore": "la tienda",
+    "noAnswer": "la página de la cuenta no respondió",
+    "accountPage": "la página de la cuenta no cargó",
+    "eaSite": "el sitio de la app de EA",
+    "noBearer": "no se emitió ningún token de acceso",
+    "noLegacyOffers": "no se devolvieron ofertas antiguas",
+    "noOwnedList": "no se devolvió la lista de juegos",
+    "noGamesList": "Steam respondió sin una lista de juegos (detalles de juegos privados o un error temporal de la API)",
+    "storePage": "la página de la tienda no cargó"
+  },
+  "signIn": {
+    "windowOpen": "Ya hay una ventana de inicio de sesión abierta",
+    "title": "Inicia sesión en {store}",
+    "failed": "Falló el inicio de sesión: {error}"
+  },
+  "confirm": {
+    "battlenet": "Confirma la instalación en Battle.net",
+    "ea": "Confirma la instalación en la app de EA",
+    "epic": "Confirma la instalación en Epic Games Launcher",
+    "gog": "Confirma la instalación en GOG Galaxy",
+    "steam": "Confirma la instalación en Steam",
+    "ubisoft": "Confirma la instalación en Ubisoft Connect",
+    "xbox": "Pulsa Instalar en la app de Xbox"
+  },
+  "install": {
+    "battlenetMissing": "Battle.net no está instalado: instálalo desde blizzard.com para instalar y jugar estos juegos.",
+    "battlenetClassic": "{title} es un juego clásico: descárgalo desde la sección Juegos clásicos de la app de Battle.net.",
+    "battlenetUnknown": "Battle.net no conoce este juego, así que no se puede instalar desde aquí.",
+    "eaMissing": "La app de EA no está instalada: instálala desde ea.com/ea-app para instalar y jugar estos juegos.",
+    "otherStore": "Este juego lo administra otra tienda; instálalo allí.",
+    "eaNoId": "Este juego no tiene id de contenido de EA, así que la app de EA no puede instalarlo.",
+    "epicNoId": "Este juego no tiene nombre de app de Epic, así que Epic Games Launcher no puede instalarlo.",
+    "epicMissing": "Epic Games Launcher no está instalado: instálalo desde epicgames.com para instalar y jugar estos juegos.",
+    "gogNoId": "Este juego no tiene id de producto de GOG, así que GOG Galaxy no puede instalarlo.",
+    "gogMissing": "GOG Galaxy no está instalado: instálalo desde gog.com/galaxy, o descarga el instalador sin conexión desde gog.com/account.",
+    "steamNoId": "Este juego no tiene id de app de Steam, así que Steam no puede instalarlo.",
+    "steamMissing": "Steam no está instalado: instálalo desde steampowered.com para instalar y jugar estos juegos.",
+    "ubisoftNoId": "Este juego no tiene id de lanzamiento de Ubisoft, así que Ubisoft Connect no puede instalarlo.",
+    "ubisoftMissing": "Ubisoft Connect no está instalado: instálalo desde ubisoft.com/ubisoft-connect para instalar y jugar estos juegos.",
+    "xboxNoId": "Este juego no tiene id de producto de Microsoft Store, así que la app de Xbox no puede instalarlo.",
+    "notFromStore": "Este juego no es de una tienda, así que no hay nada que instalar.",
+    "cannotInstall": "{store} no puede instalar este juego."
+  },
+  "token": {
+    "epic": "Epic no devolvió un token",
+    "gog": "GOG no devolvió un token",
+    "gogUser": "GOG no devolvió un id de usuario",
+    "xboxUser": "Xbox Live no devolvió un token de usuario",
+    "xsts": "Xbox Live no devolvió un token XSTS",
+    "microsoft": "Microsoft no devolvió un token"
+  },
+  "ubisoft": {
+    "noSignIn": "Ubisoft no ofrece un inicio de sesión que PlayOut pueda usar; tus juegos vienen del cliente de Ubisoft Connect."
+  },
+  "sessionExpired": "La sesión caducó; vuelve a iniciar sesión",
+  "apiKeySignOut": "Steam tiene la sesión iniciada con la clave de Web API de Ajustes > Metadatos; bórrala allí para cerrar sesión.",
+  "notSupported": "No compatible",
+  "notSignedIn": "Sin sesión iniciada",
+  "couldNotReach": "No se pudo acceder a {store}",
+  "importFailed": "Falló la importación: {error}",
+  "accountsUnsupported": "Las cuentas de {store} no son compatibles",
+  "sessionExpiredStore": "La sesión caducó; vuelve a iniciar sesión para actualizar tu biblioteca de {store}",
+  "couldNotReachWhy": "No se pudo acceder a {store} ({detail})",
+  "failure": {
+    "noAnswerAfter": "sin respuesta tras {seconds} s",
+    "server": "Los servidores de {owner} no responden en este momento ({code}). Es un problema de {owner}, no de PlayOut.",
+    "rateLimit": "{store} está limitando las solicitudes en este momento ({code}). Es cosa de {store}, no de PlayOut.",
+    "timeout": "{store} no respondió a tiempo. Puede que los servidores de {store} estén sobrecargados, o que tu conexión a internet esté lenta o caída.",
+    "timeoutWhy": "{store} no respondió a tiempo ({detail}). Puede que los servidores de {store} estén sobrecargados, o que tu conexión a internet esté lenta o caída.",
+    "network": "No se pudo acceder a {store}. Puede que tu conexión a internet esté caída, o que los servidores de {store} tengan problemas.",
+    "networkWhy": "No se pudo acceder a {store} ({detail}). Puede que tu conexión a internet esté caída, o que los servidores de {store} tengan problemas.",
+    "retryIn": "PlayOut lo intentará de nuevo en {minutes} minutos.",
+    "importLater": "Vuelve a importar más tarde para intentarlo otra vez.",
+    "unchanged": "{first} Tus juegos de {store} no cambiaron; {next}"
+  }
+}

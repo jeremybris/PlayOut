@@ -1,0 +1,189 @@
+{
+  "title": "Streaming",
+  "lead": "Juega en este PC los juegos de tus otros equipos con PlayOut. Los juegos de PC se transmiten por la red; los juegos ROM también se pueden descargar.",
+  "openLinkFailed": "No se pudo abrir el enlace",
+  "resolutionAuto": "La pantalla de este PC",
+  "bitrateAuto": "Automática",
+  "emulation": {
+    "title": "Carpeta Emulation",
+    "sync": {
+      "label": "Sincronizar la carpeta Emulation",
+      "description": "Mantiene igual la carpeta Emulation (BIOS, partidas guardadas, estados y lo demás) en este PC y en los equipos con los que está emparejado, en ambos sentidos, cada pocos minutos y después de cada partida. Sus carpetas roms y texturepacks quedan fuera. Cuando ambos equipos cambiaron el mismo archivo, se conserva el más reciente y el más antiguo pasa a las copias de seguridad durante 30 días. Ambos equipos necesitan tener esto activado."
+    }
+  },
+  "sync": {
+    "title": "Pestañas de la Biblioteca, favoritos y tiempo de juego",
+    "tabs": {
+      "label": "Sincronizar las pestañas de la Biblioteca con el host / los clientes",
+      "description": "Mantiene iguales las pestañas de la Biblioteca en este PC y en los equipos con los que está emparejado, en ambos sentidos: añadir, quitar o mover una pestaña, y sus filtros, su orden y Jugables primero. Gana el cambio más reciente. El texto de búsqueda de cada pestaña se queda en su propio PC. Con esto desactivado, este PC no envía sus pestañas ni toma las de otro."
+    },
+    "favorites": {
+      "label": "Sincronizar favoritos con el host / los clientes",
+      "description": "Mantiene iguales los favoritos en este PC y en los equipos con los que está emparejado, en ambos sentidos, juego por juego: gana el cambio más reciente. Funciona con los juegos que tienen ambos equipos, y te permite marcar como favorito un juego de un host que se muestra aquí (pasa a ser favorito en el host). Con esto desactivado, este PC no envía sus favoritos ni toma los de otro."
+    },
+    "playtime": {
+      "label": "Sincronizar el tiempo de juego con el host / los clientes",
+      "description": "Suma el tiempo de juego de los juegos que tienen ambos equipos: las sesiones de juego de cada equipo se copian al otro, así que el tiempo de juego, la última partida, Jugados - Más y Jugados - Recientes cuentan ambos. Cada sesión cuenta una vez. Un juego que transmites desde el host se cronometra solo en el host; un juego del host que este PC no tiene muestra cuándo se jugó allí por última vez, así que también aparece en Juegos recientes. Con esto desactivado, este PC no envía sus sesiones ni toma las de otro, y no informa ni muestra cuándo se jugaron por última vez los juegos de un host."
+    }
+  },
+  "tools": "Sunshine (en el host) y Moonlight (en este PC) se encargan del streaming. Son programas de código abierto independientes con licencia GPL-3, que se descargan de sus propios lanzamientos la primera vez que se necesitan.",
+  "host": {
+    "title": "Este PC como host",
+    "failed": "Algo salió mal",
+    "removeClient": {
+      "title": "¿Quitar {name}?",
+      "message": "{name} ya no verá ni transmitirá los juegos de este PC. Puede volver a emparejarse con un PIN nuevo.",
+      "confirm": "Quitar"
+    },
+    "enabled": {
+      "label": "Permitir que se conecten otros equipos con PlayOut",
+      "description": "Los equipos emparejados ven los juegos instalados y las ROM de este PC, los transmiten y descargan las ROM."
+    },
+    "shareLogins": {
+      "label": "Compartir mis inicios de sesión con los equipos emparejados",
+      "description": "Da a los equipos emparejados los inicios de sesión de metadatos de este PC (SteamGridDB, IGDB, ScreenScraper, TheGamesDB, Steam) y la cuenta de RetroAchievements. Solo los usan para los servicios en los que no tienen sesión. Se envían por la conexión emparejada y cifrada."
+    },
+    "sunshineMissing": "Se descarga cuando se inicia el host.",
+    "sunshineDownload": "Descarga de Sunshine",
+    "portForwarding": "Redirección de puertos",
+    "address": "Dirección de este PC",
+    "notConnected": "Sin conexión",
+    "addressWithPort": "{address} · puerto {port}",
+    "pair": {
+      "label": "Emparejar un equipo",
+      "pinLabel": "PIN {digits}",
+      "enterPin": "Introduce este PIN en el otro equipo (Ajustes › Streaming › Conectarse a un host). Válido durante {time}.",
+      "afterProblem": "Disponible cuando se solucione el problema de arriba.",
+      "starting": "Disponible cuando se haya iniciado el host…",
+      "description": "Muestra un PIN para introducir en el otro equipo. Queda emparejado hasta que lo quites.",
+      "cancel": "Cancelar",
+      "showPin": "Mostrar PIN"
+    },
+    "controllers": {
+      "label": "Controles",
+      "description": "Instala el controlador ViGEmBus para que los mandos del otro equipo funcionen en los juegos transmitidos. Sunshine lo usa para añadir un gamepad virtual.",
+      "get": "Obtener ViGEmBus"
+    },
+    "nowStreaming": "Transmitiendo ahora",
+    "streamingTo": "{title} a {client}",
+    "paired": "Equipos emparejados",
+    "pairedOn": "emparejado {when}",
+    "lastConnected": "última conexión {when}",
+    "remove": "Quitar",
+    "noClients": "Todavía no hay equipos emparejados."
+  },
+  "client": {
+    "title": "Conectarse a un host",
+    "findFailed": "No se pudieron buscar equipos",
+    "enterAddress": "Introduce la dirección del host",
+    "enterPin": "Introduce el PIN de 4 dígitos que muestra el host",
+    "paired": "Emparejado con {name}. Sus juegos aparecen en tu biblioteca.",
+    "pairFailed": "No se pudo emparejar",
+    "removeHost": {
+      "title": "¿Quitar {name}?",
+      "message": "Los juegos de {name} salen de tu biblioteca. Puedes volver a emparejarte con un PIN nuevo desde ese equipo.",
+      "confirm": "Quitar",
+      "failed": "No se pudo quitar el equipo"
+    },
+    "wan": {
+      "saved": "Ahora {name} se buscará en {address} desde otras redes",
+      "cleared": "Se borró la dirección de internet de {name}",
+      "failed": "No se pudo guardar la dirección",
+      "button": "Dirección de internet",
+      "label": "Dirección de internet o nombre de {name}",
+      "placeholder": "203.0.113.5 o home.example.net",
+      "oskTitle": "Dirección de internet de {name}",
+      "save": "Guardar",
+      "note": "Dónde encontrar {name} desde otra red: su dirección de internet (se muestra en Ajustes › Streaming en {name}) o un nombre que apunte a ella. Déjalo vacío para olvidarla."
+    },
+    "online": "En línea",
+    "offline": "Desconectado",
+    "remove": "Quitar",
+    "noHosts": "Todavía no hay hosts emparejados. Activa \"Permitir que se conecten otros equipos con PlayOut\" en el otro equipo, pulsa Mostrar PIN allí y luego búscalo aquí.",
+    "add": {
+      "label": "Añadir un host",
+      "description": "Busca equipos con PlayOut en esta red, o introduce la dirección que muestra el host (también su dirección de internet cuando tiene redirección de puertos).",
+      "find": "Buscar equipos en esta red",
+      "enterAddress": "Introducir dirección"
+    },
+    "pair": "Emparejar",
+    "allPaired": "Todos los equipos con PlayOut encontrados ya están emparejados.",
+    "noneFound": "No se encontraron equipos con PlayOut. Comprueba que el host tenga activado \"Permitir que se conecten otros equipos con PlayOut\", o introduce su dirección.",
+    "hostAddress": "Dirección del host",
+    "hostAddressOsk": "Dirección del host",
+    "pin": "PIN",
+    "pinOsk": "PIN que muestra el host",
+    "cancel": "Cancelar",
+    "moonlightMissing": "Se descarga la primera vez que transmites un juego.",
+    "moonlightDownload": "Descarga de Moonlight",
+    "refreshGames": "Actualizar juegos",
+    "showHostGames": {
+      "label": "Mostrar los juegos de los equipos emparejados",
+      "description": "Los juegos que solo tiene un host aparecen en tu biblioteca con Transmitir o Descargar; los juegos que tienen ambos ofrecen Transmitir desde el host en su menú Jugar."
+    },
+    "resolution": {
+      "label": "Resolución",
+      "description": "El tamaño de la imagen de la transmisión. El juego del host también se ejecuta con ella."
+    },
+    "fps": "Velocidad de fotogramas",
+    "bitrate": {
+      "label": "Tasa de bits",
+      "description": "Más alta se ve más nítida pero necesita una red más rápida. Automática elige una según la resolución y la velocidad de fotogramas."
+    }
+  },
+  "status": {
+    "checking": "Comprobando…",
+    "tool": {
+      "downloading": "Descargando {name}…",
+      "downloadingPercent": "Descargando {name}… {percent}%",
+      "ready": "{name} está listo",
+      "running": "{name} está en marcha",
+      "failed": "No se pudo configurar {name}"
+    },
+    "forwarding": {
+      "off": "Se comprueba cuando se inicia el host.",
+      "mapped": "Accesible por internet",
+      "mappedAt": "Accesible por internet en {ip}",
+      "mappedWithError": "Accesible por internet. {error}",
+      "mappedAtWithError": "Accesible por internet en {ip}. {error}",
+      "noAutomatic": "Este router no redirige los puertos automáticamente",
+      "byHand": "{reason}. Para conectarte desde otra red, redirige el puerto TCP {port} a este PC en tu router (para transmitir también: TCP 47984, 47989 y 48010, UDP 47998 a 48000). La dirección de internet de este PC es {ip}.",
+      "unavailable": "No disponible en esta red: solo pueden conectarse los equipos de la misma red",
+      "unavailableWhy": "{error}: solo pueden conectarse los equipos de la misma red"
+    },
+    "locked_one": "Demasiados PIN incorrectos. El emparejamiento está bloqueado durante {count} minuto más.",
+    "locked_other": "Demasiados PIN incorrectos. El emparejamiento está bloqueado durante {count} minutos más.",
+    "when": {
+      "justNow": "ahora mismo",
+      "minutes": "hace {count} min",
+      "hours": "hace {count} h",
+      "today": "hoy",
+      "yesterday": "ayer",
+      "days_one": "hace {count} día",
+      "days_other": "hace {count} días",
+      "onDate": "el {date}"
+    },
+    "host": {
+      "offline": "Desconectado",
+      "lastSeen": "visto por última vez {when}",
+      "games_one": "{count} juego",
+      "games_other": "{count} juegos"
+    },
+    "emulationSync": {
+      "syncing_one": "Carpeta Emulation: sincronizando, {done} de {count} archivo",
+      "syncing_other": "Carpeta Emulation: sincronizando, {done} de {count} archivos",
+      "comparing": "Carpeta Emulation: comparando…",
+      "waiting": "Carpeta Emulation: esperando",
+      "waitingWhy": "Carpeta Emulation: esperando ({reason})",
+      "error": "Carpeta Emulation sin sincronizar: {error}",
+      "unknownError": "error desconocido",
+      "synced": "Carpeta Emulation sincronizada",
+      "syncedWhen": "Carpeta Emulation sincronizada {when}",
+      "conflicts_one": "{count} conflicto: se conserva la copia más reciente y la más antigua va a las copias de seguridad",
+      "conflicts_other": "{count} conflictos: se conserva la copia más reciente y la más antigua va a las copias de seguridad",
+      "failed_one": "No se pudo sincronizar {count} archivo",
+      "failed_other": "No se pudieron sincronizar {count} archivos"
+    },
+    "firewallHint": "Windows puede preguntar si PlayOut y Sunshine pueden usar la red: elige Permitir en las redes privadas, o los demás equipos no podrán conectarse."
+  }
+}

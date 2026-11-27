@@ -1,0 +1,189 @@
+{
+  "title": "Streaming",
+  "lead": "Play the games of your other PlayOut computers on this one. PC games stream over the network; ROM games can also be downloaded.",
+  "openLinkFailed": "Could not open the link",
+  "resolutionAuto": "This PC's screen",
+  "bitrateAuto": "Automatic",
+  "emulation": {
+    "title": "Emulation folder",
+    "sync": {
+      "label": "Sync the Emulation folder",
+      "description": "Keeps the Emulation folder (BIOS, saves, states and the rest) the same on this PC and the computers it is paired with, both ways, every few minutes and after each game. Its roms and texturepacks folders are left out. When both computers changed the same file, the newer one is kept and the older one goes to the backups for 30 days. Both computers need this on."
+    }
+  },
+  "sync": {
+    "title": "Library tabs, favourites and play time",
+    "tabs": {
+      "label": "Sync Library tabs with the host / clients",
+      "description": "Keeps the Library tabs the same on this PC and the computers it is paired with, both ways: adding, removing or moving a tab, and its filters, sort and Playable first. The newest change wins. Each tab's search text stays on its own PC. With this off, this PC neither sends its tabs nor takes another's."
+    },
+    "favorites": {
+      "label": "Sync favourites with the host / clients",
+      "description": "Keeps the favourites the same on this PC and the computers it is paired with, both ways, game by game: the newest change wins. Works for the games both computers have, and lets you favourite a host's game shown here (it becomes a favourite on the host). With this off, this PC neither sends its favourites nor takes another's."
+    },
+    "playtime": {
+      "label": "Sync play time with the host / clients",
+      "description": "Adds up the play time of the games both computers have: each computer's play sessions of them are copied to the other, so play time, last played, Played - Most and Played - Recently count both. Each session counts once. A game you stream from the host is timed on the host only; a host's game this PC does not have shows when it was last played there, so it is in Recent Games too. With this off, this PC neither sends its sessions nor takes another's, and neither tells nor shows when a host's games were last played."
+    }
+  },
+  "tools": "Sunshine (on the host) and Moonlight (on this PC) do the streaming. They are separate open-source programs under the GPL-3 licence, downloaded from their own releases the first time they are needed.",
+  "host": {
+    "title": "This PC as host",
+    "failed": "Something went wrong",
+    "removeClient": {
+      "title": "Remove {name}?",
+      "message": "{name} will no longer see or stream this PC's games. It can pair again with a new PIN.",
+      "confirm": "Remove"
+    },
+    "enabled": {
+      "label": "Let other PlayOut computers connect",
+      "description": "Paired computers see this PC's installed games and ROMs, stream them and download the ROMs."
+    },
+    "shareLogins": {
+      "label": "Share my logins with paired computers",
+      "description": "Gives paired computers this PC's metadata logins (SteamGridDB, IGDB, ScreenScraper, TheGamesDB, Steam) and RetroAchievements account. They use them only for the services they have no login for. Sent over the paired, encrypted connection."
+    },
+    "sunshineMissing": "Downloads when the host starts.",
+    "sunshineDownload": "Sunshine download",
+    "portForwarding": "Port forwarding",
+    "address": "This PC's address",
+    "notConnected": "Not connected",
+    "addressWithPort": "{address} · port {port}",
+    "pair": {
+      "label": "Pair a computer",
+      "pinLabel": "PIN {digits}",
+      "enterPin": "Enter this PIN on the other computer (Settings › Streaming › Connect to a host). Valid for {time}.",
+      "afterProblem": "Available once the problem above is fixed.",
+      "starting": "Available once the host has started…",
+      "description": "Shows a PIN to enter on the other computer. It stays paired until you remove it.",
+      "cancel": "Cancel",
+      "showPin": "Show PIN"
+    },
+    "controllers": {
+      "label": "Controllers",
+      "description": "Install the ViGEmBus driver so controllers on the other computer work in streamed games. Sunshine uses it to add a virtual gamepad.",
+      "get": "Get ViGEmBus"
+    },
+    "nowStreaming": "Now streaming",
+    "streamingTo": "{title} to {client}",
+    "paired": "Paired computers",
+    "pairedOn": "paired {when}",
+    "lastConnected": "last connected {when}",
+    "remove": "Remove",
+    "noClients": "No computers paired yet."
+  },
+  "client": {
+    "title": "Connect to a host",
+    "findFailed": "Could not look for computers",
+    "enterAddress": "Enter the address of the host",
+    "enterPin": "Enter the 4-digit PIN the host shows",
+    "paired": "Paired with {name}. Its games appear in your library.",
+    "pairFailed": "Could not pair",
+    "removeHost": {
+      "title": "Remove {name}?",
+      "message": "{name}'s games leave your library. You can pair again with a new PIN from it.",
+      "confirm": "Remove",
+      "failed": "Could not remove the computer"
+    },
+    "wan": {
+      "saved": "{name} is now looked for at {address} from other networks",
+      "cleared": "{name}'s internet address was cleared",
+      "failed": "Could not save the address",
+      "button": "Internet address",
+      "label": "{name}'s internet address or name",
+      "placeholder": "203.0.113.5 or home.example.net",
+      "oskTitle": "Internet address of {name}",
+      "save": "Save",
+      "note": "Where to find {name} from another network: its internet address (shown in Settings › Streaming on {name}) or a name pointing to it. Leave empty to forget it."
+    },
+    "online": "Online",
+    "offline": "Offline",
+    "remove": "Remove",
+    "noHosts": "No hosts paired yet. Turn on \"Let other PlayOut computers connect\" on the other computer, press Show PIN there, then find it here.",
+    "add": {
+      "label": "Add a host",
+      "description": "Look for PlayOut computers on this network, or enter the address the host shows (also its internet address when it has port forwarding).",
+      "find": "Find computers on this network",
+      "enterAddress": "Enter address"
+    },
+    "pair": "Pair",
+    "allPaired": "Every PlayOut computer found is already paired.",
+    "noneFound": "No PlayOut computers found. Check that the host is on with \"Let other PlayOut computers connect\", or enter its address.",
+    "hostAddress": "Host address",
+    "hostAddressOsk": "Address of the host",
+    "pin": "PIN",
+    "pinOsk": "PIN shown on the host",
+    "cancel": "Cancel",
+    "moonlightMissing": "Downloads the first time you stream a game.",
+    "moonlightDownload": "Moonlight download",
+    "refreshGames": "Refresh games",
+    "showHostGames": {
+      "label": "Show games from paired computers",
+      "description": "Games only a host has appear in your library with Stream or Download; games both have offer Stream from the host in their Play menu."
+    },
+    "resolution": {
+      "label": "Resolution",
+      "description": "The stream's picture size. The host's game runs at it too."
+    },
+    "fps": "Frame rate",
+    "bitrate": {
+      "label": "Bitrate",
+      "description": "Higher looks sharper but needs a faster network. Automatic picks one for the resolution and frame rate."
+    }
+  },
+  "status": {
+    "checking": "Checking…",
+    "tool": {
+      "downloading": "Downloading {name}…",
+      "downloadingPercent": "Downloading {name}… {percent}%",
+      "ready": "{name} is ready",
+      "running": "{name} is running",
+      "failed": "{name} could not be set up"
+    },
+    "forwarding": {
+      "off": "Checked when the host starts.",
+      "mapped": "Reachable over the internet",
+      "mappedAt": "Reachable over the internet at {ip}",
+      "mappedWithError": "Reachable over the internet. {error}",
+      "mappedAtWithError": "Reachable over the internet at {ip}. {error}",
+      "noAutomatic": "This router does not forward ports automatically",
+      "byHand": "{reason}. To connect from another network, forward TCP port {port} to this PC on your router (to stream too: TCP 47984, 47989 and 48010, UDP 47998 to 48000). This PC's internet address is {ip}.",
+      "unavailable": "Not available on this network: only computers on the same network can connect",
+      "unavailableWhy": "{error}: only computers on the same network can connect"
+    },
+    "locked_one": "Too many wrong PINs. Pairing is locked for {count} more minute.",
+    "locked_other": "Too many wrong PINs. Pairing is locked for {count} more minutes.",
+    "when": {
+      "justNow": "just now",
+      "minutes": "{count} min ago",
+      "hours": "{count} h ago",
+      "today": "today",
+      "yesterday": "yesterday",
+      "days_one": "{count} day ago",
+      "days_other": "{count} days ago",
+      "onDate": "on {date}"
+    },
+    "host": {
+      "offline": "Offline",
+      "lastSeen": "last seen {when}",
+      "games_one": "{count} game",
+      "games_other": "{count} games"
+    },
+    "emulationSync": {
+      "syncing_one": "Emulation folder: syncing, {done} of {count} file",
+      "syncing_other": "Emulation folder: syncing, {done} of {count} files",
+      "comparing": "Emulation folder: comparing…",
+      "waiting": "Emulation folder: waiting",
+      "waitingWhy": "Emulation folder: waiting ({reason})",
+      "error": "Emulation folder not synced: {error}",
+      "unknownError": "unknown error",
+      "synced": "Emulation folder synced",
+      "syncedWhen": "Emulation folder synced {when}",
+      "conflicts_one": "{count} conflict: the newer copy kept, the older one in the backups",
+      "conflicts_other": "{count} conflicts: the newer copy kept, the older one in the backups",
+      "failed_one": "{count} file could not be synced",
+      "failed_other": "{count} files could not be synced"
+    },
+    "firewallHint": "Windows may ask whether PlayOut and Sunshine can use the network: choose Allow on private networks, or other computers cannot connect."
+  }
+}

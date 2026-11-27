@@ -1,0 +1,90 @@
+{
+  "title": "Convert",
+  "note": "Converts ROM and emulated games between formats with Game Format Converter (free, GPL-3.0, by Mr-Shizzy; downloaded on first use, about 14 MB, with MAME's chdman). Each result is written next to its original and checked; only then does the original go to the Recycle Bin, and the game keeps its play time and art in your library. PS4 packages are unpacked by PlayOut itself, PS5 packages by its PS5 package helper (built on PS5PKGTool by pearlxcore), and Xbox and Xbox 360 games are converted by its Xbox helper (built on XISOSharp and CHDSharp, the engine of XISO Studio).",
+  "toolReady": "Converter {version} is ready.",
+  "platform": "Platform",
+  "conversion": "Conversion",
+  "direction": {
+    "label": "Conversion direction",
+    "reversible": "Converting {from} to {to}; reverse the direction",
+    "oneWay": "Converting {from} to {to}; this one only goes one way",
+    "reverseTitle": "Reverse the direction",
+    "oneWayTitle": "This conversion only goes one way",
+    "hintLeftToRight": "Converting from {from} (left) to {to} (right).",
+    "hintRightToLeft": "Converting from {from} (right) to {to} (left)."
+  },
+  "missing": {
+    "place": "Put it here: {place}",
+    "openFolder": "Open folder",
+    "putIn": "Put it in {place}"
+  },
+  "files": {
+    "chooseFiles": "Choose files",
+    "chooseFolders": "Choose folders",
+    "filesChosen_one": "{count} file chosen",
+    "filesChosen_other": "{count} files chosen",
+    "foldersChosen_one": "{count} folder chosen",
+    "foldersChosen_other": "{count} folders chosen",
+    "more": "and {count} more",
+    "hintFiles": "One or more {format} files for {platform}, converted to {to}.",
+    "hintFolders": "One or more folders for {platform}, converted to {to}.",
+    "choose": "Choose",
+    "convert": "Convert",
+    "stop": "Stop"
+  },
+  "run": {
+    "converting": "Converting",
+    "lastRun": "Last run",
+    "downloading": "Downloading Game Format Converter…",
+    "done": "{finished} of {total} done"
+  },
+  "state": {
+    "queued": "Waiting",
+    "running": "Converting…",
+    "done": "Converted",
+    "failed": "Failed",
+    "skipped": "Skipped",
+    "stopped": "Stopped"
+  },
+  "toasts": {
+    "pickerFailed": "Could not open the file picker",
+    "startFailed": "Could not start converting"
+  },
+  "notes": {
+    "singleTrack": "Single-track games only.",
+    "isoUnchecked": "The converter does not check an ISO it unpacks, so the original is kept.",
+    "popstarter": "For playing PlayStation games on a PS2 with POPStarter.",
+    "playlistPbp": "Every disc of the playlist goes into one PBP.",
+    "cdOnlyBin": "CD games only: a DVD game cannot be a BIN.",
+    "cso2RealPsp": "For a real PSP only: PPSSPP cannot read CSO version 2.",
+    "encryptedDiscs": "Discs whose files are still encrypted cannot be unpacked.",
+    "ps3PackageWithUpdates": "Pick a game's package with its updates: they are unpacked together into one folder.",
+    "psnFolderToPackage": "A PSN game folder becomes a package RPCS3 installs (not for a real PS3).",
+    "splitImage": "The pieces of a split image (multiMAN) are joined into one ISO.",
+    "ps4Package": "PlayOut unpacks the package itself into a game folder next to it, as PS4PKGTool does, and keeps the package. Fake packages (fPKG) only: retail packages are locked with Sony’s keys.",
+    "ps5Package": "Unpacked with PS5PKGTool’s own extraction into a decrypted game folder next to the package (the game’s files and sce_sys), and the package is kept. Fake packages (FPKG) only: retail packages are locked with Sony’s keys, and update packages need their game.",
+    "gdromChd": "A GD-ROM CHD becomes a GDI instead: use GDI ↔ CHD.",
+    "wudUnchecked": "The converter does not check a WUD it unpacks, so the original is kept.",
+    "xboxTrim": "A full disc dump becomes a smaller .xiso.iso that holds just the game: the video partition and padding are removed, and every file is checked against the dump.",
+    "windowsNames": "Names Windows cannot hold (such as aux or con) are renamed with an underscore.",
+    "xboxChd": "The CHD holds the trimmed game (as XISO Studio makes it): a full dump comes back from it as an XISO.",
+    "x360Xiso": "For Xenia and modded consoles; the video partition and padding are removed.",
+    "zarXenia": "ZAR is read by Xenia Canary.",
+    "zarToIso": "The ISO made from a ZAR is a trimmed XISO.",
+    "godPackage": "Pick the folder of a Games on Demand package: it becomes a disc image for Xenia, named after the game, next to that folder. Nothing is decrypted, and the package is kept.",
+    "n64ByteOrder": "Only the byte order changes; the game is the same. Most emulators read Z64.",
+    "snesHeaderOffSfc": "Only the 512-byte copier header is taken off; the game is unchanged. SFC is what emulators expect.",
+    "snesHeaderOnFlash": "A plain 512-byte copier header is put on, for tools and flash carts that want one.",
+    "interleavedToPlain": "The interleaved copier layout becomes the plain layout emulators read; the game is unchanged.",
+    "plainToInterleaved": "For copiers that want the interleaved layout with its header.",
+    "headerOff": "Only the 512-byte copier header is taken off; the game is unchanged.",
+    "headerOn": "A 512-byte copier header is put on, for tools that want one.",
+    "trimPadding": "The empty padding after the game is removed; the game’s own bytes are unchanged. A game that keeps data there is left alone.",
+    "padToFull": "Padded back to the full cartridge size, for flash carts and tools that want it.",
+    "switchMerge": "Pick a game's package with its update and extra content: they become one XCI.",
+    "switchSplit": "One package each for the game, its update and every extra content.",
+    "experimental": "Experimental.",
+    "decryptedForEmulators": "Decrypted games only; for emulators and custom firmware.",
+    "decryptedOnly": "Decrypted games only."
+  }
+}

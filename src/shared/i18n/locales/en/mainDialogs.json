@@ -1,0 +1,39 @@
+{
+  "romsFolder": {
+    "title": "Choose where to create your roms folder"
+  },
+  "emulationFolder": {
+    "title": "Choose where to create your Emulation folder"
+  },
+  "createHere": "Create here",
+  "gameNotAdded": "Game could not be added",
+  "esde": {
+    "imported": "Imported from {folder}",
+    "notFound": "No ES-DE installation found (set the ES-DE folder in Settings → Library)."
+  },
+  "launch": {
+    "notInstalled": "This game is not installed",
+    "recompNeedsFiles": "Pick its game files on the Recompilation page first.",
+    "recompChooseExe": "Choose the program that starts it under Program on the Recompilation page.",
+    "recompSaveConflict": "Its saves changed on this PC and in the Emulation folder: pick which to keep on the Recompilation page.",
+    "recompImageInRecycleBin": "Its disc image is in the Recycle Bin: install the recompilation again, or restore the image and rescan.",
+    "recompReinstall": "Install the recompilation again from its Recompilation page.",
+    "recompReinstallOrRestore": "Install the recompilation again, or put the game file back and rescan."
+  },
+  "imageUnreadable": "The image could not be read.",
+  "chooseFolder": "Choose a folder",
+  "chooseFile": "Choose a file",
+  "convert": {
+    "chooseFolders": "Choose the {format} folders to convert",
+    "chooseFiles": "Choose the {format} files to convert"
+  },
+  "update": {
+    "closeGame": "Close the running game before installing the update."
+  },
+  "music": {
+    "chooseFolder": "Choose your music folder"
+  },
+  "refusedUrl": "Refusing to open this URL",
+  "refusedScheme": "Refusing to open {scheme}: URLs",
+  "refusedLink": "Refusing to open this link"
+}

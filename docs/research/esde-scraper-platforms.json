@@ -1,0 +1,1384 @@
+{
+    "3do":  {
+                "screenscraperId":  29,
+                "thegamesdbId":  25,
+                "enumName":  "THREEDO",
+                "description":  "3DO Interactive Multiplayer",
+                "systems":  [
+                                "3do"
+                            ]
+            },
+    "adam":  {
+                 "screenscraperId":  89,
+                 "thegamesdbId":  null,
+                 "enumName":  "COLECO_ADAM",
+                 "description":  "Coleco Adam",
+                 "systems":  [
+                                 "adam"
+                             ]
+             },
+    "amiga":  {
+                  "screenscraperId":  64,
+                  "thegamesdbId":  4911,
+                  "enumName":  "COMMODORE_AMIGA",
+                  "description":  "Commodore Amiga",
+                  "systems":  [
+                                  "amiga",
+                                  "amiga1200",
+                                  "amiga600"
+                              ]
+              },
+    "amigacd32":  {
+                      "screenscraperId":  130,
+                      "thegamesdbId":  4947,
+                      "enumName":  "COMMODORE_AMIGA_CD32",
+                      "description":  "Commodore Amiga CD32",
+                      "systems":  [
+                                      "amigacd32"
+                                  ]
+                  },
+    "amstradcpc":  {
+                       "screenscraperId":  65,
+                       "thegamesdbId":  4914,
+                       "enumName":  "AMSTRAD_CPC",
+                       "description":  "Amstrad CPC",
+                       "systems":  [
+                                       "amstradcpc"
+                                   ]
+                   },
+    "android":  {
+                    "screenscraperId":  63,
+                    "thegamesdbId":  4916,
+                    "enumName":  "GOOGLE_ANDROID",
+                    "description":  "Google Android",
+                    "systems":  [
+                                    "android",
+                                    "androidapps",
+                                    "androidgames"
+                                ]
+                },
+    "apple2":  {
+                   "screenscraperId":  86,
+                   "thegamesdbId":  4942,
+                   "enumName":  "APPLE_II",
+                   "description":  "Apple II",
+                   "systems":  [
+                                   "apple2"
+                               ]
+               },
+    "apple2gs":  {
+                     "screenscraperId":  217,
+                     "thegamesdbId":  null,
+                     "enumName":  "APPLE_IIGS",
+                     "description":  "Apple IIGS",
+                     "systems":  [
+                                     "apple2gs"
+                                 ]
+                 },
+    "arcade":  {
+                   "screenscraperId":  75,
+                   "thegamesdbId":  23,
+                   "enumName":  "ARCADE",
+                   "description":  "Arcade",
+                   "systems":  [
+                                   "arcade",
+                                   "atomiswave",
+                                   "consolearcade",
+                                   "cps",
+                                   "cps1",
+                                   "cps2",
+                                   "cps3",
+                                   "daphne",
+                                   "fba",
+                                   "fbneo",
+                                   "laserdisc",
+                                   "mame",
+                                   "mame-advmame",
+                                   "model2",
+                                   "model3",
+                                   "naomi",
+                                   "naomi2",
+                                   "naomigd",
+                                   "pcarcade",
+                                   "stv",
+                                   "triforce",
+                                   "type-x"
+                               ]
+               },
+    "arcadia":  {
+                    "screenscraperId":  94,
+                    "thegamesdbId":  4963,
+                    "enumName":  "ARCADIA_2001",
+                    "description":  "Emerson Arcadia 2001",
+                    "systems":  [
+                                    "arcadia"
+                                ]
+                },
+    "archimedes":  {
+                       "screenscraperId":  84,
+                       "thegamesdbId":  4944,
+                       "enumName":  "ACORN_ARCHIMEDES",
+                       "description":  "Acorn Archimedes",
+                       "systems":  [
+                                       "archimedes"
+                                   ]
+                   },
+    "arduboy":  {
+                    "screenscraperId":  263,
+                    "thegamesdbId":  null,
+                    "enumName":  "ARDUBOY",
+                    "description":  "Arduboy Miniature Game System",
+                    "systems":  [
+                                    "arduboy"
+                                ]
+                },
+    "astrocde":  {
+                     "screenscraperId":  44,
+                     "thegamesdbId":  4968,
+                     "enumName":  "BALLY_ASTROCADE",
+                     "description":  "Bally Astrocade",
+                     "systems":  [
+                                     "astrocde"
+                                 ]
+                 },
+    "atari2600":  {
+                      "screenscraperId":  26,
+                      "thegamesdbId":  22,
+                      "enumName":  "ATARI_2600",
+                      "description":  "Atari 2600",
+                      "systems":  [
+                                      "atari2600"
+                                  ]
+                  },
+    "atari5200":  {
+                      "screenscraperId":  40,
+                      "thegamesdbId":  26,
+                      "enumName":  "ATARI_5200",
+                      "description":  "Atari 5200",
+                      "systems":  [
+                                      "atari5200"
+                                  ]
+                  },
+    "atari7800":  {
+                      "screenscraperId":  41,
+                      "thegamesdbId":  27,
+                      "enumName":  "ATARI_7800",
+                      "description":  "Atari 7800",
+                      "systems":  [
+                                      "atari7800"
+                                  ]
+                  },
+    "atari800":  {
+                     "screenscraperId":  43,
+                     "thegamesdbId":  4943,
+                     "enumName":  "ATARI_800",
+                     "description":  "Atari 800",
+                     "systems":  [
+                                     "atari800"
+                                 ]
+                 },
+    "atarijaguar":  {
+                        "screenscraperId":  27,
+                        "thegamesdbId":  28,
+                        "enumName":  "ATARI_JAGUAR",
+                        "description":  "Atari Jaguar",
+                        "systems":  [
+                                        "atarijaguar"
+                                    ]
+                    },
+    "atarijaguarcd":  {
+                          "screenscraperId":  171,
+                          "thegamesdbId":  29,
+                          "enumName":  "ATARI_JAGUAR_CD",
+                          "description":  "Atari Jaguar CD",
+                          "systems":  [
+                                          "atarijaguarcd"
+                                      ]
+                      },
+    "atarilynx":  {
+                      "screenscraperId":  28,
+                      "thegamesdbId":  4924,
+                      "enumName":  "ATARI_LYNX",
+                      "description":  "Atari Lynx",
+                      "systems":  [
+                                      "atarilynx"
+                                  ]
+                  },
+    "atarist":  {
+                    "screenscraperId":  42,
+                    "thegamesdbId":  4937,
+                    "enumName":  "ATARI_ST",
+                    "description":  "Atari ST/STE/Falcon",
+                    "systems":  [
+                                    "atarist"
+                                ]
+                },
+    "atarixe":  {
+                    "screenscraperId":  43,
+                    "thegamesdbId":  30,
+                    "enumName":  "ATARI_XE",
+                    "description":  "Atari XE",
+                    "systems":  [
+                                    "atarixe"
+                                ]
+                },
+    "atomiswave":  {
+                       "screenscraperId":  53,
+                       "thegamesdbId":  23,
+                       "enumName":  "ATOMISWAVE",
+                       "description":  "Sammy Corporation Atomiswave",
+                       "systems":  [
+
+                                   ]
+                   },
+    "bbcmicro":  {
+                     "screenscraperId":  37,
+                     "thegamesdbId":  5013,
+                     "enumName":  "BBC_MICRO",
+                     "description":  "Acorn Computers BBC Micro",
+                     "systems":  [
+                                     "bbcmicro"
+                                 ]
+                 },
+    "c64":  {
+                "screenscraperId":  66,
+                "thegamesdbId":  40,
+                "enumName":  "COMMODORE_64",
+                "description":  "Commodore 64",
+                "systems":  [
+                                "c64"
+                            ]
+            },
+    "cdimono1":  {
+                     "screenscraperId":  133,
+                     "thegamesdbId":  4917,
+                     "enumName":  "PHILIPS_CDI",
+                     "description":  "Philips CD-i",
+                     "systems":  [
+                                     "cdimono1"
+                                 ]
+                 },
+    "cdtv":  {
+                 "screenscraperId":  129,
+                 "thegamesdbId":  null,
+                 "enumName":  "COMMODORE_CDTV",
+                 "description":  "Commodore CDTV",
+                 "systems":  [
+                                 "cdtv"
+                             ]
+             },
+    "channelf":  {
+                     "screenscraperId":  80,
+                     "thegamesdbId":  null,
+                     "enumName":  "FAIRCHILD_CHANNELF",
+                     "description":  "Fairchild Channel F",
+                     "systems":  [
+                                     "channelf"
+                                 ]
+                 },
+    "coco":  {
+                 "screenscraperId":  144,
+                 "thegamesdbId":  4941,
+                 "enumName":  "TANDY_COLOR_COMPUTER",
+                 "description":  "Tandy Color Computer",
+                 "systems":  [
+                                 "coco"
+                             ]
+             },
+    "colecovision":  {
+                         "screenscraperId":  48,
+                         "thegamesdbId":  31,
+                         "enumName":  "COLECOVISION",
+                         "description":  "Coleco ColecoVision",
+                         "systems":  [
+                                         "colecovision"
+                                     ]
+                     },
+    "crvision":  {
+                     "screenscraperId":  241,
+                     "thegamesdbId":  5005,
+                     "enumName":  "VTECH_CREATIVISION",
+                     "description":  "VTech CreatiVision",
+                     "systems":  [
+                                     "crvision"
+                                 ]
+                 },
+    "daphne":  {
+                   "screenscraperId":  49,
+                   "thegamesdbId":  23,
+                   "enumName":  "DAPHNE",
+                   "description":  "Daphne Arcade Laserdisc Emulator",
+                   "systems":  [
+                                   "daphne",
+                                   "laserdisc"
+                               ]
+               },
+    "dos":  {
+                "screenscraperId":  135,
+                "thegamesdbId":  1,
+                "enumName":  "DOS",
+                "description":  "DOS (PC)",
+                "systems":  [
+                                "dos"
+                            ]
+            },
+    "dragon32":  {
+                     "screenscraperId":  91,
+                     "thegamesdbId":  4952,
+                     "enumName":  "DRAGON32",
+                     "description":  "Dragon Data Dragon 32",
+                     "systems":  [
+                                     "dragon32",
+                                     "tanodragon"
+                                 ]
+                 },
+    "dreamcast":  {
+                      "screenscraperId":  23,
+                      "thegamesdbId":  16,
+                      "enumName":  "SEGA_DREAMCAST",
+                      "description":  "Sega Dreamcast",
+                      "systems":  [
+                                      "dreamcast"
+                                  ]
+                  },
+    "easyrpg":  {
+                    "screenscraperId":  231,
+                    "thegamesdbId":  null,
+                    "enumName":  "GAMEENGINE_EASYRPG",
+                    "description":  "EasyRPG eame engine",
+                    "systems":  [
+                                    "easyrpg"
+                                ]
+                },
+    "electron":  {
+                     "screenscraperId":  85,
+                     "thegamesdbId":  4954,
+                     "enumName":  "ACORN_ELECTRON",
+                     "description":  "Acorn Electron",
+                     "systems":  [
+                                     "electron"
+                                 ]
+                 },
+    "famicom":  {
+                    "screenscraperId":  3,
+                    "thegamesdbId":  7,
+                    "enumName":  "NINTENDO_FAMICOM",
+                    "description":  "Nintendo Family Computer",
+                    "systems":  [
+                                    "famicom"
+                                ]
+                },
+    "fds":  {
+                "screenscraperId":  106,
+                "thegamesdbId":  4936,
+                "enumName":  "NINTENDO_FAMICOM_DISK_SYSTEM",
+                "description":  "Nintendo Famicom Disk System",
+                "systems":  [
+                                "fds"
+                            ]
+            },
+    "flash":  {
+                  "screenscraperId":  null,
+                  "thegamesdbId":  null,
+                  "enumName":  "ADOBE_FLASH",
+                  "description":  "Adobe Flash",
+                  "systems":  [
+                                  "flash"
+                              ]
+              },
+    "fm7":  {
+                "screenscraperId":  97,
+                "thegamesdbId":  4978,
+                "enumName":  "FUJITSU_FM_7",
+                "description":  "Fujitsu FM-7",
+                "systems":  [
+                                "fm7"
+                            ]
+            },
+    "fmtowns":  {
+                    "screenscraperId":  253,
+                    "thegamesdbId":  4932,
+                    "enumName":  "FUJITSU_FM_TOWNS",
+                    "description":  "Fujitsu FM Towns",
+                    "systems":  [
+                                    "fmtowns"
+                                ]
+                },
+    "fpinball":  {
+                     "screenscraperId":  199,
+                     "thegamesdbId":  null,
+                     "enumName":  "FUTURE_PINBALL",
+                     "description":  "Future Pinball",
+                     "systems":  [
+                                     "fpinball"
+                                 ]
+                 },
+    "gamate":  {
+                   "screenscraperId":  266,
+                   "thegamesdbId":  5004,
+                   "enumName":  "BIT_CORPORATION_GAMATE",
+                   "description":  "Bit Corporation Gamate",
+                   "systems":  [
+                                   "gamate"
+                               ]
+               },
+    "gameandwatch":  {
+                         "screenscraperId":  52,
+                         "thegamesdbId":  4950,
+                         "enumName":  "NINTENDO_GAME_AND_WATCH",
+                         "description":  "Nintendo Game and Watch",
+                         "systems":  [
+                                         "gameandwatch",
+                                         "lcdgames"
+                                     ]
+                     },
+    "gamecom":  {
+                    "screenscraperId":  121,
+                    "thegamesdbId":  4940,
+                    "enumName":  "TIGER_GAME_COM",
+                    "description":  "Tiger Electronics Game.com",
+                    "systems":  [
+                                    "gamecom"
+                                ]
+                },
+    "gamegear":  {
+                     "screenscraperId":  21,
+                     "thegamesdbId":  20,
+                     "enumName":  "SEGA_GAME_GEAR",
+                     "description":  "Sega Game Gear",
+                     "systems":  [
+                                     "gamegear"
+                                 ]
+                 },
+    "gb":  {
+               "screenscraperId":  9,
+               "thegamesdbId":  4,
+               "enumName":  "NINTENDO_GAME_BOY",
+               "description":  "Nintendo Game Boy",
+               "systems":  [
+                               "gb"
+                           ]
+           },
+    "gba":  {
+                "screenscraperId":  12,
+                "thegamesdbId":  5,
+                "enumName":  "NINTENDO_GAME_BOY_ADVANCE",
+                "description":  "Nintendo Game Boy Advance",
+                "systems":  [
+                                "gba"
+                            ]
+            },
+    "gbc":  {
+                "screenscraperId":  10,
+                "thegamesdbId":  41,
+                "enumName":  "NINTENDO_GAME_BOY_COLOR",
+                "description":  "Nintendo Game Boy Color",
+                "systems":  [
+                                "gbc"
+                            ]
+            },
+    "gc":  {
+               "screenscraperId":  13,
+               "thegamesdbId":  2,
+               "enumName":  "NINTENDO_GAMECUBE",
+               "description":  "Nintendo GameCube",
+               "systems":  [
+                               "gc"
+                           ]
+           },
+    "genesis":  {
+                    "screenscraperId":  1,
+                    "thegamesdbId":  18,
+                    "enumName":  "SEGA_GENESIS",
+                    "description":  "Sega Genesis",
+                    "systems":  [
+                                    "genesis"
+                                ]
+                },
+    "gmaster":  {
+                    "screenscraperId":  103,
+                    "thegamesdbId":  null,
+                    "enumName":  "HARTUNG_GAME_MASTER",
+                    "description":  "Hartung Game Master",
+                    "systems":  [
+                                    "gmaster"
+                                ]
+                },
+    "gx4000":  {
+                   "screenscraperId":  87,
+                   "thegamesdbId":  null,
+                   "enumName":  "AMSTRAD_GX4000",
+                   "description":  "Amstrad GX4000",
+                   "systems":  [
+                                   "gx4000"
+                               ]
+               },
+    "intellivision":  {
+                          "screenscraperId":  115,
+                          "thegamesdbId":  32,
+                          "enumName":  "INTELLIVISION",
+                          "description":  "Mattel Electronics Intellivision",
+                          "systems":  [
+                                          "intellivision"
+                                      ]
+                      },
+    "j2me":  {
+                 "screenscraperId":  302,
+                 "thegamesdbId":  5018,
+                 "enumName":  "J2ME",
+                 "description":  "Java 2 Micro Edition",
+                 "systems":  [
+                                 "j2me"
+                             ]
+             },
+    "lcdgames":  {
+                     "screenscraperId":  75,
+                     "thegamesdbId":  4951,
+                     "enumName":  "LCD_GAMES",
+                     "description":  "LCD Handheld Games",
+                     "systems":  [
+                                     "lcdgames"
+                                 ]
+                 },
+    "love":  {
+                 "screenscraperId":  null,
+                 "thegamesdbId":  null,
+                 "enumName":  "GAMEENGINE_LOVE",
+                 "description":  "ChaiLove Game Engine",
+                 "systems":  [
+                                 "chailove"
+                             ]
+             },
+    "lowresnx":  {
+                     "screenscraperId":  244,
+                     "thegamesdbId":  null,
+                     "enumName":  "GAMEENGINE_LOWRES_NX",
+                     "description":  "LowRes NX Fantasy Console",
+                     "systems":  [
+                                     "lowresnx"
+                                 ]
+                 },
+    "lutro":  {
+                  "screenscraperId":  206,
+                  "thegamesdbId":  null,
+                  "enumName":  "GAMEENGINE_LUTRO",
+                  "description":  "Lutro Game Engine",
+                  "systems":  [
+                                  "lutro"
+                              ]
+              },
+    "macintosh":  {
+                      "screenscraperId":  146,
+                      "thegamesdbId":  37,
+                      "enumName":  "APPLE_MACINTOSH",
+                      "description":  "Apple Macintosh",
+                      "systems":  [
+                                      "macintosh"
+                                  ]
+                  },
+    "mastersystem":  {
+                         "screenscraperId":  2,
+                         "thegamesdbId":  35,
+                         "enumName":  "SEGA_MASTER_SYSTEM",
+                         "description":  "Sega Master System",
+                         "systems":  [
+                                         "mark3",
+                                         "mastersystem"
+                                     ]
+                     },
+    "megadrive":  {
+                      "screenscraperId":  1,
+                      "thegamesdbId":  36,
+                      "enumName":  "SEGA_MEGA_DRIVE",
+                      "description":  "Sega Mega Drive",
+                      "systems":  [
+                                      "megadrive",
+                                      "megadrivejp"
+                                  ]
+                  },
+    "megaduck":  {
+                     "screenscraperId":  90,
+                     "thegamesdbId":  4948,
+                     "enumName":  "CREATRONIC_MEGA_DUCK",
+                     "description":  "Creatronic Mega Duck",
+                     "systems":  [
+                                     "megaduck"
+                                 ]
+                 },
+    "mess":  {
+                 "screenscraperId":  null,
+                 "thegamesdbId":  null,
+                 "enumName":  "MESS",
+                 "description":  "Multi Emulator Super System",
+                 "systems":  [
+                                 "mess"
+                             ]
+             },
+    "moto":  {
+                 "screenscraperId":  141,
+                 "thegamesdbId":  null,
+                 "enumName":  "THOMSON_MOTO",
+                 "description":  "Thomson MO/TO series",
+                 "systems":  [
+                                 "moto",
+                                 "to8"
+                             ]
+             },
+    "msx":  {
+                "screenscraperId":  113,
+                "thegamesdbId":  4929,
+                "enumName":  "MSX",
+                "description":  "MSX",
+                "systems":  [
+                                "msx",
+                                "msx1"
+                            ]
+            },
+    "msx2":  {
+                 "screenscraperId":  116,
+                 "thegamesdbId":  4929,
+                 "enumName":  "MSX2",
+                 "description":  "MSX2",
+                 "systems":  [
+                                 "msx2"
+                             ]
+             },
+    "msxturbor":  {
+                      "screenscraperId":  118,
+                      "thegamesdbId":  4929,
+                      "enumName":  "MSX_TURBO_R",
+                      "description":  "MSX Turbo R",
+                      "systems":  [
+                                      "msxturbor"
+                                  ]
+                  },
+    "mugen":  {
+                  "screenscraperId":  null,
+                  "thegamesdbId":  null,
+                  "enumName":  "GAMEENGINE_MUGEN",
+                  "description":  "M.U.G.E.N Game Engine",
+                  "systems":  [
+                                  "mugen"
+                              ]
+              },
+    "n3ds":  {
+                 "screenscraperId":  17,
+                 "thegamesdbId":  4912,
+                 "enumName":  "NINTENDO_3DS",
+                 "description":  "Nintendo 3DS",
+                 "systems":  [
+                                 "n3ds"
+                             ]
+             },
+    "n64":  {
+                "screenscraperId":  14,
+                "thegamesdbId":  3,
+                "enumName":  "NINTENDO_64",
+                "description":  "Nintendo 64",
+                "systems":  [
+                                "n64",
+                                "n64dd"
+                            ]
+            },
+    "naomi":  {
+                  "screenscraperId":  56,
+                  "thegamesdbId":  23,
+                  "enumName":  "SEGA_NAOMI",
+                  "description":  "Sega NAOMI",
+                  "systems":  [
+
+                              ]
+              },
+    "nds":  {
+                "screenscraperId":  15,
+                "thegamesdbId":  8,
+                "enumName":  "NINTENDO_DS",
+                "description":  "Nintendo DS",
+                "systems":  [
+                                "nds"
+                            ]
+            },
+    "neogeo":  {
+                   "screenscraperId":  142,
+                   "thegamesdbId":  24,
+                   "enumName":  "SNK_NEO_GEO",
+                   "description":  "SNK Neo Geo",
+                   "systems":  [
+                                   "neogeo"
+                               ]
+               },
+    "neogeocd":  {
+                     "screenscraperId":  70,
+                     "thegamesdbId":  4956,
+                     "enumName":  "SNK_NEO_GEO_CD",
+                     "description":  "SNK Neo Geo CD",
+                     "systems":  [
+                                     "neogeocd",
+                                     "neogeocdjp"
+                                 ]
+                 },
+    "nes":  {
+                "screenscraperId":  3,
+                "thegamesdbId":  7,
+                "enumName":  "NINTENDO_ENTERTAINMENT_SYSTEM",
+                "description":  "Nintendo Entertainment System",
+                "systems":  [
+                                "nes"
+                            ]
+            },
+    "ngage":  {
+                  "screenscraperId":  30,
+                  "thegamesdbId":  4938,
+                  "enumName":  "NOKIA_NGAGE",
+                  "description":  "Nokia N-Gage",
+                  "systems":  [
+                                  "ngage",
+                                  "symbian"
+                              ]
+              },
+    "ngp":  {
+                "screenscraperId":  25,
+                "thegamesdbId":  4922,
+                "enumName":  "SNK_NEO_GEO_POCKET",
+                "description":  "SNK Neo Geo Pocket",
+                "systems":  [
+                                "ngp"
+                            ]
+            },
+    "ngpc":  {
+                 "screenscraperId":  82,
+                 "thegamesdbId":  4923,
+                 "enumName":  "SNK_NEO_GEO_POCKET_COLOR",
+                 "description":  "SNK Neo Geo Pocket Color",
+                 "systems":  [
+                                 "ngpc"
+                             ]
+             },
+    "odyssey2":  {
+                     "screenscraperId":  104,
+                     "thegamesdbId":  4927,
+                     "enumName":  "VIDEOPAC_ODYSSEY2",
+                     "description":  "Magnavox Odyssey2 / Philips Videopac G7000",
+                     "systems":  [
+                                     "odyssey2",
+                                     "videopac"
+                                 ]
+                 },
+    "openbor":  {
+                    "screenscraperId":  214,
+                    "thegamesdbId":  null,
+                    "enumName":  "GAMEENGINE_OPENBOR",
+                    "description":  "OpenBOR Game Engine",
+                    "systems":  [
+                                    "openbor"
+                                ]
+                },
+    "oric":  {
+                 "screenscraperId":  131,
+                 "thegamesdbId":  4986,
+                 "enumName":  "TANGERINE_ORIC",
+                 "description":  "Tangerine Computer Systems Oric",
+                 "systems":  [
+                                 "oric"
+                             ]
+             },
+    "palm":  {
+                 "screenscraperId":  219,
+                 "thegamesdbId":  null,
+                 "enumName":  "PALM_OS",
+                 "description":  "Palm OS",
+                 "systems":  [
+                                 "palm"
+                             ]
+             },
+    "pc":  {
+               "screenscraperId":  135,
+               "thegamesdbId":  1,
+               "enumName":  "PC",
+               "description":  "IBM PC",
+               "systems":  [
+                               "doom",
+                               "lutris",
+                               "pc",
+                               "ports",
+                               "quake"
+                           ]
+           },
+    "pc88":  {
+                 "screenscraperId":  221,
+                 "thegamesdbId":  4933,
+                 "enumName":  "NEC_PC_8800",
+                 "description":  "NEC PC-8800 Series",
+                 "systems":  [
+                                 "pc88"
+                             ]
+             },
+    "pc98":  {
+                 "screenscraperId":  208,
+                 "thegamesdbId":  4934,
+                 "enumName":  "NEC_PC_9800",
+                 "description":  "NEC PC-9800 Series",
+                 "systems":  [
+                                 "pc98"
+                             ]
+             },
+    "pcengine":  {
+                     "screenscraperId":  31,
+                     "thegamesdbId":  34,
+                     "enumName":  "NEC_PC_ENGINE",
+                     "description":  "NEC PC Engine / TurboGrafx-16",
+                     "systems":  [
+                                     "pcengine",
+                                     "tg16"
+                                 ]
+                 },
+    "pcenginecd":  {
+                       "screenscraperId":  114,
+                       "thegamesdbId":  4955,
+                       "enumName":  "NEC_PC_ENGINE_CD",
+                       "description":  "NEC PC Engine CD / TurboGrafx-CD",
+                       "systems":  [
+                                       "pcenginecd",
+                                       "tg-cd"
+                                   ]
+                   },
+    "pcfx":  {
+                 "screenscraperId":  72,
+                 "thegamesdbId":  4930,
+                 "enumName":  "NEC_PCFX",
+                 "description":  "NEC PC-FX",
+                 "systems":  [
+                                 "pcfx"
+                             ]
+             },
+    "pcwindows":  {
+                      "screenscraperId":  138,
+                      "thegamesdbId":  1,
+                      "enumName":  "MICROSOFT_WINDOWS",
+                      "description":  "Microsoft Windows",
+                      "systems":  [
+                                      "ags",
+                                      "desktop",
+                                      "doom",
+                                      "emulators",
+                                      "epic",
+                                      "kodi",
+                                      "ports",
+                                      "quake",
+                                      "windows",
+                                      "windows9x"
+                                  ]
+                  },
+    "pico8":  {
+                  "screenscraperId":  234,
+                  "thegamesdbId":  null,
+                  "enumName":  "GAMEENGINE_PICO8",
+                  "description":  "PICO-8 Fantasy Console",
+                  "systems":  [
+                                  "pico8"
+                              ]
+              },
+    "plus4":  {
+                  "screenscraperId":  99,
+                  "thegamesdbId":  5007,
+                  "enumName":  "COMMODORE_PLUS4",
+                  "description":  "Commodore Plus/4",
+                  "systems":  [
+                                  "plus4"
+                              ]
+              },
+    "pokemini":  {
+                     "screenscraperId":  211,
+                     "thegamesdbId":  4957,
+                     "enumName":  "NINTENDO_POKEMON_MINI",
+                     "description":  "Nintendo Pokémon Mini",
+                     "systems":  [
+                                     "pokemini"
+                                 ]
+                 },
+    "ps2":  {
+                "screenscraperId":  58,
+                "thegamesdbId":  11,
+                "enumName":  "SONY_PLAYSTATION_2",
+                "description":  "Sony PlayStation 2",
+                "systems":  [
+                                "ps2"
+                            ]
+            },
+    "ps3":  {
+                "screenscraperId":  59,
+                "thegamesdbId":  12,
+                "enumName":  "SONY_PLAYSTATION_3",
+                "description":  "Sony PlayStation 3",
+                "systems":  [
+                                "ps3"
+                            ]
+            },
+    "ps4":  {
+                "screenscraperId":  60,
+                "thegamesdbId":  4919,
+                "enumName":  "SONY_PLAYSTATION_4",
+                "description":  "Sony PlayStation 4",
+                "systems":  [
+                                "ps4"
+                            ]
+            },
+    "psp":  {
+                "screenscraperId":  61,
+                "thegamesdbId":  13,
+                "enumName":  "SONY_PLAYSTATION_PORTABLE",
+                "description":  "Sony PlayStation Portable",
+                "systems":  [
+                                "psp"
+                            ]
+            },
+    "psvita":  {
+                   "screenscraperId":  62,
+                   "thegamesdbId":  39,
+                   "enumName":  "SONY_PLAYSTATION_VITA",
+                   "description":  "Sony PlayStation Vita",
+                   "systems":  [
+                                   "psvita"
+                               ]
+               },
+    "psx":  {
+                "screenscraperId":  57,
+                "thegamesdbId":  10,
+                "enumName":  "SONY_PLAYSTATION",
+                "description":  "Sony PlayStation 1",
+                "systems":  [
+                                "psx"
+                            ]
+            },
+    "pv1000":  {
+                   "screenscraperId":  74,
+                   "thegamesdbId":  4964,
+                   "enumName":  "CASIO_PV1000",
+                   "description":  "Casio PV-1000",
+                   "systems":  [
+                                   "pv1000"
+                               ]
+               },
+    "residualvm":  {
+                       "screenscraperId":  null,
+                       "thegamesdbId":  null,
+                       "enumName":  "GAMEENGINE_RESIDUALVM",
+                       "description":  "ResidualVM Game Engine",
+                       "systems":  [
+
+                                   ]
+                   },
+    "samcoupe":  {
+                     "screenscraperId":  213,
+                     "thegamesdbId":  4979,
+                     "enumName":  "SAMCOUPE",
+                     "description":  "MGT SAM Coupé",
+                     "systems":  [
+                                     "samcoupe"
+                                 ]
+                 },
+    "satellaview":  {
+                        "screenscraperId":  107,
+                        "thegamesdbId":  6,
+                        "enumName":  "NINTENDO_SATELLAVIEW",
+                        "description":  "Nintendo Satellaview",
+                        "systems":  [
+                                        "satellaview"
+                                    ]
+                    },
+    "saturn":  {
+                   "screenscraperId":  22,
+                   "thegamesdbId":  17,
+                   "enumName":  "SEGA_SATURN",
+                   "description":  "Sega Saturn",
+                   "systems":  [
+                                   "saturn",
+                                   "saturnjp"
+                               ]
+               },
+    "scummvm":  {
+                    "screenscraperId":  123,
+                    "thegamesdbId":  1,
+                    "enumName":  "GAMEENGINE_SCUMMVM",
+                    "description":  "ScummVM Game Engine",
+                    "systems":  [
+                                    "scummvm"
+                                ]
+                },
+    "scv":  {
+                "screenscraperId":  67,
+                "thegamesdbId":  null,
+                "enumName":  "EPOCH_SCV",
+                "description":  "Epoch Super Cassette Vision",
+                "systems":  [
+                                "scv"
+                            ]
+            },
+    "sega32x":  {
+                    "screenscraperId":  19,
+                    "thegamesdbId":  33,
+                    "enumName":  "SEGA_32X",
+                    "description":  "Sega Mega Drive 32X",
+                    "systems":  [
+                                    "sega32x",
+                                    "sega32xjp",
+                                    "sega32xna"
+                                ]
+                },
+    "segacd":  {
+                   "screenscraperId":  20,
+                   "thegamesdbId":  21,
+                   "enumName":  "SEGA_CD",
+                   "description":  "Sega CD",
+                   "systems":  [
+                                   "megacd",
+                                   "megacdjp",
+                                   "segacd"
+                               ]
+               },
+    "segapico":  {
+                     "screenscraperId":  250,
+                     "thegamesdbId":  4958,
+                     "enumName":  "SEGA_PICO",
+                     "description":  "Sega Pico",
+                     "systems":  [
+
+                                 ]
+                 },
+    "sg-1000":  {
+                    "screenscraperId":  109,
+                    "thegamesdbId":  4949,
+                    "enumName":  "SEGA_SG1000",
+                    "description":  "Sega SG-1000",
+                    "systems":  [
+                                    "multivision",
+                                    "sg-1000"
+                                ]
+                },
+    "sgb":  {
+                "screenscraperId":  127,
+                "thegamesdbId":  4,
+                "enumName":  "NINTENDO_SUPER_GAME_BOY",
+                "description":  "Nintendo Super Game Boy",
+                "systems":  [
+                                "sgb"
+                            ]
+            },
+    "snes":  {
+                 "screenscraperId":  4,
+                 "thegamesdbId":  6,
+                 "enumName":  "SUPER_NINTENDO",
+                 "description":  "Nintendo SNES (Super Nintendo)",
+                 "systems":  [
+                                 "sfc",
+                                 "snes",
+                                 "snesna"
+                             ]
+             },
+    "snes-msu1":  {
+                      "screenscraperId":  210,
+                      "thegamesdbId":  null,
+                      "enumName":  "SUPER_NINTENDO_MSU1",
+                      "description":  "Nintendo SNES MSU-1",
+                      "systems":  [
+
+                                  ]
+                  },
+    "solarus":  {
+                    "screenscraperId":  223,
+                    "thegamesdbId":  null,
+                    "enumName":  "GAMEENGINE_SOLARUS",
+                    "description":  "Solarus Game Engine",
+                    "systems":  [
+                                    "solarus"
+                                ]
+                },
+    "spectravideo":  {
+                         "screenscraperId":  218,
+                         "thegamesdbId":  null,
+                         "enumName":  "SPECTRAVIDEO",
+                         "description":  "Spectravideo",
+                         "systems":  [
+                                         "spectravideo"
+                                     ]
+                     },
+    "steam":  {
+                  "screenscraperId":  138,
+                  "thegamesdbId":  1,
+                  "enumName":  "VALVE_STEAM",
+                  "description":  "Valve Steam",
+                  "systems":  [
+                                  "steam"
+                              ]
+              },
+    "sufami":  {
+                   "screenscraperId":  108,
+                   "thegamesdbId":  6,
+                   "enumName":  "BANDAI_SUFAMI_TURBO",
+                   "description":  "Bandai SuFami Turbo",
+                   "systems":  [
+                                   "sufami"
+                               ]
+               },
+    "supergrafx":  {
+                       "screenscraperId":  105,
+                       "thegamesdbId":  34,
+                       "enumName":  "NEC_SUPERGRAFX",
+                       "description":  "NEC SuperGrafx",
+                       "systems":  [
+                                       "supergrafx"
+                                   ]
+                   },
+    "supervision":  {
+                        "screenscraperId":  207,
+                        "thegamesdbId":  4959,
+                        "enumName":  "WATARA_SUPERVISION",
+                        "description":  "Watara Supervision",
+                        "systems":  [
+                                        "supervision"
+                                    ]
+                    },
+    "supracan":  {
+                     "screenscraperId":  100,
+                     "thegamesdbId":  null,
+                     "enumName":  "FUNTECH_SUPER_ACAN",
+                     "description":  "Funtech Super A\u0027Can",
+                     "systems":  [
+                                     "supracan"
+                                 ]
+                 },
+    "switch":  {
+                   "screenscraperId":  225,
+                   "thegamesdbId":  4971,
+                   "enumName":  "NINTENDO_SWITCH",
+                   "description":  "Nintendo Switch",
+                   "systems":  [
+                                   "switch"
+                               ]
+               },
+    "ti99":  {
+                 "screenscraperId":  205,
+                 "thegamesdbId":  4953,
+                 "enumName":  "TEXAS_INSTRUMENTS_TI99",
+                 "description":  "Texas Instruments TI-99",
+                 "systems":  [
+                                 "ti99"
+                             ]
+             },
+    "tic80":  {
+                  "screenscraperId":  222,
+                  "thegamesdbId":  null,
+                  "enumName":  "GAMEENGINE_TIC80",
+                  "description":  "TIC-80 Fantasy Computer",
+                  "systems":  [
+                                  "tic80"
+                              ]
+              },
+    "trs-80":  {
+                   "screenscraperId":  144,
+                   "thegamesdbId":  4941,
+                   "enumName":  "TANDY_TRS80",
+                   "description":  "Tandy TRS-80",
+                   "systems":  [
+                                   "trs-80"
+                               ]
+               },
+    "uzebox":  {
+                   "screenscraperId":  216,
+                   "thegamesdbId":  null,
+                   "enumName":  "UZEBOX",
+                   "description":  "Uzebox Open Source Console",
+                   "systems":  [
+                                   "uzebox"
+                               ]
+               },
+    "vectrex":  {
+                    "screenscraperId":  102,
+                    "thegamesdbId":  4939,
+                    "enumName":  "VECTREX",
+                    "description":  "GCE Vectrex",
+                    "systems":  [
+                                    "vectrex"
+                                ]
+                },
+    "vic20":  {
+                  "screenscraperId":  73,
+                  "thegamesdbId":  4945,
+                  "enumName":  "COMMODORE_VIC20",
+                  "description":  "Commodore VIC-20",
+                  "systems":  [
+                                  "vic20"
+                              ]
+              },
+    "vircon32":  {
+                     "screenscraperId":  272,
+                     "thegamesdbId":  null,
+                     "enumName":  "VIRCON32",
+                     "description":  "Vircon32 Virtual Console",
+                     "systems":  [
+                                     "vircon32"
+                                 ]
+                 },
+    "virtualboy":  {
+                       "screenscraperId":  11,
+                       "thegamesdbId":  4918,
+                       "enumName":  "NINTENDO_VIRTUAL_BOY",
+                       "description":  "Nintendo Virtual Boy",
+                       "systems":  [
+                                       "virtualboy"
+                                   ]
+                   },
+    "vpinball":  {
+                     "screenscraperId":  198,
+                     "thegamesdbId":  null,
+                     "enumName":  "VISUAL_PINBALL",
+                     "description":  "Visual Pinball",
+                     "systems":  [
+                                     "vpinball"
+                                 ]
+                 },
+    "vsmile":  {
+                   "screenscraperId":  120,
+                   "thegamesdbId":  4988,
+                   "enumName":  "VTECH_VSMILE",
+                   "description":  "VTech V.Smile",
+                   "systems":  [
+                                   "vsmile"
+                               ]
+               },
+    "wasm4":  {
+                  "screenscraperId":  262,
+                  "thegamesdbId":  null,
+                  "enumName":  "GAMEENGINE_WASM4",
+                  "description":  "WASM-4 Fantasy Console",
+                  "systems":  [
+                                  "wasm4"
+                              ]
+              },
+    "wii":  {
+                "screenscraperId":  16,
+                "thegamesdbId":  9,
+                "enumName":  "NINTENDO_WII",
+                "description":  "Nintendo Wii",
+                "systems":  [
+                                "wii"
+                            ]
+            },
+    "wiiu":  {
+                 "screenscraperId":  18,
+                 "thegamesdbId":  38,
+                 "enumName":  "NINTENDO_WII_U",
+                 "description":  "Nintendo Wii U",
+                 "systems":  [
+                                 "wiiu"
+                             ]
+             },
+    "windows3x":  {
+                      "screenscraperId":  136,
+                      "thegamesdbId":  1,
+                      "enumName":  "MICROSOFT_WINDOWS_3X",
+                      "description":  "Microsoft Windows 3.x",
+                      "systems":  [
+                                      "windows3x"
+                                  ]
+                  },
+    "wonderswan":  {
+                       "screenscraperId":  45,
+                       "thegamesdbId":  4925,
+                       "enumName":  "BANDAI_WONDERSWAN",
+                       "description":  "Bandai WonderSwan",
+                       "systems":  [
+                                       "wonderswan"
+                                   ]
+                   },
+    "wonderswancolor":  {
+                            "screenscraperId":  46,
+                            "thegamesdbId":  4926,
+                            "enumName":  "BANDAI_WONDERSWAN_COLOR",
+                            "description":  "Bandai WonderSwan Color",
+                            "systems":  [
+                                            "wonderswancolor"
+                                        ]
+                        },
+    "x1":  {
+               "screenscraperId":  220,
+               "thegamesdbId":  4977,
+               "enumName":  "SHARP_X1",
+               "description":  "Sharp X1",
+               "systems":  [
+                               "x1"
+                           ]
+           },
+    "x68000":  {
+                   "screenscraperId":  79,
+                   "thegamesdbId":  4931,
+                   "enumName":  "SHARP_X68000",
+                   "description":  "Sharp X68000",
+                   "systems":  [
+                                   "x68000"
+                               ]
+               },
+    "xbox":  {
+                 "screenscraperId":  32,
+                 "thegamesdbId":  14,
+                 "enumName":  "MICROSOFT_XBOX",
+                 "description":  "Microsoft Xbox",
+                 "systems":  [
+                                 "xbox"
+                             ]
+             },
+    "xbox360":  {
+                    "screenscraperId":  33,
+                    "thegamesdbId":  15,
+                    "enumName":  "MICROSOFT_XBOX_360",
+                    "description":  "Microsoft Xbox 360",
+                    "systems":  [
+                                    "xbox360"
+                                ]
+                },
+    "xboxone":  {
+                    "screenscraperId":  34,
+                    "thegamesdbId":  null,
+                    "enumName":  "MICROSOFT_XBOX_ONE",
+                    "description":  "Microsoft Xbox One",
+                    "systems":  [
+                                    "xboxone"
+                                ]
+                },
+    "zmachine":  {
+                     "screenscraperId":  215,
+                     "thegamesdbId":  null,
+                     "enumName":  "GAMEENGINE_Z_MACHINE",
+                     "description":  "Infocom Z-machine",
+                     "systems":  [
+                                     "zmachine"
+                                 ]
+                 },
+    "zx81":  {
+                 "screenscraperId":  77,
+                 "thegamesdbId":  5010,
+                 "enumName":  "SINCLAIR_ZX81_SINCLAR",
+                 "description":  "Sinclair ZX81",
+                 "systems":  [
+                                 "zx81"
+                             ]
+             },
+    "zxnext":  {
+                   "screenscraperId":  null,
+                   "thegamesdbId":  null,
+                   "enumName":  "SINCLAIR_ZX_SPECTRUM_NEXT",
+                   "description":  "Sinclair ZX Spectrum Next",
+                   "systems":  [
+                                   "zxnext"
+                               ]
+               },
+    "zxspectrum":  {
+                       "screenscraperId":  76,
+                       "thegamesdbId":  4913,
+                       "enumName":  "SINCLAIR_ZX_SPECTRUM",
+                       "description":  "Sinclair ZX Spectrum",
+                       "systems":  [
+                                       "zxspectrum"
+                                   ]
+                   }
+}

@@ -1,0 +1,42 @@
+/* ---- Steam DLC picker / Manage DLC (SteamDlcDialog) -------------------------- */
+
+.steam-dlc__status {
+  display: flex;
+  justify-content: center;
+  padding: 4rem 0;
+}
+
+.steam-dlc__quick {
+  display: flex;
+  gap: 1.6rem;
+  margin-top: 2rem;
+}
+
+.steam-dlc__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 2rem;
+}
+
+.steam-dlc__note {
+  margin-top: 1.6rem;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-tertiary);
+}
+
+.steam-dlc__note--warn {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.steam-dlc__note--error {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+/* the footer holds up to five buttons (error state): let them wrap rather than overflow */
+.steam-dlc .modal__footer {
+  flex-wrap: wrap;
+}

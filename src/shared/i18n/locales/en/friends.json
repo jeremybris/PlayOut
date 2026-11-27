@@ -1,0 +1,8 @@
+{
+  "errors": {
+    "noCredentials": "Add your Steam Web API key and SteamID64 in Settings › Metadata",
+    "private": "Steam did not share your friends list: set Friends List to Public in your Steam privacy settings",
+    "keyRefused": "Steam refused the Web API key: check it in Settings › Metadata",
+    "network": "Could not reach Steam"
+  }
+}

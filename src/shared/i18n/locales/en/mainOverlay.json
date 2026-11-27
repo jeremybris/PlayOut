@@ -1,0 +1,61 @@
+{
+  "intel": {
+    "noAnswer": "The Intel graphics driver gave no answer",
+    "noDriver": "No Intel graphics driver",
+    "noAdapter": "No Intel graphics adapter",
+    "needs64": "Needs 64-bit Windows",
+    "initFailed": "The Intel graphics driver did not start its control library: {result}",
+    "enumerateFailed": "The Intel graphics driver did not list its adapters: {result}",
+    "driverErrorWhy": "Intel graphics driver error: {error}",
+    "driverError": "Intel graphics driver error",
+    "no3dFeatures": "The driver did not list its 3D features: {result}",
+    "noEndurance": "This driver has no Endurance Gaming",
+    "unknownFormat": "This driver reports Endurance Gaming in an unknown format",
+    "capabilities": "Endurance Gaming capabilities: {result}",
+    "noChoices": "The driver lists no Endurance Gaming choices",
+    "unreadable": "Endurance Gaming could not be read: {result}",
+    "refused": "The driver refused the change: {result}",
+    "noReply": "The Intel graphics driver did not answer: {error}",
+    "noFrameGen": "The Intel frame generation override is not available on this driver",
+    "notAvailable": "Endurance Gaming is not available",
+    "notOffered": "This driver does not offer Endurance Gaming \"{choice}\"",
+    "keptPrevious": "The driver kept its previous value",
+    "off": "Off",
+    "onPerformance": "On, better performance",
+    "onBalanced": "On, balanced",
+    "onBattery": "On, maximum battery",
+    "autoPerformance": "Auto, better performance",
+    "autoBalanced": "Auto, balanced",
+    "autoBattery": "Auto, maximum battery"
+  },
+  "extras": {
+    "autoHdrNote": "Applies to games started next",
+    "winhancedClash": "Winhanced also controls RivaTuner; PlayOut changes only each game's own profile, never the global one.",
+    "hdrOff": "Turn on HDR in Windows display settings first",
+    "startGame": "Start a game first",
+    "waiting": "Waiting for the game to start",
+    "notVerified": "Not offered yet: it still needs a check in a real game",
+    "notOnThisPc": "Not available on this PC (needs the Intel or Ryzen power helper)",
+    "playoutGamesOnly": "Only for games started from PlayOut",
+    "chooseProfile": "Choose a power profile first",
+    "dynamicTdp": "Managed by Dynamic TDP",
+    "rtssStopped": "RivaTuner Statistics Server is not running",
+    "updateHelper": "Update the power helper in Settings › System",
+    "needsHelper": "Needs the power helper (Settings › System)",
+    "autoHdrUnreadable": "Windows' Auto HDR setting could not be read",
+    "frameLimitRange": "The frame limit must be a whole number from 0 to {max}",
+    "cpuBoostLocked": "CPU boost cannot be changed now",
+    "autoHdrRefused": "Windows did not accept the Auto HDR change: {error}"
+  },
+  "display": {
+    "refused": "Windows refused that display mode (code {code})"
+  },
+  "rtss": {
+    "noHelper": "Update the power helper in Settings › System",
+    "missing": "Needs RivaTuner Statistics Server"
+  },
+  "ingame": {
+    "crashed": "{title} crashed ({code}) after the in-game overlay was added, so PlayOut's overlay will open as a window over it from now on.",
+    "fault": "{title} had a problem with the in-game overlay ({where}), so PlayOut's overlay will open as a window over it from now on."
+  }
+}

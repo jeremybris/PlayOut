@@ -1,0 +1,87 @@
+{
+  "cannotStart": "PlayOut cannot start",
+  "recomp": {
+    "needsFiles": "its recompilation needs its game files (pick them on its Recompilation page)",
+    "chooseExe": "choose the program that starts its recompilation on its Recompilation page",
+    "saveConflict": "its saves changed here and in the Emulation folder: pick which to keep on its Recompilation page"
+  },
+  "trimWait": {
+    "gameRunning": "a game is running",
+    "romDownloading": "a ROM is downloading from another PC"
+  },
+  "tray": {
+    "open": "Open PlayOut",
+    "quit": "Quit"
+  },
+  "ra": {
+    "keyRejected": "RetroAchievements rejected the Web API key.",
+    "unreachable": "Couldn't reach RetroAchievements ({error}).",
+    "noUser": "RetroAchievements has no user named \"{user}\".",
+    "syncFailed": "The last sync failed ({error}).",
+    "credentialsRejected": "RetroAchievements rejected the username or Web API key"
+  },
+  "steam": {
+    "credentialRefused": "Steam refused the credential"
+  },
+  "updates": {
+    "nonePublished": "No updates have been published yet.",
+    "installedOnly": "Updates work in installed builds of PlayOut.",
+    "checkFailed": "Could not check for updates: {error}",
+    "downloadFailed": "Could not download the update: {error}"
+  },
+  "combo": {
+    "pressOne": "Press at least one button.",
+    "atMostFour": "Use at most 4 buttons.",
+    "single": "A single button other than Home is used by games: hold two or more buttons together."
+  },
+  "steamGuide": {
+    "closingOff": "Closing Steam to turn off its Guide button and in-game overlay settings…",
+    "closingRestore": "Closing Steam to put its Guide button setting back…",
+    "waiting": "Waiting until no game is running: Steam restarts to change the setting.",
+    "slowRestart": "Steam was slow to close after the last change and is not running again yet, so nothing was changed.",
+    "noFiles": "Steam's settings files were not found.",
+    "slowClose": "Steam was slow to close (still running after {seconds} seconds), so its setting was not changed. It will be started again once it has closed."
+  },
+  "winhanced": {
+    "home": "Winhanced also uses the Home button, so both react to it: turn off its Guide button setting in Winhanced, or choose other buttons here.",
+    "viewMenuOverlay": "Winhanced opens its overlay with View + Menu, so both react to these buttons: turn that shortcut off in Winhanced, or choose other buttons here.",
+    "viewMenuGameBar": "Winhanced opens Game Bar with View + Menu, so both react to these buttons: turn that shortcut off in Winhanced, or choose other buttons here."
+  },
+  "padReader": {
+    "off": "The controller reader is off."
+  },
+  "memory": {
+    "noWindowsAnswer": "Windows did not answer the memory cleanup"
+  },
+  "edits": {
+    "unknownGame": "This game cannot be edited: PlayOut cannot tell which game it is",
+    "releaseDate": "Enter the release date as YYYY-MM-DD, YYYY-MM or YYYY (month 01-12, day 01-31)",
+    "notValid": "it is not valid",
+    "cannotSave": "This edit cannot be saved: {why}",
+    "cannotSaveField": "This edit cannot be saved: {field}: {why}"
+  },
+  "scan": {
+    "battlenet": "Checking Battle.net product database",
+    "steamLibrary": "Scanning {folder}",
+    "xboxPackages": "Could not list the installed Xbox packages",
+    "romFolderMissing": "ROM folder not found: {folder}",
+    "exeMissing": "Executable not found: {path}",
+    "steamLibraryFound_one": "{folder}: {count} game",
+    "steamLibraryFound_other": "{folder}: {count} games"
+  },
+  "friends": {
+    "inGame": "In a game"
+  },
+  "power": {
+    "modeFailed": "Could not set power mode {mode} (powercfg exit {code})",
+    "modeFailedDetail": "Could not set power mode {mode} (powercfg exit {code}): {detail}",
+    "sleepFailed": "Could not put the computer to sleep",
+    "sleepFailedDetail": "Could not put the computer to sleep: {detail}",
+    "shutdownFailed": "Could not shutdown (shutdown.exe exit {code})",
+    "shutdownFailedDetail": "Could not shutdown (shutdown.exe exit {code}): {detail}",
+    "restartFailed": "Could not restart (shutdown.exe exit {code})",
+    "restartFailedDetail": "Could not restart (shutdown.exe exit {code}): {detail}",
+    "hibernateFailed": "Could not hibernate (shutdown.exe exit {code})",
+    "hibernateFailedDetail": "Could not hibernate (shutdown.exe exit {code}): {detail}"
+  }
+}

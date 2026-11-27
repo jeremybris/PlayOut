@@ -1,0 +1,99 @@
+{
+  "hints": {
+    "section": "Section",
+    "sort": "Sort",
+    "filters": "Filters",
+    "favourite": "Favourite",
+    "options": "Options",
+    "search": "Search",
+    "settings": "Settings",
+    "home": "Home",
+    "close": "Close",
+    "select": "Select"
+  },
+  "settingsLabel": "Settings",
+  "import": "Library Import",
+  "sort": "Sort",
+  "title": {
+    "hidden": "Hidden",
+    "favorites": "Favorites"
+  },
+  "progress": {
+    "covers": "fetching covers {left} left",
+    "details": "fetching details {left} left",
+    "sizes": "sizes {left} left"
+  },
+  "search": {
+    "placeholder": "Search games…",
+    "label": "Search games",
+    "keyboardTitle": "Search"
+  },
+  "playableFirst": {
+    "label": "Playable first",
+    "on": "Playable first: on",
+    "off": "Playable first: off"
+  },
+  "folders": {
+    "button": "Open the games' folders",
+    "none": "No folder on this PC holds these games",
+    "opened_one": "Opened {count} folder",
+    "opened_other": "Opened {count} folders",
+    "openedMore_one": "Opened {count} folder ({more} more not opened)",
+    "openedMore_other": "Opened {count} folders ({more} more not opened)",
+    "failed": "Could not open the folders"
+  },
+  "tabs": {
+    "label": "Library tabs",
+    "add": "Add a tab",
+    "limit": "Up to {max} tabs: delete one to add another.",
+    "delete": "Delete this tab",
+    "lastTab": "The last tab cannot be deleted",
+    "deleteTitle": "Delete Tab",
+    "deleteMessage": "Delete the \"{name}\" tab? Its filters and sort go with it; your games stay in your library.",
+    "thisTab": "this",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "grid": {
+    "label": "Games",
+    "rail": "Jump to section"
+  },
+  "coverSize": {
+    "label": "Cover size",
+    "value": "Cover size {n}%",
+    "smaller": "Smaller covers",
+    "larger": "Larger covers"
+  },
+  "filters": {
+    "pill": "Filters",
+    "pillCount": "Filters ({n})",
+    "picked": "{first} +{more}",
+    "clear": "Clear filters",
+    "all": "All",
+    "full": "Up to {max} filters at once: turn one off to pick another.",
+    "genre": "Genre",
+    "release": "Release",
+    "platform": "Platform",
+    "size": "Size",
+    "hltb": "H.L.T.B.",
+    "hltbTitle": "How Long to Beat",
+    "difficulty": "Difficulty",
+    "reviews": "Reviews",
+    "controls": "Controls",
+    "localMultiplayer": "Local Multiplayer",
+    "onlineMultiplayer": "Online Multiplayer",
+    "hidden": "Hidden",
+    "favorites": "Favorites",
+    "recompilations": "Recompilations",
+    "nucleusCoop": "Nucleus Co-Op",
+    "coop": "Co-Op",
+    "allGenres": "All Genres",
+    "allDates": "All Dates",
+    "allSizes": "All Sizes",
+    "allTimes": "All Times",
+    "allDifficulties": "All Difficulties",
+    "allReviews": "All Reviews",
+    "allControls": "All Controls",
+    "allLocalMultiplayer": "All Local Multiplayer"
+  }
+}

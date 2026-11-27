@@ -1,0 +1,89 @@
+{
+  "title": "Biblioteca",
+  "lead": "Dónde busca juegos PlayOut, y las pestañas de la Biblioteca. Las fuentes desactivadas se omiten en los escaneos y se ocultan de la pantalla de inicio.",
+  "scanAll": "Escanear todo ahora",
+  "toasts": {
+    "sourcesFailed": "No se pudo leer la lista de fuentes",
+    "scanFinished": "Escaneo terminado: {added} añadidos, {updated} actualizados, {removed} quitados",
+    "scanFailed": "Falló el escaneo",
+    "folderPickerFailed": "No se pudo abrir el selector de carpetas",
+    "esdeGamesUpdated_one": "{count} juego actualizado",
+    "esdeGamesUpdated_other": "{count} juegos actualizados",
+    "esdeImagesCopied_one": "{count} imagen copiada",
+    "esdeImagesCopied_other": "{count} imágenes copiadas",
+    "esdeSummary": "{games}, {images}",
+    "esdeMessage": "{message} ({summary})",
+    "esdeDone": "Importación de ES-DE terminada: {summary}",
+    "esdeFailed": "Falló la importación de ES-DE"
+  },
+  "sources": {
+    "title": "Fuentes",
+    "detecting": "Detectando clientes de tiendas",
+    "scan": "Escanear",
+    "status": {
+      "detecting": "Detectando…",
+      "scanning_one": "Escaneando… {count} juego encontrado",
+      "scanning_other": "Escaneando… {count} juegos encontrados",
+      "error": "Error: {error}",
+      "games_one": "{count} juego",
+      "games_other": "{count} juegos",
+      "detectedVersion": "Detectado ({version})",
+      "detected": "Detectado",
+      "notInstalled": "No instalado",
+      "lastScan": "Último escaneo: {when}"
+    }
+  },
+  "folders": {
+    "title": "Carpetas",
+    "esde": {
+      "label": "Carpeta de ES-DE",
+      "description": "Se usa para importar las listas de juegos y los medios descargados. Déjala en automático para usar ~/ES-DE.",
+      "placeholder": "Detección automática",
+      "clear": "Auto",
+      "import": "Importar datos de ES-DE",
+      "picker": "Elige tu carpeta de ES-DE (contiene gamelists y downloaded_media)"
+    },
+    "emulation": {
+      "label": "Carpeta Emulation",
+      "description": "Organizada como la usan las instalaciones de ES-DE (EmuDeck): bios, hdpacks, roms (una carpeta por sistema), saves, storage, texturepacks y tools. Convert encuentra tus claves y archivos de BIOS en su carpeta bios. PlayOut encuentra tus ROMs en su carpeta roms, una subcarpeta por sistema con el nombre de ES-DE (snes, psx, n64, …). También guarda tu lista de favoritos, para que vuelvan si reinstalas PlayOut. La predeterminada es Documentos\\Emulation. Al elegir otro lugar, la carpeta se mueve allí; no puede estar dentro de las carpetas de PlayOut, así que desinstalar PlayOut nunca la borra. Generar crea una dentro de la carpeta que elijas.",
+      "placeholderPath": "Predeterminada antigua ({path})",
+      "placeholder": "Predeterminada",
+      "clear": "Predeterminada",
+      "picker": "Elige tu carpeta Emulation (contiene bios, roms, saves…)",
+      "generatePicker": "Elige dónde poner la carpeta Emulation (se crea una carpeta Emulation dentro)"
+    }
+  },
+  "frontPage": {
+    "title": "Portada",
+    "label": "Juegos de la portada",
+    "description": "La fila de juegos de la portada de PlayOut. Añadidos recientemente muestra los juegos que puedes jugar en este PC, los más nuevos primero; Favoritos muestra tus juegos favoritos; Más jugados muestra los juegos a los que más tiempo has jugado.",
+    "options": {
+      "recent": "Jugados recientemente",
+      "added": "Añadidos recientemente",
+      "favorites": "Favoritos",
+      "played": "Más jugados"
+    }
+  },
+  "visibility": {
+    "title": "Visibilidad",
+    "showHidden": {
+      "label": "Mostrar juegos ocultos",
+      "description": "Mezcla los juegos ocultos en la biblioteca, incluidos los ocultos en Steam. Filtros → Ocultos los muestra de todos modos."
+    },
+    "showUninstalled": {
+      "label": "Mostrar juegos no instalados",
+      "description": "Juegos que tienes en una tienda con sesión iniciada, y juegos que un nuevo escaneo ya no encontró, en gris."
+    },
+    "showDuplicates": {
+      "label": "Mostrar duplicados",
+      "description": "Muestra cada copia de un juego que tengas en varias consolas (PS2, Xbox, GameCube...). Las copias de tiendas de PC siguen compartiendo una tarjeta. Desactivado: una tarjeta por juego, que muestra la recompilación, si no Steam, GOG, Epic, PS3, PS2, GameCube, Xbox 360, Xbox y luego las demás tiendas de PC."
+    }
+  },
+  "newGames": {
+    "title": "Juegos nuevos",
+    "trimGames": {
+      "label": "Recortar juegos",
+      "description": "Reduce tus juegos ROM: ISO de PS2 a CHD, ISO de Xbox y Xbox 360 a XISO (recortado), BIN/CUE de PlayStation a CHD, ISO de PSP a CSO, carpetas de disco de PS3 a ISO (no juegos de HDD ni de PSN), ISO de Wii y GameCube a RVZ. Al activarlo, los juegos que ya están en tu biblioteca se revisan una vez; después, cada juego que añadas se recorta. Cada original va a la Papelera de reciclaje solo cuando su resultado está verificado; Ajustes › Convertir muestra el progreso. Los juegos de Wii necesitan tu clave común de Wii en la carpeta Emulation (bios\\wii\\common-key.bin) o Dolphin instalado, como en Convertir. Los juegos descargados desde otro PC conservan su formato."
+    }
+  }
+}

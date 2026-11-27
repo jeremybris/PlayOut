@@ -1,0 +1,24 @@
+{
+  "title": "Pestañas",
+  "note": "Las pestañas de la Biblioteca, de izquierda a derecha. Cada pestaña guarda sus propios filtros, orden, búsqueda y posición, y se nombra según sus filtros.",
+  "full": "Hasta {max} pestañas: elimina una para añadir otra.",
+  "newTab": "Una pestaña nueva muestra Todos los juegos por A-Z con los juegos jugables primero (el botón Biblioteca junto a la búsqueda lo desactiva); elige sus filtros y su orden aquí o en la Biblioteca.",
+  "add": "Añadir pestaña",
+  "recommended": {
+    "title": "Pestañas recomendadas",
+    "description": "{description} Orden: {sort}.",
+    "add": "Añadir",
+    "addAgain": "Añadir otra vez"
+  },
+  "row": {
+    "sortReversed": "{sort} (invertido)",
+    "sortPlayableFirst": "{sort}, jugables primero",
+    "sortReversedPlayableFirst": "{sort} (invertido), jugables primero",
+    "searching": "{sort} · buscando “{query}”",
+    "moveLeft": "Mover a la izquierda",
+    "moveRight": "Mover a la derecha",
+    "sort": "Orden",
+    "delete": "Eliminar pestaña",
+    "lastTab": "La última pestaña no se puede eliminar"
+  }
+}

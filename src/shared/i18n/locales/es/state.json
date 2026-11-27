@@ -1,0 +1,215 @@
+{
+  "accounts": {
+    "signedInAs": "Sesión iniciada en {store} como {name}",
+    "signedIn": "Sesión iniciada en {store}",
+    "signInFailed": "No se pudo iniciar sesión en {store}: {error}",
+    "signedOut": "Sesión cerrada en {store}",
+    "signOutFailed": "No se pudo cerrar sesión en {store}: {error}",
+    "importFailed": "No se pudo importar tu biblioteca de {store}: {error}",
+    "importEnded": "Falló la importación de {store}: {error}"
+  },
+  "convert": {
+    "done": "{title} se convirtió a {format}",
+    "doneDetail": "{title} se convirtió a {format} ({detail})",
+    "failed": "{title} no se convirtió",
+    "failedDetail": "{title} no se convirtió: {detail}",
+    "skipped": "{title} se dejó como estaba",
+    "skippedDetail": "{title} se dejó como estaba: {detail}",
+    "stopped": "Se detuvo la conversión de {title}",
+    "trimmingOne": "Recortando {title}… (Ajustes › Convertir muestra el progreso)",
+    "trimmingLibrary_one": "Recortando {count} juego… (Ajustes › Convertir muestra el progreso)",
+    "trimmingLibrary_other": "Recortando {count} juegos… (Ajustes › Convertir muestra el progreso)",
+    "trimmingNew_one": "Recortando {count} juego nuevo… (Ajustes › Convertir muestra el progreso)",
+    "trimmingNew_other": "Recortando {count} juegos nuevos… (Ajustes › Convertir muestra el progreso)",
+    "trimSkipped": "Recortar juegos dejó {title} como estaba: {reason}",
+    "trimSkippedMany": "Recortar juegos dejó {count} juegos como estaban: {reason}"
+  },
+  "coop": {
+    "risksTitle": "Antes de Co-Op",
+    "risks": "El handler de Co-Op de {title} usa {tools}. Estas herramientas quitan la protección anticopia o esquivan el antitrampas, lo que puede incumplir los términos de servicio del juego y, en juegos en línea, puede hacer que se bloquee una cuenta. ¿Usar Co-Op con este juego de todos modos?",
+    "risksConfirm": "Usar Co-Op",
+    "saveFailed": "No se pudo guardar la elección",
+    "startFailed": "No se pudo iniciar Co-Op: {error}",
+    "starting": "Iniciando {title} en Co-Op…"
+  },
+  "favorite": {
+    "added": "{title} se añadió a favoritos",
+    "removed": "{title} se quitó de favoritos",
+    "completed": "{title} se marcó como completado",
+    "notCompleted": "{title} ya no está marcado como completado",
+    "updateFailed": "No se pudo actualizar el juego",
+    "folderFailed": "No se pudo abrir la carpeta del juego"
+  },
+  "queue": {
+    "changeFailed": "No se pudo cambiar la cola de instalación",
+    "pauseFailed": "No se pudo pausar la descarga",
+    "resumeFailed": "No se pudo reanudar la descarga",
+    "cancelled": "Se canceló la instalación de {title}",
+    "stoppedTracking": "Se dejó de seguir la instalación de {title}. {store} la sigue descargando.",
+    "paused": "En pausa",
+    "pausedAt": "En pausa al {percent}%",
+    "pausedStore": "En pausa · pausa también en {store}",
+    "storeKeepsDownloading": "{store} sigue descargando {title} hasta que también lo pauses allí",
+    "downloading": "Descargando {title}…",
+    "downloadingFrom": "Descargando {title} desde {host}…",
+    "starting": "Iniciando…",
+    "queued": "{title} está en cola; empieza cuando termine la descarga actual",
+    "queuedAfter": "{title} está en cola; empieza después de {active}",
+    "summary": {
+      "downloads": "Descargas",
+      "allPaused": "Descargas en pausa",
+      "activePaused": "{title} en pausa",
+      "downloading": "Descargando {title}",
+      "downloadingPercent": "Descargando {title} ({percent})",
+      "waiting": "{count} en espera"
+    },
+    "place": {
+      "next": "Siguiente en la cola",
+      "one": "{position}.º en la cola",
+      "two": "{position}.º en la cola",
+      "few": "{position}.º en la cola",
+      "other": "{position}.º en la cola"
+    }
+  },
+  "libraryTabs": {
+    "tooMany": "Hasta {count} pestañas: elimina una para abrir este filtro en una pestaña propia."
+  },
+  "localDelete": {
+    "title": "Eliminar de este PC",
+    "toRecycleBin": "{title} irá a la Papelera de reciclaje y se quitará de tu biblioteca:",
+    "files_one": "{count} archivo{size}:",
+    "files_other": "{count} archivos{size}:",
+    "more": "… y {count} más",
+    "kept_one": "Se conserva porque otro juego lo usa: {files}",
+    "kept_other": "Se conservan porque otro juego los usa: {files}",
+    "updatesDlc": "Sus actualizaciones y DLC{size}:",
+    "windowsSettings": "Configuración de Windows se abre en Aplicaciones: desinstala {title} desde Aplicaciones. Sigue en tu biblioteca y aparece como no instalado cuando se desinstale.",
+    "store": "{store} pedirá desinstalar {title}. Sigue en tu biblioteca y aparece como no instalado cuando {store} termine.",
+    "storeUnnamed": "La tienda pedirá desinstalar {title}. Sigue en tu biblioteca y aparece como no instalado cuando la tienda termine.",
+    "uninstaller": "Se abre el desinstalador de {title} ({path}). {title} sale de tu biblioteca cuando se desinstala; si cancelas el desinstalador, se queda.",
+    "onlyThisPcStore": "Solo afecta a este PC: tu cuenta de la tienda, los otros PC y el host conservan el juego.",
+    "folder": "Todo lo que hay en la carpeta, partidas guardadas incluidas, va a la Papelera de reciclaje. Los otros PC y el host no se tocan.",
+    "onlyThisPcFiles": "Solo afecta a este PC: los otros PC, el host y tus partidas guardadas no se tocan.",
+    "onlyThisPcUninstaller": "Solo afecta a este PC: los otros PC y el host conservan el juego. El desinstalador decide qué quita.",
+    "hostKeeps_one": "{hosts} conserva su copia; aquí aparece como Descargar.",
+    "hostKeeps_other": "{hosts} conservan su copia; aquí aparece como Descargar.",
+    "hostStreams": "Aún puedes transmitirlo desde {hosts}.",
+    "confirm": {
+      "windowsSettings": "Abrir Configuración de Windows",
+      "store": "Desinstalar en {store}",
+      "storeUnnamed": "Desinstalar en la tienda",
+      "uninstaller": "Abrir desinstalador",
+      "delete": "Eliminar"
+    },
+    "updatesOption": {
+      "label": "Eliminar también sus actualizaciones y DLC",
+      "description": "Van a la Papelera de reciclaje con el juego. Las licencias de DLC se conservan."
+    },
+    "removeOnly": {
+      "title": "Quitar de la biblioteca",
+      "message": "{title} no se puede eliminar desde aquí: {reason}.\n\n¿Quitarlo de tu biblioteca en su lugar? Sus archivos no se eliminan.",
+      "confirm": "Quitar",
+      "done": "Se quitó {title}",
+      "failed": "No se pudo quitar el juego"
+    },
+    "checkFailed": "No se pudo comprobar {title}",
+    "refused": "{title} no se puede eliminar ahora",
+    "notSafe": "no es seguro eliminar su carpeta",
+    "failed": "No se pudo eliminar {title}"
+  },
+  "peerparty": {
+    "downloading": "Descargando PeerParty…",
+    "downloadingPercent": "Descargando PeerParty… {percent}%",
+    "checking": "Comprobando PeerParty…",
+    "installing": "Instalando PeerParty…",
+    "starting": "Iniciando con PeerParty…",
+    "title": "PeerParty: juego en LAN",
+    "titleServices": "PeerParty: juego en LAN ({services})",
+    "scanning": "Revisando tus juegos para PeerParty…",
+    "startingGame": "Iniciando {title} con PeerParty…",
+    "startFailed": "No se pudo iniciar {title} con PeerParty"
+  },
+  "ps3Updates": {
+    "updated": "{title} se actualizó a {version}"
+  },
+  "recomp": {
+    "notFinished": "La instalación no terminó."
+  },
+  "recompImage": {
+    "delete": {
+      "image": "Eliminar la imagen de disco",
+      "folder": "Eliminar la carpeta del juego desempaquetada",
+      "both": "Eliminar ambas"
+    },
+    "unpackedFolder": "la carpeta del juego desempaquetada",
+    "folderOnly": "{recomp} ya no usa la copia de {game} que PlayOut desempaquetó para su programa de instalación: {folder}{size}. ¿Eliminarla? Va a la Papelera de reciclaje; si vuelves a instalar el juego con el programa de instalación, se desempaqueta de nuevo desde la imagen de disco.",
+    "fileAndMore_one": "{file} y {count} archivo más",
+    "fileAndMore_other": "{file} y {count} archivos más",
+    "ready": "{recomp} está listo. ¿Eliminar el original {what}{size}? Va a la Papelera de reciclaje; {game} sigue en tu biblioteca e inicia la recompilación.",
+    "readyWithFolder": "{image} La copia que PlayOut desempaquetó para el programa de instalación, {folder}{size}, tampoco se usa ya: elige qué eliminar.",
+    "imageLine": "{recomp} ya no necesita {file}. Puedes moverlo a la Papelera de reciclaje; el juego sigue en tu biblioteca e inicia la recompilación.",
+    "folderLine": "{recomp} ya no usa la copia del juego que PlayOut desempaquetó para su programa de instalación: {folder}{size}. También puede ir a la Papelera de reciclaje; si vuelves a instalar el juego con el programa de instalación, se desempaqueta de nuevo desde la imagen de disco.",
+    "keptBefore": "Antes elegiste conservarlo."
+  },
+  "recompHeld": {
+    "both": "{file} y {folder}",
+    "files": "los archivos",
+    "crashed": {
+      "titleImage": "¿Restaurar la imagen de disco?",
+      "titleFolder": "¿Restaurar la carpeta del juego?",
+      "messageImage": "Se detectó un cierre inesperado: {recomp} puede necesitar el original {what}. ¿Restaurarlo? Vuelve a donde estaba y {game} vuelve a ser una tarjeta de juego normal. Eliminar de todos modos lo mueve a la Papelera de reciclaje.",
+      "messageFolder": "Se detectó un cierre inesperado: {recomp} puede necesitar el original {what}. ¿Restaurarlo? Vuelve a donde estaba. Eliminar de todos modos lo mueve a la Papelera de reciclaje."
+    },
+    "passed": {
+      "title": "¿Moverlo a la Papelera de reciclaje?",
+      "messageImage": "{what} sigue apartado. Eliminar de todos modos vuelve a intentar la Papelera de reciclaje; Restaurar lo devuelve a donde estaba y {game} vuelve a ser una tarjeta de juego normal.",
+      "messageFolder": "{what} sigue apartado. Eliminar de todos modos vuelve a intentar la Papelera de reciclaje; Restaurar lo devuelve a donde estaba."
+    },
+    "interrupted": {
+      "titleImage": "¿Terminar de comprobar la imagen de disco?",
+      "titleFolder": "¿Terminar de comprobar la carpeta del juego?",
+      "message": "PlayOut apartó {what} para comprobar que {recomp} funciona sin ello, pero la comprobación no terminó ({reason}). No se ha eliminado. ¿Restaurarlo, volver a probar o eliminarlo de todos modos?",
+      "closed": "PlayOut se cerró"
+    },
+    "notStarted": {
+      "titleImage": "No se pudo comprobar la imagen de disco",
+      "titleFolder": "No se pudo comprobar la carpeta del juego",
+      "message": "PlayOut no pudo iniciar {recomp} para comprobar que funciona sin {what}: {reason}. Está apartado, no eliminado. ¿Restaurarlo, volver a probar o eliminarlo de todos modos?",
+      "notStarted": "no se inició"
+    }
+  },
+  "ra": {
+    "note": "RetroAchievements: {message}",
+    "signedIn": "RetroAchievements: sesión iniciada como {user}",
+    "notSignedIn": "RetroAchievements: sin iniciar sesión",
+    "unreachable": "No se pudo conectar con RetroAchievements"
+  },
+  "settings": {
+    "saveFailed": "No se pudieron guardar los ajustes"
+  },
+  "steamDlc": {
+    "installFailed": "No se pudo iniciar la instalación de {title}",
+    "installing": "Instalando {title} con {store}…",
+    "saveFailed": "No se pudo guardar la elección de DLC de {title}",
+    "noDownload": "Sin descarga (activa o desactiva su contenido)",
+    "changeInSteam": "Cámbialo en Steam",
+    "pending": "Cambio pendiente en Steam",
+    "installed": "Instalado",
+    "applied": "{title}: elecciones de DLC aplicadas",
+    "applyFailed": "{title}: no se pudieron aplicar las elecciones de DLC"
+  },
+  "streaming": {
+    "refreshFailed": "No se pudo pedir sus juegos a los equipos emparejados",
+    "connecting": "Conectando para transmitir {title}…",
+    "streamFailed": "No se pudo transmitir {title}: {error}",
+    "stopFailed": "No se pudo detener la transmisión",
+    "downloadFailed": "No se pudo descargar {title}: {error}",
+    "cancelFailed": "No se pudo cancelar la descarga",
+    "noRomFolder": "Elige una carpeta Emulation en Ajustes > Biblioteca para descargar ROM",
+    "logins": "Usando los inicios de sesión de {host} para {services}",
+    "paired": "{name} ya está emparejado",
+    "sessionFailed": "No se pudo transmitir desde {host}",
+    "hostDownloadFailed": "Falló la descarga desde el host",
+    "downloaded": "Descargado y añadido a tu biblioteca"
+  }
+}

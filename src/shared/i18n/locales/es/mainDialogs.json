@@ -1,0 +1,39 @@
+{
+  "romsFolder": {
+    "title": "Elige dónde crear tu carpeta roms"
+  },
+  "emulationFolder": {
+    "title": "Elige dónde crear tu carpeta Emulation"
+  },
+  "createHere": "Crear aquí",
+  "gameNotAdded": "No se pudo añadir el juego",
+  "esde": {
+    "imported": "Importado desde {folder}",
+    "notFound": "No se encontró ninguna instalación de ES-DE (configura la carpeta de ES-DE en Ajustes → Biblioteca)."
+  },
+  "launch": {
+    "notInstalled": "Este juego no está instalado",
+    "recompNeedsFiles": "Elige primero sus archivos del juego en la página de Recompilación.",
+    "recompChooseExe": "Elige el programa que lo inicia en Programa, en la página de Recompilación.",
+    "recompSaveConflict": "Sus partidas guardadas cambiaron en este PC y en la carpeta Emulation: elige cuáles conservar en la página de Recompilación.",
+    "recompImageInRecycleBin": "Su imagen de disco está en la Papelera de reciclaje: vuelve a instalar la recompilación, o restaura la imagen y vuelve a escanear.",
+    "recompReinstall": "Vuelve a instalar la recompilación desde su página de Recompilación.",
+    "recompReinstallOrRestore": "Vuelve a instalar la recompilación, o devuelve el archivo del juego y vuelve a escanear."
+  },
+  "imageUnreadable": "No se pudo leer la imagen.",
+  "chooseFolder": "Elige una carpeta",
+  "chooseFile": "Elige un archivo",
+  "convert": {
+    "chooseFolders": "Elige las carpetas de {format} que quieres convertir",
+    "chooseFiles": "Elige los archivos de {format} que quieres convertir"
+  },
+  "update": {
+    "closeGame": "Cierra el juego en ejecución antes de instalar la actualización."
+  },
+  "music": {
+    "chooseFolder": "Elige tu carpeta de música"
+  },
+  "refusedUrl": "No se abre esta URL",
+  "refusedScheme": "No se abren URL {scheme}:",
+  "refusedLink": "No se abre este enlace"
+}

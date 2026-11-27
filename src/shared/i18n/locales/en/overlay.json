@@ -1,0 +1,348 @@
+{
+  "checking": "Checking…",
+  "on": "On",
+  "off": "Off",
+  "fps": "{fps} fps",
+  "fpsUpper": "{fps} FPS",
+  "tabs": {
+    "performance": "Performance",
+    "music": "Music",
+    "display": "Display",
+    "downloads": "Downloads",
+    "friends": "Friends",
+    "peerparty": "PeerParty",
+    "settings": "Settings",
+    "power": "Power"
+  },
+  "rail": {
+    "label": "Overlay sections"
+  },
+  "header": {
+    "paused": "Paused",
+    "pausedTitle": "The game is paused until the overlay closes",
+    "cpuPower": "CPU power",
+    "powerProfile": "Power profile",
+    "battery": "Battery",
+    "fpsTitle": "Frame rate",
+    "fpsTitleRtss": "Frame rate (RivaTuner Statistics Server)",
+    "fpsTitleDynamic": "Frame rate (Dynamic TDP)"
+  },
+  "game": {
+    "back": "Back to game",
+    "close": "Close",
+    "quit": "Quit game",
+    "quitTitle": "Quit game",
+    "quitMessage": "Close {title}? Anything not saved in the game is lost.",
+    "quitMessageUnknown": "Close the game? Anything not saved in the game is lost.",
+    "quitConfirm": "Quit game",
+    "closeFailed": "Could not close {title}",
+    "closeFailedUnknown": "Could not close the game",
+    "openPlayOutFailed": "Could not open PlayOut"
+  },
+  "profiles": {
+    "title": "Power profile",
+    "labels": {
+      "dynamic": "Dynamic",
+      "silent": "Silent",
+      "balanced": "Balanced",
+      "performance": "Performance",
+      "custom": "Custom",
+      "none": "Off"
+    },
+    "descriptions": {
+      "dynamic": "Holds the FPS",
+      "silent": "Quiet",
+      "balanced": "Everyday",
+      "performance": "Full speed",
+      "custom": "Your own",
+      "none": "Windows"
+    },
+    "customWatts": "Custom watts",
+    "chipFps": "{label} · {fps} fps",
+    "chipWatts": "{label} · {watts}",
+    "chipOff": "Windows",
+    "useFor": "Use for {game}",
+    "useForThisGame": "Use for this game",
+    "perGameOff": "Per-game profiles are off in Settings › System.",
+    "dynamicEveryStart": "Use Dynamic TDP with this target every time the game starts.",
+    "profileEveryStart": "Switch to this profile every time the game starts.",
+    "editCustomWatts": "Edit Custom watts",
+    "editCustom": "Edit Custom",
+    "helperNeedsUpdate": "The power helper needs an update for Dynamic TDP (one administrator prompt).",
+    "installing": "Installing…",
+    "updateHelper": "Update power helper",
+    "installHelper": "Install power helper for exact watts",
+    "failed": "Could not change the power profile",
+    "installFailed": "Could not install the power helper",
+    "removeFailed": "Could not remove the power helper"
+  },
+  "custom": {
+    "label": "Custom profile",
+    "powerMode": "Windows power mode",
+    "modes": {
+      "efficiency": "Efficiency",
+      "balanced": "Balanced",
+      "performance": "Performance"
+    },
+    "cpuMax": "CPU maximum",
+    "cpuBoost": {
+      "label": "CPU boost",
+      "description": "Short bursts above the base clock. Off runs cooler and quieter."
+    },
+    "setWatts": {
+      "label": "Set watts",
+      "description": "Off leaves the CPU's own power limits."
+    },
+    "sustained": "Sustained",
+    "boost": "Boost"
+  },
+  "dynamic": {
+    "label": "Dynamic TDP",
+    "target": "Target frame rate",
+    "idle": "Starts with a game · target {fps} fps",
+    "noFps": "No frames measured",
+    "noFpsWatts": "No frames measured · {watts}",
+    "measuring": "Measuring…",
+    "measuringWatts": "Measuring… · {watts}",
+    "plateau": "{reading} · more watts would not help",
+    "max": "{reading} · at the highest watts"
+  },
+  "watts": {
+    "ready": "Power helper ready.",
+    "readyMethod": "Power helper ready ({method}).",
+    "readyRange": "Power helper ready ({min} to {max}).",
+    "readyMethodRange": "Power helper ready ({method}, {min} to {max}).",
+    "notInstalled": "Exact watts need PlayOut's power helper. Installing it asks Windows for administrator rights once.",
+    "notInstalledMethod": "Exact watts need PlayOut's power helper ({method}). Installing it asks Windows for administrator rights once.",
+    "unsupported": "This PC has no supported way to set watts. The profiles still change Windows power settings.",
+    "error": "The power helper is not working.",
+    "errorMessage": "The power helper is not working: {message}"
+  },
+  "combo": {
+    "notSet": "Not set",
+    "singleButton": "A single button other than Home is used by games: hold two or more buttons together.",
+    "noButtons": "No buttons were held.",
+    "twice": "A button was recorded twice.",
+    "tooMany": "Hold at most {max} buttons together.",
+    "notRecorded": "Those buttons could not be recorded: try again."
+  },
+  "override": {
+    "off": "PlayOut leaves {name} as it is.",
+    "steamApplied": "Steam no longer opens on the Guide button. PlayOut puts it back when you turn this off.",
+    "gameBarApplied": "Xbox Game Bar is off: it no longer opens on the Guide button or from other programs. PlayOut puts it back when you turn this off.",
+    "steamAlready": "Steam already ignores the Guide button.",
+    "gameBarAlready": "Xbox Game Bar is already off.",
+    "missing": "{name} is not installed.",
+    "steamPending": "Waiting for Steam to close…",
+    "gameBarPending": "Changing Game Bar…",
+    "error": "Could not change {name}."
+  },
+  "reader": {
+    "starting": "Starting the controller reader…",
+    "unavailable": "The controller reader is not available.",
+    "unavailableMessage": "The controller reader is not available: {message}",
+    "none": "Reading controllers. None connected.",
+    "pads": "Reading controllers: {pads}."
+  },
+  "display": {
+    "screen": "Screen",
+    "screenNamed": "Screen · {name}",
+    "cannotChange": "PlayOut cannot change this monitor’s display mode.",
+    "refreshRate": "Refresh rate",
+    "resolution": "Resolution",
+    "failed": "Could not change the display mode"
+  },
+  "quick": {
+    "title": "Quick settings",
+    "show": "Show",
+    "filters": {
+      "all": "All",
+      "display": "Display",
+      "game": "Game",
+      "sound": "Sound",
+      "system": "System"
+    },
+    "cpu": "CPU",
+    "gpu": "GPU",
+    "memory": "Memory",
+    "memoryDetail": "{used} of {total}",
+    "battery": "Battery",
+    "pluggedIn": "Plugged in",
+    "charging": "Charging",
+    "onBattery": "On battery",
+    "tile": "{label}: {value}",
+    "tileDetail": "{label}: {value}. {detail}"
+  },
+  "extras": {
+    "checking": "Checking the game settings…",
+    "unavailable": "Could not read the game settings",
+    "frameLimit": {
+      "label": "Frame rate limit",
+      "unlimited": "Unlimited",
+      "nowFollows": "Now: follows the display",
+      "followsDisplay": "Follows the display ({hz})",
+      "failed": "Could not change the frame rate limit"
+    },
+    "sync": {
+      "label": "Sync FPS + refresh",
+      "limit": "Limit = {hz}",
+      "followsDisplay": "Follows the display",
+      "followsRefresh": "Limit follows the refresh rate",
+      "failed": "Could not change Sync FPS + refresh"
+    },
+    "perfOverlay": {
+      "label": "Performance overlay",
+      "level": "Level {level}",
+      "level1": "FPS",
+      "level2": "FPS, frame time, CPU, GPU, watts",
+      "level3": "Level 2 plus RAM, battery and time",
+      "showing": "Showing in the game",
+      "showsInGames": "Shows in games started from PlayOut",
+      "drawnBy": "Drawn by RivaTuner",
+      "failed": "Could not change the performance overlay"
+    },
+    "autoHdr": {
+      "label": "Auto HDR",
+      "failed": "Could not change Auto HDR"
+    },
+    "cpuBoost": {
+      "label": "CPU boost",
+      "changed": "{profile} (changed)",
+      "failed": "Could not change CPU boost"
+    },
+    "endurance": {
+      "label": "Endurance Gaming",
+      "detail": "Intel battery saver for games: paces the frame rate on battery. All games.",
+      "failed": "Could not change Endurance Gaming"
+    }
+  },
+  "system": {
+    "volume": "Volume",
+    "mute": "Mute",
+    "muted": "Muted",
+    "brightness": "Brightness",
+    "volumeFailed": "Could not change the volume",
+    "muteFailed": "Could not mute",
+    "unmuteFailed": "Could not unmute",
+    "brightnessFailed": "Could not change the brightness"
+  },
+  "media": {
+    "title": "Now playing",
+    "unknownTitle": "Unknown title",
+    "nothing": "Nothing is playing",
+    "anyApp": "Music from any app on this PC shows here.",
+    "previous": "Previous",
+    "next": "Next",
+    "play": "Play",
+    "pause": "Pause",
+    "noAnswer": "The app did not respond"
+  },
+  "music": {
+    "title": "Local music",
+    "intro": "Play your own music files over any game. Pick the folder they are in.",
+    "choose": "Choose music folder",
+    "chooseFailed": "Could not choose the music folder",
+    "notPlaying": "Not playing",
+    "previous": "Previous track",
+    "next": "Next track",
+    "shuffle": "Shuffle",
+    "saveFailed": "Could not save the playlist",
+    "playlist_one": "{title}: {count} track",
+    "playlist_other": "{title}: {count} tracks",
+    "noPlaylist": "{title} has no playlist yet. Add tracks with the + button.",
+    "playPlaylist": "Play playlist",
+    "noFiles": "No music files in this folder.",
+    "more": "And {count} more. Shuffle plays them all.",
+    "addToPlaylist": "Add to the playlist",
+    "removeFromPlaylist": "Remove from the playlist",
+    "playFailed": "Could not play this track",
+    "ingameHint": "Your music folder’s player is not shown inside a full-screen game. What it plays keeps playing."
+  },
+  "downloads": {
+    "title": "Install queue"
+  },
+  "power": {
+    "game": "Game",
+    "power": "Power"
+  },
+  "settings": {
+    "power": "Power",
+    "outsideGames": "Outside games",
+    "dynamicTarget": "Dynamic TDP target",
+    "perGame": "Per-game profiles",
+    "setWatts": {
+      "label": "Set watts",
+      "description": "With the power helper."
+    },
+    "music": "Music",
+    "gameStart": "When a game starts",
+    "musicVolume": "Music volume",
+    "mute": "Mute",
+    "look": "Look",
+    "animations": "Animations",
+    "hint": "The home button and everything else are in PlayOut › Settings.",
+    "openPlayOut": "Open PlayOut"
+  },
+  "options": {
+    "profileOff": "Off (Windows as it is)",
+    "dynamic": "Dynamic TDP",
+    "customWatts": "Custom watts",
+    "noLimit": "No limit",
+    "gameStart": {
+      "keep": "Keep what plays",
+      "play": "Play the game's playlist",
+      "load": "Load it, paused"
+    }
+  },
+  "friends": {
+    "refresh": "Refresh",
+    "refreshing": "Refreshing…",
+    "loading": "Loading your Steam friends…",
+    "none": "No Steam friends",
+    "chatFailed": "Could not open Steam’s chat",
+    "listLabel": "Steam friends",
+    "playing": "Playing",
+    "online": "Online",
+    "offline": "Offline",
+    "showMore": "Show {count} more",
+    "showOffline": "Show offline friends ({count})",
+    "row": "{name}, {detail}. Message in Steam",
+    "message": "Message",
+    "presence": {
+      "offline": "Offline",
+      "online": "Online",
+      "busy": "Busy",
+      "away": "Away",
+      "snooze": "Snooze",
+      "trade": "Looking to trade",
+      "play": "Looking to play"
+    },
+    "ago": {
+      "justNow": "just now",
+      "minutes": "{count} min ago",
+      "hours": "{count} h ago",
+      "days_one": "{count} day ago",
+      "days_other": "{count} days ago"
+    },
+    "lastOnline": "Last online {ago}",
+    "updatedJustNow": "Updated just now",
+    "updatedSeconds": "Updated {count} s ago",
+    "updated": "Updated {ago}"
+  },
+  "peerParty": {
+    "lan": {
+      "on": "LAN play is on",
+      "starting": "Starting…",
+      "off": "LAN play is off"
+    },
+    "players": "Players of this game on your network: {count}",
+    "inviteSent": "Invite sent",
+    "inviteNone": "No PeerParty game took the invite",
+    "inviteFailed": "The invite could not be sent",
+    "limitsNote": "Player names and invites to one player need a newer PeerParty.",
+    "checking": "Checking PeerParty…",
+    "noGame": "No game runs through PeerParty now.",
+    "inviting": "Inviting…",
+    "invite": "Invite everyone on the LAN"
+  }
+}

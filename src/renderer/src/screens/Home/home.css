@@ -1,0 +1,390 @@
+/*
+ * Home screen layout (screens/Home). Positions and sizes come from the design tokens (tokens.css, 1u = one
+ * 1080p canvas pixel) or are written in rem (1rem = 10u, see base.css), so the screen keeps the reference
+ * proportions from 1280x800 to 3840x2160. The component blocks (.card, .row, .badge, .hints) live in
+ * components.css; this file lays them out and adds the Home-specific pieces.
+ */
+
+.home-page {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  background: var(--color-bg);
+  /* vertical swipes step rows (Home.tsx); horizontal pans stay native inside the row tracks */
+  touch-action: pan-x;
+}
+
+/* ---- home content: everything but the backdrop slides up and fades while the Library view is shown --- */
+
+.home-content {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transition:
+    transform var(--dur-screen) var(--ease-enter),
+    opacity var(--dur-screen) var(--ease-enter);
+}
+
+.home-content--away {
+  transform: translateY(-6rem);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---- hero backdrop ---------------------------------------------------------------------------------- */
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--color-bg);
+  pointer-events: none;
+}
+
+.backdrop__layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition:
+    opacity var(--dur-hero) var(--ease-linear),
+    filter var(--dur-normal) var(--ease-linear);
+}
+
+/* a modal on top: the art falls back to the page's dark base while the rows stay bright */
+.backdrop--dimmed .backdrop__layer {
+  filter: brightness(0.35);
+}
+
+.backdrop__layer--visible {
+  opacity: 1;
+}
+
+.backdrop__art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 100% 50%;
+}
+
+/* cover fallback: enlarged past the blur's soft edges */
+.backdrop__art--blur {
+  transform: scale(1.15);
+  filter: blur(32px) saturate(1.15) brightness(0.85);
+}
+
+.backdrop__gradient-left,
+.backdrop__gradient-bottom {
+  position: absolute;
+  inset: 0;
+}
+
+.backdrop__gradient-left {
+  background: var(--gradient-hero-left);
+}
+
+.backdrop__gradient-bottom {
+  background: var(--gradient-hero-bottom);
+}
+
+/* ---- the featured game's text block ---------------------------------------------- */
+
+.featured {
+  position: absolute;
+  z-index: 2;
+  left: var(--hero-logo-left);
+  top: var(--hero-logo-top);
+  /* never runs under the system pill */
+  width: min(72rem, calc(100vw - var(--hero-logo-left) - 72rem));
+  min-width: var(--hero-logo-max-w);
+  pointer-events: none;
+}
+
+.featured__content {
+  animation: featured-in var(--dur-focus) var(--ease-linear);
+}
+
+.featured__logo {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: var(--hero-logo-max-w);
+  max-height: var(--hero-logo-max-h);
+  object-fit: contain;
+  object-position: left top;
+  filter: drop-shadow(0 0.4rem 1.6rem rgba(0, 0, 0, 0.45));
+}
+
+.featured__title {
+  max-width: var(--hero-logo-max-w);
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  font-weight: var(--fw-bold);
+  line-height: 1.1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-shadow: 0 0.2rem 1.2rem rgba(0, 0, 0, 0.6);
+}
+
+.featured__meta {
+  position: absolute;
+  left: 0;
+  top: calc(var(--hero-meta-top) - var(--hero-logo-top));
+  display: flex;
+  align-items: center;
+  height: 3.2rem;
+  font-family: var(--font-ui);
+  font-size: var(--fs-meta);
+  line-height: 3.2rem;
+  color: var(--color-text-strong);
+  white-space: nowrap;
+}
+
+.featured__meta-part {
+  display: inline-flex;
+  align-items: center;
+}
+
+.featured__sep {
+  margin: 0 1.4rem;
+  color: var(--color-text-tertiary);
+}
+
+@keyframes featured-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---- system pill (top right) ------------------------------------------------------------------------ */
+
+.system-bar {
+  position: absolute;
+  z-index: var(--z-pill);
+  top: var(--pill-top);
+  right: var(--pill-right);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: var(--pill-h);
+  padding: 0 var(--pill-pad-right) 0 var(--pill-pad-left);
+  color: var(--color-icon);
+  /* a visible light rim over a blurred tint of the art (overrides .glass) */
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(20, 16, 16, 0.42);
+  -webkit-backdrop-filter: blur(28px) saturate(1.2);
+  backdrop-filter: blur(28px) saturate(1.2);
+}
+
+/* while a panel modal is open the pill stays fully visible above its scrim (it is not interactive then) */
+.system-bar--raised {
+  z-index: calc(var(--z-modal) + 1);
+  pointer-events: none;
+}
+
+/* the Library's tab band takes the pill's place: it slides away with the rest of Home */
+.system-bar--away {
+  transform: translateY(-6rem);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.system-bar {
+  transition:
+    transform var(--dur-screen) var(--ease-enter),
+    opacity var(--dur-screen) var(--ease-enter);
+}
+
+.system-bar__item {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-width: var(--pill-hit);
+  height: var(--pill-hit);
+  border-radius: var(--radius-pill);
+  color: var(--color-icon);
+  outline: var(--ring-w) solid transparent;
+  outline-offset: 0;
+  transition:
+    background var(--dur-instant) var(--ease-linear),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.system-bar__item--text {
+  padding: 0 0.8rem;
+}
+
+.system-bar__item--clock {
+  min-width: 0;
+  padding: 0 0.4rem 0 0.8rem;
+}
+
+.system-bar__item--button {
+  cursor: pointer;
+}
+
+.system-bar__item--button:hover,
+.system-bar__item[data-focused='true'] {
+  background: var(--color-glass-hover);
+}
+
+.system-bar__item[data-focused='true'] {
+  outline-color: var(--ring);
+}
+
+/* thin outline glyphs: 22u at a 1.5 stroke (the battery is wide, so a little larger) */
+.system-bar__item > svg {
+  flex: none;
+  width: var(--pill-icon);
+  height: var(--pill-icon);
+  stroke-width: var(--icon-stroke);
+}
+
+.system-bar__item--battery > svg {
+  width: var(--pill-icon-battery);
+  height: var(--pill-icon-battery);
+}
+
+.system-bar__label {
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--color-text-strong);
+}
+
+.system-bar__divider {
+  flex: none;
+  width: 1px;
+  height: var(--pill-divider-h);
+  margin: 0 1.6rem;
+  background: var(--color-divider-strong);
+}
+
+/* ---- quick actions ([Settings] [Exit]) above the empty-library row only ------------------------------ */
+
+.quick-bar {
+  position: absolute;
+  z-index: 3;
+  left: var(--page-inset-x);
+  top: var(--quick-actions-top);
+  display: flex;
+  gap: var(--quick-action-gap);
+}
+
+.quick-bar__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.2rem;
+  height: var(--quick-action-h);
+  padding: 0 var(--quick-action-pad-x);
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text);
+  white-space: nowrap;
+  cursor: pointer;
+  outline: var(--ring-w) solid transparent;
+  outline-offset: var(--ring-offset);
+  transition:
+    background var(--dur-instant) var(--ease-linear),
+    transform var(--dur-focus) var(--ease-p2p),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.quick-bar__pill:hover,
+.quick-bar__pill[data-focused='true'] {
+  background: var(--color-glass-hover);
+}
+
+.quick-bar__pill[data-focused='true'] {
+  outline-color: var(--ring);
+  transform: scale(1.04);
+}
+
+.quick-bar__pill:active {
+  transform: scale(0.98);
+  transition-duration: var(--dur-instant);
+}
+
+.quick-bar__pill > svg {
+  flex: none;
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+/* ---- rows: a clipped viewport whose stack is translated so the focused row stays at 496u ------------ */
+
+.home-rows {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  top: var(--home-first-row-top);
+  bottom: 0;
+  /* clip, not hidden: never a scroll container, so scrollIntoView cannot move it; only the translate does */
+  overflow: clip;
+}
+
+.home-rows__stack {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--row-gap);
+  will-change: transform;
+  transition: transform var(--dur-slow) var(--ease-p2p);
+}
+
+/* the reference puts the cards 82u below the header line box (44u header + 2u), with the 396u track above them */
+.home-page .row__header {
+  margin-bottom: 0.2rem;
+}
+
+.home-rows__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(var(--row-header-h) + var(--card-track-h));
+}
+
+/* ---- more-rows hint ------------------------------------------------------------------------------- */
+
+.scroll-chevron {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: var(--chevron-hint-bottom);
+  width: var(--chevron-hint-size);
+  height: var(--chevron-hint-size);
+  color: var(--color-icon-muted);
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: scroll-chevron-bob 1.6s ease-in-out infinite;
+}
+
+.scroll-chevron > svg {
+  width: 100%;
+  height: 100%;
+}
+
+html[data-animations='off'] .scroll-chevron {
+  animation: none;
+}
+
+@keyframes scroll-chevron-bob {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, 0.6rem);
+  }
+}

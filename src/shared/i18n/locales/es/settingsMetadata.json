@@ -1,0 +1,94 @@
+{
+  "title": "Metadatos e ilustraciones",
+  "lead": "Las claves se guardan solo en este PC y se usan con los servicios de abajo. Los campos se guardan mientras escribes, y cada clave se comprueba con su servicio en cuanto la introduces.",
+  "steamStore": "Tienda de Steam",
+  "links": {
+    "getApiKey": "Obtener clave de API",
+    "getClientId": "Obtener ID de cliente",
+    "createAccount": "Crear cuenta",
+    "getWebApiKey": "Obtener clave de Web API",
+    "label": "{link} para {service} (se abre en tu navegador)"
+  },
+  "regions": {
+    "us": "EE. UU.",
+    "eu": "Europa",
+    "jp": "Japón",
+    "wor": "Mundial"
+  },
+  "refresh": {
+    "all": "Actualizar todos los metadatos",
+    "missing": "Actualizar los que faltan",
+    "allStarted": "Actualizando los metadatos y las ilustraciones de todos los juegos",
+    "missingStarted": "Obteniendo metadatos para los juegos que no tienen",
+    "failed": "No se pudo iniciar la actualización de metadatos",
+    "missingQueued_one": "Buscando las ilustraciones que faltan de {count} juego…",
+    "missingQueued_other": "Buscando las ilustraciones que faltan de {count} juegos…",
+    "nothingMissing": "No falta nada",
+    "needsSignIn": "Las portadas necesitan iniciar sesión en SteamGridDB, ScreenScraper o IGDB. Añade una cuenta en Ajustes › Metadatos."
+  },
+  "artSourceNeeded": "Las portadas de los juegos sin imágenes en las tiendas necesitan iniciar sesión en SteamGridDB, ScreenScraper, IGDB o TheGamesDB más abajo. En cuanto añadas una, las portadas que faltan se buscan automáticamente.",
+  "openLinkFailed": "No se pudo abrir el enlace",
+  "scraping": {
+    "title": "Obtención de datos",
+    "autoScrape": {
+      "label": "Obtener datos automáticamente",
+      "description": "Obtiene metadatos e ilustraciones para los juegos nuevos justo después de un escaneo."
+    },
+    "localArt": {
+      "label": "Usar ilustraciones de las tiendas instaladas",
+      "description": "Reutiliza las portadas que Steam, GOG Galaxy y Epic ya descargaron en este PC antes de buscar nada."
+    },
+    "hltb": {
+      "label": "Tiempos de HowLongToBeat",
+      "description": "Consulta los tiempos de historia principal / completista (una consulta por juego, guardada 30 días)."
+    },
+    "steamTags": {
+      "label": "Etiquetas de Steam",
+      "description": "Lee las etiquetas de los jugadores de Steam (Roguelike, Souls-like, ...) para todos los juegos, incluidos los de otras tiendas que también están en Steam."
+    },
+    "region": {
+      "label": "Región preferida",
+      "description": "Qué lanzamiento regional, título y carátula preferir para las ROM."
+    }
+  },
+  "database": {
+    "title": "Base de datos de PlayOut",
+    "use": {
+      "label": "Usar la base de datos de PlayOut",
+      "description": "Completa la fecha de lanzamiento, los géneros, las etiquetas, los desarrolladores, los distribuidores y los jugadores locales de cada juego desde la base de datos compartida de PlayOut antes de consultar a los proveedores de datos."
+    },
+    "contribute": {
+      "label": "Añadir los juegos que faltan a la base de datos",
+      "description": "Envía el título y los datos de los juegos que faltan en la base de datos, con un ID de instalación anónimo; nada personal y nunca tus propias ediciones."
+    }
+  },
+  "artwork": {
+    "title": "Fuentes de ilustraciones (se prueban en este orden)",
+    "moveUp": "Subir {source}",
+    "moveDown": "Bajar {source}"
+  },
+  "steamgriddb": {
+    "note": "Portadas, imágenes de cabecera y logotipos. Inicia sesión en SteamGridDB y genera una clave en Preferences › API.",
+    "apiKey": "Clave de API"
+  },
+  "igdb": {
+    "note": "Descripciones, géneros y fechas de lanzamiento, y la valoración de usuarios que se muestra para los juegos sin puntuación de reseñas de Steam. Registra una aplicación en la consola de desarrolladores de Twitch, copia su ID de cliente y genera un secreto de cliente.",
+    "clientId": "ID de cliente",
+    "clientSecret": "Secreto de cliente"
+  },
+  "screenscraper": {
+    "note": "Metadatos e ilustraciones de ROM según el hash del archivo. El ID y la contraseña de desarrollador son obligatorios (ScreenScraper los entrega en su foro); una cuenta de usuario aumenta la cuota diaria.",
+    "username": "Nombre de usuario",
+    "password": "Contraseña",
+    "devId": "ID de desarrollador",
+    "devPassword": "Contraseña de desarrollador"
+  },
+  "thegamesdb": {
+    "note": "Carátulas y descripciones. Inicia sesión en TheGamesDB para ver tu clave de API.",
+    "apiKey": "Clave de API"
+  },
+  "steam": {
+    "note": "Logros y tiempo de juego desde la Steam Web API. Tu SteamID64 es el número de 17 dígitos de tu perfil.",
+    "apiKey": "Clave de Web API"
+  }
+}

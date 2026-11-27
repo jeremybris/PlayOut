@@ -1,0 +1,61 @@
+{
+  "intel": {
+    "noAnswer": "El controlador gráfico de Intel no respondió",
+    "noDriver": "No hay controlador gráfico de Intel",
+    "noAdapter": "No hay adaptador gráfico de Intel",
+    "needs64": "Necesita Windows de 64 bits",
+    "initFailed": "El controlador gráfico de Intel no inició su biblioteca de control: {result}",
+    "enumerateFailed": "El controlador gráfico de Intel no listó sus adaptadores: {result}",
+    "driverErrorWhy": "Error del controlador gráfico de Intel: {error}",
+    "driverError": "Error del controlador gráfico de Intel",
+    "no3dFeatures": "El controlador no listó sus funciones 3D: {result}",
+    "noEndurance": "Este controlador no tiene Endurance Gaming",
+    "unknownFormat": "Este controlador informa Endurance Gaming en un formato desconocido",
+    "capabilities": "Capacidades de Endurance Gaming: {result}",
+    "noChoices": "El controlador no lista opciones de Endurance Gaming",
+    "unreadable": "No se pudo leer Endurance Gaming: {result}",
+    "refused": "El controlador rechazó el cambio: {result}",
+    "noReply": "El controlador gráfico de Intel no respondió: {error}",
+    "noFrameGen": "El ajuste de generación de fotogramas de Intel no está disponible en este controlador",
+    "notAvailable": "Endurance Gaming no está disponible",
+    "notOffered": "Este controlador no ofrece Endurance Gaming \"{choice}\"",
+    "keptPrevious": "El controlador mantuvo su valor anterior",
+    "off": "Desactivado",
+    "onPerformance": "Activado, mejor rendimiento",
+    "onBalanced": "Activado, equilibrado",
+    "onBattery": "Activado, máxima batería",
+    "autoPerformance": "Automático, mejor rendimiento",
+    "autoBalanced": "Automático, equilibrado",
+    "autoBattery": "Automático, máxima batería"
+  },
+  "extras": {
+    "autoHdrNote": "Se aplica a los juegos que se inicien después",
+    "winhancedClash": "Winhanced también controla RivaTuner; PlayOut solo cambia el perfil propio de cada juego, nunca el global.",
+    "hdrOff": "Activa primero HDR en la configuración de pantalla de Windows",
+    "startGame": "Inicia un juego primero",
+    "waiting": "Esperando a que se inicie el juego",
+    "notVerified": "Aún no disponible: todavía necesita una prueba en un juego real",
+    "notOnThisPc": "No disponible en este PC (necesita el asistente de energía para Intel o Ryzen)",
+    "playoutGamesOnly": "Solo para juegos iniciados desde PlayOut",
+    "chooseProfile": "Elige primero un perfil de energía",
+    "dynamicTdp": "Controlado por Dynamic TDP",
+    "rtssStopped": "RivaTuner Statistics Server no está en ejecución",
+    "updateHelper": "Actualiza el asistente de energía en Ajustes › Sistema",
+    "needsHelper": "Necesita el asistente de energía (Ajustes › Sistema)",
+    "autoHdrUnreadable": "No se pudo leer la opción Auto HDR de Windows",
+    "frameLimitRange": "El límite de fotogramas debe ser un número entero de 0 a {max}",
+    "cpuBoostLocked": "El boost de la CPU no se puede cambiar ahora",
+    "autoHdrRefused": "Windows no aceptó el cambio de Auto HDR: {error}"
+  },
+  "display": {
+    "refused": "Windows rechazó ese modo de pantalla (código {code})"
+  },
+  "rtss": {
+    "noHelper": "Actualiza el asistente de energía en Ajustes › Sistema",
+    "missing": "Necesita RivaTuner Statistics Server"
+  },
+  "ingame": {
+    "crashed": "{title} se cerró inesperadamente ({code}) después de añadir la superposición dentro del juego, así que desde ahora la superposición de PlayOut se abrirá como una ventana encima.",
+    "fault": "{title} tuvo un problema con la superposición dentro del juego ({where}), así que desde ahora la superposición de PlayOut se abrirá como una ventana encima."
+  }
+}

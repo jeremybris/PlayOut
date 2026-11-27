@@ -1,0 +1,87 @@
+{
+  "cannotStart": "PlayOut no puede iniciarse",
+  "recomp": {
+    "needsFiles": "su recompilación necesita sus archivos del juego (elígelos en su página de Recompilación)",
+    "chooseExe": "elige el programa que inicia su recompilación en su página de Recompilación",
+    "saveConflict": "sus partidas guardadas cambiaron aquí y en la carpeta Emulation: elige cuáles conservar en su página de Recompilación"
+  },
+  "trimWait": {
+    "gameRunning": "hay un juego en ejecución",
+    "romDownloading": "se está descargando una ROM de otro PC"
+  },
+  "tray": {
+    "open": "Abrir PlayOut",
+    "quit": "Salir"
+  },
+  "ra": {
+    "keyRejected": "RetroAchievements rechazó la clave de Web API.",
+    "unreachable": "No se pudo acceder a RetroAchievements ({error}).",
+    "noUser": "RetroAchievements no tiene ningún usuario llamado \"{user}\".",
+    "syncFailed": "Falló la última sincronización ({error}).",
+    "credentialsRejected": "RetroAchievements rechazó el nombre de usuario o la clave de Web API"
+  },
+  "steam": {
+    "credentialRefused": "Steam rechazó la credencial"
+  },
+  "updates": {
+    "nonePublished": "Aún no se publicó ninguna actualización.",
+    "installedOnly": "Las actualizaciones funcionan en las versiones instaladas de PlayOut.",
+    "checkFailed": "No se pudo buscar actualizaciones: {error}",
+    "downloadFailed": "No se pudo descargar la actualización: {error}"
+  },
+  "combo": {
+    "pressOne": "Pulsa al menos un botón.",
+    "atMostFour": "Usa como máximo 4 botones.",
+    "single": "Los juegos usan los botones sueltos, salvo Home: mantén pulsados dos o más botones juntos."
+  },
+  "steamGuide": {
+    "closingOff": "Cerrando Steam para desactivar su botón Guía y su superposición dentro del juego…",
+    "closingRestore": "Cerrando Steam para restaurar su ajuste del botón Guía…",
+    "waiting": "Esperando a que no haya ningún juego en ejecución: Steam se reinicia para cambiar el ajuste.",
+    "slowRestart": "Steam tardó en cerrarse tras el último cambio y aún no volvió a ejecutarse, así que no se cambió nada.",
+    "noFiles": "No se encontraron los archivos de configuración de Steam.",
+    "slowClose": "Steam tardó en cerrarse (seguía en ejecución tras {seconds} segundos), así que su ajuste no se cambió. Se volverá a iniciar cuando se haya cerrado."
+  },
+  "winhanced": {
+    "home": "Winhanced también usa el botón Home, así que ambos reaccionan a él: desactiva su ajuste del botón Guía en Winhanced, o elige otros botones aquí.",
+    "viewMenuOverlay": "Winhanced abre su superposición con View + Menu, así que ambos reaccionan a estos botones: desactiva ese atajo en Winhanced, o elige otros botones aquí.",
+    "viewMenuGameBar": "Winhanced abre Game Bar con View + Menu, así que ambos reaccionan a estos botones: desactiva ese atajo en Winhanced, o elige otros botones aquí."
+  },
+  "padReader": {
+    "off": "El lector de mandos está desactivado."
+  },
+  "memory": {
+    "noWindowsAnswer": "Windows no respondió a la limpieza de memoria"
+  },
+  "edits": {
+    "unknownGame": "Este juego no se puede editar: PlayOut no sabe qué juego es",
+    "releaseDate": "Ingresa la fecha de lanzamiento como AAAA-MM-DD, AAAA-MM o AAAA (mes 01-12, día 01-31)",
+    "notValid": "no es válida",
+    "cannotSave": "Esta edición no se puede guardar: {why}",
+    "cannotSaveField": "Esta edición no se puede guardar: {field}: {why}"
+  },
+  "scan": {
+    "battlenet": "Revisando la base de datos de productos de Battle.net",
+    "steamLibrary": "Escaneando {folder}",
+    "xboxPackages": "No se pudieron listar los paquetes de Xbox instalados",
+    "romFolderMissing": "No se encontró la carpeta de ROM: {folder}",
+    "exeMissing": "No se encontró el ejecutable: {path}",
+    "steamLibraryFound_one": "{folder}: {count} juego",
+    "steamLibraryFound_other": "{folder}: {count} juegos"
+  },
+  "friends": {
+    "inGame": "En un juego"
+  },
+  "power": {
+    "modeFailed": "No se pudo ajustar el modo de energía {mode} (powercfg salió con {code})",
+    "modeFailedDetail": "No se pudo ajustar el modo de energía {mode} (powercfg salió con {code}): {detail}",
+    "sleepFailed": "No se pudo suspender el equipo",
+    "sleepFailedDetail": "No se pudo suspender el equipo: {detail}",
+    "shutdownFailed": "No se pudo apagar (shutdown.exe salió con {code})",
+    "shutdownFailedDetail": "No se pudo apagar (shutdown.exe salió con {code}): {detail}",
+    "restartFailed": "No se pudo reiniciar (shutdown.exe salió con {code})",
+    "restartFailedDetail": "No se pudo reiniciar (shutdown.exe salió con {code}): {detail}",
+    "hibernateFailed": "No se pudo hibernar (shutdown.exe salió con {code})",
+    "hibernateFailedDetail": "No se pudo hibernar (shutdown.exe salió con {code}): {detail}"
+  }
+}

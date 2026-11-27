@@ -1,0 +1,120 @@
+{
+  "title": "Explorar mods de RV",
+  "mods_one": "{count} mod",
+  "mods_other": "{count} mods",
+  "downloadedCount_one": "{count} descargado",
+  "downloadedCount_other": "{count} descargados",
+  "readFailed": "No se pudo leer la lista de mods de RV.",
+  "tryAgain": "Reintentar",
+  "reading": "Leyendo la lista de mods de RV",
+  "searchPlaceholder": "Buscar juegos, mods, autores, etiquetas",
+  "searchTitle": "Buscar mods de RV",
+  "sortBy": "Ordenar por",
+  "show": "Mostrar",
+  "noMatch": "Ningún mod de RV coincide con “{query}”.",
+  "noneHere": "No hay mods de RV aquí.",
+  "listEmpty": "La lista de mods de RV está vacía.",
+  "showMore_one": "Mostrar más ({count} mod más)",
+  "showMore_other": "Mostrar más ({count} mods más)",
+  "listLabel": "Mods de RV",
+  "filters": {
+    "all": "Todos",
+    "debut": "Mods nuevos",
+    "alpha": "Actualizaciones y alfas",
+    "tool": "Herramientas",
+    "profile": "Perfiles",
+    "quest": "Quest independiente",
+    "installed": "Descargados"
+  },
+  "sorts": {
+    "newest": "Más recientes",
+    "oldest": "Más antiguos",
+    "title": "Nombre"
+  },
+  "kind": {
+    "debut": "Mod nuevo",
+    "alpha": "Actualización",
+    "tool": "Herramienta",
+    "profile": "Perfil"
+  },
+  "toast": {
+    "downloading": "Descargando {title}…",
+    "downloadFailed": "No se pudo descargar {title}",
+    "openPageFailed": "No se pudo abrir la página",
+    "openFolderFailed": "No se pudo abrir la carpeta",
+    "removed": "Se quitó {title}",
+    "removeFailed": "No se pudo quitar {title}"
+  },
+  "remove": {
+    "title": "¿Quitar {title}?",
+    "message": "Se borra su carpeta en la carpeta VR Mods, con todo lo que hayas puesto en ella (tus propios archivos se comprimen antes en las copias de seguridad).",
+    "confirm": "Quitar"
+  },
+  "row": {
+    "noDownloadLink": "sin enlace de descarga",
+    "update": "Actualización",
+    "downloaded": "Descargado"
+  },
+  "detail": {
+    "by": "por {author}",
+    "downloaded": "Descargado",
+    "available": "{version} disponible",
+    "outside": "Fuera del servidor de Flat2VR",
+    "download": "Descargar",
+    "updateTo": "Actualizar a {version}",
+    "openFolder": "Abrir carpeta",
+    "openPage": "Abrir página",
+    "openPageOn": "Abrir página ({site})",
+    "projectPage": "Página del proyecto",
+    "remove": "Quitar",
+    "questOnly": "Este mod es para un Quest por sí solo: su compilación (.apk) se instala en el visor, no en este PC. Consíguelo desde su página; una versión de abajo con un archivo para PC todavía se puede descargar.",
+    "savedHere": "Las descargas se guardan en la carpeta VR Mods, una carpeta por mod; PlayOut nunca las ejecuta.",
+    "savedHereQuest": "Las descargas se guardan en la carpeta VR Mods, una carpeta por mod; PlayOut nunca las ejecuta. Una compilación independiente para Quest (.apk) se instala en el visor, no aquí.",
+    "notOnGithub": "Este mod no está en GitHub: consíguelo desde su página.",
+    "notOnGithubSite": "Este mod no está en GitHub: consíguelo desde su página en {site}.",
+    "noLink": "La lista no tiene enlace de descarga para este mod."
+  },
+  "releases": {
+    "label": "Versiones",
+    "asking": "Pidiendo las versiones a GitHub…",
+    "unreachable": "No se pudo conectar con GitHub.",
+    "none": "Este proyecto aún no tiene versiones en GitHub: abre su página para ver cómo conseguirlo.",
+    "hide": "Ocultar versiones",
+    "show": "Mostrar versiones",
+    "download": "Descargar esta",
+    "update": "Actualizar a esta",
+    "back": "Volver a esta",
+    "noFile": "Ningún archivo que PlayOut pueda descargar",
+    "prerelease": "Versión preliminar",
+    "downloaded": "Descargada",
+    "hideNotes": "Ocultar notas",
+    "notes": "Notas"
+  },
+  "readme": {
+    "reading": "Leyendo el README…",
+    "none": "El proyecto no tiene README, o no se pudo conectar con GitHub.",
+    "hide": "Ocultar README",
+    "show": "Mostrar README"
+  },
+  "progress": {
+    "removing": "Quitando…",
+    "saving": "Guardando en la carpeta VR Mods…"
+  },
+  "links": {
+    "video": "Video",
+    "reddit": "Reddit",
+    "sourceThread": "Hilo de origen",
+    "sourceThreadOn": "Hilo de origen ({site})"
+  },
+  "facts": {
+    "status": "Estado: {status}",
+    "downloaded": "descargado {tag}",
+    "downloadedUnverified": "descargado {tag} (sin verificar)",
+    "onDisk": "{size} en disco"
+  },
+  "lead": {
+    "empty": "Mods que te permiten jugar juegos planos de PC en RV.",
+    "count": "{mods} mods de RV para juegos de PC, {github} de ellos en GitHub.",
+    "countListed": "{mods} mods de RV para juegos de PC, {github} de ellos en GitHub, listados hasta {updated}."
+  }
+}

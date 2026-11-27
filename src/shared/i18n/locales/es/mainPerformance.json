@@ -1,0 +1,77 @@
+{
+  "helper": {
+    "notRunning": "El asistente de energía no está en ejecución: reinstálalo en Ajustes › Sistema.",
+    "connectionClosed": "El asistente de energía cerró la conexión",
+    "clientClosed": "El cliente del asistente de energía está cerrado",
+    "noAnswer": "El asistente de energía no respondió",
+    "outdated": "El asistente de energía necesita una actualización (una solicitud de administrador).",
+    "install": "Instala el asistente de energía para ajustar los vatios (una solicitud de administrador).",
+    "notConnected": "El asistente de energía no está conectado",
+    "didNotStart": "El asistente de energía se instaló pero no se inició: {error}",
+    "lineTooLong": "El asistente de energía envió una línea demasiado larga",
+    "notJson": "El asistente de energía no respondió con JSON",
+    "unexpected": "El asistente de energía envió una respuesta inesperada",
+    "failed": "Falló el asistente de energía"
+  },
+  "fps": {
+    "noProcesses": "No hay procesos que medir."
+  },
+  "memory": {
+    "helperNotReported": "El asistente de energía no informó la limpieza de memoria: {error}",
+    "helperLost": "El asistente de energía perdió la limpieza de memoria",
+    "helperNoReport": "El asistente de energía no informó la limpieza de memoria",
+    "timeout": "La limpieza de memoria no terminó a tiempo",
+    "gameUnknown": "No se pudieron distinguir los programas del juego en ejecución del resto, así que no se liberó nada.",
+    "foregroundUnknown": "No se pudo leer la ventana en primer plano, así que no se liberó nada.",
+    "helperBusy": "El asistente de energía aún está ocupado con una limpieza de memoria.",
+    "stillFinishing": "La última limpieza de memoria aún está terminando.",
+    "passTimeout": "La limpieza de memoria no terminó a tiempo.",
+    "notRunning": "La limpieza de memoria no está disponible en este momento.",
+    "processesUnreadable": "No se pudieron leer los programas en ejecución.",
+    "helperDidNotStart": "El asistente de energía no inició la limpieza de memoria",
+    "notReported": "el asistente de energía no lo informó"
+  },
+  "watts": {
+    "unsupported": "Este PC no tiene una forma compatible de ajustar los vatios; los perfiles igual ajustan el modo de energía, el estado de la CPU y el boost.",
+    "checking": "Revisando este PC…",
+    "restoreFailed": "No se pudieron restaurar los vatios: {error}",
+    "noHelperNeeded": "Este PC ajusta los vatios sin el asistente."
+  },
+  "asus": {
+    "wattsRefused": "El firmware de ASUS no aceptó {watts} W (respuesta {answer})",
+    "deviceRefused": "El firmware de ASUS rechazó el dispositivo {device}",
+    "modeRefused": "El firmware de ASUS no aceptó el modo {mode} (respuesta {answer})"
+  },
+  "profiles": {
+    "unread": "No se pudo leer primero la configuración de energía de Windows, así que se dejó como estaba.",
+    "pendingBattery": "El modo de energía de Windows con batería no se pudo restaurar ahora (este Windows solo ajusta la fuente de energía actual); se restaurará la próxima vez que PlayOut lo restaure con batería.",
+    "pendingPluggedIn": "El modo de energía de Windows enchufado no se pudo restaurar ahora (este Windows solo ajusta la fuente de energía actual); se restaurará la próxima vez que PlayOut lo restaure enchufado.",
+    "modeFailed": "No se pudo ajustar el modo de energía (powercfg salió con {code})",
+    "modeFailedDetail": "No se pudo ajustar el modo de energía (powercfg salió con {code}): {detail}"
+  },
+  "windowsUser": "No se pudo leer el usuario de Windows",
+  "dynamic": {
+    "needsHelper": "Dynamic TDP necesita el asistente de energía."
+  },
+  "install": {
+    "noProgramData": "No se encontró la carpeta ProgramData",
+    "noModulesZip": "La versión de los módulos de PawnIO no tiene zip",
+    "noInstaller": "La versión de PawnIO no tiene instalador",
+    "declined": "Se rechazó la solicitud de administrador.",
+    "pawnioChanged": "El instalador de PawnIO cambió después de descargarse; inténtalo de nuevo.",
+    "pawnioUnsigned": "El instalador de PawnIO no está firmado correctamente, así que no se ejecutó.",
+    "pawnioFailed": "No se pudo instalar el controlador PawnIO.",
+    "copyFailed": "No se pudieron copiar los archivos del asistente de energía (o cambiaron al copiarse).",
+    "taskFailed": "No se pudo registrar la tarea del asistente de energía.",
+    "unfinished": "El paso de administrador no terminó.",
+    "exitCode": "Falló el paso de administrador (salida {code})."
+  },
+  "cpu": {
+    "failed": "No se pudo cambiar la configuración del procesador (powercfg {command} salió con {code})",
+    "failedDetail": "No se pudo cambiar la configuración del procesador (powercfg {command} salió con {code}): {detail}"
+  },
+  "mode": {
+    "refusedBattery": "Windows no aceptó el modo de energía con batería (error {error})",
+    "refusedPluggedIn": "Windows no aceptó el modo de energía enchufado (error {error})"
+  }
+}

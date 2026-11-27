@@ -1,0 +1,231 @@
+/*
+ * Quick panel: a glass popup anchored top-right under the system pill (the dialog backdrop is centred by
+ * default; :has() re-anchors it for this modal). Groups inside reuse the foundation's controls.
+ */
+
+.modal-backdrop:has(> .quickpanel) {
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: calc(var(--pill-top) + var(--pill-h) + 1.6rem) var(--pill-right) 2.4rem 0;
+}
+
+.modal.quickpanel {
+  width: 60rem;
+  /* leaves room for the button hints bar below the panel */
+  max-height: calc(100vh - var(--pill-top) - var(--pill-h) - 10.4rem);
+  background: var(--color-surface-translucent);
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(1.2);
+  backdrop-filter: blur(var(--blur-glass)) saturate(1.2);
+  border: 1px solid var(--color-glass-stroke);
+  border-radius: var(--radius-popup);
+  animation: quickpanel-enter var(--dur-normal) var(--ease-enter);
+}
+
+@keyframes quickpanel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-1.6rem) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.quickpanel .modal__header {
+  padding: 2.8rem 3.2rem 0;
+}
+
+.quickpanel .modal__title {
+  font-size: calc(40 * var(--u));
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.quickpanel .modal__subtitle {
+  margin-top: 0.2rem;
+  font-size: var(--fs-body-lg);
+}
+
+.quickpanel .modal__body.quickpanel__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  padding: 1.6rem 3.2rem 3.2rem;
+  scroll-padding: 2.4rem 0;
+}
+
+/* ---- now playing ---------------------------------------------------------- */
+
+.qp-playing {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 0 0.4rem;
+  font-size: var(--fs-body-lg);
+  color: var(--color-text-secondary);
+}
+
+.qp-playing__dot {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--color-success);
+  box-shadow: 0 0 0 0.4rem rgba(108, 203, 95, 0.25);
+}
+
+/* ---- status tiles ------------------------------------------------------------ */
+
+.qp-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.qp-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 1.2rem 1.6rem 1rem;
+  border-radius: var(--radius-icon-button);
+  background: var(--color-control);
+  border: 1px solid var(--color-control-stroke);
+  text-align: left;
+  outline: var(--ring-w) solid transparent;
+  outline-offset: var(--ring-offset);
+  transition:
+    background var(--dur-instant) var(--ease-linear),
+    transform var(--dur-focus) var(--ease-p2p),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.qp-tile:hover,
+.qp-tile[data-focused='true'] {
+  background: var(--color-control-hover);
+}
+
+.qp-tile[data-focused='true'] {
+  outline-color: var(--ring);
+  transform: scale(1.03);
+  z-index: 1;
+}
+
+.qp-tile:active {
+  background: var(--color-control-pressed);
+  transform: scale(0.98);
+}
+
+.qp-tile__icon {
+  display: inline-flex;
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+  margin-bottom: 0.4rem;
+  color: var(--color-icon);
+}
+
+.qp-tile__icon > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.qp-tile__value {
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.qp-tile__detail {
+  max-width: 100%;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+}
+
+/* ---- groups ------------------------------------------------------------------- */
+
+.qp-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.qp-group__title {
+  padding: 0 0.4rem 0.6rem;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--color-text-label);
+}
+
+.quickpanel .control {
+  padding-left: 0.8rem;
+  padding-right: 0.8rem;
+}
+
+.qp-volume {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.qp-volume__slider {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* the panel is 600u wide: shorter tracks keep room for the label and value */
+.quickpanel .slider__body {
+  width: 26rem;
+}
+
+.quickpanel .slider__value {
+  min-width: 6rem;
+}
+
+/* ---- segmented power mode ----------------------------------------------------- */
+
+.qp-segmented {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.qp-segmented__item {
+  padding: 0 1.2rem;
+}
+
+/* ---- performance --------------------------------------------------------------- */
+
+.qp-perf {
+  display: flex;
+  gap: 4rem;
+  padding: 0.4rem 0.8rem 0.4rem;
+}
+
+.qp-perf .stat {
+  gap: 0.6rem;
+}
+
+/* ---- Windows shortcuts ------------------------------------------------------------ */
+
+.qp-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.qp-shortcut {
+  justify-content: flex-start;
+  padding: 0 1.4rem;
+}
+
+.qp-shortcut .btn__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

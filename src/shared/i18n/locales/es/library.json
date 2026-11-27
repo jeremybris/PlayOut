@@ -1,0 +1,99 @@
+{
+  "hints": {
+    "section": "Sección",
+    "sort": "Ordenar",
+    "filters": "Filtros",
+    "favourite": "Favorito",
+    "options": "Opciones",
+    "search": "Buscar",
+    "settings": "Ajustes",
+    "home": "Inicio",
+    "close": "Cerrar",
+    "select": "Seleccionar"
+  },
+  "settingsLabel": "Ajustes",
+  "import": "Importar a la biblioteca",
+  "sort": "Ordenar",
+  "title": {
+    "hidden": "Ocultos",
+    "favorites": "Favoritos"
+  },
+  "progress": {
+    "covers": "buscando portadas, faltan {left}",
+    "details": "buscando detalles, faltan {left}",
+    "sizes": "tamaños, faltan {left}"
+  },
+  "search": {
+    "placeholder": "Buscar juegos…",
+    "label": "Buscar juegos",
+    "keyboardTitle": "Buscar"
+  },
+  "playableFirst": {
+    "label": "Jugables primero",
+    "on": "Jugables primero: sí",
+    "off": "Jugables primero: no"
+  },
+  "folders": {
+    "button": "Abrir las carpetas de los juegos",
+    "none": "Ninguna carpeta de este PC contiene estos juegos",
+    "opened_one": "Se abrió {count} carpeta",
+    "opened_other": "Se abrieron {count} carpetas",
+    "openedMore_one": "Se abrió {count} carpeta ({more} más sin abrir)",
+    "openedMore_other": "Se abrieron {count} carpetas ({more} más sin abrir)",
+    "failed": "No se pudieron abrir las carpetas"
+  },
+  "tabs": {
+    "label": "Pestañas de la biblioteca",
+    "add": "Añadir una pestaña",
+    "limit": "Hasta {max} pestañas: elimina una para añadir otra.",
+    "delete": "Eliminar esta pestaña",
+    "lastTab": "La última pestaña no se puede eliminar",
+    "deleteTitle": "Eliminar pestaña",
+    "deleteMessage": "¿Eliminar la pestaña \"{name}\"? Sus filtros y su orden se van con ella; tus juegos siguen en tu biblioteca.",
+    "thisTab": "esta",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "grid": {
+    "label": "Juegos",
+    "rail": "Saltar a la sección"
+  },
+  "coverSize": {
+    "label": "Tamaño de las portadas",
+    "value": "Tamaño de las portadas {n}%",
+    "smaller": "Portadas más pequeñas",
+    "larger": "Portadas más grandes"
+  },
+  "filters": {
+    "pill": "Filtros",
+    "pillCount": "Filtros ({n})",
+    "picked": "{first} +{more}",
+    "clear": "Quitar filtros",
+    "all": "Todo",
+    "full": "Hasta {max} filtros a la vez: quita uno para elegir otro.",
+    "genre": "Género",
+    "release": "Lanzamiento",
+    "platform": "Plataforma",
+    "size": "Tamaño",
+    "hltb": "H.L.T.B.",
+    "hltbTitle": "How Long to Beat",
+    "difficulty": "Dificultad",
+    "reviews": "Reseñas",
+    "controls": "Controles",
+    "localMultiplayer": "Multijugador local",
+    "onlineMultiplayer": "Multijugador en línea",
+    "hidden": "Ocultos",
+    "favorites": "Favoritos",
+    "recompilations": "Recompilaciones",
+    "nucleusCoop": "Nucleus Co-Op",
+    "coop": "Co-Op",
+    "allGenres": "Todos los géneros",
+    "allDates": "Todas las fechas",
+    "allSizes": "Todos los tamaños",
+    "allTimes": "Todas las duraciones",
+    "allDifficulties": "Todas las dificultades",
+    "allReviews": "Todas las reseñas",
+    "allControls": "Todos los controles",
+    "allLocalMultiplayer": "Todo el multijugador local"
+  }
+}

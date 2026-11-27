@@ -1,0 +1,89 @@
+{
+  "title": "Library",
+  "lead": "Where PlayOut looks for games, and the Library's tabs. Disabled sources are skipped by scans and hidden from the home screen.",
+  "scanAll": "Scan all now",
+  "toasts": {
+    "sourcesFailed": "Could not read the source list",
+    "scanFinished": "Scan finished: {added} added, {updated} updated, {removed} removed",
+    "scanFailed": "Scan failed",
+    "folderPickerFailed": "Could not open the folder picker",
+    "esdeGamesUpdated_one": "{count} game updated",
+    "esdeGamesUpdated_other": "{count} games updated",
+    "esdeImagesCopied_one": "{count} image copied",
+    "esdeImagesCopied_other": "{count} images copied",
+    "esdeSummary": "{games}, {images}",
+    "esdeMessage": "{message} ({summary})",
+    "esdeDone": "ES-DE import done: {summary}",
+    "esdeFailed": "ES-DE import failed"
+  },
+  "sources": {
+    "title": "Sources",
+    "detecting": "Detecting store clients",
+    "scan": "Scan",
+    "status": {
+      "detecting": "Detecting…",
+      "scanning_one": "Scanning… {count} game found",
+      "scanning_other": "Scanning… {count} games found",
+      "error": "Error: {error}",
+      "games_one": "{count} game",
+      "games_other": "{count} games",
+      "detectedVersion": "Detected ({version})",
+      "detected": "Detected",
+      "notInstalled": "Not installed",
+      "lastScan": "Last scan {when}"
+    }
+  },
+  "folders": {
+    "title": "Folders",
+    "esde": {
+      "label": "ES-DE folder",
+      "description": "Used to import gamelists and downloaded media. Leave on auto to use ~/ES-DE.",
+      "placeholder": "Auto-detect",
+      "clear": "Auto",
+      "import": "Import ES-DE data",
+      "picker": "Choose your ES-DE folder (contains gamelists and downloaded_media)"
+    },
+    "emulation": {
+      "label": "Emulation Folder",
+      "description": "Laid out the way ES-DE setups (EmuDeck) use it: bios, hdpacks, roms (one folder per system), saves, storage, texturepacks and tools. Convert finds your keys and BIOS files in its bios folder. PlayOut finds your ROMs in its roms folder, one subfolder per system named like ES-DE (snes, psx, n64, …). It also keeps your favourites list, so they come back if PlayOut is reinstalled. Default is Documents\\Emulation. Choosing another place moves the folder there; it can't be inside PlayOut's own folders, so uninstalling PlayOut never deletes it. Generate makes one inside the folder you choose.",
+      "placeholderPath": "Older default ({path})",
+      "placeholder": "Default",
+      "clear": "Default",
+      "picker": "Choose your Emulation folder (holds bios, roms, saves…)",
+      "generatePicker": "Choose where to put the Emulation folder (an Emulation folder is made inside it)"
+    }
+  },
+  "frontPage": {
+    "title": "Front page",
+    "label": "Games on the front page",
+    "description": "The row of games on PlayOut's front page. Recently Added shows the games you can play on this PC, newest first; Favorites shows your favourite games; Most Played shows the games you have played longest.",
+    "options": {
+      "recent": "Recently Played",
+      "added": "Recently Added",
+      "favorites": "Favorites",
+      "played": "Most Played"
+    }
+  },
+  "visibility": {
+    "title": "Visibility",
+    "showHidden": {
+      "label": "Show hidden games",
+      "description": "Mix hidden games into the library, including those hidden in Steam. Filters → Hidden lists them either way."
+    },
+    "showUninstalled": {
+      "label": "Show games that are not installed",
+      "description": "Games you own on a signed-in store, and games a rescan no longer found, greyed out."
+    },
+    "showDuplicates": {
+      "label": "Show duplicates",
+      "description": "Show every copy of a game you have on several consoles (PS2, Xbox, GameCube...). Copies from PC stores still share one card. Off: one card per game, showing the recompilation, else Steam, GOG, Epic, PS3, PS2, GameCube, Xbox 360, Xbox, then the other PC stores."
+    }
+  },
+  "newGames": {
+    "title": "New games",
+    "trimGames": {
+      "label": "Trim Games",
+      "description": "Shrink your ROM games: PS2 ISO to CHD, Xbox and Xbox 360 ISO to XISO (trimmed), PlayStation BIN/CUE to CHD, PSP ISO to CSO, PS3 disc folders to ISO (not HDD or PSN games), Wii and GameCube ISO to RVZ. When you turn it on, the games already in your library are checked once; after that, each game you add is trimmed. Each original goes to the Recycle Bin only once its result is verified; Settings › Convert shows the progress. Wii games need your Wii common key in the Emulation folder (bios\\wii\\common-key.bin) or Dolphin installed, as in Convert. Games downloaded from another PC keep their format."
+    }
+  }
+}

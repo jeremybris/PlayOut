@@ -1,0 +1,105 @@
+{
+  "title": "Controls",
+  "lead": "The home button and controller behaviour. Keyboard and mouse always work alongside the gamepad.",
+  "ms": "{value} ms",
+  "tester": {
+    "title": "Controller tester",
+    "noController": "No controller detected",
+    "standard": "Standard mapping · press any button to test it",
+    "nonStandard": "Non-standard mapping ({mapping}) · buttons may differ",
+    "unknownMapping": "unknown",
+    "connect": "Connect a controller and press a button.",
+    "leftStick": "Left stick",
+    "rightStick": "Right stick",
+    "buttons": {
+      "up": "Up",
+      "down": "Down",
+      "left": "Left",
+      "right": "Right"
+    }
+  },
+  "capture": {
+    "title": "Press the new buttons",
+    "cancel": "Cancel",
+    "message": "Hold the buttons together on any controller, then let go of all of them: two to four buttons, or Home on its own. Press Escape or click Cancel to stop.",
+    "waiting": "Waiting for buttons…",
+    "readFailed": "Could not read the controllers"
+  },
+  "combo": {
+    "buttons": "Buttons",
+    "notSet": "Not set",
+    "change": "Change",
+    "set": "Set",
+    "clear": "Clear",
+    "overlapsKeyboard": "Those buttons overlap the on-screen keyboard’s: pick others.",
+    "overlapsHome": "Those buttons overlap the home button’s: pick others."
+  },
+  "home": {
+    "title": "Home button",
+    "enabled": {
+      "label": "Home button opens the overlay",
+      "description": "Power, display, sound and music over any game, with back to game, PlayOut and quit."
+    },
+    "hold": {
+      "label": "Hold time",
+      "description": "How long the buttons must be held before the overlay opens.",
+      "atOnce": "At once"
+    },
+    "steam": {
+      "label": "Take the Guide button from Steam",
+      "description": "PlayOut turns off Steam's \"Guide button focuses Steam\" and \"Enable the Steam Overlay while in-game\" (Steam restarts quietly) and puts them back when you turn this off.",
+      "onlyWithHome": "Steam only matters while the buttons include Home."
+    },
+    "gameBar": {
+      "label": "Turn off Xbox Game Bar",
+      "description": "So it never opens over the overlay: its controller shortcuts and links are turned off, and Game Bar is closed if something still starts it. Everything is put back when you turn this off."
+    },
+    "pause": {
+      "label": "Pause the game while the overlay is open",
+      "description": "The game is frozen so it takes none of your buttons, and runs on when the overlay closes. Games with anti-cheat, and competitive online games (Online Multiplayer › All Competitive), are never paused."
+    },
+    "touchSwipe": {
+      "label": "Swipe from the left to open the overlay",
+      "description": "On a touchscreen, swipe right from the left side of the screen during a game. Start a finger's width in from the edge: Windows keeps the very edge for its own swipe."
+    }
+  },
+  "ingame": {
+    "title": "In-game overlay",
+    "label": "In-game overlay",
+    "description": "Over a game in exclusive full screen, PlayOut draws its overlay inside the game so the game does not minimize. Never for games with anti-cheat.",
+    "never": "Games without the in-game overlay",
+    "neverDescription": "Gets the window overlay (it may minimize in exclusive full screen).",
+    "allowLabel": "Use the in-game overlay for {title} again",
+    "remove": "Remove"
+  },
+  "keyboard": {
+    "title": "On-screen keyboard",
+    "note": "Opens Windows’ on-screen keyboard over any game or in PlayOut, to type with the controller."
+  },
+  "controller": {
+    "title": "Controller",
+    "deadzone": {
+      "label": "Stick dead zone",
+      "description": "Stick travel ignored before a direction registers."
+    },
+    "vibration": {
+      "label": "Vibration",
+      "description": "A short rumble when you select something."
+    },
+    "swapAB": {
+      "label": "Swap A and B",
+      "description": "Nintendo-style layout: B selects and A goes back."
+    }
+  },
+  "repeat": {
+    "title": "Navigation repeat",
+    "delay": {
+      "label": "Repeat delay",
+      "description": "How long a direction must be held before focus starts repeating."
+    },
+    "rate": {
+      "label": "Repeat rate",
+      "description": "Time between repeated moves while a direction is held."
+    }
+  }
+}

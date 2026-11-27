@@ -1,0 +1,8 @@
+{
+  "errors": {
+    "noCredentials": "Añade tu clave de la API web de Steam y tu SteamID64 en Ajustes › Metadatos",
+    "private": "Steam no compartió tu lista de amigos: pon la lista de amigos como Pública en la configuración de privacidad de Steam",
+    "keyRefused": "Steam rechazó la clave de la API web: compruébala en Ajustes › Metadatos",
+    "network": "No se pudo conectar con Steam"
+  }
+}

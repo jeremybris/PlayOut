@@ -1,0 +1,23 @@
+{
+  "blocked": {
+    "install": "La carpeta Emulation no puede estar dentro de la carpeta de instalación de PlayOut: al desinstalar o actualizar PlayOut se borraría. Elige una carpeta fuera de ella, como Documentos.",
+    "data": "La carpeta Emulation no puede estar dentro de la carpeta de datos de PlayOut (AppData). Elige una carpeta fuera de ella, como Documentos.",
+    "insideCurrent": "El nuevo lugar está dentro de la carpeta Emulation en uso. Elige una carpeta fuera de ella.",
+    "containsCurrent": "La carpeta Emulation en uso está dentro del nuevo lugar. Elige otra carpeta, o una llamada Emulation.",
+    "notFolder": "Hay un archivo con ese nombre. Elige otra carpeta.",
+    "currentIsLink": "La carpeta Emulation en uso es un enlace a otra carpeta. Elige primero como carpeta Emulation la carpeta real a la que apunta y luego muévela.",
+    "noSpace": "La carpeta Emulation ({size}) no cabe en esa unidad ({free} libres, y se deja 1 GB libre).",
+    "notEmpty": "El nuevo lugar no está vacío: elige mover a él o usarlo tal como está."
+  },
+  "busy": {
+    "game": "Hay un juego en marcha. Ciérralo antes de mover la carpeta Emulation.",
+    "setup": "PlayOut está instalando o actualizando emuladores. Mueve la carpeta Emulation cuando termine.",
+    "convert": "Hay una conversión en marcha. Mueve la carpeta Emulation cuando termine.",
+    "sending": "Un PC emparejado está descargando de la carpeta Emulation. Muévela cuando termine la descarga.",
+    "emulator": "Cierra {names} antes de mover la carpeta Emulation.",
+    "moving": "Se está moviendo la carpeta Emulation. Vuelve a intentarlo cuando termine."
+  },
+  "alreadyRunning": "La carpeta Emulation ya se está moviendo.",
+  "cancelled": "Movimiento cancelado. No se ha movido nada; la carpeta Emulation sigue donde estaba.",
+  "saveFailed": "PlayOut no ha podido guardar el nuevo ajuste de la carpeta Emulation, así que no se ha movido nada. La carpeta Emulation sigue donde estaba."
+}

@@ -1,0 +1,35 @@
+{
+  "hints": {
+    "open": "Abrir",
+    "favourite": "Favorito",
+    "options": "Opciones",
+    "library": "Biblioteca",
+    "search": "Buscar",
+    "settings": "Ajustes"
+  },
+  "loadingLibrary": "Cargando biblioteca",
+  "emptyLibrary": "Tu biblioteca está vacía",
+  "played": "Jugado {time}",
+  "quickActions": {
+    "label": "Acciones rápidas",
+    "settings": "Ajustes",
+    "exit": "Salir"
+  },
+  "systemBar": {
+    "label": "Sistema",
+    "search": "Buscar",
+    "power": "Energía",
+    "clock": "Reloj",
+    "bluetoothOn": "Bluetooth activado",
+    "bluetoothOff": "Bluetooth desactivado",
+    "battery": "Batería {percent}%",
+    "batteryCharging": "Batería {percent}%, cargando",
+    "volume": "Volumen",
+    "volumeMuted": "Volumen silenciado",
+    "volumeLevel": "Volumen {percent}%",
+    "noNetwork": "Sin red",
+    "ethernet": "Ethernet",
+    "wifi": "Wi-Fi",
+    "wifiNamed": "Wi-Fi: {ssid}"
+  }
+}

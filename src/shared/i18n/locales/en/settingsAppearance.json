@@ -1,0 +1,30 @@
+{
+  "title": "Appearance",
+  "lead": "How PlayOut looks and behaves on screen.",
+  "window": {
+    "title": "Window",
+    "fullscreen": {
+      "label": "Start in fullscreen",
+      "description": "Open PlayOut as a borderless fullscreen dashboard (F11 toggles it any time)."
+    },
+    "minimize": {
+      "label": "Minimize while playing",
+      "description": "Hide the dashboard when a game starts and bring it back when the game ends."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "clock": {
+      "label": "24-hour clock",
+      "description": "Show the system bar clock as 19:30 instead of 7:30 PM."
+    },
+    "recent": {
+      "label": "Front page games",
+      "description": "How many games the front page's row shows (Recently Played, Recently Added, Favorites or Most Played: Settings › Library)."
+    },
+    "animations": {
+      "label": "Animations",
+      "description": "Focus scaling, hero crossfades and modal motion. Turn off on slow machines."
+    }
+  }
+}

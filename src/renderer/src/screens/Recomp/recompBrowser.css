@@ -1,0 +1,299 @@
+/* The recompilation browser (RecompBrowser.tsx): search + sort on top, games on the left, the chosen game's
+   recompilations on the right. Sizes in --u like the Recompilation page. */
+
+.recomp-browser {
+  display: flex;
+  flex-direction: column;
+  gap: calc(16 * var(--u));
+  min-height: 0;
+  overflow: hidden;
+}
+
+.recomp-browser__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(16 * var(--u));
+}
+
+.recomp-browser__search {
+  flex: 1 1 calc(480 * var(--u));
+  min-width: 0;
+}
+
+.recomp-browser__note {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--color-text-tertiary);
+}
+
+.recomp-browser__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(16 * var(--u));
+  padding: calc(64 * var(--u)) calc(24 * var(--u));
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.recomp-browser__spinner {
+  margin: calc(64 * var(--u)) auto;
+}
+
+.recomp-browser__split {
+  display: grid;
+  grid-template-columns: minmax(calc(420 * var(--u)), 2fr) 3fr;
+  gap: calc(20 * var(--u));
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.recomp-browser__games,
+.recomp-browser__detail {
+  display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  min-height: 0;
+  overflow-y: auto;
+  padding: calc(4 * var(--u));
+}
+
+.recomp-browser__more {
+  align-self: center;
+  margin: calc(8 * var(--u)) 0;
+}
+
+/* one game */
+.recomp-browser-game {
+  display: flex;
+  align-items: center;
+  gap: calc(16 * var(--u));
+  flex: none;
+  min-width: 0;
+  padding: calc(10 * var(--u)) calc(14 * var(--u));
+  border-radius: var(--radius-card);
+  background: var(--color-control);
+  border: 1px solid var(--color-control-stroke);
+  cursor: pointer;
+  outline: var(--ring-w) solid transparent;
+  outline-offset: var(--ring-offset);
+  transition:
+    background var(--dur-instant) var(--ease-linear),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.recomp-browser-game:hover,
+.recomp-browser-game[data-focused='true'] {
+  background: var(--color-control-hover);
+}
+
+.recomp-browser-game[data-focused='true'] {
+  outline-color: var(--ring);
+}
+
+.recomp-browser-game--selected {
+  border-color: var(--color-accent);
+  background: rgba(0, 120, 212, 0.14);
+}
+
+.recomp-browser-game__art {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(56 * var(--u));
+  height: calc(56 * var(--u));
+  flex: none;
+  overflow: hidden;
+  border-radius: var(--radius-button);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-tertiary);
+}
+
+.recomp-browser-game__art > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recomp-browser-game__art > svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.recomp-browser-game__text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: calc(2 * var(--u));
+  min-width: 0;
+}
+
+.recomp-browser-game__name {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recomp-browser-game__sub {
+  overflow: hidden;
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recomp-browser-game__meta {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.recomp-browser-game__value {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6 * var(--u));
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.recomp-browser-game__value > svg,
+.recomp-browser-entry__stars > svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  color: #e6b800;
+}
+
+.recomp-browser-game__check {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  color: var(--color-accent-hover);
+}
+
+/* the chosen game */
+.recomp-browser__detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(16 * var(--u));
+  margin-bottom: calc(8 * var(--u));
+}
+
+.recomp-browser__detail-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title, var(--fs-body-lg));
+  font-weight: var(--fw-semibold);
+}
+
+.recomp-browser__detail-sub {
+  margin: calc(4 * var(--u)) 0 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+}
+
+.recomp-browser__versions {
+  display: flex;
+  flex-direction: column;
+  gap: calc(12 * var(--u));
+}
+
+.recomp-browser-entry {
+  display: flex;
+  flex-direction: column;
+  gap: calc(10 * var(--u));
+  padding: calc(16 * var(--u)) calc(20 * var(--u));
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-control-stroke);
+}
+
+.recomp-browser-entry__head {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(16 * var(--u));
+}
+
+.recomp-browser-entry__titles {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2 * var(--u));
+  min-width: 0;
+}
+
+.recomp-browser-entry__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-semibold);
+}
+
+.recomp-browser-entry__author,
+.recomp-browser-entry__facts {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+}
+
+.recomp-browser-entry__stars {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: calc(6 * var(--u));
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.recomp-browser-entry__blurb {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+.recomp-browser-entry__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(8 * var(--u));
+}
+
+.recomp-browser-entry__warn {
+  color: #ffd27a;
+}
+
+.recomp-browser-entry__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(12 * var(--u));
+}
+
+.recomp-browser-entry__progress {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+
+/* narrow windows: one column, the list above the chosen game */
+@media (max-width: 900px) {
+  .recomp-browser {
+    overflow-y: auto;
+  }
+  .recomp-browser__split {
+    grid-template-columns: 1fr;
+  }
+  .recomp-browser__games {
+    max-height: 45vh;
+  }
+}

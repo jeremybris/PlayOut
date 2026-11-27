@@ -1,0 +1,50 @@
+{
+  "queueLimit": {
+    "client_one": "{count} edit waiting to be suggested. The suggestion service accepts {perHour} per hour from one PC; PlayOut sends the rest automatically.",
+    "client_other": "{count} edits waiting to be suggested. The suggestion service accepts {perHour} per hour from one PC; PlayOut sends the rest automatically.",
+    "clientAt_one": "{count} edit waiting to be suggested. The suggestion service accepts {perHour} per hour from one PC; PlayOut sends the rest automatically (next at {time}).",
+    "clientAt_other": "{count} edits waiting to be suggested. The suggestion service accepts {perHour} per hour from one PC; PlayOut sends the rest automatically (next at {time}).",
+    "network_one": "{count} edit waiting to be suggested. The suggestion service has had many suggestions from your internet connection this hour; PlayOut sends the rest automatically.",
+    "network_other": "{count} edits waiting to be suggested. The suggestion service has had many suggestions from your internet connection this hour; PlayOut sends the rest automatically.",
+    "networkAt_one": "{count} edit waiting to be suggested. The suggestion service has had many suggestions from your internet connection this hour; PlayOut sends the rest automatically (next at {time}).",
+    "networkAt_other": "{count} edits waiting to be suggested. The suggestion service has had many suggestions from your internet connection this hour; PlayOut sends the rest automatically (next at {time}).",
+    "backlog_one": "{count} edit waiting to be suggested. The maintainer has many suggestions to review first; PlayOut tries again automatically.",
+    "backlog_other": "{count} edits waiting to be suggested. The maintainer has many suggestions to review first; PlayOut tries again automatically.",
+    "backlogAt_one": "{count} edit waiting to be suggested. The maintainer has many suggestions to review first; PlayOut tries again automatically (next at {time}).",
+    "backlogAt_other": "{count} edits waiting to be suggested. The maintainer has many suggestions to review first; PlayOut tries again automatically (next at {time}).",
+    "service_one": "{count} edit waiting to be suggested. The suggestion service is busy right now; PlayOut sends them automatically.",
+    "service_other": "{count} edits waiting to be suggested. The suggestion service is busy right now; PlayOut sends them automatically.",
+    "serviceAt_one": "{count} edit waiting to be suggested. The suggestion service is busy right now; PlayOut sends them automatically (next at {time}).",
+    "serviceAt_other": "{count} edits waiting to be suggested. The suggestion service is busy right now; PlayOut sends them automatically (next at {time})."
+  },
+  "fields": {
+    "title": "Title",
+    "description": "Description",
+    "shortDescription": "Short description",
+    "releaseDate": "Release date",
+    "developers": "Developers",
+    "publishers": "Publishers",
+    "genres": "Genres",
+    "tags": "Tags",
+    "localPlayers": "Local players",
+    "controls": "Controls",
+    "hltb": "How long to beat",
+    "reviewScore": "Review score",
+    "difficulty": "Difficulty"
+  },
+  "values": {
+    "notSet": "(not set)",
+    "none": "(none)",
+    "controllerFull": "Full controller",
+    "controllerPartial": "Partial controller",
+    "controllerNone": "No controller",
+    "vrOnly": "VR only",
+    "vrSupported": "VR supported",
+    "vrNone": "No VR",
+    "hltbMain": "Main {hours} h",
+    "hltbExtra": "Main + extras {hours} h",
+    "hltbCompletionist": "Completionist {hours} h",
+    "hltbSolo": "Solo {hours} h",
+    "defaultDifficulty": "Default ({level})"
+  }
+}

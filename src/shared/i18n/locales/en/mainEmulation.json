@@ -1,0 +1,51 @@
+{
+  "launch": {
+    "shortcutsWindowsOnly": "Windows shortcuts can only be read on Windows",
+    "noRomPath": "{title} has no ROM path.",
+    "romNotFound": "The ROM was not found: {path}",
+    "placeholderSystem": "{system} has no launch command on Windows (ES-DE placeholder system).",
+    "commandEmpty": "The launch command for {system} is empty.",
+    "emulatorNotFound": "The emulator {emulator} was not found.{searched}",
+    "emulatorMissing": "{name} ({id}) is not installed or could not be found.{searched}",
+    "noExecutable": "Could not determine the emulator executable for {system}.",
+    "coreNotFound": "The {core} core {file} was not found.{searched}",
+    "startDirFailed": "Could not create the start directory {folder}: {error}",
+    "noPs3Serial": "{file} does not hold a PS3 serial (such as BLUS30443), so RPCS3 cannot start it.",
+    "notRpcs3Shortcut": "{file} is not an RPCS3 game shortcut, so RPCS3 cannot start it.",
+    "unknownSystem": "Unknown system '{system}' for {title}.",
+    "lookedIn": "Looked in:",
+    "searchedMore": "… and {count} more",
+    "noEmulatorFolder": "PlayOut has no {system} emulator yet, so {game} cannot be started. A Windows shortcut (.lnk) to an emulator that runs it can go next to that folder and be played instead.",
+    "noEmulatorFile": "PlayOut has no {system} emulator yet, so {game} cannot be started. A Windows shortcut (.lnk) to an emulator that runs it can go in the same folder and be played instead."
+  },
+  "ps3": {
+    "noRomFolder": "No ROM folder is set",
+    "noSerial": "No PS3 serial was found for {title}, so its updates cannot be looked up",
+    "serverUnreachable": "Sony's update server could not be reached ({error})",
+    "noUpdatesForGame": "Sony lists no updates for this game",
+    "rpcs3Open": "RPCS3 is open: close it to install the update",
+    "rpcs3Missing": "RPCS3 is not installed (Settings › Emulators)",
+    "rpcs3Opened": "RPCS3 was opened meanwhile",
+    "installFailed": "The update {version} of {title} could not be installed: {error}",
+    "updatedTo": "{title} is updated to {version}",
+    "latestVersion": "the latest version",
+    "upToDate": "{title} is up to date ({version})",
+    "noUpdates": "Sony lists no updates for {title}",
+    "notPs3Game": "That is not a PS3 game on this PC",
+    "listTooLarge": "the update list is too large",
+    "serverNoAnswer": "Sony’s update server did not answer",
+    "serverAnswered": "Sony's update server answered {status} for {titleId}",
+    "notPkg": "not a PKG: too small",
+    "downloadFailed": "the update download failed ({status})",
+    "wrongSize": "the update download has the wrong size ({size} bytes, Sony lists {expected})",
+    "tooLarge": "the update download is larger than Sony lists ({expected} bytes)",
+    "incomplete": "the update download is incomplete ({size} of {expected} bytes)",
+    "checksum": "the update download does not match Sony’s checksum",
+    "rpcs3Failed": "RPCS3 did not install it (exit {code})",
+    "rpcs3FailedSaid": "RPCS3 did not install it (exit {code}: {said})"
+  },
+  "hdd": {
+    "doesNotFit": "the PS3 HDD ({size}) does not fit on the drive of {folder} ({free} free)",
+    "partial": "some of {folder} could not be moved yet"
+  }
+}

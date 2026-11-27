@@ -1,0 +1,1178 @@
+{
+    "3do":  {
+                "year":  "1993",
+                "manufacturer_year":  "Panasonic - 1993",
+                "hwtype_year":  "Console - 1993",
+                "manufacturer_hwtype_year":  "Panasonic - Console - 1993"
+            },
+    "adam":  {
+                 "year":  "1983",
+                 "manufacturer_year":  "Coleco - 1983",
+                 "hwtype_year":  "Computer - 1983",
+                 "manufacturer_hwtype_year":  "Coleco - Computer - 1983"
+             },
+    "ags":  {
+                "year":  "1997",
+                "manufacturer_year":  "Chris Jones - 1997",
+                "hwtype_year":  "Engine - 1997",
+                "manufacturer_hwtype_year":  "Chris Jones - Engine - 1997"
+            },
+    "amiga":  {
+                  "year":  "1985",
+                  "manufacturer_year":  "Commodore - 1985",
+                  "hwtype_year":  "Computer - 1985",
+                  "manufacturer_hwtype_year":  "Commodore - Computer - 1985"
+              },
+    "amiga1200":  {
+                      "year":  "1992",
+                      "manufacturer_year":  "Commodore - 1992",
+                      "hwtype_year":  "Computer - 1992",
+                      "manufacturer_hwtype_year":  "Commodore - Computer - 1992"
+                  },
+    "amiga600":  {
+                     "year":  "1992",
+                     "manufacturer_year":  "Commodore - 1992",
+                     "hwtype_year":  "Computer - 1992",
+                     "manufacturer_hwtype_year":  "Commodore - Computer - 1992"
+                 },
+    "amigacd32":  {
+                      "year":  "1993",
+                      "manufacturer_year":  "Commodore - 1993",
+                      "hwtype_year":  "Console - 1993",
+                      "manufacturer_hwtype_year":  "Commodore - Console - 1993"
+                  },
+    "amstradcpc":  {
+                       "year":  "1984",
+                       "manufacturer_year":  "Amstrad - 1984",
+                       "hwtype_year":  "Computer - 1984",
+                       "manufacturer_hwtype_year":  "Amstrad - Computer - 1984"
+                   },
+    "android":  {
+                    "year":  "2008",
+                    "manufacturer_year":  "Google - 2008",
+                    "hwtype_year":  "OS - 2008",
+                    "manufacturer_hwtype_year":  "Google - OS - 2008"
+                },
+    "androidapps":  {
+                        "year":  "0000",
+                        "manufacturer_year":  "Various - 0000",
+                        "hwtype_year":  "Folder - 0000",
+                        "manufacturer_hwtype_year":  "Various - Folder - 0000"
+                    },
+    "androidgames":  {
+                         "year":  "0000",
+                         "manufacturer_year":  "Various - 0000",
+                         "hwtype_year":  "Folder - 0000",
+                         "manufacturer_hwtype_year":  "Various - Folder - 0000"
+                     },
+    "apple2":  {
+                   "year":  "1977",
+                   "manufacturer_year":  "Apple - 1977",
+                   "hwtype_year":  "Computer - 1977",
+                   "manufacturer_hwtype_year":  "Apple - Computer - 1977"
+               },
+    "apple2gs":  {
+                     "year":  "1986",
+                     "manufacturer_year":  "Apple - 1986",
+                     "hwtype_year":  "Computer - 1986",
+                     "manufacturer_hwtype_year":  "Apple - Computer - 1986"
+                 },
+    "arcade":  {
+                   "year":  "0000",
+                   "manufacturer_year":  "Arcade - 0000",
+                   "hwtype_year":  "Arcade - 0000",
+                   "manufacturer_hwtype_year":  "Arcade - Arcade - 0000"
+               },
+    "arcadia":  {
+                    "year":  "1982",
+                    "manufacturer_year":  "Emerson - 1982",
+                    "hwtype_year":  "Console - 1982",
+                    "manufacturer_hwtype_year":  "Emerson - Console - 1982"
+                },
+    "archimedes":  {
+                       "year":  "1987",
+                       "manufacturer_year":  "Acorn Computers - 1987",
+                       "hwtype_year":  "Computer - 1987",
+                       "manufacturer_hwtype_year":  "Acorn Computers - Computer - 1987"
+                   },
+    "arduboy":  {
+                    "year":  "2015",
+                    "manufacturer_year":  "Kevin Bates - 2015",
+                    "hwtype_year":  "Portable - 2015",
+                    "manufacturer_hwtype_year":  "Kevin Bates - Portable - 2015"
+                },
+    "astrocde":  {
+                     "year":  "1978",
+                     "manufacturer_year":  "Bally - 1978",
+                     "hwtype_year":  "Console - 1978",
+                     "manufacturer_hwtype_year":  "Bally - Console - 1978"
+                 },
+    "atari2600":  {
+                      "year":  "1977",
+                      "manufacturer_year":  "Atari - 1977",
+                      "hwtype_year":  "Console - 1977",
+                      "manufacturer_hwtype_year":  "Atari - Console - 1977"
+                  },
+    "atari5200":  {
+                      "year":  "1982",
+                      "manufacturer_year":  "Atari - 1982",
+                      "hwtype_year":  "Console - 1982",
+                      "manufacturer_hwtype_year":  "Atari - Console - 1982"
+                  },
+    "atari7800":  {
+                      "year":  "1986",
+                      "manufacturer_year":  "Atari - 1986",
+                      "hwtype_year":  "Console - 1986",
+                      "manufacturer_hwtype_year":  "Atari - Console - 1986"
+                  },
+    "atari800":  {
+                     "year":  "1979",
+                     "manufacturer_year":  "Atari - 1979",
+                     "hwtype_year":  "Computer - 1979",
+                     "manufacturer_hwtype_year":  "Atari - Computer - 1979"
+                 },
+    "atarijaguar":  {
+                        "year":  "1993",
+                        "manufacturer_year":  "Atari - 1993",
+                        "hwtype_year":  "Console - 1993",
+                        "manufacturer_hwtype_year":  "Atari - Console - 1993"
+                    },
+    "atarijaguarcd":  {
+                          "year":  "1995",
+                          "manufacturer_year":  "Atari - 1995",
+                          "hwtype_year":  "Console - 1995",
+                          "manufacturer_hwtype_year":  "Atari - Console - 1995"
+                      },
+    "atarilynx":  {
+                      "year":  "1989",
+                      "manufacturer_year":  "Atari - 1989",
+                      "hwtype_year":  "Portable - 1989",
+                      "manufacturer_hwtype_year":  "Atari - Portable - 1989"
+                  },
+    "atarist":  {
+                    "year":  "1985",
+                    "manufacturer_year":  "Atari - 1985",
+                    "hwtype_year":  "Computer - 1985",
+                    "manufacturer_hwtype_year":  "Atari - Computer - 1985"
+                },
+    "atarixe":  {
+                    "year":  "1987",
+                    "manufacturer_year":  "Atari - 1987",
+                    "hwtype_year":  "Computer - 1987",
+                    "manufacturer_hwtype_year":  "Atari - Computer - 1987"
+                },
+    "atomiswave":  {
+                       "year":  "2003",
+                       "manufacturer_year":  "Sammy - 2003",
+                       "hwtype_year":  "Arcade - 2003",
+                       "manufacturer_hwtype_year":  "Sammy - Arcade - 2003"
+                   },
+    "bbcmicro":  {
+                     "year":  "1981",
+                     "manufacturer_year":  "Acorn Computers - 1981",
+                     "hwtype_year":  "Computer - 1981",
+                     "manufacturer_hwtype_year":  "Acorn Computers - Computer - 1981"
+                 },
+    "c64":  {
+                "year":  "1982",
+                "manufacturer_year":  "Commodore - 1982",
+                "hwtype_year":  "Computer - 1982",
+                "manufacturer_hwtype_year":  "Commodore - Computer - 1982"
+            },
+    "cdimono1":  {
+                     "year":  "1991",
+                     "manufacturer_year":  "Philips - 1991",
+                     "hwtype_year":  "Console - 1991",
+                     "manufacturer_hwtype_year":  "Philips - Console - 1991"
+                 },
+    "cdtv":  {
+                 "year":  "1991",
+                 "manufacturer_year":  "Commodore - 1991",
+                 "hwtype_year":  "Console - 1991",
+                 "manufacturer_hwtype_year":  "Commodore - Console - 1991"
+             },
+    "chailove":  {
+                     "year":  "2017",
+                     "manufacturer_year":  "ChaiLove Team - 2017",
+                     "hwtype_year":  "Engine - 2017",
+                     "manufacturer_hwtype_year":  "ChaiLove Team - Engine - 2017"
+                 },
+    "channelf":  {
+                     "year":  "1976",
+                     "manufacturer_year":  "Fairchild - 1976",
+                     "hwtype_year":  "Console - 1976",
+                     "manufacturer_hwtype_year":  "Fairchild - Console - 1976"
+                 },
+    "coco":  {
+                 "year":  "1980",
+                 "manufacturer_year":  "Tandy - 1980",
+                 "hwtype_year":  "Computer - 1980",
+                 "manufacturer_hwtype_year":  "Tandy - Computer - 1980"
+             },
+    "colecovision":  {
+                         "year":  "1982",
+                         "manufacturer_year":  "Coleco - 1982",
+                         "hwtype_year":  "Console - 1982",
+                         "manufacturer_hwtype_year":  "Coleco - Console - 1982"
+                     },
+    "consolearcade":  {
+                          "year":  "1984",
+                          "manufacturer_year":  "Arcade - 1984",
+                          "hwtype_year":  "Arcade - 1984",
+                          "manufacturer_hwtype_year":  "Arcade - Arcade - 1984"
+                      },
+    "cps":  {
+                "year":  "1988",
+                "manufacturer_year":  "Capcom - 1988",
+                "hwtype_year":  "Arcade - 1988",
+                "manufacturer_hwtype_year":  "Capcom - Arcade - 1988"
+            },
+    "cps1":  {
+                 "year":  "1988",
+                 "manufacturer_year":  "Capcom - 1988",
+                 "hwtype_year":  "Arcade - 1988",
+                 "manufacturer_hwtype_year":  "Capcom - Arcade - 1988"
+             },
+    "cps2":  {
+                 "year":  "1993",
+                 "manufacturer_year":  "Capcom - 1993",
+                 "hwtype_year":  "Arcade - 1993",
+                 "manufacturer_hwtype_year":  "Capcom - Arcade - 1993"
+             },
+    "cps3":  {
+                 "year":  "1996",
+                 "manufacturer_year":  "Capcom - 1996",
+                 "hwtype_year":  "Arcade - 1996",
+                 "manufacturer_hwtype_year":  "Capcom - Arcade - 1996"
+             },
+    "crvision":  {
+                     "year":  "1982",
+                     "manufacturer_year":  "VTech - 1982",
+                     "hwtype_year":  "Console - 1982",
+                     "manufacturer_hwtype_year":  "VTech - Console - 1982"
+                 },
+    "daphne":  {
+                   "year":  "2007",
+                   "manufacturer_year":  "Matt Ownby - 2007",
+                   "hwtype_year":  "Arcade - 2007",
+                   "manufacturer_hwtype_year":  "Matt Ownby - Arcade - 2007"
+               },
+    "desktop":  {
+                    "year":  "0000",
+                    "manufacturer_year":  "Various - 0000",
+                    "hwtype_year":  "Folder - 0000",
+                    "manufacturer_hwtype_year":  "Various - Folder - 0000"
+                },
+    "doom":  {
+                 "year":  "1993",
+                 "manufacturer_year":  "id Software - 1993",
+                 "hwtype_year":  "Engine - 1993",
+                 "manufacturer_hwtype_year":  "id Software - Engine - 1993"
+             },
+    "dos":  {
+                "year":  "1981",
+                "manufacturer_year":  "Microsoft - 1981",
+                "hwtype_year":  "OS - 1981",
+                "manufacturer_hwtype_year":  "Microsoft - OS - 1981"
+            },
+    "dragon32":  {
+                     "year":  "1982",
+                     "manufacturer_year":  "Dragon Data, Ltd. - 1982",
+                     "hwtype_year":  "Computer - 1982",
+                     "manufacturer_hwtype_year":  "Dragon Data, Ltd. - Computer - 1982"
+                 },
+    "dreamcast":  {
+                      "year":  "1998",
+                      "manufacturer_year":  "Sega - 1998",
+                      "hwtype_year":  "Console - 1998",
+                      "manufacturer_hwtype_year":  "Sega - Console - 1998"
+                  },
+    "easyrpg":  {
+                    "year":  "2007",
+                    "manufacturer_year":  "EasyRPG Team - 2007",
+                    "hwtype_year":  "Engine - 2007",
+                    "manufacturer_hwtype_year":  "EasyRPG Team - Engine - 2007"
+                },
+    "electron":  {
+                     "year":  "1983",
+                     "manufacturer_year":  "Acorn Computers - 1983",
+                     "hwtype_year":  "Computer - 1983",
+                     "manufacturer_hwtype_year":  "Acorn Computers - Computer - 1983"
+                 },
+    "emulators":  {
+                      "year":  "0000",
+                      "manufacturer_year":  "Various - 0000",
+                      "hwtype_year":  "Folder - 0000",
+                      "manufacturer_hwtype_year":  "Various - Folder - 0000"
+                  },
+    "epic":  {
+                 "year":  "2018",
+                 "manufacturer_year":  "Epic - 2018",
+                 "hwtype_year":  "Folder - 2018",
+                 "manufacturer_hwtype_year":  "Epic - Folder - 2018"
+             },
+    "famicom":  {
+                    "year":  "1983",
+                    "manufacturer_year":  "Nintendo - 1983",
+                    "hwtype_year":  "Console - 1983",
+                    "manufacturer_hwtype_year":  "Nintendo - Console - 1983"
+                },
+    "fba":  {
+                "year":  "2000",
+                "manufacturer_year":  "Arcade - 2000",
+                "hwtype_year":  "Arcade - 2000",
+                "manufacturer_hwtype_year":  "Arcade - Arcade - 2000"
+            },
+    "fbneo":  {
+                  "year":  "2002",
+                  "manufacturer_year":  "Arcade - 2002",
+                  "hwtype_year":  "Arcade - 2002",
+                  "manufacturer_hwtype_year":  "Arcade - Arcade - 2002"
+              },
+    "fds":  {
+                "year":  "1986",
+                "manufacturer_year":  "Nintendo - 1986",
+                "hwtype_year":  "Console - 1986",
+                "manufacturer_hwtype_year":  "Nintendo - Console - 1986"
+            },
+    "flash":  {
+                  "year":  "1996",
+                  "manufacturer_year":  "Adobe - 1996",
+                  "hwtype_year":  "Engine - 1996",
+                  "manufacturer_hwtype_year":  "Adobe - Engine - 1996"
+              },
+    "fm7":  {
+                "year":  "1982",
+                "manufacturer_year":  "Fujitsu - 1982",
+                "hwtype_year":  "Computer - 1982",
+                "manufacturer_hwtype_year":  "Fujitsu - Computer - 1982"
+            },
+    "fmtowns":  {
+                    "year":  "1989",
+                    "manufacturer_year":  "Fujitsu - 1989",
+                    "hwtype_year":  "Computer - 1989",
+                    "manufacturer_hwtype_year":  "Fujitsu - Computer - 1989"
+                },
+    "fpinball":  {
+                     "year":  "2005",
+                     "manufacturer_year":  "Christopher Leathley - 2005",
+                     "hwtype_year":  "Engine - 2005",
+                     "manufacturer_hwtype_year":  "Christopher Leathley - Engine - 2005"
+                 },
+    "gamate":  {
+                   "year":  "1990",
+                   "manufacturer_year":  "Bit Corporation - 1990",
+                   "hwtype_year":  "Portable - 1990",
+                   "manufacturer_hwtype_year":  "Bit Corporation - Portable - 1990"
+               },
+    "gameandwatch":  {
+                         "year":  "1980",
+                         "manufacturer_year":  "Nintendo - 1980",
+                         "hwtype_year":  "Portable - 1980",
+                         "manufacturer_hwtype_year":  "Nintendo - Portable - 1980"
+                     },
+    "gamecom":  {
+                    "year":  "1997",
+                    "manufacturer_year":  "Tiger - 1997",
+                    "hwtype_year":  "Portable - 1997",
+                    "manufacturer_hwtype_year":  "Tiger - Portable - 1997"
+                },
+    "gamegear":  {
+                     "year":  "1990",
+                     "manufacturer_year":  "Sega - 1990",
+                     "hwtype_year":  "Portable - 1990",
+                     "manufacturer_hwtype_year":  "Sega - Portable - 1990"
+                 },
+    "gb":  {
+               "year":  "1989",
+               "manufacturer_year":  "Nintendo - 1989",
+               "hwtype_year":  "Portable - 1989",
+               "manufacturer_hwtype_year":  "Nintendo - Portable - 1989"
+           },
+    "gba":  {
+                "year":  "2001",
+                "manufacturer_year":  "Nintendo - 2001",
+                "hwtype_year":  "Portable - 2001",
+                "manufacturer_hwtype_year":  "Nintendo - Portable - 2001"
+            },
+    "gbc":  {
+                "year":  "1998",
+                "manufacturer_year":  "Nintendo - 1998",
+                "hwtype_year":  "Portable - 1998",
+                "manufacturer_hwtype_year":  "Nintendo - Portable - 1998"
+            },
+    "gc":  {
+               "year":  "2001",
+               "manufacturer_year":  "Nintendo - 2001",
+               "hwtype_year":  "Console - 2001",
+               "manufacturer_hwtype_year":  "Nintendo - Console - 2001"
+           },
+    "genesis":  {
+                    "year":  "1989",
+                    "manufacturer_year":  "Sega - 1989",
+                    "hwtype_year":  "Console - 1989",
+                    "manufacturer_hwtype_year":  "Sega - Console - 1989"
+                },
+    "gmaster":  {
+                    "year":  "1990",
+                    "manufacturer_year":  "Hartung - 1990",
+                    "hwtype_year":  "Portable - 1990",
+                    "manufacturer_hwtype_year":  "Hartung - Portable - 1990"
+                },
+    "gx4000":  {
+                   "year":  "1990",
+                   "manufacturer_year":  "Amstrad - 1990",
+                   "hwtype_year":  "Console - 1990",
+                   "manufacturer_hwtype_year":  "Amstrad - Console - 1990"
+               },
+    "intellivision":  {
+                          "year":  "1979",
+                          "manufacturer_year":  "Mattel - 1979",
+                          "hwtype_year":  "Console - 1979",
+                          "manufacturer_hwtype_year":  "Mattel - Console - 1979"
+                      },
+    "j2me":  {
+                 "year":  "1998",
+                 "manufacturer_year":  "Oracle - 1998",
+                 "hwtype_year":  "OS - 1998",
+                 "manufacturer_hwtype_year":  "Oracle - OS - 1998"
+             },
+    "kodi":  {
+                 "year":  "2002",
+                 "manufacturer_year":  "XBMC Foundation - 2002",
+                 "hwtype_year":  "Folder - 2002",
+                 "manufacturer_hwtype_year":  "XBMC Foundation - Folder - 2002"
+             },
+    "laserdisc":  {
+                      "year":  "1983",
+                      "manufacturer_year":  "Arcade - 1983",
+                      "hwtype_year":  "Arcade - 1983",
+                      "manufacturer_hwtype_year":  "Arcade - Arcade - 1983"
+                  },
+    "lcdgames":  {
+                     "year":  "0000",
+                     "manufacturer_year":  "Various - 0000",
+                     "hwtype_year":  "Portable - 0000",
+                     "manufacturer_hwtype_year":  "Various - Portable - 0000"
+                 },
+    "lowresnx":  {
+                     "year":  "2016",
+                     "manufacturer_year":  "Timo Kloss - 2016",
+                     "hwtype_year":  "Engine - 2016",
+                     "manufacturer_hwtype_year":  "Timo Kloss - Engine - 2016"
+                 },
+    "lutris":  {
+                   "year":  "2010",
+                   "manufacturer_year":  "Mathieu Comandon - 2010",
+                   "hwtype_year":  "Folder - 2010",
+                   "manufacturer_hwtype_year":  "Mathieu Comandon - Folder - 2010"
+               },
+    "lutro":  {
+                  "year":  "2015",
+                  "manufacturer_year":  "libretro - 2015",
+                  "hwtype_year":  "Engine - 2015",
+                  "manufacturer_hwtype_year":  "libretro - Engine - 2015"
+              },
+    "macintosh":  {
+                      "year":  "1984",
+                      "manufacturer_year":  "Apple - 1984",
+                      "hwtype_year":  "Computer - 1984",
+                      "manufacturer_hwtype_year":  "Apple - Computer - 1984"
+                  },
+    "mame":  {
+                 "year":  "1997",
+                 "manufacturer_year":  "MAME Team - 1997",
+                 "hwtype_year":  "Emulator - 1997",
+                 "manufacturer_hwtype_year":  "MAME Team - Emulator - 1997"
+             },
+    "mame-advmame":  {
+                         "year":  "1998",
+                         "manufacturer_year":  "AdvanceMAME - 1998",
+                         "hwtype_year":  "Emulator - 1998",
+                         "manufacturer_hwtype_year":  "AdvanceMAME - Emulator - 1998"
+                     },
+    "mark3":  {
+                  "year":  "1985",
+                  "manufacturer_year":  "Sega - 1985",
+                  "hwtype_year":  "Console - 1985",
+                  "manufacturer_hwtype_year":  "Sega - Console - 1985"
+              },
+    "mastersystem":  {
+                         "year":  "1986",
+                         "manufacturer_year":  "Sega - 1986",
+                         "hwtype_year":  "Console - 1986",
+                         "manufacturer_hwtype_year":  "Sega - Console - 1986"
+                     },
+    "megacd":  {
+                   "year":  "1993",
+                   "manufacturer_year":  "Sega - 1993",
+                   "hwtype_year":  "Console - 1993",
+                   "manufacturer_hwtype_year":  "Sega - Console - 1993"
+               },
+    "megacdjp":  {
+                     "year":  "1991",
+                     "manufacturer_year":  "Sega - 1991",
+                     "hwtype_year":  "Console - 1991",
+                     "manufacturer_hwtype_year":  "Sega - Console - 1991"
+                 },
+    "megadrive":  {
+                      "year":  "1990",
+                      "manufacturer_year":  "Sega - 1990",
+                      "hwtype_year":  "Console - 1990",
+                      "manufacturer_hwtype_year":  "Sega - Console - 1990"
+                  },
+    "megadrivejp":  {
+                        "year":  "1988",
+                        "manufacturer_year":  "Sega - 1988",
+                        "hwtype_year":  "Console - 1988",
+                        "manufacturer_hwtype_year":  "Sega - Console - 1988"
+                    },
+    "megaduck":  {
+                     "year":  "1993",
+                     "manufacturer_year":  "Creatronic - 1993",
+                     "hwtype_year":  "Portable - 1993",
+                     "manufacturer_hwtype_year":  "Creatronic - Portable - 1993"
+                 },
+    "mess":  {
+                 "year":  "1998",
+                 "manufacturer_year":  "MESS Team - 1998",
+                 "hwtype_year":  "Emulator - 1998",
+                 "manufacturer_hwtype_year":  "MESS Team - Emulator - 1998"
+             },
+    "model2":  {
+                   "year":  "1993",
+                   "manufacturer_year":  "Sega - 1993",
+                   "hwtype_year":  "Arcade - 1993",
+                   "manufacturer_hwtype_year":  "Sega - Arcade - 1993"
+               },
+    "model3":  {
+                   "year":  "1996",
+                   "manufacturer_year":  "Sega - 1996",
+                   "hwtype_year":  "Arcade - 1996",
+                   "manufacturer_hwtype_year":  "Sega - Arcade - 1996"
+               },
+    "moto":  {
+                 "year":  "1984",
+                 "manufacturer_year":  "Thomson SA - 1984",
+                 "hwtype_year":  "Computer - 1984",
+                 "manufacturer_hwtype_year":  "Thomson SA - Computer - 1984"
+             },
+    "msx":  {
+                "year":  "1983",
+                "manufacturer_year":  "Microsoft - 1983",
+                "hwtype_year":  "Computer - 1983",
+                "manufacturer_hwtype_year":  "Microsoft - Computer - 1983"
+            },
+    "msx1":  {
+                 "year":  "1983",
+                 "manufacturer_year":  "Microsoft - 1983",
+                 "hwtype_year":  "Computer - 1983",
+                 "manufacturer_hwtype_year":  "Microsoft - Computer - 1983"
+             },
+    "msx2":  {
+                 "year":  "1985",
+                 "manufacturer_year":  "Microsoft - 1985",
+                 "hwtype_year":  "Computer - 1985",
+                 "manufacturer_hwtype_year":  "Microsoft - Computer - 1985"
+             },
+    "msxturbor":  {
+                      "year":  "1991",
+                      "manufacturer_year":  "Microsoft - 1991",
+                      "hwtype_year":  "Computer - 1991",
+                      "manufacturer_hwtype_year":  "Microsoft - Computer - 1991"
+                  },
+    "mugen":  {
+                  "year":  "1999",
+                  "manufacturer_year":  "Elecbyte - 1999",
+                  "hwtype_year":  "Engine - 1999",
+                  "manufacturer_hwtype_year":  "Elecbyte - Engine - 1999"
+              },
+    "multivision":  {
+                        "year":  "1983",
+                        "manufacturer_year":  "Tsukuda Original - 1983",
+                        "hwtype_year":  "Console - 1983",
+                        "manufacturer_hwtype_year":  "Tsukuda Original - Console - 1983"
+                    },
+    "n3ds":  {
+                 "year":  "2011",
+                 "manufacturer_year":  "Nintendo - 2011",
+                 "hwtype_year":  "Portable - 2011",
+                 "manufacturer_hwtype_year":  "Nintendo - Portable - 2011"
+             },
+    "n64":  {
+                "year":  "1996",
+                "manufacturer_year":  "Nintendo - 1996",
+                "hwtype_year":  "Console - 1996",
+                "manufacturer_hwtype_year":  "Nintendo - Console - 1996"
+            },
+    "n64dd":  {
+                  "year":  "1999",
+                  "manufacturer_year":  "Nintendo - 1999",
+                  "hwtype_year":  "Console - 1999",
+                  "manufacturer_hwtype_year":  "Nintendo - Console - 1999"
+              },
+    "naomi":  {
+                  "year":  "1998",
+                  "manufacturer_year":  "Sega - 1998",
+                  "hwtype_year":  "Arcade - 1998",
+                  "manufacturer_hwtype_year":  "Sega - Arcade - 1998"
+              },
+    "naomi2":  {
+                   "year":  "2000",
+                   "manufacturer_year":  "Sega - 2000",
+                   "hwtype_year":  "Arcade - 2000",
+                   "manufacturer_hwtype_year":  "Sega - Arcade - 2000"
+               },
+    "naomigd":  {
+                    "year":  "1998",
+                    "manufacturer_year":  "Sega - 1998",
+                    "hwtype_year":  "Arcade - 1998",
+                    "manufacturer_hwtype_year":  "Sega - Arcade - 1998"
+                },
+    "nds":  {
+                "year":  "2004",
+                "manufacturer_year":  "Nintendo - 2004",
+                "hwtype_year":  "Portable - 2004",
+                "manufacturer_hwtype_year":  "Nintendo - Portable - 2004"
+            },
+    "neogeo":  {
+                   "year":  "1990",
+                   "manufacturer_year":  "SNK - 1990",
+                   "hwtype_year":  "Console - 1990",
+                   "manufacturer_hwtype_year":  "SNK - Console - 1990"
+               },
+    "neogeocd":  {
+                     "year":  "1994",
+                     "manufacturer_year":  "SNK - 1994",
+                     "hwtype_year":  "Console - 1994",
+                     "manufacturer_hwtype_year":  "SNK - Console - 1994"
+                 },
+    "neogeocdjp":  {
+                       "year":  "1994",
+                       "manufacturer_year":  "SNK - 1994",
+                       "hwtype_year":  "Console - 1994",
+                       "manufacturer_hwtype_year":  "SNK - Console - 1994"
+                   },
+    "nes":  {
+                "year":  "1985",
+                "manufacturer_year":  "Nintendo - 1985",
+                "hwtype_year":  "Console - 1985",
+                "manufacturer_hwtype_year":  "Nintendo - Console - 1985"
+            },
+    "ngage":  {
+                  "year":  "2003",
+                  "manufacturer_year":  "Nokia - 2003",
+                  "hwtype_year":  "Portable - 2003",
+                  "manufacturer_hwtype_year":  "Nokia - Portable - 2003"
+              },
+    "ngp":  {
+                "year":  "1998",
+                "manufacturer_year":  "SNK - 1998",
+                "hwtype_year":  "Portable - 1998",
+                "manufacturer_hwtype_year":  "SNK - Portable - 1998"
+            },
+    "ngpc":  {
+                 "year":  "1999",
+                 "manufacturer_year":  "SNK - 1999",
+                 "hwtype_year":  "Portable - 1999",
+                 "manufacturer_hwtype_year":  "SNK - Portable - 1999"
+             },
+    "odyssey2":  {
+                     "year":  "1978",
+                     "manufacturer_year":  "Magnavox - 1978",
+                     "hwtype_year":  "Console - 1978",
+                     "manufacturer_hwtype_year":  "Magnavox - Console - 1978"
+                 },
+    "openbor":  {
+                    "year":  "2003",
+                    "manufacturer_year":  "Senile Team - 2003",
+                    "hwtype_year":  "Engine - 2003",
+                    "manufacturer_hwtype_year":  "Senile Team - Engine - 2003"
+                },
+    "oric":  {
+                 "year":  "1982",
+                 "manufacturer_year":  "Tangerine Computer Systems - 1982",
+                 "hwtype_year":  "Computer - 1982",
+                 "manufacturer_hwtype_year":  "Tangerine Computer Systems - Computer - 1982"
+             },
+    "palm":  {
+                 "year":  "1997",
+                 "manufacturer_year":  "Palm - 1997",
+                 "hwtype_year":  "OS - 1997",
+                 "manufacturer_hwtype_year":  "Palm - OS - 1997"
+             },
+    "pc":  {
+               "year":  "1981",
+               "manufacturer_year":  "IBM - 1981",
+               "hwtype_year":  "Computer - 1981",
+               "manufacturer_hwtype_year":  "IBM - Computer - 1981"
+           },
+    "pc88":  {
+                 "year":  "1981",
+                 "manufacturer_year":  "NEC - 1981",
+                 "hwtype_year":  "Computer - 1981",
+                 "manufacturer_hwtype_year":  "NEC - Computer - 1981"
+             },
+    "pc98":  {
+                 "year":  "1982",
+                 "manufacturer_year":  "NEC - 1982",
+                 "hwtype_year":  "Computer - 1982",
+                 "manufacturer_hwtype_year":  "NEC - Computer - 1982"
+             },
+    "pcarcade":  {
+                     "year":  "2003",
+                     "manufacturer_year":  "Arcade - 2003",
+                     "hwtype_year":  "Arcade - 2003",
+                     "manufacturer_hwtype_year":  "Arcade - Arcade - 2003"
+                 },
+    "pcengine":  {
+                     "year":  "1987",
+                     "manufacturer_year":  "NEC - 1987",
+                     "hwtype_year":  "Console - 1987",
+                     "manufacturer_hwtype_year":  "NEC - Console - 1987"
+                 },
+    "pcenginecd":  {
+                       "year":  "1988",
+                       "manufacturer_year":  "NEC - 1988",
+                       "hwtype_year":  "Console - 1988",
+                       "manufacturer_hwtype_year":  "NEC - Console - 1988"
+                   },
+    "pcfx":  {
+                 "year":  "1994",
+                 "manufacturer_year":  "NEC - 1994",
+                 "hwtype_year":  "Console - 1994",
+                 "manufacturer_hwtype_year":  "NEC - Console - 1994"
+             },
+    "pico8":  {
+                  "year":  "2015",
+                  "manufacturer_year":  "Lexaloffle - 2015",
+                  "hwtype_year":  "Engine - 2015",
+                  "manufacturer_hwtype_year":  "Lexaloffle - Engine - 2015"
+              },
+    "plus4":  {
+                  "year":  "1984",
+                  "manufacturer_year":  "Commodore - 1984",
+                  "hwtype_year":  "Computer - 1984",
+                  "manufacturer_hwtype_year":  "Commodore - Computer - 1984"
+              },
+    "pokemini":  {
+                     "year":  "2001",
+                     "manufacturer_year":  "Nintendo - 2001",
+                     "hwtype_year":  "Portable - 2001",
+                     "manufacturer_hwtype_year":  "Nintendo - Portable - 2001"
+                 },
+    "ports":  {
+                  "year":  "0000",
+                  "manufacturer_year":  "Various - 0000",
+                  "hwtype_year":  "Folder - 0000",
+                  "manufacturer_hwtype_year":  "Various - Folder - 0000"
+              },
+    "ps2":  {
+                "year":  "2000",
+                "manufacturer_year":  "Sony - 2000",
+                "hwtype_year":  "Console - 2000",
+                "manufacturer_hwtype_year":  "Sony - Console - 2000"
+            },
+    "ps3":  {
+                "year":  "2006",
+                "manufacturer_year":  "Sony - 2006",
+                "hwtype_year":  "Console - 2006",
+                "manufacturer_hwtype_year":  "Sony - Console - 2006"
+            },
+    "ps4":  {
+                "year":  "2013",
+                "manufacturer_year":  "Sony - 2013",
+                "hwtype_year":  "Console - 2013",
+                "manufacturer_hwtype_year":  "Sony - Console - 2013"
+            },
+    "psp":  {
+                "year":  "2004",
+                "manufacturer_year":  "Sony - 2004",
+                "hwtype_year":  "Portable - 2004",
+                "manufacturer_hwtype_year":  "Sony - Portable - 2004"
+            },
+    "psvita":  {
+                   "year":  "2011",
+                   "manufacturer_year":  "Sony - 2011",
+                   "hwtype_year":  "Portable - 2011",
+                   "manufacturer_hwtype_year":  "Sony - Portable - 2011"
+               },
+    "psx":  {
+                "year":  "1994",
+                "manufacturer_year":  "Sony - 1994",
+                "hwtype_year":  "Console - 1994",
+                "manufacturer_hwtype_year":  "Sony - Console - 1994"
+            },
+    "pv1000":  {
+                   "year":  "1983",
+                   "manufacturer_year":  "Casio - 1983",
+                   "hwtype_year":  "Console - 1983",
+                   "manufacturer_hwtype_year":  "Casio - Console - 1983"
+               },
+    "quake":  {
+                  "year":  "1996",
+                  "manufacturer_year":  "id Software - 1996",
+                  "hwtype_year":  "Engine - 1996",
+                  "manufacturer_hwtype_year":  "id Software - Engine - 1996"
+              },
+    "samcoupe":  {
+                     "year":  "1989",
+                     "manufacturer_year":  "MGT - 1989",
+                     "hwtype_year":  "Computer - 1989",
+                     "manufacturer_hwtype_year":  "MGT - Computer - 1989"
+                 },
+    "satellaview":  {
+                        "year":  "1995",
+                        "manufacturer_year":  "Nintendo - 1995",
+                        "hwtype_year":  "Console - 1995",
+                        "manufacturer_hwtype_year":  "Nintendo - Console - 1995"
+                    },
+    "saturn":  {
+                   "year":  "1995",
+                   "manufacturer_year":  "Sega - 1995",
+                   "hwtype_year":  "Console - 1995",
+                   "manufacturer_hwtype_year":  "Sega - Console - 1995"
+               },
+    "saturnjp":  {
+                     "year":  "1994",
+                     "manufacturer_year":  "Sega - 1994",
+                     "hwtype_year":  "Console - 1994",
+                     "manufacturer_hwtype_year":  "Sega - Console - 1994"
+                 },
+    "scummvm":  {
+                    "year":  "2001",
+                    "manufacturer_year":  "ScummVM - 2001",
+                    "hwtype_year":  "Engine - 2001",
+                    "manufacturer_hwtype_year":  "ScummVM - Engine - 2001"
+                },
+    "scv":  {
+                "year":  "1984",
+                "manufacturer_year":  "Epoch - 1984",
+                "hwtype_year":  "Console - 1984",
+                "manufacturer_hwtype_year":  "Epoch - Console - 1984"
+            },
+    "sega32x":  {
+                    "year":  "1994",
+                    "manufacturer_year":  "Sega - 1994",
+                    "hwtype_year":  "Console - 1994",
+                    "manufacturer_hwtype_year":  "Sega - Console - 1994"
+                },
+    "sega32xjp":  {
+                      "year":  "1994",
+                      "manufacturer_year":  "Sega - 1994",
+                      "hwtype_year":  "Console - 1994",
+                      "manufacturer_hwtype_year":  "Sega - Console - 1994"
+                  },
+    "sega32xna":  {
+                      "year":  "1994",
+                      "manufacturer_year":  "Sega - 1994",
+                      "hwtype_year":  "Console - 1994",
+                      "manufacturer_hwtype_year":  "Sega - Console - 1994"
+                  },
+    "segacd":  {
+                   "year":  "1992",
+                   "manufacturer_year":  "Sega - 1992",
+                   "hwtype_year":  "Console - 1992",
+                   "manufacturer_hwtype_year":  "Sega - Console - 1992"
+               },
+    "sfc":  {
+                "year":  "1990",
+                "manufacturer_year":  "Nintendo - 1990",
+                "hwtype_year":  "Console - 1990",
+                "manufacturer_hwtype_year":  "Nintendo - Console - 1990"
+            },
+    "sg-1000":  {
+                    "year":  "1983",
+                    "manufacturer_year":  "Sega - 1983",
+                    "hwtype_year":  "Console - 1983",
+                    "manufacturer_hwtype_year":  "Sega - Console - 1983"
+                },
+    "sgb":  {
+                "year":  "1994",
+                "manufacturer_year":  "Nintendo - 1994",
+                "hwtype_year":  "Console - 1994",
+                "manufacturer_hwtype_year":  "Nintendo - Console - 1994"
+            },
+    "snes":  {
+                 "year":  "1992",
+                 "manufacturer_year":  "Nintendo - 1992",
+                 "hwtype_year":  "Console - 1992",
+                 "manufacturer_hwtype_year":  "Nintendo - Console - 1992"
+             },
+    "snesna":  {
+                   "year":  "1991",
+                   "manufacturer_year":  "Nintendo - 1991",
+                   "hwtype_year":  "Console - 1991",
+                   "manufacturer_hwtype_year":  "Nintendo - Console - 1991"
+               },
+    "solarus":  {
+                    "year":  "2002",
+                    "manufacturer_year":  "Christopho - 2002",
+                    "hwtype_year":  "Engine - 2002",
+                    "manufacturer_hwtype_year":  "Christopho - Engine - 2002"
+                },
+    "spectravideo":  {
+                         "year":  "1983",
+                         "manufacturer_year":  "Spectravideo - 1983",
+                         "hwtype_year":  "Console - 1983",
+                         "manufacturer_hwtype_year":  "Spectravideo - Console - 1983"
+                     },
+    "steam":  {
+                  "year":  "2003",
+                  "manufacturer_year":  "Valve - 2003",
+                  "hwtype_year":  "Folder - 2003",
+                  "manufacturer_hwtype_year":  "Valve - Folder - 2003"
+              },
+    "stv":  {
+                "year":  "1994",
+                "manufacturer_year":  "Sega - 1994",
+                "hwtype_year":  "Arcade - 1994",
+                "manufacturer_hwtype_year":  "Sega - Arcade - 1994"
+            },
+    "sufami":  {
+                   "year":  "1996",
+                   "manufacturer_year":  "Bandai - 1996",
+                   "hwtype_year":  "Console - 1996",
+                   "manufacturer_hwtype_year":  "Bandai - Console - 1996"
+               },
+    "supergrafx":  {
+                       "year":  "1989",
+                       "manufacturer_year":  "NEC - 1989",
+                       "hwtype_year":  "Console - 1989",
+                       "manufacturer_hwtype_year":  "NEC - Console - 1989"
+                   },
+    "supervision":  {
+                        "year":  "1992",
+                        "manufacturer_year":  "Watara - 1992",
+                        "hwtype_year":  "Portable - 1992",
+                        "manufacturer_hwtype_year":  "Watara - Portable - 1992"
+                    },
+    "supracan":  {
+                     "year":  "1995",
+                     "manufacturer_year":  "Funtech - 1995",
+                     "hwtype_year":  "Console - 1995",
+                     "manufacturer_hwtype_year":  "Funtech - Console - 1995"
+                 },
+    "switch":  {
+                   "year":  "2017",
+                   "manufacturer_year":  "Nintendo - 2017",
+                   "hwtype_year":  "Console - 2017",
+                   "manufacturer_hwtype_year":  "Nintendo - Console - 2017"
+               },
+    "symbian":  {
+                    "year":  "1997",
+                    "manufacturer_year":  "Symbian Ltd. - 1997",
+                    "hwtype_year":  "OS - 1997",
+                    "manufacturer_hwtype_year":  "Symbian Ltd. - OS - 1997"
+                },
+    "tanodragon":  {
+                       "year":  "1984",
+                       "manufacturer_year":  "Tano - 1984",
+                       "hwtype_year":  "Computer - 1984",
+                       "manufacturer_hwtype_year":  "Tano - Computer - 1984"
+                   },
+    "tg-cd":  {
+                  "year":  "1989",
+                  "manufacturer_year":  "NEC - 1989",
+                  "hwtype_year":  "Console - 1989",
+                  "manufacturer_hwtype_year":  "NEC - Console - 1989"
+              },
+    "tg16":  {
+                 "year":  "1989",
+                 "manufacturer_year":  "NEC - 1989",
+                 "hwtype_year":  "Console - 1989",
+                 "manufacturer_hwtype_year":  "NEC - Console - 1989"
+             },
+    "ti99":  {
+                 "year":  "1981",
+                 "manufacturer_year":  "Texas Instruments - 1981",
+                 "hwtype_year":  "Computer - 1981",
+                 "manufacturer_hwtype_year":  "Texas Instruments - Computer - 1981"
+             },
+    "tic80":  {
+                  "year":  "2017",
+                  "manufacturer_year":  "Vadim Grigoruk - 2017",
+                  "hwtype_year":  "Engine - 2017",
+                  "manufacturer_hwtype_year":  "Vadim Grigoruk - Engine - 2017"
+              },
+    "to8":  {
+                "year":  "1986",
+                "manufacturer_year":  "Thomson - 1986",
+                "hwtype_year":  "Computer - 1986",
+                "manufacturer_hwtype_year":  "Thomson - Computer - 1986"
+            },
+    "tools":  {
+                  "year":  "0000",
+                  "manufacturer_year":  "Various - 0000",
+                  "hwtype_year":  "Folder - 0000",
+                  "manufacturer_hwtype_year":  "Various - Folder - 0000"
+              },
+    "triforce":  {
+                     "year":  "2002",
+                     "manufacturer_year":  "Namco-Sega-Nintendo - 2002",
+                     "hwtype_year":  "Arcade - 2002",
+                     "manufacturer_hwtype_year":  "Namco-Sega-Nintendo - Arcade - 2002"
+                 },
+    "trs-80":  {
+                   "year":  "1977",
+                   "manufacturer_year":  "Tandy - 1977",
+                   "hwtype_year":  "Computer - 1977",
+                   "manufacturer_hwtype_year":  "Tandy - Computer - 1977"
+               },
+    "type-x":  {
+                   "year":  "2004",
+                   "manufacturer_year":  "Arcade - 2004",
+                   "hwtype_year":  "Arcade - 2004",
+                   "manufacturer_hwtype_year":  "Arcade - Arcade - 2004"
+               },
+    "uzebox":  {
+                   "year":  "2008",
+                   "manufacturer_year":  "Belogic Software - 2008",
+                   "hwtype_year":  "Console - 2008",
+                   "manufacturer_hwtype_year":  "Belogic Software - Console - 2008"
+               },
+    "vectrex":  {
+                    "year":  "1982",
+                    "manufacturer_year":  "GCE - 1982",
+                    "hwtype_year":  "Console - 1982",
+                    "manufacturer_hwtype_year":  "GCE - Console - 1982"
+                },
+    "vic20":  {
+                  "year":  "1980",
+                  "manufacturer_year":  "Commodore - 1980",
+                  "hwtype_year":  "Computer - 1980",
+                  "manufacturer_hwtype_year":  "Commodore - Computer - 1980"
+              },
+    "videopac":  {
+                     "year":  "1978",
+                     "manufacturer_year":  "Philips - 1978",
+                     "hwtype_year":  "Console - 1978",
+                     "manufacturer_hwtype_year":  "Philips - Console - 1978"
+                 },
+    "vircon32":  {
+                     "year":  "2021",
+                     "manufacturer_year":  "Carra - 2021",
+                     "hwtype_year":  "Engine - 2021",
+                     "manufacturer_hwtype_year":  "Carra - Engine - 2021"
+                 },
+    "virtualboy":  {
+                       "year":  "1995",
+                       "manufacturer_year":  "Nintendo - 1995",
+                       "hwtype_year":  "Portable - 1995",
+                       "manufacturer_hwtype_year":  "Nintendo - Portable - 1995"
+                   },
+    "vpinball":  {
+                     "year":  "2000",
+                     "manufacturer_year":  "Visual Pinball Team - 2000",
+                     "hwtype_year":  "Engine - 2000",
+                     "manufacturer_hwtype_year":  "Visual Pinball Team - Engine - 2000"
+                 },
+    "vsmile":  {
+                   "year":  "2004",
+                   "manufacturer_year":  "VTech - 2004",
+                   "hwtype_year":  "Console - 2004",
+                   "manufacturer_hwtype_year":  "VTech - Console - 2004"
+               },
+    "wasm4":  {
+                  "year":  "2022",
+                  "manufacturer_year":  "Bruno Garcia - 2022",
+                  "hwtype_year":  "Engine - 2022",
+                  "manufacturer_hwtype_year":  "Bruno Garcia - Engine - 2022"
+              },
+    "wii":  {
+                "year":  "2006",
+                "manufacturer_year":  "Nintendo - 2006",
+                "hwtype_year":  "Console - 2006",
+                "manufacturer_hwtype_year":  "Nintendo - Console - 2006"
+            },
+    "wiiu":  {
+                 "year":  "2012",
+                 "manufacturer_year":  "Nintendo - 2012",
+                 "hwtype_year":  "Console - 2012",
+                 "manufacturer_hwtype_year":  "Nintendo - Console - 2012"
+             },
+    "windows":  {
+                    "year":  "1985",
+                    "manufacturer_year":  "Microsoft - 1985",
+                    "hwtype_year":  "OS - 1985",
+                    "manufacturer_hwtype_year":  "Microsoft - OS - 1985"
+                },
+    "windows3x":  {
+                      "year":  "1990",
+                      "manufacturer_year":  "Microsoft - 1990",
+                      "hwtype_year":  "OS - 1990",
+                      "manufacturer_hwtype_year":  "Microsoft - OS - 1990"
+                  },
+    "windows9x":  {
+                      "year":  "1995",
+                      "manufacturer_year":  "Microsoft - 1995",
+                      "hwtype_year":  "OS - 1995",
+                      "manufacturer_hwtype_year":  "Microsoft - OS - 1995"
+                  },
+    "wonderswan":  {
+                       "year":  "1999",
+                       "manufacturer_year":  "Bandai - 1999",
+                       "hwtype_year":  "Portable - 1999",
+                       "manufacturer_hwtype_year":  "Bandai - Portable - 1999"
+                   },
+    "wonderswancolor":  {
+                            "year":  "2000",
+                            "manufacturer_year":  "Bandai - 2000",
+                            "hwtype_year":  "Portable - 2000",
+                            "manufacturer_hwtype_year":  "Bandai - Portable - 2000"
+                        },
+    "x1":  {
+               "year":  "1982",
+               "manufacturer_year":  "Sharp - 1982",
+               "hwtype_year":  "Computer - 1982",
+               "manufacturer_hwtype_year":  "Sharp - Computer - 1982"
+           },
+    "x68000":  {
+                   "year":  "1987",
+                   "manufacturer_year":  "Sharp - 1987",
+                   "hwtype_year":  "Computer - 1987",
+                   "manufacturer_hwtype_year":  "Sharp - Computer - 1987"
+               },
+    "xbox":  {
+                 "year":  "2001",
+                 "manufacturer_year":  "Microsoft - 2001",
+                 "hwtype_year":  "Console - 2001",
+                 "manufacturer_hwtype_year":  "Microsoft - Console - 2001"
+             },
+    "xbox360":  {
+                    "year":  "2005",
+                    "manufacturer_year":  "Microsoft - 2005",
+                    "hwtype_year":  "Console - 2005",
+                    "manufacturer_hwtype_year":  "Microsoft - Console - 2005"
+                },
+    "xboxone":  {
+                    "year":  "2013",
+                    "manufacturer_year":  "Microsoft - 2013",
+                    "hwtype_year":  "Console - 2013",
+                    "manufacturer_hwtype_year":  "Microsoft - Console - 2013"
+                },
+    "zmachine":  {
+                     "year":  "1979",
+                     "manufacturer_year":  "Infocom - 1979",
+                     "hwtype_year":  "Engine - 1979",
+                     "manufacturer_hwtype_year":  "Infocom - Engine - 1979"
+                 },
+    "zx81":  {
+                 "year":  "1981",
+                 "manufacturer_year":  "Sinclair - 1981",
+                 "hwtype_year":  "Computer - 1981",
+                 "manufacturer_hwtype_year":  "Sinclair - Computer - 1981"
+             },
+    "zxnext":  {
+                   "year":  "2017",
+                   "manufacturer_year":  "Sinclair - 2017",
+                   "hwtype_year":  "Computer - 2017",
+                   "manufacturer_hwtype_year":  "Sinclair - Computer - 2017"
+               },
+    "zxspectrum":  {
+                       "year":  "1982",
+                       "manufacturer_year":  "Sinclair - 1982",
+                       "hwtype_year":  "Computer - 1982",
+                       "manufacturer_hwtype_year":  "Sinclair - Computer - 1982"
+                   }
+}

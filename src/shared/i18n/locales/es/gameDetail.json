@@ -1,0 +1,497 @@
+{
+  "notFound": {
+    "title": "Juego no encontrado",
+    "message": "Este juego ya no está en la biblioteca."
+  },
+  "header": {
+    "similar": "Juegos similares",
+    "close": "Cerrar"
+  },
+  "hints": {
+    "select": "Seleccionar",
+    "back": "Atrás",
+    "favourite": "Favorito",
+    "unfavourite": "Quitar favorito",
+    "options": "Opciones"
+  },
+  "badges": {
+    "coopLabel": "Co-Op",
+    "coop": "Nucleus Co-Op: pantalla dividida",
+    "coopMax": "Nucleus Co-Op: pantalla dividida para hasta {max} jugadores"
+  },
+  "players": {
+    "upTo_one": "1 jugador",
+    "upTo_other": "Hasta {count} jugadores"
+  },
+  "chips": {
+    "playingNow": "{players} jugando ahora",
+    "showStore": "Mostrar juegos de {store} en la Biblioteca",
+    "ownedOn": "En tu cuenta de {store}",
+    "notInstalled": "No instalado",
+    "addFilter": "Añadir {name} a los filtros de esta pestaña de la Biblioteca",
+    "removeFilter": "Quitar {name} de los filtros de esta pestaña de la Biblioteca",
+    "addDeveloper": "Añadir los juegos desarrollados por {name} a los filtros de esta pestaña de la Biblioteca",
+    "addPublisher": "Añadir los juegos publicados por {name} a los filtros de esta pestaña de la Biblioteca"
+  },
+  "description": {
+    "more": "Más",
+    "less": "Menos"
+  },
+  "meta": {
+    "released": "Lanzado el {date}"
+  },
+  "toasts": {
+    "metadataFailed": "No se pudieron obtener los metadatos",
+    "launching": "Iniciando {title}…",
+    "launchFailed": "No se pudo iniciar {title}",
+    "checkingUpdates": "Buscando actualizaciones de {title}…",
+    "updateFailed": "No se pudo actualizar {title}",
+    "emulatorListFailed": "No se pudo leer la lista de emuladores"
+  },
+  "recomp": {
+    "squareLabel": "Recompilaciones",
+    "installFailed": "La instalación falló",
+    "installRecompFailed": "No se pudo instalar la recompilación",
+    "starting": "Iniciando {title} (recompilación)…",
+    "pickFiles": "Primero elige los archivos del juego para {title}",
+    "startFailed": "No se pudo iniciar la recompilación de {title}",
+    "delete": {
+      "title": "¿Seguro que quieres eliminar esta recompilación?",
+      "messageNamed": "{name} (la recompilación de {title}) y todos los archivos que generó se eliminan de este PC. Las partidas guardadas fuera de su carpeta se conservan, y las partidas y la configuración de su propia carpeta se guardan en una copia de seguridad.",
+      "message": "La recompilación de {title} y todos los archivos que generó se eliminan de este PC. Las partidas guardadas fuera de su carpeta se conservan, y las partidas y la configuración de su propia carpeta se guardan en una copia de seguridad.",
+      "leavesLibrary": "También sale de tu biblioteca, ya que solo está ahí por esta recompilación.",
+      "yes": "Sí",
+      "no": "No",
+      "deletedNamed": "Se eliminó {name}",
+      "deleted": "Se eliminó la recompilación de {title}",
+      "failed": "No se pudo eliminar la recompilación de {title}"
+    }
+  },
+  "bar": {
+    "label": "Acciones del juego",
+    "play": "Jugar",
+    "running": "En curso",
+    "install": "Instalar",
+    "download": "Descargar",
+    "stream": "Transmitir",
+    "retry": "Reintentar",
+    "resume": "Reanudar",
+    "resumeDownload": "Reanudar descarga",
+    "unqueue": "Quitar",
+    "removeFromQueue": "Quitar de la cola",
+    "stopStreaming": "Detener transmisión",
+    "addingToLibrary": "Añadiendo a la biblioteca…",
+    "notInstalled": "No instalado",
+    "notAvailableFrom": "No disponible desde {host}",
+    "pressToCancel": "{status} Pulsa para cancelar.",
+    "sizeAria": "{action}, {size}",
+    "sizeAriaEstimate": "{action}, unos {size}",
+    "streamFailed": "No se pudo transmitir desde {host}",
+    "hostOffline": "No se puede conectar con {host} ahora: este es su juego tal como estaba la última vez que respondió",
+    "queued": "En cola",
+    "placeAfter": "{place}, después de {title}",
+    "theStore": "la tienda",
+    "moreOptions": "Más opciones",
+    "editGame": "Editar juego",
+    "performancePanel": "Panel de rendimiento",
+    "addFavourite": "Añadir a favoritos",
+    "removeFavourite": "Quitar de favoritos",
+    "installing": "Instalando…",
+    "bytesOf": "{done} de {total}"
+  },
+  "stats": {
+    "achievements": "Logros",
+    "playTime": "Tiempo jugado",
+    "playTimeVsMain": "Tiempo jugado / Historia principal",
+    "playTimeVsSolo": "Tiempo jugado / Solo",
+    "playedVsMain": "Jugado / Principal",
+    "playedVsSolo": "Jugado / Solo",
+    "rating": "{score} ({source})",
+    "players": {
+      "label": "Jugadores",
+      "peakTitle": "Récord histórico (SteamCharts)",
+      "currentTitle": "Jugando ahora (Steam)",
+      "ariaBoth": "Jugadores: récord histórico {peak}, {current} jugando ahora",
+      "ariaPeakOnly": "Jugadores: récord histórico {peak}, número de jugadores actuales desconocido",
+      "ariaCurrentOnly": "Jugadores: récord histórico desconocido, {current} jugando ahora",
+      "ariaNone": "Jugadores: récord histórico desconocido, número de jugadores actuales desconocido"
+    }
+  },
+  "features": {
+    "label": "Funciones del juego",
+    "upgrade": "Mejorar",
+    "coopStarting": "Iniciando Co-Op",
+    "coopPlay": "Jugar en Co-Op (pantalla dividida)",
+    "coopTitle": "Nucleus Co-Op: pantalla dividida con un mando para cada jugador",
+    "peerPartyTitle": "PeerParty: juego en LAN",
+    "peerPartyPlay": "Jugar en tu red con PeerParty"
+  },
+  "playMenu": {
+    "label": "Opciones de juego",
+    "play": "Jugar",
+    "install": "Instalar",
+    "retryInstall": "Reintentar instalación",
+    "download": "Descargar",
+    "retryDownload": "Reintentar descarga",
+    "downloadFrom": "Descargar desde {host}",
+    "cancelDownload": "Cancelar descarga",
+    "cancelTracking": "Dejar de seguir",
+    "starting": "Iniciando…",
+    "stream": "Transmitir",
+    "streamFrom": "Transmitir desde {host}",
+    "stopStreaming": "Detener transmisión",
+    "cancelStream": "Cancelar transmisión",
+    "notAvailableFrom": "No disponible desde {host}",
+    "recompilationHint": "Recompilación",
+    "removeFromQueue": "Quitar de la cola",
+    "pauseDownload": "Pausar descarga",
+    "resumeDownload": "Reanudar descarga",
+    "paused": "En pausa",
+    "openStore": "Abrir {store}",
+    "playWith": "Jugar con {emulator}",
+    "notFound": "No encontrado",
+    "recompilation": "Recompilación…",
+    "ps3Update": "Actualizar juego de PS3",
+    "manageDlc": "Administrar DLC",
+    "deleteRecomp": "Eliminar recompilación",
+    "coopSetup": "Configurar Co-Op…",
+    "convertEntry": "Convertir…",
+    "openFolder": "Abrir carpeta de instalación",
+    "openStorePage": "Abrir página de la tienda",
+    "refreshMetadata": "Actualizar metadatos",
+    "searchMetadataEntry": "Buscar metadatos…",
+    "showGame": "Mostrar juego",
+    "hideGame": "Ocultar juego",
+    "removeFromLibrary": "Quitar de la biblioteca",
+    "deleteFromPc": "Eliminar de este PC",
+    "convert": {
+      "label": "Convertir {title}",
+      "back": "Convertir",
+      "closeGameFirst": "Cierra el juego primero",
+      "conversionRunning": "Hay una conversión en curso",
+      "fromTo": "{from} a {to}",
+      "to": "A {to}",
+      "notPlayableHere": "No se puede jugar aquí",
+      "started": "Convirtiendo {title} a {to}… (Ajustes › Convertir muestra el progreso)",
+      "failed": "No se pudo convertir {title}"
+    },
+    "search": {
+      "title": "Buscar metadatos",
+      "placeholder": "Título del juego",
+      "searching": "Buscando…",
+      "failed": "La búsqueda falló: {message}",
+      "noMatches": "Sin resultados. Prueba con un título más corto.",
+      "matches": "Resultados",
+      "prompt": "Escribe un título y pulsa Enter."
+    },
+    "toasts": {
+      "applied": "Metadatos aplicados desde {source}",
+      "applyFailed": "No se pudieron aplicar esos metadatos",
+      "recompFolderFailed": "No se pudo abrir la carpeta de la recompilación",
+      "installFolderFailed": "No se pudo abrir la carpeta de instalación",
+      "storePageFailed": "No se pudo abrir la página de la tienda",
+      "trackingStopped": "Se dejó de seguir la instalación de {title}. {store} sigue descargándolo.",
+      "trackingStoppedNoStore": "Se dejó de seguir la instalación de {title}. La tienda sigue descargándolo.",
+      "stopTrackingFailed": "No se pudo dejar de seguir la instalación",
+      "openStoreFailed": "No se pudo abrir {store}",
+      "refreshing": "Actualizando los metadatos de {title}…",
+      "refreshFailed": "No se pudieron actualizar los metadatos",
+      "hidden": "{title} está oculto. Encuéntralo en la Biblioteca en Filtros → Ocultos.",
+      "shown": "{title} está de vuelta en tu biblioteca.",
+      "hideFailed": "No se pudo ocultar el juego",
+      "showFailed": "No se pudo mostrar el juego",
+      "removed": "Se quitó {title}",
+      "removeFailed": "No se pudo quitar el juego"
+    },
+    "remove": {
+      "title": "Quitar de la biblioteca",
+      "messageRecomp": "¿Quitar {title} de tu biblioteca? Puedes volver a añadirlo desde el explorador de recompilaciones.",
+      "message": "¿Quitar {title} de tu biblioteca? Los archivos del juego no se eliminan.",
+      "confirm": "Quitar"
+    }
+  },
+  "upgrades": {
+    "label": "Mejoras",
+    "checkingFiles": "Revisando los archivos del juego…",
+    "checkingGame": "Revisando el juego…",
+    "readFailed": "No se pudieron leer las mejoras",
+    "failed": "La mejora falló",
+    "savesAbout": "Ahorra unos {size}",
+    "dlls": "Actualizar DLSS / FSR / XeSS",
+    "restore": "Restaurar los archivos originales",
+    "dlss5Opens": "Abre DLSS AiO Swapper",
+    "dlss5Downloads": "Descarga DLSS AiO Swapper",
+    "shaders": "Precompilar shaders",
+    "removeOptiScaler": "Quitar OptiScaler",
+    "installOptiScaler": "Instalar OptiScaler",
+    "optiScalerNeedsInputs": "Requiere DLSS, FSR o XeSS en el juego",
+    "optiScalerNvidia": "Hecho para gráficos AMD e Intel",
+    "optiScalerOther": "Opciones de DLSS en AMD / Intel",
+    "compress": "Comprimir juego",
+    "compressAgain": "Comprimir de nuevo",
+    "compressPartial": "Una actualización dejó archivos sin comprimir",
+    "uncompress": "Descomprimir juego",
+    "stop": "Detener",
+    "compressConfirm": {
+      "title": "¿Comprimir este juego?",
+      "message": "Windows comprime los archivos de {title} para liberar espacio en disco. Los juegos comprimidos pueden tardar más en cargar, porque cada archivo se descomprime al leerse, y una actualización del juego deja sin comprimir los archivos que reescribe. Puedes descomprimirlo en cualquier momento.",
+      "confirm": "Comprimir"
+    },
+    "risk": {
+      "title": "Riesgo de suspensión",
+      "confirm": "Continuar de todos modos",
+      "reasonTags": "{title} parece un juego en línea o competitivo: sus etiquetas de Steam ({tags}).",
+      "reasonAntiCheat": "{title} parece un juego en línea o competitivo: hay antitrampas en su carpeta ({files}).",
+      "reasonBoth": "{title} parece un juego en línea o competitivo: sus etiquetas de Steam ({tags}) y el antitrampas de su carpeta ({files}).",
+      "consequence": "El software antitrampas puede considerar trampa los archivos del juego modificados o los mods inyectados, y tu cuenta podría ser suspendida. Usa las mejoras solo en el modo de un jugador, o no las uses en este juego."
+    }
+  },
+  "similar": {
+    "title": "Juegos similares",
+    "none": "Tienes 0 juegos similares en tu biblioteca.",
+    "percent": "{percent}% similar"
+  },
+  "screenshots": {
+    "label": "Capturas de pantalla",
+    "item": "Captura {number}",
+    "viewer": "Captura {number} de {total}",
+    "image": "Captura de pantalla",
+    "previous": "Captura anterior",
+    "next": "Captura siguiente",
+    "close": "Cerrar"
+  },
+  "achievements": {
+    "title": "Logros",
+    "points": "{earned}/{total} puntos",
+    "loading": "Cargando logros",
+    "loadFailed": "No se pudieron cargar los logros: {message}",
+    "hostNone": "{host} no devolvió logros para este juego. Puede que su cuenta de Steam o RetroAchievements no tenga la sesión iniciada allí, o que use una versión anterior de PlayOut.",
+    "hostNoneUnknown": "El host no devolvió logros para este juego. Puede que su cuenta de Steam o RetroAchievements no tenga la sesión iniciada allí, o que use una versión anterior de PlayOut.",
+    "steamNone": "Steam no devolvió logros para este juego. Inicia sesión en Steam en Importar biblioteca de la Biblioteca, o añade tu clave de Steam Web API en Ajustes. Si ya iniciaste sesión, puede que el juego no tenga logros o que los detalles de juegos de tu perfil sean privados.",
+    "openMetadataSettings": "Abrir los ajustes de metadatos",
+    "raNotSignedIn": "No has iniciado sesión en RetroAchievements.",
+    "raCheckSettings": "{message} Revisa tu nombre de usuario y tu clave de Web API en Ajustes.",
+    "raSignInHint": "Inicia sesión en RetroAchievements en Ajustes para seguir los logros de los juegos ROM.",
+    "raSignIn": "Iniciar sesión en RetroAchievements",
+    "raUnknownRom": "RetroAchievements no reconoce esta ROM, o el juego aún no tiene logros. Las imágenes de disco se buscan por título, así que un archivo con otro nombre puede no encontrarse.",
+    "noData": "No hay datos de logros para este juego.",
+    "noneInGame": "Este juego no tiene logros.",
+    "hidden": "Logro oculto",
+    "hiddenHint": "Desbloquéalo para ver los detalles.",
+    "pts": "{points} pts",
+    "unlockedOn": "Desbloqueado el {date}",
+    "unlocked": "Desbloqueado",
+    "hardcore": "Hardcore",
+    "locked": "Bloqueado"
+  },
+  "coop": {
+    "subtitle": "Configurar Co-Op",
+    "label": "Configuración de Co-Op para {title}",
+    "controller": "Control {number}",
+    "keyboardMouse": "Teclado + ratón",
+    "readFailed": "No se pudo leer la configuración de Co-Op",
+    "saveFailed": "No se pudo guardar la configuración de Co-Op",
+    "chooseExeTitle": "Elige el exe de {title}",
+    "programs": "Programas",
+    "handlerRemoved": "Se quitó el handler de Co-Op. Se extrae de nuevo la próxima vez que juegues en Co-Op.",
+    "removeFailed": "No se pudo quitar el handler de Co-Op",
+    "handler": "Handler: {name}. Co-Op lo configura todo automáticamente; si cambias algo aquí, se guarda para este juego.",
+    "handlerMax": "Handler: {name} · hasta {max} jugadores. Co-Op lo configura todo automáticamente; si cambias algo aquí, se guarda para este juego.",
+    "noHandler": "Ningún handler de Co-Op coincide con este juego.",
+    "risks": "Este handler usa {risks}.",
+    "readingControllers": "Leyendo mandos",
+    "ready": "Listo: {players} jugadores, {layout}.",
+    "play": "Jugar Co-Op",
+    "checkControllers": "Revisar mandos",
+    "allAutomatic": "Todo automático",
+    "automatic": "Automático",
+    "gameTitle": "Juego",
+    "gameExe": "Exe del juego",
+    "notFound": "No encontrado",
+    "chooseExe": "Elegir exe…",
+    "playersTitle": "Jugadores",
+    "players": "Jugadores",
+    "playersNow_one": "{players} ahora · {count} dispositivo conectado",
+    "playersNow_other": "{players} ahora · {count} dispositivos conectados",
+    "layout": "Disposición de pantalla",
+    "layoutNow": "Ahora: {layout}",
+    "player": "Jugador {number}",
+    "handlerTitle": "Handler",
+    "removeHandler": "Quitar handler de Co-Op",
+    "handlerNote": "El handler sigue descargado y se extrae de nuevo la próxima vez que juegues en Co-Op."
+  },
+  "edit": {
+    "subtitle": "Editar juego",
+    "label": "Editar {title}",
+    "readFailed": "No se pudieron leer los metadatos del juego",
+    "readFailedMessage": "No se pudieron leer los metadatos del juego.",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "reset": "Restablecer",
+    "checkFields": "Revisa los campos",
+    "sizeFormat": "Escribe el tamaño de instalación como \"45 GB\" o \"800 MB\"",
+    "saved": "Juego guardado",
+    "saveFailed": "No se pudo guardar el juego",
+    "origin": {
+      "local": "Tu edición",
+      "cloud": "Nube de PlayOut",
+      "scraped": "Obtenido",
+      "host": "Del host",
+      "changed": "Cambiado",
+      "notSet": "Sin definir",
+      "backToCloud": "Vuelve al valor de la nube",
+      "backToScraped": "Vuelve al valor obtenido",
+      "backToHost": "Vuelve al valor del host"
+    },
+    "sections": {
+      "info": "Información del juego",
+      "players": "Jugadores y controles",
+      "time": "Duración, calificación y dificultad",
+      "settings": "Ajustes",
+      "artwork": "Imágenes"
+    },
+    "fields": {
+      "title": {
+        "label": "Título",
+        "reset": "Restablecer título"
+      },
+      "description": {
+        "label": "Descripción",
+        "reset": "Restablecer descripción",
+        "placeholder": "Sin descripción"
+      },
+      "shortDescription": {
+        "label": "Descripción corta",
+        "reset": "Restablecer descripción corta",
+        "placeholder": "Ninguna"
+      },
+      "releaseDate": {
+        "label": "Fecha de lanzamiento",
+        "reset": "Restablecer fecha de lanzamiento",
+        "placeholder": "AAAA-MM-DD"
+      },
+      "developers": {
+        "label": "Desarrolladores",
+        "reset": "Restablecer desarrolladores",
+        "placeholder": "Separados por comas"
+      },
+      "publishers": {
+        "label": "Distribuidores",
+        "reset": "Restablecer distribuidores",
+        "placeholder": "Separados por comas"
+      },
+      "genresTags": {
+        "label": "Géneros y etiquetas",
+        "reset": "Restablecer géneros y etiquetas",
+        "summary": "Géneros y etiquetas: {summary}",
+        "alsoOnGame": "También en este juego",
+        "search": "Buscar géneros y etiquetas",
+        "searchPlaceholder": "Escribe un género o una etiqueta…",
+        "suggestions": "Géneros y etiquetas que coinciden",
+        "noMatch": "Ningún género ni etiqueta coincide"
+      },
+      "localPlayers": {
+        "label": "Jugadores locales",
+        "reset": "Restablecer jugadores locales",
+        "select": "Jugadores en un PC",
+        "none": "No mostrar",
+        "notKnown": "Desconocido"
+      },
+      "controls": {
+        "label": "Controles",
+        "reset": "Restablecer controles",
+        "controller": "Control",
+        "vr": "RV",
+        "full": "Compatibilidad total con mando",
+        "partial": "Compatibilidad parcial con mando",
+        "keyboard": "Teclado y ratón",
+        "noVr": "Sin RV",
+        "vrSupported": "Compatible con RV",
+        "vrOnly": "Solo RV"
+      },
+      "hltb": {
+        "label": "How Long to Beat (horas)",
+        "reset": "Restablecer How Long to Beat (horas)",
+        "main": "Historia principal",
+        "extra": "Principal + extras",
+        "completionist": "Completista",
+        "solo": "Solo"
+      },
+      "rating": {
+        "label": "Calificación",
+        "reset": "Restablecer calificación",
+        "aria": "Calificación, de 0 a 100",
+        "shownAs": "Se muestra como",
+        "steam": "Reseñas de Steam (% positivas)",
+        "igdb": "Calificación de IGDB (0-100)"
+      },
+      "difficulty": {
+        "label": "Dificultad",
+        "reset": "Restablecer dificultad",
+        "select": "Filtros › Dificultad",
+        "defaultFromTag": "Predeterminada ({level}, por la etiqueta {tag})",
+        "default": "Predeterminada ({level})",
+        "tools": "N/D (Herramientas)"
+      }
+    },
+    "notes": {
+      "remote": "Este juego está en {host}: sus detalles vienen de allí. Tus ediciones se quedan en este PC (el host conserva las suyas) y van con el juego si lo descargas. Restablece un campo para volver al valor de la nube de PlayOut o, si no hay, al del host. El emulador, los argumentos de inicio, el tamaño de instalación, el ocultamiento y las imágenes personalizadas se pueden configurar cuando el juego esté en este PC.",
+      "remoteHost": "un equipo vinculado",
+      "local": "Tus ediciones se quedan en este PC y reemplazan lo que encontraron los scrapers, que ya no pueden cambiarlas. Restablece un campo para volver al valor de la nube de PlayOut o, si no hay, al obtenido."
+    },
+    "settings": {
+      "emulator": "Emulador",
+      "defaultEmulator": "Predeterminado ({emulator})",
+      "default": "Predeterminado",
+      "args": "Argumentos de inicio adicionales",
+      "argsPlaceholder": "p. ej., -windowed",
+      "size": "Tamaño de instalación",
+      "sizePlaceholder": "p. ej., 45 GB",
+      "hide": "Ocultar de la biblioteca",
+      "hideDescription": "Los juegos ocultos aparecen cuando Ajustes → Biblioteca → Mostrar ocultos está activado"
+    },
+    "artwork": {
+      "custom": "Imagen personalizada",
+      "fromScrapers": "De los scrapers",
+      "none": "Ninguna",
+      "choose": "Elegir…",
+      "note": "Las imágenes se quedan en este PC y cambian al instante.",
+      "sources": "Metadatos e imágenes de {sources}.",
+      "noSources": "Aún no coincide ninguna fuente de metadatos. Usa \"Buscar metadatos…\" en el menú de juego para elegir una.",
+      "cover": {
+        "label": "Portada",
+        "hint": "Carátula vertical (2:3)",
+        "chooseTitle": "Elige una imagen de portada",
+        "chooseAria": "Elegir imagen de portada",
+        "resetAria": "Restablecer imagen de portada",
+        "updated": "Portada actualizada",
+        "resetDone": "Portada restablecida a la imagen obtenida",
+        "setFailed": "No se pudo cambiar la portada",
+        "resetFailed": "No se pudo restablecer la portada"
+      },
+      "hero": {
+        "label": "Fondo",
+        "hint": "Imagen de fondo ancha",
+        "chooseTitle": "Elige una imagen de fondo",
+        "chooseAria": "Elegir imagen de fondo",
+        "resetAria": "Restablecer imagen de fondo",
+        "updated": "Fondo actualizado",
+        "resetDone": "Fondo restablecido a la imagen obtenida",
+        "setFailed": "No se pudo cambiar el fondo",
+        "resetFailed": "No se pudo restablecer el fondo"
+      },
+      "logo": {
+        "label": "Logo",
+        "hint": "PNG transparente",
+        "chooseTitle": "Elige una imagen de logo",
+        "chooseAria": "Elegir imagen de logo",
+        "resetAria": "Restablecer imagen de logo",
+        "updated": "Logo actualizado",
+        "resetDone": "Logo restablecido a la imagen obtenida",
+        "setFailed": "No se pudo cambiar el logo",
+        "resetFailed": "No se pudo restablecer el logo"
+      }
+    },
+    "imagesFilter": "Imágenes"
+  }
+}

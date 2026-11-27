@@ -1,0 +1,1549 @@
+/*
+ * Game detail panel (screens/GameDetail). Measurements follow docs/research/winhanced-design.md section 3:
+ * 1u = 0.1rem (html font-size = 100vh / 108). The panel itself is sized by .modal--panel (components.css).
+ */
+
+/* ---- panel background ------------------------------------------------------ */
+
+.gdetail__art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 100% 50%;
+  animation: gdetail-fade var(--dur-hero) var(--ease-linear);
+}
+
+.gdetail__gradient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.gdetail__gradient--left {
+  background: var(--gradient-modal-left);
+}
+
+.gdetail__gradient--bottom {
+  background: var(--gradient-modal-bottom);
+}
+
+@keyframes gdetail-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---- logo (top-left) and header (top-right) -------------------------------- */
+
+.gdetail__logo-box {
+  position: absolute;
+  left: var(--modal-logo-left);
+  top: var(--modal-logo-top);
+  max-width: calc(var(--modal-logo-max-w) + 22rem);
+  pointer-events: none;
+  /* The players badge (when the game has a count) at the top left, the logo or title beside it. */
+  display: flex;
+  align-items: flex-start;
+  gap: calc(20 * var(--u));
+}
+
+/* How many players the game takes (GameDetail.tsx PlayersBadge): the count above a controller, a glass tile the size
+   of the header's pills. */
+.gdetail__players {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(2 * var(--u));
+  min-width: calc(64 * var(--u));
+  padding: calc(8 * var(--u)) calc(10 * var(--u));
+  border-radius: var(--radius-icon-button);
+  background: rgba(20, 20, 24, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  color: var(--color-text);
+}
+
+/* The players badge and the Co-Op badge side by side (GameDetail.tsx), left of the logo. */
+.gdetail__badges {
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  gap: calc(10 * var(--u));
+}
+
+/* Nucleus Co-Op: the same glass tile, "Co-Op" above two people. */
+.gdetail__coop-label {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.gdetail__players-count {
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.gdetail__players-icon {
+  width: calc(34 * var(--u));
+  height: calc(34 * var(--u));
+  color: var(--color-icon);
+}
+
+.gdetail__logo {
+  width: auto;
+  height: auto;
+  max-width: var(--modal-logo-max-w);
+  max-height: var(--modal-logo-max-h);
+  object-fit: contain;
+  object-position: left top;
+  filter: drop-shadow(0 0.2rem 1.2rem rgba(0, 0, 0, 0.45));
+}
+
+.gdetail__title {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  font-weight: var(--fw-bold);
+  line-height: 1.1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-shadow: 0 0.2rem 1.2rem rgba(0, 0, 0, 0.6);
+}
+
+.gdetail__header {
+  position: absolute;
+  top: var(--modal-header-top);
+  right: var(--modal-header-right);
+  display: flex;
+  align-items: center;
+  gap: var(--modal-header-gap);
+}
+
+.gdetail__header .icon-btn {
+  width: var(--modal-pill-h);
+  height: var(--modal-pill-h);
+}
+
+/* The Similar button's wrapper (its menu's anchor). */
+.gdetail__similar {
+  display: flex;
+}
+
+.gdetail__header .icon-btn > svg {
+  width: 2rem;
+  height: 2rem;
+  color: var(--color-text-secondary);
+}
+
+.gdetail__store {
+  gap: 1.2rem;
+}
+
+/* ---- lower text block (anchored above the action bar) ---------------------- */
+
+.gdetail__text {
+  position: absolute;
+  left: var(--modal-inset-x);
+  right: var(--modal-inset-x);
+  bottom: calc(var(--bar-inset) + var(--bar-h) + var(--modal-stack-gap-bar));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  pointer-events: none;
+}
+
+.gdetail__text > * {
+  pointer-events: auto;
+}
+
+.gdetail__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--chip-gap);
+  margin-bottom: var(--modal-stack-gap-chips);
+}
+
+.gdetail__desc {
+  max-width: var(--modal-desc-max-w);
+  margin-bottom: var(--modal-stack-gap-meta);
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  line-height: var(--modal-desc-lh);
+  color: var(--color-text-secondary);
+}
+
+.gdetail__desc-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--modal-desc-lines);
+  overflow: hidden;
+  white-space: pre-line;
+}
+
+.gdetail__desc--expanded .gdetail__desc-text {
+  display: block;
+  max-height: calc(14 * var(--modal-desc-lh));
+  padding-right: 1.6rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* muted "More" / "Less" link, rendered only while the clamped description actually overflows */
+.gdetail__more {
+  display: inline-flex;
+  align-items: center;
+  height: var(--modal-desc-lh);
+  margin-left: -1.2rem;
+  padding: 0 1.2rem;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: max(calc(16 * var(--u)), 12px);
+  font-weight: var(--fw-regular);
+  color: rgba(255, 255, 255, 0.65);
+  outline: var(--ring-w) solid transparent;
+  outline-offset: 0;
+  transition:
+    background var(--dur-instant) var(--ease-linear),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.gdetail__more:hover,
+.gdetail__more[data-focused='true'] {
+  background: var(--color-glass-hover);
+}
+
+.gdetail__more[data-focused='true'] {
+  outline-color: var(--ring);
+}
+
+.gdetail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--modal-meta-gap);
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  line-height: var(--modal-desc-lh);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+.gdetail__meta strong {
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-secondary);
+}
+
+/* Developer / publisher: buttons that filter the Library tab by them (CreatorButton.tsx). They read as the line's
+   text; hover and focus show they can be pressed, and an underline marks the one the tab is filtered by. */
+.gdetail__creator {
+  appearance: none;
+  margin: 0 -0.4em;
+  padding: 0 0.4em;
+  border: 0;
+  border-radius: var(--radius-button);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  outline: var(--ring-w) solid transparent;
+  transition:
+    background var(--dur-instant) var(--ease-linear),
+    color var(--dur-instant) var(--ease-linear),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.gdetail__creator:hover,
+.gdetail__creator[data-focused='true'] {
+  background: var(--color-glass-hover);
+  color: var(--color-text-strong);
+}
+
+.gdetail__creator[data-focused='true'] {
+  outline-color: var(--ring);
+}
+
+.gdetail__creator--on {
+  color: var(--color-text-strong);
+  text-decoration: underline;
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.25em;
+}
+
+/* Steam games: the store page's screenshots in one row under the release date line (as many as fit; the rest are
+   clipped off whole, never cut through). */
+.gdetail__shots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  max-width: 100%;
+  height: var(--gdetail-shot-h);
+  margin-top: var(--modal-stack-gap-meta);
+  overflow: hidden;
+}
+
+.gdetail__shot {
+  flex: none;
+  height: var(--gdetail-shot-h);
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-card);
+  background: var(--color-surface-translucent);
+  cursor: pointer;
+  overflow: hidden;
+  outline: var(--ring-w) solid transparent;
+  outline-offset: calc(-1 * var(--ring-w));
+  transition: outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.gdetail__shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* A ROM's screenshot is the console's own picture (4:3, 8:7 ...): shown whole in the tile, not cropped to 16:9. */
+.gdetail__shot--whole {
+  background: #000;
+}
+
+.gdetail__shot--whole img {
+  object-fit: contain;
+}
+
+.gdetail__shot--focused {
+  outline-color: var(--ring);
+}
+
+/* ---- screenshot viewer (a Steam screenshot full size over the page) ---------- */
+
+.modal.shot-viewer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.6rem;
+  width: min(92vw, calc(88vh * 16 / 9));
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.shot-viewer__stage {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  width: 100%;
+}
+
+.shot-viewer__arrow {
+  flex: none;
+}
+
+.shot-viewer__frame {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: #000;
+  outline: var(--ring-w) solid transparent;
+  outline-offset: calc(-1 * var(--ring-w));
+  cursor: pointer;
+}
+
+.shot-viewer__frame--focused {
+  outline-color: var(--ring);
+}
+
+.shot-viewer__thumb,
+.shot-viewer__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.shot-viewer__footer {
+  display: flex;
+  align-items: center;
+  gap: 2.4rem;
+}
+
+.shot-viewer__count {
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.gdetail {
+  --gdetail-shot-h: 10.8rem;
+}
+
+/* ---- action bar -------------------------------------------------------------- */
+
+.gdetail__bar {
+  position: absolute;
+  left: var(--bar-inset);
+  right: var(--bar-inset);
+  bottom: var(--bar-inset);
+  height: var(--bar-h);
+  display: flex;
+  align-items: center;
+  gap: var(--bar-group-gap);
+  padding: 0 var(--bar-pad-x);
+  border-radius: var(--radius-bar);
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* one joined control: the 1px flex gap shows the container's background as the internal divider; the
+   segments clip inside it and draw their focus ring inset so it stays within the rounded container */
+.gdetail__play {
+  display: flex;
+  /* 1px (not rem) so Norigin's integer offset measurements never put the main part past the chevron. */
+  gap: 1px;
+  flex: none;
+  width: var(--btn-play-w);
+  height: var(--btn-play-h);
+  border-radius: var(--radius-button);
+  background: rgba(255, 255, 255, 0.12);
+  background-clip: padding-box;
+  border: 1px solid var(--color-control-stroke);
+  overflow: hidden;
+}
+
+.gdetail__play-main,
+.gdetail__play-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text);
+  background: var(--color-control);
+  outline: var(--ring-w) solid transparent;
+  outline-offset: calc(-1 * var(--ring-w));
+  transition:
+    background var(--dur-instant) var(--ease-linear),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.gdetail__play-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 1.2rem;
+  border-radius: var(--radius-button) 0 0 var(--radius-button);
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  font-weight: var(--fw-semibold);
+}
+
+/* Install / Download with the game's size on a smaller second line ("Install" over "45 GB"). */
+.gdetail__play-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  line-height: 1.1;
+}
+
+.gdetail__play-sub {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-regular, 400);
+  color: var(--color-text-secondary);
+}
+
+/* Co-Op setup (CoopSetupSheet.tsx): the plan line and the action row. */
+.coopsheet__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+}
+
+.coopsheet__ok {
+  color: var(--color-text);
+}
+
+.coopsheet__warn {
+  color: #ffb3ba;
+}
+
+.gdetail__play-chevron {
+  flex: none;
+  width: var(--btn-play-split-w);
+  border-radius: 0 var(--radius-button) var(--radius-button) 0;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.gdetail__play-chevron > svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.gdetail__play-main:hover,
+.gdetail__play-main[data-focused='true'],
+.gdetail__play-chevron:hover,
+.gdetail__play-chevron[data-focused='true'] {
+  background: var(--color-control-hover);
+}
+
+.gdetail__play-main[data-focused='true'],
+.gdetail__play-chevron[data-focused='true'] {
+  outline-color: var(--ring);
+  z-index: 1;
+}
+
+.gdetail__play-main:active,
+.gdetail__play-chevron:active {
+  background: var(--color-control-pressed);
+}
+
+.gdetail__play--running .gdetail__play-main,
+.gdetail__play-main:disabled {
+  color: var(--color-text-disabled);
+  cursor: default;
+}
+
+.gdetail__play-main:disabled:hover {
+  background: var(--color-control);
+}
+
+/* the Install / Retry variants carry a 24u glyph before the label */
+.gdetail__play-icon {
+  display: inline-flex;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  flex: none;
+}
+
+.gdetail__play-icon > svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* no store client can install the game: a "Not installed" chip fills the main part */
+.gdetail__play--chip {
+  align-items: center;
+  padding-left: 1.6rem;
+  background: var(--color-control);
+}
+
+.gdetail__not-installed {
+  flex: 1 1 auto;
+  justify-content: center;
+  margin-right: 1px;
+}
+
+/* the tracked install: the main part becomes a progress block with the Play button's exact footprint, so
+   the stats to its right never move when Install is pressed; the percent and the byte counts stack */
+.gdetail__play--progress {
+  width: var(--btn-play-w);
+}
+
+.gdetail__install {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  /* like .gdetail__play-main: the fixed-width parent sizes it, so its ring matches the Play ring exactly */
+  min-width: 0;
+  height: 100%;
+  padding: 0 2rem;
+  border-radius: var(--radius-button) 0 0 var(--radius-button);
+  background: var(--color-control);
+  color: var(--color-text);
+  overflow: hidden;
+  outline: var(--ring-w) solid transparent;
+  outline-offset: calc(-1 * var(--ring-w));
+  transition: outline-color var(--dur-instant) var(--ease-linear);
+}
+
+/* a light accent wash grows with the percent behind the labels, so the fill reads at a glance even while
+   the focus ring covers the block's edges; --p is the percent (unset for an indeterminate install) */
+.gdetail__install::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: calc(var(--p, 0) * 1%);
+  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+  transition: width var(--dur-slow) var(--ease-linear);
+}
+
+.gdetail__install[data-focused='true'] {
+  outline-color: var(--ring);
+  z-index: 1;
+}
+
+.gdetail__install-text {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  align-self: center;
+  min-width: 0;
+  padding-bottom: 0.6rem;
+}
+
+.gdetail__install-message {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  font-weight: var(--fw-semibold);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.gdetail__install-detail {
+  max-width: 100%;
+  min-width: 0;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 4u accent bar along the bottom of the block, inside the inset focus ring so the ring never hides it */
+.gdetail__install-bar {
+  position: absolute;
+  left: var(--ring-w);
+  right: var(--ring-w);
+  bottom: var(--ring-w);
+  height: 0.4rem;
+  border-radius: 0.2rem;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.gdetail__install-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: calc(var(--p, 0) * 1%);
+  background: var(--color-accent);
+  transition: width var(--dur-slow) var(--ease-linear);
+}
+
+.gdetail__install-bar--indeterminate::after {
+  width: 35%;
+  animation: gdetail-install-slide 1.4s var(--ease-p2p) infinite alternate;
+}
+
+@keyframes gdetail-install-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(calc(100% / 0.35));
+  }
+}
+
+/* the tracker gave up (cancelled in the client, no change for 30 minutes): its message next to Retry */
+.gdetail__install-failed {
+  flex: none;
+  max-width: calc(360 * var(--u));
+  margin-left: calc(-1 * var(--bar-group-gap) + 1.6rem);
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  line-height: 1.35;
+  color: #ff6b76;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gdetail__install-bar--indeterminate::after {
+    animation: none;
+    width: 100%;
+    opacity: 0.6;
+  }
+}
+
+.gdetail__stats {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: var(--bar-group-gap);
+  overflow: hidden;
+}
+
+.gdetail__stats .stat {
+  gap: 0.8rem;
+}
+
+/* Compact (useDropToFit): half the space between the stats, so a narrow bar keeps its review score. */
+.gdetail__stats.fit-compact {
+  gap: calc(var(--bar-group-gap) / 2);
+}
+
+/* The compact review score: one star and the score ('★ 98%'). */
+.gdetail__rating-short {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  white-space: nowrap;
+}
+
+/* The full stars' wrapper centres them as the value row did before it was there. */
+.gdetail__rating .fit-full {
+  display: flex;
+  align-items: center;
+}
+
+.gdetail__stats.fit-compact .gdetail__rating-short {
+  display: inline-flex !important;
+}
+
+.gdetail__rating-short > svg {
+  width: 1.8rem;
+  height: 1.8rem;
+  fill: currentColor;
+}
+
+.gdetail__stats .stat__value {
+  display: flex;
+  align-items: center;
+  min-height: 3.6rem;
+}
+
+.gdetail__stats .gdetail__ach-chevron {
+  width: 2.8rem;
+  height: 2.8rem;
+  margin-left: 1.8rem;
+  color: var(--color-icon-faint);
+  transition: transform var(--dur-focus) var(--ease-p2p);
+}
+
+.gdetail__stats .gdetail__ach-chevron--open {
+  transform: rotate(180deg);
+}
+
+.gdetail__bar-actions {
+  display: flex;
+  flex: none;
+  gap: var(--btn-icon-gap);
+  margin-left: auto;
+}
+
+/* Narrow canvases (16:10 handhelds, a window narrower than the screen) drop the stats after Achievements from the
+   right (design 3.4 responsive rule): Players first; then the row turns compact (tighter gaps, 'Played / Main', whole
+   hours, '★ 98%' for the review score) before the review score is dropped. A Play button with a Co-Op half needs
+   this on 16:10 to keep the score. ActionBar measures what fits (hooks/useDropToFit.ts) rather than going by the aspect ratio, so a stat is
+   never dropped while there is room for it, nor kept when it would push the focusable Achievements stat out. */
+
+/* Genre, tag and store chips that open the Library filtered by them (GameDetail.tsx FilterChip); narrow canvases
+   render fewer tags (useMediaQuery) rather than hiding them, so no hidden chip takes gamepad focus. */
+.gdetail__chips .chip--pressable {
+  cursor: pointer;
+  outline: var(--ring-w) solid transparent;
+  outline-offset: 0;
+  transition:
+    background var(--dur-instant) var(--ease-linear),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.gdetail__chips .chip--pressable:hover,
+.gdetail__chips .chip--pressable[data-focused='true'] {
+  background: var(--color-glass-hover);
+}
+
+.gdetail__chips .chip--pressable[data-focused='true'] {
+  outline-color: var(--ring);
+}
+
+/* A genre / tag chip whose choice is on the Library's current tab (GameDetail.tsx GenreChip). */
+.gdetail__chips .chip--on {
+  background: var(--color-accent-soft);
+  border-color: transparent;
+  color: var(--color-text-strong);
+}
+
+/* ---- achievements list (replaces the text block while open) ---------------- */
+
+.gdetail__achievements {
+  position: absolute;
+  left: var(--modal-inset-x);
+  right: var(--modal-inset-x);
+  bottom: calc(var(--bar-inset) + var(--bar-h) + var(--modal-stack-gap-bar));
+  max-height: calc(
+    100% - var(--modal-logo-top) - var(--modal-logo-max-h) - 2.4rem - var(--bar-inset) -
+      var(--bar-h) - var(--modal-stack-gap-bar)
+  );
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-bar);
+  background: var(--color-surface-translucent);
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  backdrop-filter: blur(var(--blur-glass));
+  border: 1px solid var(--color-control-stroke);
+  overflow: hidden;
+  animation: gdetail-rise var(--dur-normal) var(--ease-enter);
+}
+
+@keyframes gdetail-rise {
+  from {
+    opacity: 0;
+    transform: translateY(1.2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gdetail__ach-header {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  flex: none;
+  padding: 2rem 2.8rem;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.gdetail__ach-trophy {
+  width: 2.4rem;
+  height: 2.4rem;
+  color: var(--color-text-secondary);
+}
+
+.gdetail__ach-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-semibold);
+}
+
+.gdetail__ach-count {
+  font-family: var(--font-display);
+  font-size: var(--fs-meta);
+  color: var(--color-text-secondary);
+}
+
+.gdetail__ach-percent {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+}
+
+.gdetail__ach-points {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+
+.gdetail__ach-progress {
+  flex: 1 1 auto;
+  max-width: 32rem;
+  height: 0.6rem;
+  margin-left: auto;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.gdetail__ach-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent);
+}
+
+.gdetail__ach-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 1.2rem 1.6rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding: 1.2rem;
+}
+
+.gdetail__ach-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.6rem;
+  padding: 2.4rem 1.2rem;
+  font-size: var(--fs-body-lg);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+.gdetail__ach-status--error {
+  color: #ff6b76;
+}
+
+.gdetail__ach-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  list-style: none;
+}
+
+.gdetail__ach-row {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  min-height: 8rem;
+  padding: 0.8rem 1.6rem;
+  border-radius: var(--radius-button);
+  outline: var(--ring-w) solid transparent;
+  outline-offset: calc(-1 * var(--ring-w));
+  transition:
+    background var(--dur-instant) var(--ease-linear),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.gdetail__ach-row:hover,
+.gdetail__ach-row[data-focused='true'] {
+  background: var(--color-glass-hover);
+}
+
+.gdetail__ach-row[data-focused='true'] {
+  outline-color: var(--ring);
+}
+
+.gdetail__ach-row--locked {
+  opacity: 0.62;
+}
+
+.gdetail__ach-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 6.4rem;
+  height: 6.4rem;
+  border-radius: 1.2rem;
+  background: var(--color-control);
+  color: var(--color-icon-muted);
+  overflow: hidden;
+}
+
+.gdetail__ach-icon > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gdetail__ach-icon > svg {
+  width: 2.8rem;
+  height: 2.8rem;
+}
+
+.gdetail__ach-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.gdetail__ach-name {
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-semibold);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.gdetail__ach-desc {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  line-height: 1.4;
+  color: var(--color-text-tertiary);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.gdetail__ach-when {
+  flex: none;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.gdetail__ach-pts {
+  color: var(--color-text-secondary);
+}
+
+/* ---- play menu (portaled popup above the Play button) ---------------------- */
+
+.playmenu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+}
+
+.playmenu {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: var(--menu-w);
+  max-height: calc(100vh - 8rem);
+  padding: 1.2rem;
+  border-radius: var(--radius-popup);
+  background: var(--color-surface);
+  border: 1px solid var(--color-control-stroke);
+  box-shadow: var(--shadow-popup);
+  transform-origin: bottom left;
+  animation: playmenu-enter var(--dur-normal) var(--ease-enter);
+  overflow: hidden;
+}
+
+.playmenu--search {
+  width: 72rem;
+}
+
+@keyframes playmenu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.8rem) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.playmenu > .menu {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.playmenu__hint {
+  flex: none;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+.playmenu__search {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  min-height: 0;
+  padding: 0.8rem;
+}
+
+.playmenu__search-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-semibold);
+  padding: 0 0.4rem;
+}
+
+.playmenu__results {
+  min-height: 0;
+  max-height: 38rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding: 0.8rem;
+}
+
+.playmenu__status {
+  padding: 1.2rem 0.4rem;
+  font-size: var(--fs-body-lg);
+  color: var(--color-text-secondary);
+}
+
+.playmenu__status--error {
+  color: #ff6b76;
+}
+
+.playmenu__cand-meta {
+  flex: none;
+  max-width: 50%;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ---- game settings sheet ------------------------------------------------------ */
+
+.gsheet__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 2.4rem;
+}
+
+.gsheet__title {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--color-text-label);
+  padding: 0 1.6rem 0.8rem;
+}
+
+.gsheet__field {
+  padding: 0.4rem 1.6rem 1.2rem;
+}
+
+.gsheet__media {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  min-height: 8rem;
+  padding: 0.8rem 1.6rem;
+}
+
+.gsheet__media-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 6.4rem;
+  height: 6.4rem;
+  border-radius: 0.8rem;
+  background: var(--color-control);
+  color: var(--color-icon-muted);
+  overflow: hidden;
+}
+
+.gsheet__media--hero .gsheet__media-thumb {
+  width: 11.4rem;
+}
+
+.gsheet__media--logo .gsheet__media-thumb {
+  width: 11.4rem;
+  background: var(--color-control);
+}
+
+.gsheet__media-thumb > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gsheet__media--logo .gsheet__media-thumb > img {
+  object-fit: contain;
+  padding: 0.6rem;
+}
+
+.gsheet__media-thumb > svg {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+
+.gsheet__media-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.gsheet__media-label {
+  font-size: var(--fs-body-lg);
+}
+
+.gsheet__media-desc {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.gsheet__media-actions {
+  display: flex;
+  flex: none;
+  gap: 0.8rem;
+}
+
+.gsheet__media-actions .btn {
+  padding: 0 1.4rem;
+}
+
+.gsheet__note {
+  padding: 0.8rem 1.6rem 0;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--color-text-tertiary);
+}
+
+/* a game waiting in the install queue: its place, in the failure line's spot but not in its colour */
+.gdetail__install-failed.gdetail__queue-note {
+  color: var(--color-text-secondary);
+}
+
+/* ---- The four-square grid right of Play (FeatureGrid.tsx) ----------------------------------------------- */
+
+/* Recompilation, Upgrade, Co-Op and PeerParty as a 2x2 grid of squares, in that order (top left, top right, bottom
+   left, bottom right). A feature the game does not have leaves its square empty, so the others keep their places.
+   96u square: it fits the 134u bar without changing its height. */
+.gdetail__features {
+  --feat-cell: calc(46 * var(--u));
+  --feat-gap: calc(4 * var(--u));
+  display: grid;
+  flex: none;
+  grid-template-columns: repeat(2, var(--feat-cell));
+  grid-template-rows: repeat(2, var(--feat-cell));
+  gap: var(--feat-gap);
+}
+
+.gdetail__features-empty {
+  width: var(--feat-cell);
+  height: var(--feat-cell);
+}
+
+.gdetail__feature {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--feat-cell);
+  height: var(--feat-cell);
+  padding: 0;
+  border-radius: var(--radius-button);
+  color: var(--color-text);
+  background: var(--color-control);
+  border: 1px solid var(--color-control-stroke);
+  background-clip: padding-box;
+  cursor: pointer;
+  outline: var(--ring-w) solid transparent;
+  outline-offset: calc(-1 * var(--ring-w));
+  transition:
+    background var(--dur-instant) var(--ease-linear),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.gdetail__feature > svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.gdetail__feature:hover,
+.gdetail__feature[data-focused='true'],
+.gdetail__feature--open {
+  background: var(--color-control-hover);
+}
+
+.gdetail__feature[data-focused='true'] {
+  outline-color: var(--ring);
+}
+
+.gdetail__feature:active {
+  background: var(--color-control-pressed);
+}
+
+.gdetail__feature:disabled {
+  color: var(--color-text-disabled);
+  cursor: default;
+}
+
+.gdetail__feature:disabled:hover {
+  background: var(--color-control);
+}
+
+/* An installed recompilation, or the game running through PeerParty now: an accent square. */
+.gdetail__feature--accent,
+.gdetail__feature--accent:disabled,
+.gdetail__feature--accent:disabled:hover {
+  color: var(--color-text);
+  background: var(--color-accent);
+  border-color: transparent;
+}
+
+.gdetail__feature--accent:hover,
+.gdetail__feature--accent[data-focused='true'] {
+  background: var(--color-accent-hover);
+}
+
+/* an accent ring would vanish on the accent fill: white (gamepad / keyboard only, like every ring) */
+html[data-input-method='gamepad'] .gdetail__feature--accent[data-focused='true'],
+html[data-input-method='keyboard'] .gdetail__feature--accent[data-focused='true'] {
+  outline-color: var(--color-text);
+}
+
+/* A recompilation installing, Co-Op being prepared, PeerParty downloading or starting: the glyph pulses. */
+.gdetail__feature--busy > svg {
+  animation: gdetail-feature-pulse 1.2s ease-in-out infinite;
+}
+
+html[data-animations='off'] .gdetail__feature--busy > svg {
+  animation: none;
+  opacity: 0.6;
+}
+
+@keyframes gdetail-feature-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.45;
+    transform: translateY(calc(-3 * var(--u)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gdetail__feature--busy > svg {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* ---- Players (Steam games): all-time peak vs online now (PlayersStat.tsx) ---- */
+
+.gdetail__online {
+  --players-peak: var(--color-success);
+  --players-current: #f29a38;
+}
+
+.gdetail__online-body {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+/* Two bars on one track: the peak (green) full length, the number online now (orange) over it, as a share of it. */
+.gdetail__online-chart {
+  position: relative;
+  width: 9.6rem;
+  height: 1.4rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-glass-hover);
+  overflow: hidden;
+}
+
+.gdetail__online-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: var(--radius-pill);
+}
+
+.gdetail__online-bar--peak {
+  width: 100%;
+  background: var(--players-peak);
+}
+
+.gdetail__online-bar--current {
+  background: var(--players-current);
+  box-shadow: 0.2rem 0 0.4rem rgb(0 0 0 / 35%);
+}
+
+/* The peak over a line, the number online now under it; each in its bar's colour. */
+.gdetail__online-numbers {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: var(--fs-body-lg);
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.gdetail__online-peak {
+  padding-bottom: 0.2rem;
+  border-bottom: 0.15rem solid var(--color-text-label);
+  color: var(--players-peak);
+}
+
+.gdetail__online-current {
+  padding-top: 0.2rem;
+  color: var(--players-current);
+}
+
+/* ---- game edit sheet (the pen button): metadata fields with their origin and Reset ------------------------------ */
+
+.gedit__loading {
+  display: flex;
+  justify-content: center;
+  padding: 4rem 1.6rem;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+}
+
+.gedit__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.4rem 1.6rem 1.2rem;
+}
+
+.gedit__head {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  min-height: 3.6rem;
+}
+
+.gedit__label {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+
+.gedit__origin {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 0.2rem 0.8rem;
+  border-radius: 99rem;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+  background: var(--color-control);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.gedit__origin--local,
+.gedit__origin--changed {
+  color: var(--color-accent);
+}
+
+.gedit__origin--cloud {
+  color: var(--color-text);
+}
+
+.gedit__reset {
+  margin-left: auto;
+}
+
+.gedit__head .gedit__reset.btn {
+  height: auto;
+  min-height: 3.6rem;
+  padding: 0 1.2rem;
+}
+
+/* Genres & Tags (GenresTagsField.tsx): what is ticked, then the chevron that opens the checklist. */
+.gedit__tags .control__label {
+  color: var(--color-text-secondary);
+}
+
+/* Its checklist (a SelectField-style popup): the game's genres and tags that are no Filters › Genre choice. */
+.gedit-tags-menu__sep {
+  flex: none;
+  margin-top: 0.8rem;
+  padding: 1.2rem 1.6rem 0.6rem;
+  border-top: 1px solid var(--color-divider);
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+}
+
+/* The search box under the dropdown (GenresTagsSearch) and its suggestions: the checklist's look, above the sheet. */
+.gedit-tags-search {
+  margin-top: 0.8rem;
+}
+
+.gedit-tags-search__layer {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-modal) + 10);
+  pointer-events: none;
+}
+
+.gedit-tags-search__list {
+  pointer-events: auto;
+}
+
+.gedit-tags-search__empty {
+  padding: 1.2rem 1.6rem;
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  color: var(--color-text-tertiary);
+}
+
+/* The matches on the on-screen keyboard (OskSuggestions): a wrapping row of key-sized buttons above the keys. */
+.gedit-tags-osk {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--osk-gap);
+  width: min(96rem, 100%);
+  min-height: var(--osk-key);
+}
+
+.gedit-tags-osk__item {
+  width: auto;
+  padding: 0 1.6rem;
+  font-size: var(--fs-body);
+  white-space: nowrap;
+}
+
+.gedit__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+/* The Upgrade menu: wider than the Play menu for its hints. The graphics card line is information only. */
+.upgrademenu {
+  width: max(var(--menu-w), 64rem);
+}
+
+/* The Similar menu (SimilarMenu.tsx): under the button at the top right, so it grows down from there. */
+.similarmenu {
+  width: max(var(--menu-w), 60rem);
+  transform-origin: top right;
+}
+
+.similarmenu__title {
+  padding: 0.4rem 1.6rem 0.8rem;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+.similarmenu__cover {
+  flex: none;
+  width: 3.2rem;
+  height: 4.4rem;
+  border-radius: 0.4rem;
+  object-fit: cover;
+  background: var(--color-glass-hover);
+}
+
+.similarmenu__percent {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.upgrademenu__gpu {
+  opacity: 0.7;
+}

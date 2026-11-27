@@ -1,0 +1,1562 @@
+[
+    {
+        "system_name":  "3do",
+        "full_name":  "3DO Interactive Multiplayer",
+        "default_emulator":  "Opera",
+        "alternative_emulators":  "",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "adam",
+        "full_name":  "Coleco Adam",
+        "default_emulator":  "MAME [Diskette] **(Standalone)**",
+        "alternative_emulators":  "MAME [Tape] **(Standalone)**,\u003cbr\u003eMAME [Cartridge] **(Standalone)**,\u003cbr\u003eMAME [Software list] **(Standalone)**,\u003cbr\u003eColEm **(Standalone)** [LW]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "ags",
+        "full_name":  "Adventure Game Studio Game Engine",
+        "default_emulator":  "_Shortcut or script_",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "amiga",
+        "full_name":  "Commodore Amiga",
+        "default_emulator":  "PUAE",
+        "alternative_emulators":  "PUAE 2021,\u003cbr\u003eFS-UAE [L],\u003cbr\u003eFS-UAE **(Standalone)**,\u003cbr\u003eAmiberry,\u003cbr\u003eAmiberry **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Commodore Amiga and CDTV_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "amiga1200",
+        "full_name":  "Commodore Amiga 1200",
+        "default_emulator":  "PUAE",
+        "alternative_emulators":  "PUAE 2021,\u003cbr\u003eFS-UAE [L],\u003cbr\u003eFS-UAE **(Standalone)**,\u003cbr\u003eAmiberry,\u003cbr\u003eAmiberry **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Commodore Amiga and CDTV_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "amiga600",
+        "full_name":  "Commodore Amiga 600",
+        "default_emulator":  "PUAE",
+        "alternative_emulators":  "PUAE 2021,\u003cbr\u003eFS-UAE [L],\u003cbr\u003eFS-UAE **(Standalone)**,\u003cbr\u003eAmiberry,\u003cbr\u003eAmiberry **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Commodore Amiga and CDTV_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "amigacd32",
+        "full_name":  "Commodore Amiga CD32",
+        "default_emulator":  "PUAE",
+        "alternative_emulators":  "PUAE 2021,\u003cbr\u003eFS-UAE **(Standalone)**,\u003cbr\u003eAmiberry,\u003cbr\u003eAmiberry **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Commodore Amiga and CDTV_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "amstradcpc",
+        "full_name":  "Amstrad CPC",
+        "default_emulator":  "Caprice32",
+        "alternative_emulators":  "CrocoDS,\u003cbr\u003eCPCemu **(Standalone)**,\u003cbr\u003eACE-DL **(Standalone)**,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "Yes for MAME",
+        "recommended_game_setup":  "Single archive or disk file"
+    },
+    {
+        "system_name":  "android",
+        "full_name":  "Google Android",
+        "default_emulator":  "BlueStacks **(Standalone)** [W]",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Shortcut (.lnk) file"
+    },
+    {
+        "system_name":  "androidapps",
+        "full_name":  "Android Apps",
+        "default_emulator":  "_Placeholder_",
+        "alternative_emulators":  "",
+        "needs_bios":  "",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "androidgames",
+        "full_name":  "Android Games",
+        "default_emulator":  "_Placeholder_",
+        "alternative_emulators":  "",
+        "needs_bios":  "",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "apple2",
+        "full_name":  "Apple II",
+        "default_emulator":  "AppleWin",
+        "alternative_emulators":  "LinApple **(Standalone)** [L],\u003cbr\u003eMariani **(Standalone)** [M],\u003cbr\u003eAppleWin **(Standalone)** [W],\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eMAME - Current,\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eizapple2 **(Standalone)** [LW]",
+        "needs_bios":  "Yes for Mednafen and MAME",
+        "recommended_game_setup":  "See the specific _Apple II_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "apple2gs",
+        "full_name":  "Apple IIGS",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME - Current [Software list],\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eMAME [Software list] **(Standalone)**,\u003cbr\u003eKEGS **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Apple IIGS_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "arcade",
+        "full_name":  "Arcade",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME 2010,\u003cbr\u003eMAME 2003-Plus,\u003cbr\u003eMAME 2003,\u003cbr\u003eMAME 2000,\u003cbr\u003eHBMAME,\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eGroovyMAME **(Standalone)** [LW],\u003cbr\u003eFinalBurn Neo,\u003cbr\u003eFinalBurn Neo **(Standalone)** [LW],\u003cbr\u003eFB Alpha 2012,\u003cbr\u003eGeolith,\u003cbr\u003eFlycast,\u003cbr\u003eFlycast **(Standalone)**,\u003cbr\u003eFlycast Dojo **(Standalone)**,\u003cbr\u003eKronos [LW],\u003cbr\u003eDICE,\u003cbr\u003esm2-emu **(Standalone)** [L],\u003cbr\u003eModel 2 Emulator **(Standalone)** [W],\u003cbr\u003eModel 2 Emulator [Suspend ES-DE] **(Standalone)** [W],\u003cbr\u003eSupermodel,\u003cbr\u003eSupermodel **(Standalone)**,\u003cbr\u003eSupermodel Dojo **(Standalone)** [W],\u003cbr\u003eLindbergh Loader **(Standalone)** [L],\u003cbr\u003eLinux Loader **(Standalone)** [LW],\u003cbr\u003ePCSX2x6 **(Standalone)**,\u003cbr\u003ePlay! Arcade **(Standalone)**,\u003cbr\u003eMFME **(Standalone)** [LW],\u003cbr\u003eArcadeDuck **(Standalone)** [W],\u003cbr\u003e _Shortcut or script_",
+        "needs_bios":  "Depends",
+        "recommended_game_setup":  "See the specific _Arcade and Neo Geo_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "arcadia",
+        "full_name":  "Emerson Arcadia 2001",
+        "default_emulator":  "AmiArcadia",
+        "alternative_emulators":  "MAME - Current,\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eWinArcadia **(Standalone)** [W]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "archimedes",
+        "full_name":  "Acorn Archimedes",
+        "default_emulator":  "MAME [Model A440/1] **(Standalone)**",
+        "alternative_emulators":  "MAME [Model A3000] **(Standalone)**,\u003cbr\u003eMAME [Model A310] **(Standalone)**,\u003cbr\u003eMAME [Model A540] **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "arduboy",
+        "full_name":  "Arduboy Miniature Game System",
+        "default_emulator":  "Arduous",
+        "alternative_emulators":  "Ardens",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or .hex file"
+    },
+    {
+        "system_name":  "astrocde",
+        "full_name":  "Bally Astrocade",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "atari2600",
+        "full_name":  "Atari 2600",
+        "default_emulator":  "Stella",
+        "alternative_emulators":  "Stella 2014,\u003cbr\u003eStella 2023,\u003cbr\u003eStella **(Standalone)**,\u003cbr\u003eTia,\u003cbr\u003eGopher2600 **(Standalone)** [LW],\u003cbr\u003eares **(Standalone)**,\u003cbr\u003eMissingno **(Standalone)** [L]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "atari5200",
+        "full_name":  "Atari 5200",
+        "default_emulator":  "a5200",
+        "alternative_emulators":  "Atari800,\u003cbr\u003eAtari800 **(Standalone)**,\u003cbr\u003eAltirra **(Standalone)** [W]",
+        "needs_bios":  "Yes except for Altirra",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "atari7800",
+        "full_name":  "Atari 7800 ProSystem",
+        "default_emulator":  "ProSystem",
+        "alternative_emulators":  "MAME - Current,\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eA7800 **(Standalone)** [LW]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "atari800",
+        "full_name":  "Atari 800",
+        "default_emulator":  "Atari800",
+        "alternative_emulators":  "Atari800 **(Standalone)**,\u003cbr\u003eAltirra **(Standalone)** [W]",
+        "needs_bios":  "Yes except for Altirra",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "atarijaguar",
+        "full_name":  "Atari Jaguar",
+        "default_emulator":  "Virtual Jaguar",
+        "alternative_emulators":  "BigPEmu **(Standalone)** [LW],\u003cbr\u003eBigPEmu **(Wine)** [L],\u003cbr\u003eBigPEmu **(Proton)** [L],\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "Yes for MAME",
+        "recommended_game_setup":  "See the specific _Atari Jaguar and Atari Jaguar CD_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "atarijaguarcd",
+        "full_name":  "Atari Jaguar CD",
+        "default_emulator":  "Virtual Jaguar",
+        "alternative_emulators":  "BigPEmu **(Standalone)** [LW],\u003cbr\u003eBigPEmu **(Wine)** [L],\u003cbr\u003eBigPEmu **(Proton)** [L]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _Atari Jaguar and Atari Jaguar CD_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "atarilynx",
+        "full_name":  "Atari Lynx",
+        "default_emulator":  "Handy",
+        "alternative_emulators":  "Beetle Lynx,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eGearlynx,\u003cbr\u003eHolani",
+        "needs_bios":  "Yes for Gearlynx",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "atarist",
+        "full_name":  "Atari ST [also STE and Falcon]",
+        "default_emulator":  "Hatari",
+        "alternative_emulators":  "Hatari 2014,\u003cbr\u003eHatari **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or image file for single-diskette games, .m3u playlist for multi-diskette games"
+    },
+    {
+        "system_name":  "atarixe",
+        "full_name":  "Atari XE",
+        "default_emulator":  "Atari800",
+        "alternative_emulators":  "Atari800 **(Standalone)**,\u003cbr\u003eAltirra **(Standalone)** [W]",
+        "needs_bios":  "Yes except for Altirra",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "atomiswave",
+        "full_name":  "Sammy Corporation Atomiswave",
+        "default_emulator":  "Flycast",
+        "alternative_emulators":  "Flycast **(Standalone)**,\u003cbr\u003eFlycast Dojo **(Standalone)**,\u003cbr\u003eDemul **(Standalone)** [W]",
+        "needs_bios":  "Depends",
+        "recommended_game_setup":  "Single archive  file"
+    },
+    {
+        "system_name":  "bbcmicro",
+        "full_name":  "Acorn Computers BBC Micro",
+        "default_emulator":  "MAME **(Standalone)**",
+        "alternative_emulators":  "b2,\u003cbr\u003eBeebEm **(Standalone)** [W]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive (MAME only) or diskette image file"
+    },
+    {
+        "system_name":  "c64",
+        "full_name":  "Commodore 64",
+        "default_emulator":  "VICE x64sc Accurate",
+        "alternative_emulators":  "VICE x64sc Accurate **(Standalone)**,\u003cbr\u003eVICE x64 Fast,\u003cbr\u003eVICE x64 SuperCPU,\u003cbr\u003eVICE x128,\u003cbr\u003eFrodo",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or image file for tape, cartridge or single-diskette games, .m3u playlist for multi-diskette games"
+    },
+    {
+        "system_name":  "cdimono1",
+        "full_name":  "Philips CD-i",
+        "default_emulator":  "SAME CDi",
+        "alternative_emulators":  "CDi 2015 @,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single .bin/.cue pair"
+    },
+    {
+        "system_name":  "cdtv",
+        "full_name":  "Commodore CDTV",
+        "default_emulator":  "PUAE",
+        "alternative_emulators":  "PUAE 2021,\u003cbr\u003eFS-UAE **(Standalone)**,\u003cbr\u003eAmiberry,\u003cbr\u003eAmiberry **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Commodore Amiga and CDTV_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "chailove",
+        "full_name":  "ChaiLove Game Engine",
+        "default_emulator":  "ChaiLove",
+        "alternative_emulators":  "",
+        "needs_bios":  "",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "channelf",
+        "full_name":  "Fairchild Channel F",
+        "default_emulator":  "FreeChaF",
+        "alternative_emulators":  "MAME - Current,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "coco",
+        "full_name":  "Tandy Color Computer",
+        "default_emulator":  "XRoar CoCo 2 NTSC **(Standalone)**",
+        "alternative_emulators":  "XRoar CoCo 2 PAL **(Standalone)**,\u003cbr\u003eMAME [Cartridge] **(Standalone)**,\u003cbr\u003eMAME [Tape] **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Tandy Color Computer_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "colecovision",
+        "full_name":  "Coleco ColecoVision",
+        "default_emulator":  "blueMSX",
+        "alternative_emulators":  "Gearcoleco,\u003cbr\u003eJollyCV,\u003cbr\u003eBlastEm,\u003cbr\u003eBlastEm **(Standalone)**,\u003cbr\u003eopenMSX **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eColEm **(Standalone)** [LW]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "consolearcade",
+        "full_name":  "Console Arcade Systems",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME **(Standalone)**,\u003cbr\u003eFlycast,\u003cbr\u003eFlycast **(Standalone)**,\u003cbr\u003eFlycast Dojo **(Standalone)**,\u003cbr\u003eKronos [LW],\u003cbr\u003eMednafen [Sega Saturn] **(Standalone)**,\u003cbr\u003ePCSX2x6 **(Standalone)**,\u003cbr\u003ePlay! Arcade **(Standalone)**,\u003cbr\u003ePlay! Disc **(Standalone)**,\u003cbr\u003eRPCS3 Shortcut **(Standalone)**,\u003cbr\u003eRPCS3 Game Serial **(Standalone)**,\u003cbr\u003eRPCS3 ISO **(Standalone)**,\u003cbr\u003eDolphin,\u003cbr\u003eDolphin **(Standalone)**,\u003cbr\u003eTriforce **(Standalone)** [LW] @,\u003cbr\u003exemu **(Standalone)**,\u003cbr\u003eCxbx-Reloaded **(Standalone)** [W],\u003cbr\u003eArcadeDuck **(Standalone)** [W],\u003cbr\u003e _Shortcut or script_",
+        "needs_bios":  "Depends",
+        "recommended_game_setup":  "See the specific _Console Arcade Systems_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "cps",
+        "full_name":  "Capcom Play System",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME 2010,\u003cbr\u003eMAME 2003-Plus,\u003cbr\u003eMAME 2003,\u003cbr\u003eMAME 2000,\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eFinalBurn Neo,\u003cbr\u003eFinalBurn Neo **(Standalone)** [LW],\u003cbr\u003eFB Alpha 2012,\u003cbr\u003eFB Alpha 2012 CPS-1,\u003cbr\u003eFB Alpha 2012 CPS-2,\u003cbr\u003eFB Alpha 2012 CPS-3",
+        "needs_bios":  "Depends",
+        "recommended_game_setup":  "See the specific _Arcade and Neo Geo_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "cps1",
+        "full_name":  "Capcom Play System I",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME 2010,\u003cbr\u003eMAME 2003-Plus,\u003cbr\u003eMAME 2003,\u003cbr\u003eMAME 2000,\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eFinalBurn Neo,\u003cbr\u003eFinalBurn Neo **(Standalone)** [LW],\u003cbr\u003eFB Alpha 2012,\u003cbr\u003eFB Alpha 2012 CPS-1",
+        "needs_bios":  "Depends",
+        "recommended_game_setup":  "See the specific _Arcade and Neo Geo_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "cps2",
+        "full_name":  "Capcom Play System II",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME 2010,\u003cbr\u003eMAME 2003-Plus,\u003cbr\u003eMAME 2003,\u003cbr\u003eMAME 2000,\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eFinalBurn Neo,\u003cbr\u003eFinalBurn Neo **(Standalone)** [LW],\u003cbr\u003eFB Alpha 2012,\u003cbr\u003eFB Alpha 2012 CPS-2",
+        "needs_bios":  "Depends",
+        "recommended_game_setup":  "See the specific _Arcade and Neo Geo_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "cps3",
+        "full_name":  "Capcom Play System III",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME 2010,\u003cbr\u003eMAME 2003-Plus,\u003cbr\u003eMAME 2003,\u003cbr\u003eMAME 2000,\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eFinalBurn Neo,\u003cbr\u003eFinalBurn Neo **(Standalone)** [LW],\u003cbr\u003eFB Alpha 2012,\u003cbr\u003eFB Alpha 2012 CPS-3",
+        "needs_bios":  "Depends",
+        "recommended_game_setup":  "See the specific _Arcade and Neo Geo_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "crvision",
+        "full_name":  "VTech CreatiVision",
+        "default_emulator":  "JollyCV",
+        "alternative_emulators":  "MAME - Current,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "daphne",
+        "full_name":  "Daphne Arcade LaserDisc Emulator",
+        "default_emulator":  "Hypseus [Daphne] **(Standalone)**",
+        "alternative_emulators":  "Hypseus [Singe] **(Standalone)**,\u003cbr\u003eHypseus [Singe ZLUA] **(Standalone)**,\u003cbr\u003eMAME - Current,\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eDirkSimple,\u003cbr\u003eares [Mega LD] **(Standalone)**",
+        "needs_bios":  "Depends",
+        "recommended_game_setup":  "See the specific _LaserDisc Games_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "desktop",
+        "full_name":  "Desktop Applications",
+        "default_emulator":  "_Suspend ES-DE_",
+        "alternative_emulators":  "_Keep ES-DE running_,\u003cbr\u003e _AppImage (Suspend ES-DE)_ [L],\u003cbr\u003e _AppImage (Keep ES-DE running)_ [L]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _Ports and desktop applications_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "doom",
+        "full_name":  "Doom",
+        "default_emulator":  "PrBoom",
+        "alternative_emulators":  "PrBoom+ **(Standalone)**,\u003cbr\u003eBoom 3 [LW],\u003cbr\u003eBoom 3 xp [LW],\u003cbr\u003e _Shortcut or script_",
+        "needs_bios":  "No",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "dos",
+        "full_name":  "DOS (PC)",
+        "default_emulator":  "DOSBox-Pure",
+        "alternative_emulators":  "DOSBox Pure Unleashed **(Standalone)**,\u003cbr\u003eDOSBox-Core,\u003cbr\u003eDOSBox-SVN,\u003cbr\u003eDOSBox-X **(Standalone)**,\u003cbr\u003eDOSBox Staging **(Standalone)**,\u003cbr\u003eDREAMM **(Standalone)**,\u003cbr\u003eVirtualXT",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _DOS / PC_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "dragon32",
+        "full_name":  "Dragon Data Dragon 32",
+        "default_emulator":  "MAME Dragon 32 [Tape] **(Standalone)**",
+        "alternative_emulators":  "MAME Dragon 32 [Cartridge] **(Standalone)**,\u003cbr\u003eMAME Dragon 64 [Tape] **(Standalone)**,\u003cbr\u003eMAME Dragon 64 [Cartridge] **(Standalone)**,\u003cbr\u003eXRoar Dragon 32 **(Standalone)**,\u003cbr\u003eXRoar Dragon 64 **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Dragon 32 and Tano Dragon_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "dreamcast",
+        "full_name":  "Sega Dreamcast",
+        "default_emulator":  "Flycast",
+        "alternative_emulators":  "Flycast **(Standalone)**,\u003cbr\u003eFlycast Dojo **(Standalone)**,\u003cbr\u003eRedream **(Standalone)**,\u003cbr\u003eDemul **(Standalone)** [W]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "In separate folder interpreted as a file, with .m3u playlist if multi-disc game"
+    },
+    {
+        "system_name":  "easyrpg",
+        "full_name":  "EasyRPG Game Engine",
+        "default_emulator":  "EasyRPG",
+        "alternative_emulators":  "EasyRPG Player **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _EasyRPG Game Engine_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "electron",
+        "full_name":  "Acorn Electron",
+        "default_emulator":  "MAME [Tape] **(Standalone)**",
+        "alternative_emulators":  "MAME [Diskette DFS] **(Standalone)**,\u003cbr\u003eMAME [Diskette ADFS] **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive, or single tape or diskette image file"
+    },
+    {
+        "system_name":  "emulators",
+        "full_name":  "Emulators",
+        "default_emulator":  "_Suspend ES-DE_",
+        "alternative_emulators":  "_Keep ES-DE running_,\u003cbr\u003e _AppImage (Suspend ES-DE)_ [L],\u003cbr\u003e _AppImage (Keep ES-DE running)_ [L]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _Ports and desktop applications_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "epic",
+        "full_name":  "Epic Games Store",
+        "default_emulator":  "Epic Games Store **(Standalone)**",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Shortcut (.desktop/.app/.lnk) file"
+    },
+    {
+        "system_name":  "famicom",
+        "full_name":  "Nintendo Family Computer",
+        "default_emulator":  "Mesen",
+        "alternative_emulators":  "Mesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eNestopia UE,\u003cbr\u003eNestopia UE **(Standalone)** [L],\u003cbr\u003eFCEUmm,\u003cbr\u003eQuickNES,\u003cbr\u003eRustyNES,\u003cbr\u003epuNES **(Standalone)** [LW],\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003eares FDS **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW],\u003cbr\u003ePlastic **(Standalone)** [L],\u003cbr\u003e3dSen **(Standalone)**,\u003cbr\u003e3dSen **(Wine)** [L],\u003cbr\u003e3dSen **(Proton)** [L]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file. For Famicom games in 3D see the specific _Nintendo NES and Famicom in 3D_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "fba",
+        "full_name":  "FinalBurn Alpha",
+        "default_emulator":  "FB Alpha 2012",
+        "alternative_emulators":  "FB Alpha 2012 Neo Geo,\u003cbr\u003eFB Alpha 2012 CPS-1,\u003cbr\u003eFB Alpha 2012 CPS-2,\u003cbr\u003eFB Alpha 2012 CPS-3",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Arcade and Neo Geo_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "fbneo",
+        "full_name":  "FinalBurn Neo",
+        "default_emulator":  "FinalBurn Neo",
+        "alternative_emulators":  "FinalBurn Neo **(Standalone)** [LW]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Arcade and Neo Geo_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "fds",
+        "full_name":  "Nintendo Famicom Disk System",
+        "default_emulator":  "Mesen",
+        "alternative_emulators":  "Mesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eNestopia UE,\u003cbr\u003eNestopia UE **(Standalone)** [L],\u003cbr\u003eFCEUmm,\u003cbr\u003eRustyNES,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "flash",
+        "full_name":  "Adobe Flash",
+        "default_emulator":  "Ruffle **(Standalone)**",
+        "alternative_emulators":  "Lightspark **(Standalone)** [L],\u003cbr\u003eArcadeFlashWeb **(Standalone)** [W]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single .swf file"
+    },
+    {
+        "system_name":  "fm7",
+        "full_name":  "Fujitsu FM-7",
+        "default_emulator":  "MAME [FM-7 Diskette] **(Standalone)**",
+        "alternative_emulators":  "MAME [FM-7 Tape] **(Standalone)**,\u003cbr\u003eMAME [FM-7 Software list] **(Standalone)**,\u003cbr\u003eMAME [FM77AV Diskette] **(Standalone)**,\u003cbr\u003eMAME [FM77AV Tape] **(Standalone)**,\u003cbr\u003eMAME [FM77AV Software list] **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "For tape files you need to manually start the cassette player from the MAME menu after the \"load\" command, as well as entering the \"run\" command after loading is complete"
+    },
+    {
+        "system_name":  "fmtowns",
+        "full_name":  "Fujitsu FM Towns",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME **(Standalone)**,\u003cbr\u003eTsugaru **(Standalone)** [LW]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Fujitsu FM Towns_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "fpinball",
+        "full_name":  "Future Pinball",
+        "default_emulator":  "Future Pinball **(Standalone)** [W]",
+        "alternative_emulators":  "Future Pinball FPLoader **(Standalone)** [W]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "gamate",
+        "full_name":  "Bit Corporation Gamate",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "gameandwatch",
+        "full_name":  "Nintendo Game and Watch",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME Local Artwork **(Standalone)**,\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eHandheld Electronic (GW)",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _LCD handheld games_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "gamecom",
+        "full_name":  "Tiger Electronics Game.com",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "gamegear",
+        "full_name":  "Sega Game Gear",
+        "default_emulator":  "Genesis Plus GX",
+        "alternative_emulators":  "Genesis Plus GX Wide,\u003cbr\u003eGearsystem,\u003cbr\u003eSMS Plus GX,\u003cbr\u003ePicoDrive,\u003cbr\u003eBlastEm,\u003cbr\u003eBlastEm **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW],\u003cbr\u003eEmulicious **(Standalone)** [LW]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "gb",
+        "full_name":  "Nintendo Game Boy",
+        "default_emulator":  "Gambatte",
+        "alternative_emulators":  "SameBoy,\u003cbr\u003eSameBoy **(Standalone)**,\u003cbr\u003eGearboy,\u003cbr\u003eGearboy **(Standalone)** [LW],\u003cbr\u003eTGB Dual,\u003cbr\u003eDoubleCherryGB [LW],\u003cbr\u003eIroGB,\u003cbr\u003eMesen-S,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003ebsnes,\u003cbr\u003emGBA,\u003cbr\u003emGBA **(Standalone)**,\u003cbr\u003eVBA-M,\u003cbr\u003eVBA-M **(Standalone)**,\u003cbr\u003eSkyEmu,\u003cbr\u003eSkyEmu **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW],\u003cbr\u003eMissingno **(Standalone)** [L],\u003cbr\u003eEmulicious **(Standalone)** [LW]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "gba",
+        "full_name":  "Nintendo Game Boy Advance",
+        "default_emulator":  "mGBA",
+        "alternative_emulators":  "mGBA **(Standalone)**,\u003cbr\u003eVBA-M,\u003cbr\u003eVBA-M **(Standalone)**,\u003cbr\u003eVBA Next,\u003cbr\u003egpSP,\u003cbr\u003eNooDS,\u003cbr\u003eNooDS **(Standalone)** [LW],\u003cbr\u003eSkyEmu,\u003cbr\u003eSkyEmu **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE",
+        "needs_bios":  "Yes for ares",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "gbc",
+        "full_name":  "Nintendo Game Boy Color",
+        "default_emulator":  "Gambatte",
+        "alternative_emulators":  "SameBoy,\u003cbr\u003eSameBoy **(Standalone)**,\u003cbr\u003eGearboy,\u003cbr\u003eGearboy **(Standalone)** [LW],\u003cbr\u003eTGB Dual,\u003cbr\u003eDoubleCherryGB [LW],\u003cbr\u003eIroGB,\u003cbr\u003eMesen-S,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003ebsnes,\u003cbr\u003emGBA,\u003cbr\u003emGBA **(Standalone)**,\u003cbr\u003eVBA-M,\u003cbr\u003eVBA-M **(Standalone)**,\u003cbr\u003eSkyEmu,\u003cbr\u003eSkyEmu **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW],\u003cbr\u003eMissingno **(Standalone)** [L],\u003cbr\u003eEmulicious **(Standalone)** [LW]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "gc",
+        "full_name":  "Nintendo GameCube",
+        "default_emulator":  "Dolphin",
+        "alternative_emulators":  "Dolphin **(Standalone)**,\u003cbr\u003ePrimeHack **(Standalone)** [LW],\u003cbr\u003eTriforce **(Standalone)** [LW] @",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Disc image file for single-disc games, .m3u playlist for multi-disc games"
+    },
+    {
+        "system_name":  "genesis",
+        "full_name":  "Sega Genesis",
+        "default_emulator":  "Genesis Plus GX",
+        "alternative_emulators":  "Genesis Plus GX Wide,\u003cbr\u003ePicoDrive,\u003cbr\u003eBlastEm,\u003cbr\u003eBlastEm **(Standalone)**,\u003cbr\u003eClownMDEmu,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "gmaster",
+        "full_name":  "Hartung Game Master",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "gx4000",
+        "full_name":  "Amstrad GX4000",
+        "default_emulator":  "Caprice32",
+        "alternative_emulators":  "CrocoDS,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "intellivision",
+        "full_name":  "Mattel Electronics Intellivision",
+        "default_emulator":  "FreeIntv",
+        "alternative_emulators":  "MAME - Current,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "j2me",
+        "full_name":  "Java 2 Micro Edition (J2ME)",
+        "default_emulator":  "SquirrelJME",
+        "alternative_emulators":  "KEmulator **(Standalone)** [W]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single .jar file"
+    },
+    {
+        "system_name":  "kodi",
+        "full_name":  "Kodi Home Theatre Software",
+        "default_emulator":  "Kodi **(Standalone)**",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Shortcut (.desktop/.app/.lnk) file"
+    },
+    {
+        "system_name":  "laserdisc",
+        "full_name":  "LaserDisc Games",
+        "default_emulator":  "Hypseus [Daphne] **(Standalone)**",
+        "alternative_emulators":  "Hypseus [Singe] **(Standalone)**,\u003cbr\u003eHypseus [Singe ZLUA] **(Standalone)**,\u003cbr\u003eMAME - Current,\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eDirkSimple,\u003cbr\u003eares [Mega LD] **(Standalone)**",
+        "needs_bios":  "Depends",
+        "recommended_game_setup":  "See the specific _LaserDisc Games_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "lcdgames",
+        "full_name":  "LCD Handheld Games",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME Local Artwork **(Standalone)**,\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eHandheld Electronic (GW)",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _LCD handheld games_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "lowresnx",
+        "full_name":  "LowRes NX Fantasy Console",
+        "default_emulator":  "LowRes NX",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single ROM file"
+    },
+    {
+        "system_name":  "lutris",
+        "full_name":  "Lutris Open Gaming Platform",
+        "default_emulator":  "Lutris **(Standalone)** [L]",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _Lutris_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "lutro",
+        "full_name":  "Lutro Game Engine",
+        "default_emulator":  "Lutro",
+        "alternative_emulators":  "",
+        "needs_bios":  "",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "macintosh",
+        "full_name":  "Apple Macintosh",
+        "default_emulator":  "MAME Mac SE Bootable **(Standalone)**",
+        "alternative_emulators":  "MAME Mac SE Boot Disk **(Standalone)**,\u003cbr\u003eMAME Mac Plus Bootable **(Standalone)**,\u003cbr\u003eMAME Mac Plus Boot Disk **(Standalone)**,\u003cbr\u003eBasilisk II **(Standalone)**,\u003cbr\u003eSheepShaver **(Standalone)**,\u003cbr\u003eMini vMac",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Apple Macintosh_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "mame",
+        "full_name":  "Multiple Arcade Machine Emulator",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME 2010,\u003cbr\u003eMAME 2003-Plus,\u003cbr\u003eMAME 2003,\u003cbr\u003eMAME 2000,\u003cbr\u003eHBMAME,\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eGroovyMAME **(Standalone)** [LW],\u003cbr\u003eFinalBurn Neo,\u003cbr\u003eFinalBurn Neo **(Standalone)** [LW],\u003cbr\u003eFB Alpha 2012,\u003cbr\u003eGeolith,\u003cbr\u003eFlycast,\u003cbr\u003eFlycast **(Standalone)**,\u003cbr\u003eFlycast Dojo **(Standalone)**,\u003cbr\u003eKronos [LW],\u003cbr\u003eDICE,\u003cbr\u003esm2-emu **(Standalone)** [L],\u003cbr\u003eModel 2 Emulator **(Standalone)** [W],\u003cbr\u003eModel 2 Emulator [Suspend ES-DE] **(Standalone)** [W],\u003cbr\u003eSupermodel,\u003cbr\u003eSupermodel **(Standalone)**,\u003cbr\u003eSupermodel Dojo **(Standalone)** [W],\u003cbr\u003eLindbergh Loader **(Standalone)** [L],\u003cbr\u003eLinux Loader **(Standalone)** [LW],\u003cbr\u003ePCSX2x6 **(Standalone)**,\u003cbr\u003ePlay! Arcade **(Standalone)**,\u003cbr\u003eMFME **(Standalone)** [LW],\u003cbr\u003eArcadeDuck **(Standalone)** [W],\u003cbr\u003e _Shortcut or script_",
+        "needs_bios":  "Depends",
+        "recommended_game_setup":  "See the specific _Arcade and Neo Geo_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "mame-advmame",
+        "full_name":  "AdvanceMAME",
+        "default_emulator":  "AdvanceMAME **(Standalone)** [LW]",
+        "alternative_emulators":  "",
+        "needs_bios":  "Depends",
+        "recommended_game_setup":  "See the specific _Arcade and Neo Geo_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "mark3",
+        "full_name":  "Sega Mark III",
+        "default_emulator":  "Genesis Plus GX",
+        "alternative_emulators":  "Genesis Plus GX Wide,\u003cbr\u003eSMS Plus GX,\u003cbr\u003eGearsystem,\u003cbr\u003ePicoDrive,\u003cbr\u003eBlastEm,\u003cbr\u003eBlastEm **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW],\u003cbr\u003eEmulicious **(Standalone)** [LW]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "mastersystem",
+        "full_name":  "Sega Master System",
+        "default_emulator":  "Genesis Plus GX",
+        "alternative_emulators":  "Genesis Plus GX Wide,\u003cbr\u003eSMS Plus GX,\u003cbr\u003eGearsystem,\u003cbr\u003ePicoDrive,\u003cbr\u003eBlastEm,\u003cbr\u003eBlastEm **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW],\u003cbr\u003eEmulicious **(Standalone)** [LW]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "megacd",
+        "full_name":  "Sega Mega-CD",
+        "default_emulator":  "Genesis Plus GX",
+        "alternative_emulators":  "Genesis Plus GX Wide,\u003cbr\u003ePicoDrive,\u003cbr\u003eBlastEm,\u003cbr\u003eBlastEm **(Standalone)**,\u003cbr\u003eClownMDEmu,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "megacdjp",
+        "full_name":  "Sega Mega-CD [Japan]",
+        "default_emulator":  "Genesis Plus GX",
+        "alternative_emulators":  "Genesis Plus GX Wide,\u003cbr\u003ePicoDrive,\u003cbr\u003eBlastEm,\u003cbr\u003eBlastEm **(Standalone)**,\u003cbr\u003eClownMDEmu,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "megadrive",
+        "full_name":  "Sega Mega Drive",
+        "default_emulator":  "Genesis Plus GX",
+        "alternative_emulators":  "Genesis Plus GX Wide,\u003cbr\u003ePicoDrive,\u003cbr\u003eBlastEm,\u003cbr\u003eBlastEm **(Standalone)**,\u003cbr\u003eClownMDEmu,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "megadrivejp",
+        "full_name":  "Sega Mega Drive [Japan]",
+        "default_emulator":  "Genesis Plus GX",
+        "alternative_emulators":  "Genesis Plus GX Wide,\u003cbr\u003ePicoDrive,\u003cbr\u003eBlastEm,\u003cbr\u003eBlastEm **(Standalone)**,\u003cbr\u003eClownMDEmu,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "megaduck",
+        "full_name":  "Creatronic Mega Duck",
+        "default_emulator":  "SameDuck",
+        "alternative_emulators":  "MAME - Current,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "mess",
+        "full_name":  "Multi Emulator Super System",
+        "default_emulator":  "MESS 2015",
+        "alternative_emulators":  "",
+        "needs_bios":  "",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "model2",
+        "full_name":  "Sega Model 2",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME **(Standalone)**,\u003cbr\u003esm2-emu **(Standalone)** [L],\u003cbr\u003eModel 2 Emulator **(Standalone)** [W],\u003cbr\u003eModel 2 Emulator [Suspend ES-DE] **(Standalone)** [W],\u003cbr\u003eModel 2 Emulator **(Wine)** [L],\u003cbr\u003eModel 2 Emulator **(Proton)** [L]",
+        "needs_bios":  "Yes for MAME",
+        "recommended_game_setup":  "See the specific _Arcade and Neo Geo_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "model3",
+        "full_name":  "Sega Model 3",
+        "default_emulator":  "Supermodel",
+        "alternative_emulators":  "Supermodel **(Standalone)**,\u003cbr\u003eSupermodel Dojo **(Standalone)** [W],\u003cbr\u003eMAME - Current,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _Arcade and Neo Geo_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "moto",
+        "full_name":  "Thomson MO/TO Series",
+        "default_emulator":  "Theodore",
+        "alternative_emulators":  "",
+        "needs_bios":  "",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "msx",
+        "full_name":  "MSX",
+        "default_emulator":  "blueMSX",
+        "alternative_emulators":  "fMSX,\u003cbr\u003eopenMSX **(Standalone)**,\u003cbr\u003eopenMSX No Machine **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003eEmulicious **(Standalone)** [LW]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "msx1",
+        "full_name":  "MSX1",
+        "default_emulator":  "blueMSX",
+        "alternative_emulators":  "fMSX,\u003cbr\u003eopenMSX **(Standalone)**,\u003cbr\u003eopenMSX No Machine **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003eEmulicious **(Standalone)** [LW]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "msx2",
+        "full_name":  "MSX2",
+        "default_emulator":  "blueMSX",
+        "alternative_emulators":  "fMSX,\u003cbr\u003eopenMSX **(Standalone)**,\u003cbr\u003eopenMSX No Machine **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003eEmulicious **(Standalone)** [LW]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "msxturbor",
+        "full_name":  "MSX Turbo R",
+        "default_emulator":  "blueMSX",
+        "alternative_emulators":  "openMSX **(Standalone)**,\u003cbr\u003eopenMSX No Machine **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "mugen",
+        "full_name":  "M.U.G.E.N Game Engine",
+        "default_emulator":  "Ikemen GO **(Standalone)**",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _M.U.G.E.N Game Engine_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "multivision",
+        "full_name":  "Othello Multivision",
+        "default_emulator":  "Gearsystem",
+        "alternative_emulators":  "Mesen **(Standalone)** [LW]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "n3ds",
+        "full_name":  "Nintendo 3DS",
+        "default_emulator":  "Azahar",
+        "alternative_emulators":  "Azahar **(Standalone)**,\u003cbr\u003eAzahar Shortcut **(Standalone)** [LW],\u003cbr\u003eAzaharPlus **(Standalone)** [LW],\u003cbr\u003eCitra,\u003cbr\u003eCitra 2018,\u003cbr\u003eCitra **(Standalone)**,\u003cbr\u003eMandarine **(Standalone)**,\u003cbr\u003eLime3DS **(Standalone)**,\u003cbr\u003ePanda3DS **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single ROM file"
+    },
+    {
+        "system_name":  "n64",
+        "full_name":  "Nintendo 64",
+        "default_emulator":  "Mupen64Plus-Next",
+        "alternative_emulators":  "Mupen64Plus **(Standalone)**,\u003cbr\u003eParaLLEl N64,\u003cbr\u003eParallel Launcher **(Standalone)**,\u003cbr\u003esimple64 **(Standalone)** [LW],\u003cbr\u003eRosalie\u0027s Mupen GUI **(Standalone)** [LW],\u003cbr\u003eProject64 **(Standalone)** [W],\u003cbr\u003eares **(Standalone)**,\u003cbr\u003eGopher64 **(Standalone)** [LW],\u003cbr\u003esixtyforce **(Standalone)** [M],\u003cbr\u003e _Native port_,\u003cbr\u003e _Shortcut or script_",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file, for recompilations see the specific _Nintendo 64 Recompilations_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "n64dd",
+        "full_name":  "Nintendo 64DD",
+        "default_emulator":  "ParaLLEl N64 [LW],\u003cbr\u003eMupen64Plus-Next [M]",
+        "alternative_emulators":  "Mupen64Plus-Next [LW],\u003cbr\u003eParaLLEl N64 [M],\u003cbr\u003eRosalie\u0027s Mupen GUI **(Standalone)** [LW],\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Nintendo 64DD_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "naomi",
+        "full_name":  "Sega NAOMI",
+        "default_emulator":  "Flycast",
+        "alternative_emulators":  "Flycast **(Standalone)**,\u003cbr\u003eFlycast Dojo **(Standalone)**,\u003cbr\u003eDemul **(Standalone)** [W]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive file + .chd file in subdirectory if GD-ROM game"
+    },
+    {
+        "system_name":  "naomi2",
+        "full_name":  "Sega NAOMI 2",
+        "default_emulator":  "Flycast",
+        "alternative_emulators":  "Flycast **(Standalone)**,\u003cbr\u003eFlycast Dojo **(Standalone)**,\u003cbr\u003eDemul **(Standalone)** [W]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive file + .chd file in subdirectory if GD-ROM game"
+    },
+    {
+        "system_name":  "naomigd",
+        "full_name":  "Sega NAOMI GD-ROM",
+        "default_emulator":  "Flycast",
+        "alternative_emulators":  "Flycast **(Standalone)**,\u003cbr\u003eFlycast Dojo **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive file + .chd file in subdirectory if GD-ROM game"
+    },
+    {
+        "system_name":  "nds",
+        "full_name":  "Nintendo DS",
+        "default_emulator":  "melonDS DS",
+        "alternative_emulators":  "melonDS,\u003cbr\u003emelonDS **(Standalone)**,\u003cbr\u003eDeSmuME,\u003cbr\u003eDeSmuME 2015,\u003cbr\u003eDeSmuME **(Standalone)** [L],\u003cbr\u003eNooDS,\u003cbr\u003eNooDS **(Standalone)** [LW],\u003cbr\u003eSkyEmu,\u003cbr\u003eSkyEmu **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "neogeo",
+        "full_name":  "SNK Neo Geo",
+        "default_emulator":  "FinalBurn Neo",
+        "alternative_emulators":  "FinalBurn Neo **(Standalone)** [LW],\u003cbr\u003eGeolith,\u003cbr\u003eMAME - Current,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Arcade and Neo Geo_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "neogeocd",
+        "full_name":  "SNK Neo Geo CD",
+        "default_emulator":  "NeoCD",
+        "alternative_emulators":  "FinalBurn Neo,\u003cbr\u003eFinalBurn Neo **(Standalone)** [LW],\u003cbr\u003eGeolith,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ".chd (NeoCD, Geolith and MAME only) or .cue file"
+    },
+    {
+        "system_name":  "neogeocdjp",
+        "full_name":  "SNK Neo Geo CD [Japan]",
+        "default_emulator":  "NeoCD",
+        "alternative_emulators":  "FinalBurn Neo,\u003cbr\u003eFinalBurn Neo **(Standalone)** [LW],\u003cbr\u003eGeolith,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ".chd (NeoCD, Geolith and MAME only) or .cue file"
+    },
+    {
+        "system_name":  "nes",
+        "full_name":  "Nintendo Entertainment System",
+        "default_emulator":  "Mesen",
+        "alternative_emulators":  "Mesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eNestopia UE,\u003cbr\u003eNestopia UE **(Standalone)** [L],\u003cbr\u003eFCEUmm,\u003cbr\u003eQuickNES,\u003cbr\u003eRustyNES,\u003cbr\u003epuNES **(Standalone)** [LW],\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003eares FDS **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW],\u003cbr\u003ePlastic **(Standalone)** [L],\u003cbr\u003e3dSen **(Standalone)**,\u003cbr\u003e3dSen **(Wine)** [L],\u003cbr\u003e3dSen **(Proton)** [L]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file. For NES games in 3D see the specific _Nintendo NES and Famicom in 3D_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "ngage",
+        "full_name":  "Nokia N-Gage",
+        "default_emulator":  "EKA2L1 [Mounted] **(Standalone)**",
+        "alternative_emulators":  "EKA2L1 [Installed] **(Standalone)**,\u003cbr\u003eEKA2L1 [Mounted] **(Wine)** [L],\u003cbr\u003eEKA2L1 [Installed] **(Wine)** [L]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Symbian and Nokia N-Gage_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "ngp",
+        "full_name":  "SNK Neo Geo Pocket",
+        "default_emulator":  "Beetle NeoPop",
+        "alternative_emulators":  "RACE,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "ngpc",
+        "full_name":  "SNK Neo Geo Pocket Color",
+        "default_emulator":  "Beetle NeoPop",
+        "alternative_emulators":  "RACE,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "odyssey2",
+        "full_name":  "Magnavox Odyssey 2",
+        "default_emulator":  "O2EM",
+        "alternative_emulators":  "MAME - Current,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "openbor",
+        "full_name":  "OpenBOR Game Engine",
+        "default_emulator":  "OpenBOR **(Standalone)**",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _OpenBOR_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "oric",
+        "full_name":  "Tangerine Computer Systems Oric",
+        "default_emulator":  "MAME **(Standalone)**",
+        "alternative_emulators":  "Oricutron **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Tangerine Computer Systems Oric_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "palm",
+        "full_name":  "Palm OS",
+        "default_emulator":  "Mu",
+        "alternative_emulators":  "",
+        "needs_bios":  "",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "pc",
+        "full_name":  "IBM PC",
+        "default_emulator":  "DOSBox-Pure",
+        "alternative_emulators":  "DOSBox Pure Unleashed **(Standalone)**,\u003cbr\u003eDOSBox-Core,\u003cbr\u003eDOSBox-SVN,\u003cbr\u003eDOSBox-X **(Standalone)**,\u003cbr\u003eDOSBox Staging **(Standalone)**,\u003cbr\u003eDREAMM **(Standalone)**,\u003cbr\u003eVirtualXT",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _DOS / PC_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "pc88",
+        "full_name":  "NEC PC-8800 Series",
+        "default_emulator":  "QUASI88",
+        "alternative_emulators":  "QUASI88 **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "pc98",
+        "full_name":  "NEC PC-9800 Series",
+        "default_emulator":  "Neko Project II Kai",
+        "alternative_emulators":  "Neko Project II",
+        "needs_bios":  "",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "pcarcade",
+        "full_name":  "PC Arcade Systems",
+        "default_emulator":  "Wine **(Standalone)** [L],\u003cbr\u003e _Shortcut or script_ [MW]",
+        "alternative_emulators":  "Proton **(Standalone)** [L],\u003cbr\u003eUMU **(Standalone)** [L],\u003cbr\u003eLindbergh Loader **(Standalone)** [L],\u003cbr\u003eLinux Loader **(Standalone)** [LW],\u003cbr\u003e _AppImage_ [L],\u003cbr\u003e _Shortcut or script_ [L]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "pcengine",
+        "full_name":  "NEC PC Engine",
+        "default_emulator":  "Beetle PCE",
+        "alternative_emulators":  "Beetle PCE FAST,\u003cbr\u003eBeetle SuperGrafx,\u003cbr\u003eGeargrafx,\u003cbr\u003eGeargrafx **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "pcenginecd",
+        "full_name":  "NEC PC Engine CD",
+        "default_emulator":  "Beetle PCE",
+        "alternative_emulators":  "Beetle PCE FAST,\u003cbr\u003eBeetle SuperGrafx,\u003cbr\u003eGeargrafx,\u003cbr\u003eGeargrafx **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "pcfx",
+        "full_name":  "NEC PC-FX",
+        "default_emulator":  "Beetle PC-FX",
+        "alternative_emulators":  "Mednafen **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "pico8",
+        "full_name":  "PICO-8 Fantasy Console",
+        "default_emulator":  "PICO-8 **(Standalone)**",
+        "alternative_emulators":  "PICO-8 Splore **(Standalone)**,\u003cbr\u003eRetro8",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _PICO-8_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "plus4",
+        "full_name":  "Commodore Plus/4",
+        "default_emulator":  "VICE xplus4",
+        "alternative_emulators":  "VICE xplus4 **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or image file for tape, cartridge or single-diskette games, .m3u playlist for multi-diskette games"
+    },
+    {
+        "system_name":  "pokemini",
+        "full_name":  "Nintendo Pokémon Mini",
+        "default_emulator":  "PokeMini",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "ports",
+        "full_name":  "Ports",
+        "default_emulator":  "_Shortcut or script_",
+        "alternative_emulators":  "_AppImage_ [L],\u003cbr\u003eECWolf (Wolfenstein 3D),\u003cbr\u003eCannonBall (OutRun),\u003cbr\u003eCraft (Minecraft),\u003cbr\u003eMr.Boom (Bomberman),\u003cbr\u003eNXEngine (Cave Story),\u003cbr\u003edrs (Cave Story),\u003cbr\u003eOpenLara (Tomb Raider) [LW],\u003cbr\u003eSuper Bros War",
+        "needs_bios":  "Yes for ECWolf",
+        "recommended_game_setup":  "See the specific _Ports and desktop applications_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "ps2",
+        "full_name":  "Sony PlayStation 2",
+        "default_emulator":  "PCEE2",
+        "alternative_emulators":  "LRPS2,\u003cbr\u003ePCSX2 [LW] @,\u003cbr\u003ePCSX2 **(Standalone)**,\u003cbr\u003ePCSX2 Legacy **(Standalone)** @,\u003cbr\u003eAetherSX2 **(Standalone)** [M],\u003cbr\u003eARMSX2 **(Standalone)** [M],\u003cbr\u003ePlay! **(Standalone)**,\u003cbr\u003e_Shortcut or script_ [LW]",
+        "needs_bios":  "Yes except for Play!",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "ps3",
+        "full_name":  "Sony PlayStation 3",
+        "default_emulator":  "RPCS3 Shortcut **(Standalone)**",
+        "alternative_emulators":  "RPCS3 Game Serial **(Standalone)**,\u003cbr\u003eRPCS3 Directory **(Standalone)**,\u003cbr\u003eRPCS3 ISO **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Sony PlayStation 3_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "ps4",
+        "full_name":  "Sony PlayStation 4",
+        "default_emulator":  "shadPS4 Shortcut **(Standalone)** [LW],\u003cbr\u003eshadPS4 Game Serial **(Standalone)** [M]",
+        "alternative_emulators":  "shadPS4 Game Serial **(Standalone)** [LW],\u003cbr\u003eshadPS4 eboot.bin **(Standalone)**,\u003cbr\u003eshadPS4 [GUI] Game Serial **(Standalone)**,\u003cbr\u003eshadPS4 [GUI] eboot.bin **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _Sony PlayStation 4_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "psp",
+        "full_name":  "Sony PlayStation Portable",
+        "default_emulator":  "PPSSPP",
+        "alternative_emulators":  "PPSSPP **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single disc image file"
+    },
+    {
+        "system_name":  "psvita",
+        "full_name":  "Sony PlayStation Vita",
+        "default_emulator":  "Vita3K **(Standalone)**",
+        "alternative_emulators":  "",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Sony PlayStation Vita_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "psx",
+        "full_name":  "Sony PlayStation",
+        "default_emulator":  "Beetle PSX",
+        "alternative_emulators":  "Beetle PSX HW,\u003cbr\u003ePCSX ReARMed,\u003cbr\u003eSwanStation,\u003cbr\u003eDuckStation **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ".chd file for single-disc games, .m3u playlist for multi-disc games"
+    },
+    {
+        "system_name":  "pv1000",
+        "full_name":  "Casio PV-1000",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "quake",
+        "full_name":  "Quake",
+        "default_emulator":  "TyrQuake",
+        "alternative_emulators":  "vitaQuake 2,\u003cbr\u003evitaQuake 2 [Rogue],\u003cbr\u003evitaQuake 2 [Xatrix],\u003cbr\u003evitaQuake 2 [Zaero],\u003cbr\u003evitaQuake 3,\u003cbr\u003e _Shortcut or script_",
+        "needs_bios":  "No",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "samcoupe",
+        "full_name":  "MGT SAM Coupé",
+        "default_emulator":  "SimCoupé **(Standalone)**",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "satellaview",
+        "full_name":  "Nintendo Satellaview",
+        "default_emulator":  "Snes9x - Current",
+        "alternative_emulators":  "Snes9x 2010,\u003cbr\u003eSnes9x 2005 Plus,\u003cbr\u003eSnes9x **(Standalone)**,\u003cbr\u003ebsnes,\u003cbr\u003ebsnes-hd,\u003cbr\u003ebsnes-jg,\u003cbr\u003ebsnes-mercury Accuracy,\u003cbr\u003ebsnes **(Standalone)** [LW],\u003cbr\u003eMesen-S,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "saturn",
+        "full_name":  "Sega Saturn",
+        "default_emulator":  "Beetle Saturn",
+        "alternative_emulators":  "Kronos [LW],\u003cbr\u003eKronos **(Standalone)** [LW],\u003cbr\u003eYabaSanshiro,\u003cbr\u003eYaba Sanshiro 2 **(Standalone)** [W],\u003cbr\u003eYabause,\u003cbr\u003eYmir **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eSSF **(Standalone)** [W]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ".chd file for single-disc games, .m3u playlist for multi-disc games"
+    },
+    {
+        "system_name":  "saturnjp",
+        "full_name":  "Sega Saturn [Japan]",
+        "default_emulator":  "Beetle Saturn",
+        "alternative_emulators":  "Kronos [LW],\u003cbr\u003eKronos **(Standalone)** [LW],\u003cbr\u003eYabaSanshiro,\u003cbr\u003eYaba Sanshiro 2 **(Standalone)** [W],\u003cbr\u003eYabause,\u003cbr\u003eYmir **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eSSF **(Standalone)** [W]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ".chd file for single-disc games, .m3u playlist for multi-disc games"
+    },
+    {
+        "system_name":  "scummvm",
+        "full_name":  "ScummVM Game Engine",
+        "default_emulator":  "ScummVM",
+        "alternative_emulators":  "ScummVM **(Standalone)**,\u003cbr\u003eDREAMM **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _ScummVM_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "scv",
+        "full_name":  "Epoch Super Cassette Vision",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "sega32x",
+        "full_name":  "Sega Mega Drive 32X",
+        "default_emulator":  "PicoDrive",
+        "alternative_emulators":  "BlastEm,\u003cbr\u003eBlastEm **(Standalone)**,\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "Yes for BlastEm",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "sega32xjp",
+        "full_name":  "Sega Super 32X [Japan]",
+        "default_emulator":  "PicoDrive",
+        "alternative_emulators":  "BlastEm,\u003cbr\u003eBlastEm **(Standalone)**,\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "Yes for BlastEm",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "sega32xna",
+        "full_name":  "Sega Genesis 32X [North America]",
+        "default_emulator":  "PicoDrive",
+        "alternative_emulators":  "BlastEm,\u003cbr\u003eBlastEm **(Standalone)**,\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "Yes for BlastEm",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "segacd",
+        "full_name":  "Sega CD",
+        "default_emulator":  "Genesis Plus GX",
+        "alternative_emulators":  "Genesis Plus GX Wide,\u003cbr\u003ePicoDrive,\u003cbr\u003eBlastEm,\u003cbr\u003eBlastEm **(Standalone)**,\u003cbr\u003eClownMDEmu,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "sfc",
+        "full_name":  "Nintendo SFC (Super Famicom)",
+        "default_emulator":  "Snes9x - Current",
+        "alternative_emulators":  "Snes9x 2010,\u003cbr\u003eSnes9x 2005 Plus,\u003cbr\u003eSnes9x **(Standalone)**,\u003cbr\u003ebsnes,\u003cbr\u003ebsnes-hd,\u003cbr\u003ebsnes-jg,\u003cbr\u003ebsnes-mercury Accuracy,\u003cbr\u003ebsnes **(Standalone)** [LW],\u003cbr\u003eBeetle Supafaust [LW],\u003cbr\u003eMesen-S,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW],\u003cbr\u003eSUPER ZSNES **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "sg-1000",
+        "full_name":  "Sega SG-1000",
+        "default_emulator":  "Genesis Plus GX",
+        "alternative_emulators":  "Genesis Plus GX Wide,\u003cbr\u003eGearsystem,\u003cbr\u003eBlastEm,\u003cbr\u003eBlastEm **(Standalone)**,\u003cbr\u003eblueMSX,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "sgb",
+        "full_name":  "Nintendo Super Game Boy",
+        "default_emulator":  "Mesen-S",
+        "alternative_emulators":  "Mesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eSameBoy,\u003cbr\u003emGBA,\u003cbr\u003emGBA **(Standalone)**",
+        "needs_bios":  "",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "snes",
+        "full_name":  "Nintendo SNES (Super Nintendo)",
+        "default_emulator":  "Snes9x - Current",
+        "alternative_emulators":  "Snes9x 2010,\u003cbr\u003eSnes9x 2005 Plus,\u003cbr\u003eSnes9x **(Standalone)**,\u003cbr\u003ebsnes,\u003cbr\u003ebsnes-hd,\u003cbr\u003ebsnes-jg,\u003cbr\u003ebsnes-mercury Accuracy,\u003cbr\u003ebsnes **(Standalone)** [LW],\u003cbr\u003eBeetle Supafaust [LW],\u003cbr\u003eMesen-S,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW],\u003cbr\u003eSUPER ZSNES **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "snesna",
+        "full_name":  "Nintendo SNES (Super Nintendo) [North America]",
+        "default_emulator":  "Snes9x - Current",
+        "alternative_emulators":  "Snes9x 2010,\u003cbr\u003eSnes9x 2005 Plus,\u003cbr\u003eSnes9x **(Standalone)**,\u003cbr\u003ebsnes,\u003cbr\u003ebsnes-hd,\u003cbr\u003ebsnes-jg,\u003cbr\u003ebsnes-mercury Accuracy,\u003cbr\u003ebsnes **(Standalone)** [LW],\u003cbr\u003eBeetle Supafaust [LW],\u003cbr\u003eMesen-S,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003ejgenesis **(Standalone)** [LW],\u003cbr\u003eSUPER ZSNES **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "solarus",
+        "full_name":  "Solarus Game Engine",
+        "default_emulator":  "Solarus **(Standalone)**",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single .solarus game file"
+    },
+    {
+        "system_name":  "spectravideo",
+        "full_name":  "Spectravideo",
+        "default_emulator":  "blueMSX",
+        "alternative_emulators":  "",
+        "needs_bios":  "",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "steam",
+        "full_name":  "Valve Steam",
+        "default_emulator":  "Steam **(Standalone)**",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _Steam_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "stv",
+        "full_name":  "Sega Titan Video Game System",
+        "default_emulator":  "Kronos [LW],\u003cbr\u003eMAME - Current [M]",
+        "alternative_emulators":  "MAME - Current [LW],\u003cbr\u003eMAME **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive file"
+    },
+    {
+        "system_name":  "sufami",
+        "full_name":  "Bandai SuFami Turbo",
+        "default_emulator":  "Snes9x - Current",
+        "alternative_emulators":  "Snes9x 2010,\u003cbr\u003eSnes9x 2005 Plus,\u003cbr\u003eSnes9x **(Standalone)**,\u003cbr\u003ebsnes,\u003cbr\u003ebsnes-hd,\u003cbr\u003ebsnes-jg,\u003cbr\u003ebsnes-mercury Accuracy,\u003cbr\u003ebsnes **(Standalone)** [LW],\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "supergrafx",
+        "full_name":  "NEC SuperGrafx",
+        "default_emulator":  "Beetle SuperGrafx",
+        "alternative_emulators":  "Beetle PCE,\u003cbr\u003eGeargrafx,\u003cbr\u003eGeargrafx **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "supervision",
+        "full_name":  "Watara Supervision",
+        "default_emulator":  "Potator",
+        "alternative_emulators":  "MAME - Current,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "supracan",
+        "full_name":  "Funtech Super A\u0027Can",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file. You need a supracan.zip archive that contains a valid internal_68k.bin file and an empty file named umc6650.bin"
+    },
+    {
+        "system_name":  "switch",
+        "full_name":  "Nintendo Switch",
+        "default_emulator":  "Eden **(Standalone)**",
+        "alternative_emulators":  "Ryujinx **(Standalone)**,\u003cbr\u003e_Shortcut_ [W]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "symbian",
+        "full_name":  "Symbian",
+        "default_emulator":  "EKA2L1 [Nokia N-Gage] **(Standalone)**",
+        "alternative_emulators":  "EKA2L1 [Nokia N70] **(Standalone)**,\u003cbr\u003eEKA2L1 [Nokia N97] **(Standalone)**,\u003cbr\u003eEKA2L1 [Custom device] **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Symbian and Nokia N-Gage_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "tanodragon",
+        "full_name":  "Tano Dragon",
+        "default_emulator":  "MAME [Tape] **(Standalone)**",
+        "alternative_emulators":  "MAME [Cartridge] **(Standalone)**,\u003cbr\u003eXRoar **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Dragon 32 and Tano Dragon_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "tg16",
+        "full_name":  "NEC TurboGrafx-16",
+        "default_emulator":  "Beetle PCE",
+        "alternative_emulators":  "Beetle PCE FAST,\u003cbr\u003eBeetle SuperGrafx,\u003cbr\u003eGeargrafx,\u003cbr\u003eGeargrafx **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "tg-cd",
+        "full_name":  "NEC TurboGrafx-CD",
+        "default_emulator":  "Beetle PCE",
+        "alternative_emulators":  "Beetle PCE FAST,\u003cbr\u003eBeetle SuperGrafx,\u003cbr\u003eGeargrafx,\u003cbr\u003eGeargrafx **(Standalone)**,\u003cbr\u003eMednafen **(Standalone)**,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE,\u003cbr\u003eares **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "ti99",
+        "full_name":  "Texas Instruments TI-99",
+        "default_emulator":  "MAME **(Standalone)**",
+        "alternative_emulators":  "MAME Legacy **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Texas Instruments TI-99_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "tic80",
+        "full_name":  "TIC-80 Fantasy Computer",
+        "default_emulator":  "TIC-80",
+        "alternative_emulators":  "TIC-80 **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single .tic file"
+    },
+    {
+        "system_name":  "to8",
+        "full_name":  "Thomson TO8",
+        "default_emulator":  "Theodore",
+        "alternative_emulators":  "",
+        "needs_bios":  "",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "triforce",
+        "full_name":  "Namco-Sega-Nintendo Triforce",
+        "default_emulator":  "Dolphin",
+        "alternative_emulators":  "Dolphin **(Standalone)**,\u003cbr\u003eTriforce **(Standalone)** [LW] @",
+        "needs_bios":  "No",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "trs-80",
+        "full_name":  "Tandy TRS-80",
+        "default_emulator":  "sdl2trs DOS Diskette **(Standalone)** [LW]",
+        "alternative_emulators":  "sdl2trs Bootable Diskette **(Standalone)** [LW],\u003cbr\u003esdl2trs CMD File **(Standalone)** [LW]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "See the specific _Tandy TRS-80_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "type-x",
+        "full_name":  "Taito Type X",
+        "default_emulator":  "Wine **(Standalone)** [L],\u003cbr\u003e _Shortcut or script_ [MW]",
+        "alternative_emulators":  "Proton **(Standalone)** [L],\u003cbr\u003eUMU **(Standalone)** [L],\u003cbr\u003e _AppImage_ [L],\u003cbr\u003e _Shortcut or script_ [L]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "uzebox",
+        "full_name":  "Uzebox Open Source Console",
+        "default_emulator":  "Uzem",
+        "alternative_emulators":  "",
+        "needs_bios":  "",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "vectrex",
+        "full_name":  "GCE Vectrex",
+        "default_emulator":  "vecx",
+        "alternative_emulators":  "MAME - Current,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "Yes for MAME",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "vic20",
+        "full_name":  "Commodore VIC-20",
+        "default_emulator":  "VICE xvic",
+        "alternative_emulators":  "VICE xvic **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or tape, cartridge or diskette image file"
+    },
+    {
+        "system_name":  "videopac",
+        "full_name":  "Philips Videopac G7000",
+        "default_emulator":  "O2EM",
+        "alternative_emulators":  "MAME - Current,\u003cbr\u003eMAME **(Standalone)**",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "vircon32",
+        "full_name":  "Vircon32 Virtual Console",
+        "default_emulator":  "Vircon32",
+        "alternative_emulators":  "Vircon32 **(Standalone)** [LW]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "virtualboy",
+        "full_name":  "Nintendo Virtual Boy",
+        "default_emulator":  "Beetle VB",
+        "alternative_emulators":  "Mednafen **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "vpinball",
+        "full_name":  "Visual Pinball",
+        "default_emulator":  "Visual Pinball **(Standalone)**",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _Visual Pinball_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "vsmile",
+        "full_name":  "VTech V.Smile",
+        "default_emulator":  "MAME - Current",
+        "alternative_emulators":  "MAME **(Standalone)**,\u003cbr\u003eveesem **(Standalone)** [LW]",
+        "needs_bios":  "Yes",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "wasm4",
+        "full_name":  "WASM-4 Fantasy Console",
+        "default_emulator":  "WASM-4",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single .wasm file"
+    },
+    {
+        "system_name":  "wii",
+        "full_name":  "Nintendo Wii",
+        "default_emulator":  "Dolphin",
+        "alternative_emulators":  "Dolphin **(Standalone)**,\u003cbr\u003ePrimeHack **(Standalone)** [LW]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "wiiu",
+        "full_name":  "Nintendo Wii U",
+        "default_emulator":  "Cemu **(Standalone)**",
+        "alternative_emulators":  "Cemu",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _Nintendo Wii U_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "windows",
+        "full_name":  "Microsoft Windows",
+        "default_emulator":  "_Suspend ES-DE_",
+        "alternative_emulators":  "_Keep ES-DE running_,\u003cbr\u003e _AppImage (Suspend ES-DE)_ [L],\u003cbr\u003e _AppImage (Keep ES-DE running)_ [L]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Shortcut (.desktop/.app/.lnk) file, script or AppImage"
+    },
+    {
+        "system_name":  "windows3x",
+        "full_name":  "Microsoft Windows 3.x",
+        "default_emulator":  "DOSBox-X **(Standalone)**",
+        "alternative_emulators":  "DOSBox-Pure,\u003cbr\u003eDOSBox Pure Unleashed **(Standalone)**,\u003cbr\u003e _Shortcut or script (Suspend ES-DE)_,\u003cbr\u003e _Shortcut or script (Keep ES-DE running)_,\u003cbr\u003e _AppImage (Suspend ES-DE)_ [L],\u003cbr\u003e _AppImage (Keep ES-DE running)_ [L]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _Microsoft Windows 3.x and 9x_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "windows9x",
+        "full_name":  "Microsoft Windows 9x",
+        "default_emulator":  "DOSBox-X **(Standalone)**",
+        "alternative_emulators":  "DOSBox-Pure,\u003cbr\u003eDOSBox Pure Unleashed **(Standalone)**,\u003cbr\u003e _Shortcut or script (Suspend ES-DE)_,\u003cbr\u003e _Shortcut or script (Keep ES-DE running)_,\u003cbr\u003e _AppImage (Suspend ES-DE)_ [L],\u003cbr\u003e _AppImage (Keep ES-DE running)_ [L]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _Microsoft Windows 3.x and 9x_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "wonderswan",
+        "full_name":  "Bandai WonderSwan",
+        "default_emulator":  "Beetle Cygne",
+        "alternative_emulators":  "Mednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003eares [Benesse Pocket Challenge V2] **(Standalone)**,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "wonderswancolor",
+        "full_name":  "Bandai WonderSwan Color",
+        "default_emulator":  "Beetle Cygne",
+        "alternative_emulators":  "Mednafen **(Standalone)**,\u003cbr\u003eares **(Standalone)**,\u003cbr\u003eMesen **(Standalone)** [LW],\u003cbr\u003eMesenCE",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    },
+    {
+        "system_name":  "x1",
+        "full_name":  "Sharp X1",
+        "default_emulator":  "X Millennium",
+        "alternative_emulators":  "MAME [Diskette] **(Standalone)**,\u003cbr\u003eMAME [Tape] **(Standalone)**",
+        "needs_bios":  "Yes for MAME",
+        "recommended_game_setup":  "Single archive or diskette/tape file"
+    },
+    {
+        "system_name":  "x68000",
+        "full_name":  "Sharp X68000",
+        "default_emulator":  "PX68k",
+        "alternative_emulators":  "MAME **(Standalone)**,\u003cbr\u003eXM6 Pro-68k **(Standalone)** [W],\u003cbr\u003eXM6 TypeG **(Standalone**) [W],\u003cbr\u003eXM6 Pro-68k **(Wine)** [L],\u003cbr\u003eXM6 Pro-68k **(Proton)** [L],\u003cbr\u003eXM6 TypeG **(Wine)** [L],\u003cbr\u003eXM6 TypeG **(Proton)** [L]",
+        "needs_bios":  "Yes for PX68k and MAME",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "xbox",
+        "full_name":  "Microsoft Xbox",
+        "default_emulator":  "xemu **(Standalone)**",
+        "alternative_emulators":  "Cxbx-Reloaded **(Standalone)** [W],\u003cbr\u003e _Shortcut or script_ [W]",
+        "needs_bios":  "Yes for xemu",
+        "recommended_game_setup":  "Single .iso or .xiso file for xemu or unpacked .iso directory for Cxbx-Reloaded"
+    },
+    {
+        "system_name":  "xbox360",
+        "full_name":  "Microsoft Xbox 360",
+        "default_emulator":  "xenia **(Standalone)** [LW],\u003cbr\u003eXeniOS **(Standalone)** [M]",
+        "alternative_emulators":  "Xenia Edge **(Standalone)** [LW],\u003cbr\u003exenia **(Wine)** [L],\u003cbr\u003exenia **(Proton)** [L],\u003cbr\u003e _Shortcut or script_ [LW]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "See the specific _Microsoft Xbox 360_ section elsewhere in this guide"
+    },
+    {
+        "system_name":  "xboxone",
+        "full_name":  "Microsoft Xbox One",
+        "default_emulator":  "_Placeholder_",
+        "alternative_emulators":  "",
+        "needs_bios":  "",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "zmachine",
+        "full_name":  "Infocom Z-machine",
+        "default_emulator":  "MojoZork",
+        "alternative_emulators":  "Gargoyle **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "zx81",
+        "full_name":  "Sinclair ZX81",
+        "default_emulator":  "EightyOne",
+        "alternative_emulators":  "",
+        "needs_bios":  "No",
+        "recommended_game_setup":  ""
+    },
+    {
+        "system_name":  "zxnext",
+        "full_name":  "Sinclair ZX Spectrum Next",
+        "default_emulator":  "#CSpect **(Standalone)** [LW],\u003cbr\u003eZEsarUX **(Standalone)** [M]",
+        "alternative_emulators":  "ZEsarUX **(Standalone)** [LW]",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "In separate folder interpreted as a file"
+    },
+    {
+        "system_name":  "zxspectrum",
+        "full_name":  "Sinclair ZX Spectrum",
+        "default_emulator":  "Fuse",
+        "alternative_emulators":  "Fuse **(Standalone)**",
+        "needs_bios":  "No",
+        "recommended_game_setup":  "Single archive or ROM file"
+    }
+]

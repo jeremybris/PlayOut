@@ -1,0 +1,155 @@
+{
+  "title": "System",
+  "lead": "Language, startup, power actions, power profiles, memory, music and Windows shortcuts.",
+  "exit": {
+    "button": "Exit PlayOut",
+    "confirmTitle": "Exit PlayOut",
+    "confirmToTray": "Close the dashboard to the system tray? PlayOut keeps running there.",
+    "confirmToDesktop": "Close the dashboard and return to the Windows desktop?",
+    "confirmButton": "Exit",
+    "failed": "Could not exit PlayOut"
+  },
+  "language": {
+    "title": "Language",
+    "label": "Language",
+    "description": "PlayOut's menus and messages. Game names and details stay as their stores and sources write them.",
+    "machineTranslated": "{language} (machine translated)"
+  },
+  "startup": {
+    "title": "Startup and power",
+    "launchAtLogin": {
+      "label": "Launch at login",
+      "description": "Start PlayOut when you sign in to Windows."
+    },
+    "minimizeToTray": {
+      "label": "Minimize to tray",
+      "description": "Closing PlayOut keeps it running in the system tray. Quit from the tray icon's menu."
+    },
+    "confirmPowerActions": {
+      "label": "Confirm power actions",
+      "description": "Ask before sleeping, restarting, shutting down or exiting."
+    },
+    "enhancedSleepWake": {
+      "label": "Enhanced Sleep/Wake",
+      "description": "Freezes the running game while the PC sleeps or the screen is locked, and resumes it when you're back. Sleep pauses background apps and the network, nothing but you wakes the PC, and it hibernates after 48 hours of sleep to save the battery (one administrator step; undone when turned off)."
+    },
+    "controllerWake": {
+      "label": "Wake with the Xbox button",
+      "description": "Pressing the Xbox button on an Xbox controller wakes the PC from sleep. Needs the Xbox Wireless Adapter or a USB cable (Bluetooth usually cannot wake a PC), and a PC whose sleep lets USB devices wake it. One administrator step; undone when turned off."
+    }
+  },
+  "power": {
+    "title": "Power profiles",
+    "noteDynamic": "Switch from the overlay (the home button). Dynamic TDP (the default) raises or lowers the watts during a game to hold your target frame rate; Custom watts sets fixed limits.",
+    "noteStatic": "Switch profiles from the overlay (the home button). Each profile sets the Windows power mode, the CPU maximum and CPU boost, and with the power helper, watts.",
+    "defaultProfile": {
+      "label": "Outside games",
+      "description": "Used when no game runs, and for games without their own profile."
+    },
+    "targetFps": {
+      "label": "Dynamic TDP target",
+      "description": "The frame rate Dynamic TDP holds in games without their own target."
+    },
+    "dynamicMin": {
+      "label": "Dynamic TDP lowest watts",
+      "description": "Never below this, even when the target is easy to reach."
+    },
+    "dynamicMax": {
+      "label": "Dynamic TDP highest watts",
+      "description": "Never above this, even when the target is not reached (cooler and quieter)."
+    },
+    "perGame": {
+      "label": "Per-game profiles",
+      "description": "Switch to a game's own profile while it runs, and back afterwards."
+    },
+    "useWatts": {
+      "label": "Set watts",
+      "description": "Use the power helper's sustained and boost limits when it is installed."
+    },
+    "helper": {
+      "label": "Power helper",
+      "install": "Install",
+      "update": "Update",
+      "remove": "Remove",
+      "installFailed": "Could not install the power helper",
+      "removeFailed": "Could not remove the power helper"
+    }
+  },
+  "memory": {
+    "title": "Memory",
+    "label": "Free up memory while PlayOut is running",
+    "manual": "Manual cleanup",
+    "freeNow": "Free memory now",
+    "failed": "Could not free memory",
+    "description": "Trims background apps when a game starts and when memory runs low. Temporary: Windows refills its cache, and apps you switch back to may be slow for a moment.",
+    "ago": {
+      "justNow": "just now",
+      "minutes_one": "{count} minute ago",
+      "minutes_other": "{count} minutes ago",
+      "hours_one": "{count} hour ago",
+      "hours_other": "{count} hours ago",
+      "days_one": "{count} day ago",
+      "days_other": "{count} days ago"
+    },
+    "pass": {
+      "nothing": "Nothing could be freed this time",
+      "freed": "Freed {size}",
+      "freedIn": "Freed {size} in {seconds} s"
+    },
+    "result": {
+      "checking": "Checking…",
+      "running": "Freeing memory…",
+      "idle": "Runs one cleanup now. PlayOut, your game and the app in front are never touched.",
+      "withAgo": "{result} · {ago}"
+    },
+    "tier": {
+      "missing": "Only your own apps are trimmed. System-wide cleanup needs the power helper: install it from the Power helper row above.",
+      "outdated": "Only your own apps are trimmed. System-wide cleanup needs the newer power helper: press Install or Update in the Power helper row above.",
+      "notAnswering": "Only your own apps are trimmed. The power helper is not answering: remove it and install it again from the Power helper row above.",
+      "unavailable": "Only your own apps are trimmed: system-wide cleanup needs the power helper, which is not available on this PC."
+    }
+  },
+  "music": {
+    "title": "Music",
+    "folder": {
+      "label": "Music folder",
+      "description": "Music files (mp3, m4a, aac, flac, ogg, opus, wav) the overlay can play over any game.",
+      "notSet": "Not set",
+      "chooseFailed": "Could not choose the music folder"
+    },
+    "gameStart": {
+      "label": "When a game starts",
+      "description": "Games get their own playlists in the overlay's Music tab."
+    },
+    "note": "Music plays from the overlay's player: open it with the home button to see what is playing.",
+    "volume": "Music volume"
+  },
+  "windows": {
+    "title": "Windows settings",
+    "note": "Opens the matching page of the Windows Settings app.",
+    "failed": "Could not open Windows settings",
+    "pages": {
+      "bluetooth": "Bluetooth",
+      "wifi": "Wi-Fi",
+      "sound": "Sound",
+      "display": "Display",
+      "power": "Power",
+      "controllers": "Controllers"
+    }
+  },
+  "controllerWake": {
+    "working": "Asking Windows for administrator approval…",
+    "offDeclined": "Turning wake off needs administrator approval, which was declined. Turn the switch on and off again to ask again.",
+    "offFailed": "Windows did not turn wake off. Turn the switch on and off again to try again, or untick \"Allow this device to wake the computer\" in Device Manager.",
+    "offFailedFor": "Windows did not turn wake off for {devices}. Turn the switch on and off again to try again, or untick \"Allow this device to wake the computer\" in Device Manager.",
+    "unreadable": "The wake settings could not be read from Windows.",
+    "declined": "Administrator approval was declined. Turn the switch off and on again to ask again.",
+    "refused": "Windows did not allow {refused}. In Device Manager, open it, Power Management, and tick \"Allow this device to wake the computer\"; or turn the switch off and on again to try again.",
+    "refusedBeside": "Wakes the PC: {wakes}. Windows did not allow {refused}. In Device Manager, open it, Power Management, and tick \"Allow this device to wake the computer\"; or turn the switch off and on again to try again.",
+    "wakes": "Wakes the PC: {devices}.",
+    "waiting": "Waiting to allow: {devices}.",
+    "locked": "Windows lists {devices} as able to wake the PC but does not let its setting be changed. Check that the Xbox accessories driver is installed.",
+    "adapterCannotWake": "The Xbox Wireless Adapter is plugged in, but Windows does not list it as able to wake this PC. Check that its driver is installed, and that sleep in the BIOS allows USB wake (S3).",
+    "noDevice": "No Xbox Wireless Adapter or wired Xbox controller that can wake this PC was found. Plug one in; it is set up at the next start, or when the switch is turned on again."
+  }
+}

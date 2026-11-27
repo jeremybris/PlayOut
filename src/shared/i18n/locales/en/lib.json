@@ -1,0 +1,396 @@
+{
+  "format": {
+    "minutes": "{count} min",
+    "hours_one": "{count} hour",
+    "hours_other": "{count} hours",
+    "minutesTitle": "{count} Min",
+    "hoursTitle_one": "{count} Hour",
+    "hoursTitle_other": "{count} Hours",
+    "minutesVsBeat_one": "{minutes} Min / {count} Hr",
+    "minutesVsBeat_other": "{minutes} Min / {count} Hrs",
+    "hoursVsBeat_one": "{played} / {count} Hr",
+    "hoursVsBeat_other": "{played} / {count} Hrs",
+    "hoursShort_one": "{count} hr",
+    "hoursShort_other": "{count} hrs",
+    "reviews": "Reviews",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo_one": "{count} day ago",
+    "daysAgo_other": "{count} days ago"
+  },
+  "account": {
+    "finishSignIn": "Finish signing in in the window that opened…",
+    "checking": "Checking your account…",
+    "installedOnly": "Installed games only — {reason}",
+    "installedOnlyNoSignIn": "Installed games only — no {store} sign-in available",
+    "notSignedIn": "Not signed in",
+    "signedInAs": "Signed in as {name}",
+    "signedInAsYou": "Signed in as you",
+    "importing": "importing your library…",
+    "games_one": "{count} game",
+    "games_other": "{count} games",
+    "importedToday": "imported today",
+    "importedYesterday": "imported yesterday",
+    "importedDaysAgo_one": "imported {count} day ago",
+    "importedDaysAgo_other": "imported {count} days ago",
+    "importedOn": "imported {date}"
+  },
+  "controls": {
+    "filters": {
+      "vr": "VR",
+      "controller": "Controller",
+      "keyboard": "Mouse and Keyboard",
+      "touch": "Touch"
+    },
+    "badge": {
+      "pad": "Pad",
+      "vr": "VR",
+      "partial": "Partial",
+      "keyboard": "KB+M"
+    },
+    "console": "Played with a controller (console game)",
+    "vrOnly": "VR only: needs a VR headset",
+    "full": "Full controller support",
+    "fullVr": "Full controller support, VR supported",
+    "partial": "Partial controller support",
+    "partialVr": "Partial controller support, VR supported",
+    "vrSupported": "VR supported; keyboard and mouse otherwise",
+    "keyboard": "Keyboard and mouse"
+  },
+  "coop": {
+    "layouts": {
+      "fullScreen": "One per screen",
+      "stacked": "Stacked",
+      "sideBySide": "Side by side"
+    },
+    "descriptions": {
+      "fullScreen": "one player per screen",
+      "stacked": "stacked top and bottom",
+      "sideBySide": "side by side",
+      "grid": "a {grid} grid"
+    },
+    "monitors": {
+      "fullScreen": "full screen",
+      "main": "main monitor {layout}",
+      "second": "second monitor {layout}",
+      "third": "third monitor {layout}",
+      "fourth": "fourth monitor {layout}",
+      "numbered": "monitor {number} {layout}"
+    },
+    "risks": {
+      "steamless": "Steamless (removes Steam DRM)",
+      "smartsteamemu": "SmartSteamEmu (a Steam emulator)",
+      "eac": "an Easy Anti-Cheat bypass",
+      "list": "{first} and {last}"
+    },
+    "bar": {
+      "name": "Co-Op downloads",
+      "listing": "Listing the Co-Op handlers…",
+      "downloading": "Downloading Co-Op handlers · {done} of {total}",
+      "reading": "Reading Co-Op handlers · {done} of {total}",
+      "tools": "Downloading the Co-Op tools · {done} of {total} MB"
+    }
+  },
+  "credentials": {
+    "igdbNeedsSecret": "IGDB is off until the client secret is entered too: on the Twitch developer console, open the application, press New Secret and copy it here.",
+    "igdbNeedsId": "IGDB is off until the client ID is entered too: it is shown on the Twitch developer console under the application's name.",
+    "screenscraperNeedsDev": "Covers from ScreenScraper need the developer ID and password too: the user account alone does not work."
+  },
+  "installSize": {
+    "label": "Install size",
+    "about": "About {size}"
+  },
+  "folders": {
+    "notFound": "{path} not found.",
+    "notFoundMore": "{path} and {count} more not found.",
+    "movedRoms": "If you moved your ROMs, choose the Emulation folder they are in now (its roms folder) in Settings › Library.",
+    "movedGames": "If that drive is disconnected, connect it; if you moved the games, let their store or launcher find them in the new place."
+  },
+  "hltb": {
+    "hours": "{range} Hours"
+  },
+  "recent": {
+    "added": "Recently Added",
+    "favorites": "Favorites",
+    "played": "Most Played",
+    "recent": "Recent Games"
+  },
+  "metadataForm": {
+    "enterTitle": "Enter a title",
+    "releaseDate": "Enter the release date as YYYY-MM-DD, YYYY-MM or YYYY (month 01-12, day 01-31)"
+  },
+  "upgrades": {
+    "shadersDone": "Done {date}",
+    "shadersHint": "Removes shader stutter",
+    "dllsNone": "None in this game",
+    "dllsUnknown": "Newest versions unknown",
+    "dllsUpToDate": "Up to date"
+  },
+  "updates": {
+    "check": "Check for Updates",
+    "unknownVersion": "unknown",
+    "idle": "Updates are published as GitHub releases.",
+    "checking": "Checking…",
+    "checkingText": "Looking for a new version…",
+    "upToDate": "PlayOut {version} is the latest version.",
+    "openRelease": "Open release page",
+    "availablePortable": "Version {version} is available. The portable build cannot replace itself: download the new version from its release page.",
+    "download": "Download update",
+    "available": "Version {version} is available.",
+    "downloadingVersion": "Downloading version {version}",
+    "bytes": "{done} of {total}",
+    "speed": "{size}/s",
+    "downloading": "Downloading {percent}%",
+    "restart": "Restart to install",
+    "ready": "Version {version} is ready. PlayOut will close, install it and reopen.",
+    "installing": "Installing…",
+    "installingText": "Installing version {version}. PlayOut will reopen.",
+    "unavailable": "Updates are not available."
+  },
+  "streaming": {
+    "moonlight": "Downloading Moonlight…",
+    "moonlightPercent": "Downloading Moonlight… {percent}%",
+    "pairing": "Pairing…",
+    "starting": "Starting on {host}…",
+    "connecting": "Connecting…",
+    "paused": "Paused",
+    "downloading": "Downloading…",
+    "onHost": "On {host}",
+    "downloadSize": "Download size"
+  },
+  "scanBars": {
+    "count": "{done} of {total}",
+    "megabytes": "{done} of {total} MB",
+    "sizes": {
+      "name": "Install size scan",
+      "paused": "Install sizes paused: the stores are not answering. {left} left, trying again soon",
+      "checking": "Checking install sizes · {count}",
+      "measuring": "Checking install sizes · {count} · measuring {current}"
+    },
+    "ratings": {
+      "name": "Review scores",
+      "paused": "Review scores paused: Steam or IGDB is not answering. {left} left, trying again in 15 min",
+      "steam": "Reading review scores from Steam · {count}",
+      "igdb": "Reading review scores from IGDB · {count}"
+    },
+    "hltb": {
+      "name": "HowLongToBeat times",
+      "label": "Matching HowLongToBeat times · {count}"
+    },
+    "screenshots": {
+      "name": "Steam screenshot downloads",
+      "label": "Downloading Steam screenshots · {count} games"
+    },
+    "hostSync": {
+      "name": "Copying from your hosts",
+      "label": "Copying art and details from your hosts · {count}"
+    },
+    "players": {
+      "name": "LaunchBox player counts",
+      "downloading": "Downloading LaunchBox player counts · {size}",
+      "reading": "Reading LaunchBox player counts · {percent}%"
+    },
+    "art": {
+      "name": "Game art downloads",
+      "covers": "Downloading cover art · {count}",
+      "other": "Downloading game art · {count}"
+    },
+    "ps3": {
+      "name": "PS3 update",
+      "downloading": "Downloading {title}'s update · {size}",
+      "downloadingVersion": "Downloading {title}'s update {version} · {size}",
+      "installing": "Installing {title}'s update with RPCS3",
+      "installingVersion": "Installing {title}'s update {version} with RPCS3",
+      "checking": "Checking {title} for PS3 updates"
+    },
+    "emulators": {
+      "setupName": "Emulator setup",
+      "updatesName": "Emulator updates",
+      "runtimes": "Installing Visual C++ / DirectX runtimes",
+      "bios": "Linking BIOS files",
+      "updating": "Updating emulators",
+      "settingUp": "Setting up emulators",
+      "files": "{done} of {total} files"
+    }
+  },
+  "sections": {
+    "rail": {
+      "notInstalled": "Not inst",
+      "playable": "Play"
+    },
+    "months": {
+      "jan": "Jan",
+      "feb": "Feb",
+      "mar": "Mar",
+      "apr": "Apr",
+      "may": "May",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Aug",
+      "sep": "Sep",
+      "oct": "Oct",
+      "nov": "Nov",
+      "dec": "Dec"
+    },
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "yesterdayShort": "Yday",
+    "dayMonth": "{day} {month}",
+    "dayMonthYear": "{day} {month} {year}",
+    "monthYearShort": "{month} {year}",
+    "underOneHour": "Under 1 h",
+    "notPlayed": "Not played",
+    "neverPlayed": "Never played",
+    "never": "Never",
+    "unknown": "Unknown",
+    "unknownDate": "Unknown date",
+    "unknownSize": "Unknown size",
+    "noScore": "No score",
+    "noTime": "No time yet",
+    "activePlayers": {
+      "k100": "100K+ players",
+      "k10": "10K–100K",
+      "k1": "1K–10K",
+      "h100": "100–1K",
+      "under100": "Under 100",
+      "none": "No one playing",
+      "unknown": "Unknown"
+    },
+    "difficulty": {
+      "story": "Story",
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard",
+      "impossible": "Impossible",
+      "tools": "N/A (Tools)",
+      "toolsShort": "N/A"
+    }
+  },
+  "tabs": {
+    "hint": {
+      "developer": "Developer",
+      "publisher": "Publisher",
+      "genre": "Genre"
+    },
+    "allGames": "All Games",
+    "settings": "Settings",
+    "coop": "Co-Op",
+    "recomp": "Recompilations",
+    "favorites": "Favorites",
+    "hidden": "Hidden",
+    "recommended": {
+      "allGames": "Every game from every store, A to Z, playable games first."
+    }
+  },
+  "view": {
+    "sort": {
+      "title": "A-Z",
+      "recent": "Played - Recently",
+      "mostPlayed": "Played - Most",
+      "players": "Popularity",
+      "reviews": "Reviews",
+      "added": "Recently Added",
+      "release": "Release",
+      "size": "Size",
+      "difficulty": "Difficulty",
+      "hltb": "H.L.T.B."
+    },
+    "other": "Other",
+    "hltbLookup_one": "Looking up H.L.T.B. times… {count} game left",
+    "hltbLookup_other": "Looking up H.L.T.B. times… {count} games left"
+  },
+  "genreTagPicker": {
+    "none": "None"
+  },
+  "players": {
+    "band": "{players} Players",
+    "party": "Party Games",
+    "so": "S.O. Games",
+    "lanParty": "L.A.N. Party",
+    "all": "Local Multiplayer"
+  },
+  "eras": {
+    "present": "{year}-Present",
+    "before": "Before {year}"
+  },
+  "stores": {
+    "all": "All Stores",
+    "other": "Other"
+  },
+  "platforms": {
+    "all": "All Platforms"
+  },
+  "tags": {
+    "2d": "2D",
+    "action": "Action",
+    "actionRpg": "Action RPG",
+    "adventure": "Adventure",
+    "anime": "Anime",
+    "boardGame": "Board Game",
+    "building": "Building",
+    "casual": "Casual",
+    "choicesMatter": "Choices Matter",
+    "chooseYourOwnAdventure": "Choose Your Own Adventure",
+    "cityBuilder": "City Builder",
+    "classic": "Classic",
+    "destruction": "Destruction",
+    "detective": "Detective",
+    "difficult": "Difficult",
+    "driving": "Driving",
+    "exploration": "Exploration",
+    "familyFriendly": "Family Friendly",
+    "fantasy": "Fantasy",
+    "fastPaced": "Fast-Paced",
+    "flight": "Flight",
+    "fps": "FPS",
+    "freeToPlay": "Free to Play",
+    "funny": "Funny",
+    "futuristic": "Futuristic",
+    "hiddenObject": "Hidden Object",
+    "historical": "Historical",
+    "horror": "Horror",
+    "immersiveSim": "Immersive Sim",
+    "jrpg": "JRPG",
+    "logic": "Logic",
+    "management": "Management",
+    "massivelyMultiplayer": "Massively Multiplayer",
+    "metroidvania": "Metroidvania",
+    "minimalist": "Minimalist",
+    "mystery": "Mystery",
+    "openWorld": "Open World",
+    "parkour": "Parkour",
+    "physics": "Physics",
+    "pixelGraphics": "Pixel Graphics",
+    "platformer": "Platformer",
+    "pointClick": "Point & Click",
+    "proceduralGeneration": "Procedural Generation",
+    "psychologicalHorror": "Psychological Horror",
+    "puzzle": "Puzzle",
+    "puzzlePlatformer": "Puzzle Platformer",
+    "racing": "Racing",
+    "realistic": "Realistic",
+    "relaxing": "Relaxing",
+    "remake": "Remake",
+    "replayValue": "Replay Value",
+    "resourceManagement": "Resource Management",
+    "retro": "Retro",
+    "roguelike": "Roguelike",
+    "rpg": "RPG",
+    "rts": "RTS",
+    "sandbox": "Sandbox",
+    "scienceFiction": "Science Fiction",
+    "shooter": "Shooter",
+    "simulation": "Simulation",
+    "space": "Space",
+    "sports": "Sports",
+    "stealth": "Stealth",
+    "storyRich": "Story Rich",
+    "strategy": "Strategy",
+    "survival": "Survival",
+    "tactical": "Tactical",
+    "towerDefense": "Tower Defense",
+    "turnBased": "Turn-Based",
+    "utilities": "Utilities",
+    "visualNovel": "Visual Novel"
+  }
+}

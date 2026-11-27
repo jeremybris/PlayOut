@@ -1,0 +1,7 @@
+{
+  "title": "Connect to a PlayOut host?",
+  "notNow": "Not now",
+  "messageOne": "PlayOut is running on {name} on your network. Connect to it to get its games, metadata and logins, and its Emulation folder (BIOS, saves and the rest). You type the PIN that computer shows in Settings › Streaming › Show PIN.",
+  "messageMany_other": "PlayOut is running on {count} computers on your network. Connect to one to get its games, metadata and logins, and its Emulation folder (BIOS, saves and the rest). You type the PIN that computer shows in Settings › Streaming › Show PIN.",
+  "connectTo": "Connect to {name}"
+}

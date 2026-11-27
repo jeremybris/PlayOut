@@ -1,0 +1,7 @@
+{
+  "unknownGame": "juego",
+  "sessionStarted": "Jugando a {title}",
+  "sessionEnded": "Jugaste a {title} durante {time}",
+  "installDone": "{title} está instalado",
+  "installFailed": "Falló la instalación de {title}"
+}

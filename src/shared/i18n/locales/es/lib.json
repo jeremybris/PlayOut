@@ -1,0 +1,396 @@
+{
+  "format": {
+    "minutes": "{count} min",
+    "hours_one": "{count} hora",
+    "hours_other": "{count} horas",
+    "minutesTitle": "{count} Min",
+    "hoursTitle_one": "{count} Hora",
+    "hoursTitle_other": "{count} Horas",
+    "minutesVsBeat_one": "{minutes} Min / {count} h",
+    "minutesVsBeat_other": "{minutes} Min / {count} h",
+    "hoursVsBeat_one": "{played} / {count} h",
+    "hoursVsBeat_other": "{played} / {count} h",
+    "hoursShort_one": "{count} h",
+    "hoursShort_other": "{count} h",
+    "reviews": "Reseñas",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "daysAgo_one": "Hace {count} día",
+    "daysAgo_other": "Hace {count} días"
+  },
+  "account": {
+    "finishSignIn": "Termina de iniciar sesión en la ventana que se abrió…",
+    "checking": "Comprobando tu cuenta…",
+    "installedOnly": "Solo juegos instalados — {reason}",
+    "installedOnlyNoSignIn": "Solo juegos instalados — no hay inicio de sesión de {store}",
+    "notSignedIn": "Sin iniciar sesión",
+    "signedInAs": "Sesión iniciada como {name}",
+    "signedInAsYou": "Sesión iniciada",
+    "importing": "importando tu biblioteca…",
+    "games_one": "{count} juego",
+    "games_other": "{count} juegos",
+    "importedToday": "importada hoy",
+    "importedYesterday": "importada ayer",
+    "importedDaysAgo_one": "importada hace {count} día",
+    "importedDaysAgo_other": "importada hace {count} días",
+    "importedOn": "importada el {date}"
+  },
+  "controls": {
+    "filters": {
+      "vr": "RV",
+      "controller": "Mando",
+      "keyboard": "Teclado y ratón",
+      "touch": "Táctil"
+    },
+    "badge": {
+      "pad": "Mando",
+      "vr": "RV",
+      "partial": "Parcial",
+      "keyboard": "T+R"
+    },
+    "console": "Se juega con mando (juego de consola)",
+    "vrOnly": "Solo RV: necesita un visor de RV",
+    "full": "Compatibilidad total con mando",
+    "fullVr": "Compatibilidad total con mando, compatible con RV",
+    "partial": "Compatibilidad parcial con mando",
+    "partialVr": "Compatibilidad parcial con mando, compatible con RV",
+    "vrSupported": "Compatible con RV; si no, teclado y ratón",
+    "keyboard": "Teclado y ratón"
+  },
+  "coop": {
+    "layouts": {
+      "fullScreen": "Una por pantalla",
+      "stacked": "Apiladas",
+      "sideBySide": "Lado a lado"
+    },
+    "descriptions": {
+      "fullScreen": "un jugador por pantalla",
+      "stacked": "apiladas arriba y abajo",
+      "sideBySide": "lado a lado",
+      "grid": "una cuadrícula de {grid}"
+    },
+    "monitors": {
+      "fullScreen": "pantalla completa",
+      "main": "monitor principal: {layout}",
+      "second": "segundo monitor: {layout}",
+      "third": "tercer monitor: {layout}",
+      "fourth": "cuarto monitor: {layout}",
+      "numbered": "monitor {number}: {layout}"
+    },
+    "risks": {
+      "steamless": "Steamless (quita el DRM de Steam)",
+      "smartsteamemu": "SmartSteamEmu (un emulador de Steam)",
+      "eac": "una forma de saltarse Easy Anti-Cheat",
+      "list": "{first} y {last}"
+    },
+    "bar": {
+      "name": "Descargas de Co-Op",
+      "listing": "Listando los handlers de Co-Op…",
+      "downloading": "Descargando handlers de Co-Op · {done} de {total}",
+      "reading": "Leyendo handlers de Co-Op · {done} de {total}",
+      "tools": "Descargando las herramientas de Co-Op · {done} de {total} MB"
+    }
+  },
+  "credentials": {
+    "igdbNeedsSecret": "IGDB está desactivado hasta que también escribas el secreto de cliente: en la consola de desarrolladores de Twitch, abre la aplicación, pulsa New Secret y cópialo aquí.",
+    "igdbNeedsId": "IGDB está desactivado hasta que también escribas el ID de cliente: aparece en la consola de desarrolladores de Twitch bajo el nombre de la aplicación.",
+    "screenscraperNeedsDev": "Las portadas de ScreenScraper también necesitan el ID y la contraseña de desarrollador: la cuenta de usuario sola no basta."
+  },
+  "installSize": {
+    "label": "Tamaño instalado",
+    "about": "Unos {size}"
+  },
+  "folders": {
+    "notFound": "No se encontró {path}.",
+    "notFoundMore": "No se encontraron {path} ni {count} más.",
+    "movedRoms": "Si moviste tus ROM, elige la carpeta Emulation donde están ahora (su carpeta roms) en Ajustes › Biblioteca.",
+    "movedGames": "Si esa unidad está desconectada, conéctala; si moviste los juegos, deja que su tienda o lanzador los encuentre en el nuevo lugar."
+  },
+  "hltb": {
+    "hours": "{range} horas"
+  },
+  "recent": {
+    "added": "Añadidos recientemente",
+    "favorites": "Favoritos",
+    "played": "Más jugados",
+    "recent": "Juegos recientes"
+  },
+  "metadataForm": {
+    "enterTitle": "Escribe un título",
+    "releaseDate": "Escribe la fecha de lanzamiento como AAAA-MM-DD, AAAA-MM o AAAA (mes 01-12, día 01-31)"
+  },
+  "upgrades": {
+    "shadersDone": "Hecho {date}",
+    "shadersHint": "Elimina los tirones por sombreadores",
+    "dllsNone": "Ninguno en este juego",
+    "dllsUnknown": "Versiones más nuevas desconocidas",
+    "dllsUpToDate": "Al día"
+  },
+  "updates": {
+    "check": "Buscar actualizaciones",
+    "unknownVersion": "desconocida",
+    "idle": "Las actualizaciones se publican como versiones de GitHub.",
+    "checking": "Buscando…",
+    "checkingText": "Buscando una versión nueva…",
+    "upToDate": "PlayOut {version} es la última versión.",
+    "openRelease": "Abrir página de la versión",
+    "availablePortable": "La versión {version} está disponible. La versión portátil no puede reemplazarse a sí misma: descarga la nueva versión desde su página.",
+    "download": "Descargar actualización",
+    "available": "La versión {version} está disponible.",
+    "downloadingVersion": "Descargando la versión {version}",
+    "bytes": "{done} de {total}",
+    "speed": "{size}/s",
+    "downloading": "Descargando {percent}%",
+    "restart": "Reiniciar para instalar",
+    "ready": "La versión {version} está lista. PlayOut se cerrará, la instalará y volverá a abrirse.",
+    "installing": "Instalando…",
+    "installingText": "Instalando la versión {version}. PlayOut volverá a abrirse.",
+    "unavailable": "Las actualizaciones no están disponibles."
+  },
+  "streaming": {
+    "moonlight": "Descargando Moonlight…",
+    "moonlightPercent": "Descargando Moonlight… {percent}%",
+    "pairing": "Emparejando…",
+    "starting": "Iniciando en {host}…",
+    "connecting": "Conectando…",
+    "paused": "En pausa",
+    "downloading": "Descargando…",
+    "onHost": "En {host}",
+    "downloadSize": "Tamaño de descarga"
+  },
+  "scanBars": {
+    "count": "{done} de {total}",
+    "megabytes": "{done} de {total} MB",
+    "sizes": {
+      "name": "Análisis de tamaños instalados",
+      "paused": "Tamaños instalados en pausa: las tiendas no responden. Quedan {left}; se reintentará pronto",
+      "checking": "Comprobando tamaños instalados · {count}",
+      "measuring": "Comprobando tamaños instalados · {count} · midiendo {current}"
+    },
+    "ratings": {
+      "name": "Puntuaciones de reseñas",
+      "paused": "Puntuaciones en pausa: Steam o IGDB no responden. Quedan {left}; se reintentará en 15 min",
+      "steam": "Leyendo puntuaciones de Steam · {count}",
+      "igdb": "Leyendo puntuaciones de IGDB · {count}"
+    },
+    "hltb": {
+      "name": "Tiempos de HowLongToBeat",
+      "label": "Buscando tiempos de HowLongToBeat · {count}"
+    },
+    "screenshots": {
+      "name": "Descargas de capturas de Steam",
+      "label": "Descargando capturas de Steam · {count} juegos"
+    },
+    "hostSync": {
+      "name": "Copiando de tus hosts",
+      "label": "Copiando imágenes y detalles de tus hosts · {count}"
+    },
+    "players": {
+      "name": "Número de jugadores de LaunchBox",
+      "downloading": "Descargando el número de jugadores de LaunchBox · {size}",
+      "reading": "Leyendo el número de jugadores de LaunchBox · {percent}%"
+    },
+    "art": {
+      "name": "Descargas de imágenes de juegos",
+      "covers": "Descargando portadas · {count}",
+      "other": "Descargando imágenes de juegos · {count}"
+    },
+    "ps3": {
+      "name": "Actualización de PS3",
+      "downloading": "Descargando la actualización de {title} · {size}",
+      "downloadingVersion": "Descargando la actualización {version} de {title} · {size}",
+      "installing": "Instalando la actualización de {title} con RPCS3",
+      "installingVersion": "Instalando la actualización {version} de {title} con RPCS3",
+      "checking": "Buscando actualizaciones de PS3 para {title}"
+    },
+    "emulators": {
+      "setupName": "Configuración de emuladores",
+      "updatesName": "Actualizaciones de emuladores",
+      "runtimes": "Instalando los componentes de Visual C++ / DirectX",
+      "bios": "Vinculando archivos de BIOS",
+      "updating": "Actualizando emuladores",
+      "settingUp": "Configurando emuladores",
+      "files": "{done} de {total} archivos"
+    }
+  },
+  "sections": {
+    "rail": {
+      "notInstalled": "No inst",
+      "playable": "Jugar"
+    },
+    "months": {
+      "jan": "ene",
+      "feb": "feb",
+      "mar": "mar",
+      "apr": "abr",
+      "may": "may",
+      "jun": "jun",
+      "jul": "jul",
+      "aug": "ago",
+      "sep": "sept",
+      "oct": "oct",
+      "nov": "nov",
+      "dec": "dic"
+    },
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "yesterdayShort": "Ayer",
+    "dayMonth": "{day} {month}",
+    "dayMonthYear": "{day} {month} {year}",
+    "monthYearShort": "{month} {year}",
+    "underOneHour": "Menos de 1 h",
+    "notPlayed": "Sin jugar",
+    "neverPlayed": "Nunca jugados",
+    "never": "Nunca",
+    "unknown": "Desconocida",
+    "unknownDate": "Fecha desconocida",
+    "unknownSize": "Tamaño desconocido",
+    "noScore": "Sin puntuación",
+    "noTime": "Sin tiempo todavía",
+    "activePlayers": {
+      "k100": "100K+ jugadores",
+      "k10": "10K–100K",
+      "k1": "1K–10K",
+      "h100": "100–1K",
+      "under100": "Menos de 100",
+      "none": "Nadie jugando",
+      "unknown": "Desconocido"
+    },
+    "difficulty": {
+      "story": "Historia",
+      "easy": "Fácil",
+      "medium": "Media",
+      "hard": "Difícil",
+      "impossible": "Imposible",
+      "tools": "N/D (Herramientas)",
+      "toolsShort": "N/D"
+    }
+  },
+  "tabs": {
+    "hint": {
+      "developer": "Desarrollador",
+      "publisher": "Editor",
+      "genre": "Género"
+    },
+    "allGames": "Todos los juegos",
+    "settings": "Ajustes",
+    "coop": "Co-Op",
+    "recomp": "Recompilaciones",
+    "favorites": "Favoritos",
+    "hidden": "Ocultos",
+    "recommended": {
+      "allGames": "Todos los juegos de todas las tiendas, de la A a la Z, primero los que se pueden jugar."
+    }
+  },
+  "view": {
+    "sort": {
+      "title": "A-Z",
+      "recent": "Jugados - Recientes",
+      "mostPlayed": "Jugados - Más",
+      "players": "Popularidad",
+      "reviews": "Reseñas",
+      "added": "Añadidos recientemente",
+      "release": "Lanzamiento",
+      "size": "Tamaño",
+      "difficulty": "Dificultad",
+      "hltb": "H.L.T.B."
+    },
+    "other": "Otros",
+    "hltbLookup_one": "Buscando tiempos de H.L.T.B.… queda {count} juego",
+    "hltbLookup_other": "Buscando tiempos de H.L.T.B.… quedan {count} juegos"
+  },
+  "genreTagPicker": {
+    "none": "Ninguno"
+  },
+  "players": {
+    "band": "{players} jugadores",
+    "party": "Juegos de fiesta",
+    "so": "Juegos en pareja",
+    "lanParty": "L.A.N. Party",
+    "all": "Multijugador local"
+  },
+  "eras": {
+    "present": "{year}-actualidad",
+    "before": "Antes de {year}"
+  },
+  "stores": {
+    "all": "Todas las tiendas",
+    "other": "Otros"
+  },
+  "platforms": {
+    "all": "Todas las plataformas"
+  },
+  "tags": {
+    "2d": "2D",
+    "action": "Acción",
+    "actionRpg": "RPG de acción",
+    "adventure": "Aventura",
+    "anime": "Anime",
+    "boardGame": "Juego de mesa",
+    "building": "Construcción",
+    "casual": "Casual",
+    "choicesMatter": "Decisiones importantes",
+    "chooseYourOwnAdventure": "Elige tu propia aventura",
+    "cityBuilder": "Construcción de ciudades",
+    "classic": "Clásico",
+    "destruction": "Destrucción",
+    "detective": "Detectives",
+    "difficult": "Difícil",
+    "driving": "Conducción",
+    "exploration": "Exploración",
+    "familyFriendly": "Para toda la familia",
+    "fantasy": "Fantasía",
+    "fastPaced": "Ritmo rápido",
+    "flight": "Vuelo",
+    "fps": "FPS",
+    "freeToPlay": "Gratuito",
+    "funny": "Divertido",
+    "futuristic": "Futurista",
+    "hiddenObject": "Objetos ocultos",
+    "historical": "Histórico",
+    "horror": "Terror",
+    "immersiveSim": "Simulación inmersiva",
+    "jrpg": "JRPG",
+    "logic": "Lógica",
+    "management": "Gestión",
+    "massivelyMultiplayer": "Multijugador masivo",
+    "metroidvania": "Metroidvania",
+    "minimalist": "Minimalista",
+    "mystery": "Misterio",
+    "openWorld": "Mundo abierto",
+    "parkour": "Parkour",
+    "physics": "Física",
+    "pixelGraphics": "Gráficos pixelados",
+    "platformer": "Plataformas",
+    "pointClick": "Apuntar y hacer clic",
+    "proceduralGeneration": "Generación procedimental",
+    "psychologicalHorror": "Terror psicológico",
+    "puzzle": "Puzles",
+    "puzzlePlatformer": "Plataformas y puzles",
+    "racing": "Carreras",
+    "realistic": "Realista",
+    "relaxing": "Relajante",
+    "remake": "Remake",
+    "replayValue": "Rejugable",
+    "resourceManagement": "Gestión de recursos",
+    "retro": "Retro",
+    "roguelike": "Roguelike",
+    "rpg": "RPG",
+    "rts": "RTS",
+    "sandbox": "Sandbox",
+    "scienceFiction": "Ciencia ficción",
+    "shooter": "Disparos",
+    "simulation": "Simulación",
+    "space": "Espacio",
+    "sports": "Deportes",
+    "stealth": "Sigilo",
+    "storyRich": "Gran historia",
+    "strategy": "Estrategia",
+    "survival": "Supervivencia",
+    "tactical": "Táctico",
+    "towerDefense": "Defensa de torres",
+    "turnBased": "Por turnos",
+    "utilities": "Utilidades",
+    "visualNovel": "Novela visual"
+  }
+}

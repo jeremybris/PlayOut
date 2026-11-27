@@ -1,0 +1,70 @@
+{
+  "presetsFailed": "{name} se configuró, pero no se pudieron aplicar sus ajustes de pantalla completa y mandos: {error}",
+  "noDownload": "no se encontró ninguna descarga",
+  "coresMissing": "no se encontraron los núcleos de RetroArch después de descomprimir",
+  "exeNotDownloaded": "{file} no está en los archivos descargados",
+  "exeNotInDrive": "{file} no está en la carpeta de Drive",
+  "runtimesFailed": "No se pudieron instalar los componentes de Visual C++ / DirectX: {error}",
+  "foldersNotSet": "{name} se instaló, pero no se pudieron configurar sus carpetas: {error}",
+  "processesUnreadable": "no se pudo leer la lista de programas en ejecución, así que no se tocó",
+  "update": {
+    "exeMissingBack": "falta {file} después de la actualización; se restauró la versión anterior",
+    "exeMissingPending": "falta {file} después de la actualización, y algunos archivos anteriores aún no se pudieron restaurar (PlayOut lo reintenta en su próximo inicio)",
+    "incompleteBack": "no se pudo completar la actualización ({error}); se restauró la versión anterior",
+    "incompletePending": "no se pudo completar la actualización ({error}); PlayOut restaura la versión anterior en su próximo inicio",
+    "foldersNotSet": "{name} se actualizó, pero no se pudieron configurar sus carpetas: {error}",
+    "undoPending": "{name}: aún no se pudo deshacer por completo una actualización interrumpida; PlayOut lo reintenta en su próximo inicio",
+    "earlierKept": "no se pudo deshacer una actualización anterior de esta carpeta; sus archivos se conservan en {folder}",
+    "notPutBack": "{error}; algunos archivos no se pudieron restaurar (se conservan en {folder})"
+  },
+  "bios": {
+    "failed": "{emulator}: no se pudieron configurar los archivos de BIOS ({error}).",
+    "ps3Firmware": "RPCS3: no se pudo instalar el firmware de PS3 desde {file}.",
+    "switchKeys": "Ryujinx: no se pudieron copiar las claves de Switch desde {file}.",
+    "switchFirmware": "Ryujinx: no se pudo instalar el firmware de Switch desde {folder}.",
+    "gamecubeIpl": "Dolphin: no se pudo copiar el IPL de GameCube para {regions}.",
+    "mgba": "mGBA: no se pudieron escribir las rutas de BIOS en config.ini."
+  },
+  "runtimes": {
+    "vcStillMissing": "El componente Visual C++ sigue pareciendo ausente después de instalarlo; reiniciar Windows puede ayudar.",
+    "dxStillMissing": "El componente DirectX 9 sigue pareciendo ausente después de instalarlo; reiniciar Windows puede ayudar.",
+    "vcDeclined": "Se rechazó la instalación de Visual C++; algunos emuladores no se iniciarán hasta que esté instalado.",
+    "vcFailed": "Falló la instalación de Visual C++ (código {code}).",
+    "dxIncomplete": "La descarga de DirectX 9 quedó incompleta ({size} de {expected} bytes).",
+    "dxDeclined": "Se rechazó la instalación de DirectX 9; algunos emuladores no se iniciarán hasta que esté instalado.",
+    "dxFailed": "Falló la instalación de DirectX 9 (código {code}).",
+    "vcInstallError": "No se pudo instalar el componente Visual C++: {error}",
+    "dxInstallError": "No se pudo instalar el componente DirectX 9: {error}"
+  },
+  "download": {
+    "rateLimit": "Se alcanzó el límite de la API de GitHub (60 consultas por hora por dirección); inténtalo de nuevo más tarde",
+    "refused": "La API de GitHub rechazó la consulta (HTTP {status}, probablemente por su límite); inténtalo de nuevo más tarde",
+    "stalled": "la descarga se estancó",
+    "noData": "{file}: el servidor no envió datos",
+    "wrongSize": "{file}: se descargaron {size} bytes, se esperaban {expected} (descarga dañada)",
+    "checksum": "{file}: la descarga está dañada o no es el archivo esperado (la suma de verificación no coincide)"
+  },
+  "drive": {
+    "tooDeep": "la carpeta de Drive tiene más de {max} niveles de carpetas",
+    "tooManyFolders": "la carpeta de Drive tiene más de {max} carpetas",
+    "notListed": "No se pudo listar la carpeta de Drive {folder} (¿está compartida públicamente?)",
+    "tooManyFiles": "la carpeta de Drive tiene más de {max} archivos",
+    "webPage": "Google Drive envió una página web en lugar del archivo (¿límite de descargas?)",
+    "empty": "la carpeta de Drive está vacía"
+  },
+  "archive": {
+    "notArchive": "{file} no es un archivo zip, 7z ni autoextraíble",
+    "tarFailed": "no se pudo descomprimir {file} (tar salió con {code}: {output})",
+    "unpackFailed": "no se pudo descomprimir {file} ({error})",
+    "sfxFailed": "no se pudo descomprimir {file} (el autoextraíble salió con {code}: {output})"
+  },
+  "junction": {
+    "inTheWay": "No se puede enlazar: {path} está en el camino (quítalo e inténtalo de nuevo)",
+    "failed": "No se pudo enlazar {link} con {target}: {reason}. La carpeta Emulation debe estar en una unidad NTFS local.",
+    "self": "La unión {link} apuntaría a sí misma",
+    "fileInTheWay": "No se puede enlazar {link}: hay un archivo en el camino"
+  },
+  "hdd": {
+    "notMoved": "el disco duro de PS3 no se movió por completo a Updates and DLC: {error}"
+  }
+}

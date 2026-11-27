@@ -1,0 +1,64 @@
+{
+  "title": "Cloud metadata",
+  "repository": "Repository",
+  "repositoryLabel": "Open the PlayOut metadata repository (opens in your browser)",
+  "note": "Corrections made with the pen on a game's page are shared through the PlayOut metadata cloud, a public GitHub repository every PlayOut reads without an account. A cloud correction replaces what the scrapers found; your own edit on this PC replaces both. Artwork is not part of it and stays on this PC.",
+  "cloud": {
+    "label": "PlayOut cloud",
+    "lastError": "Last attempt failed: {error}",
+    "checkNow": "Check now"
+  },
+  "suggest": {
+    "label": "Suggest my edits"
+  },
+  "relay": {
+    "label": "Suggestion relay URL",
+    "placeholder": "Not set (https://…workers.dev)",
+    "save": "Save",
+    "share": "Share with every PlayOut",
+    "usingShared": "Using the relay the repository announces ({url}).",
+    "note": "The relay is the free Cloudflare Worker in metadata-relay (see its SETUP.md) that turns edits into pull requests for the maintainer. Leave it empty to use the one the repository announces."
+  },
+  "suggestions": {
+    "title": "Suggestions",
+    "titleCount": "Suggestions ({number})",
+    "refresh": "Refresh",
+    "none": "No open suggestions.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "openLabel": "Open suggestion {number} on GitHub (opens in your browser)",
+    "noChange": "No field would change."
+  },
+  "toasts": {
+    "relaySaved": "Relay saved",
+    "approved": "{game}: approved; every PlayOut gets it with the next sync",
+    "rejected": "{game}: suggestion rejected",
+    "relayShared": "Relay URL shared; every PlayOut picks it up with its next sync"
+  },
+  "status": {
+    "checking": "Checking for corrections…",
+    "notChecked": "Not checked yet",
+    "checked": "Checked",
+    "checkedJustNow": "Checked just now",
+    "checkedMinutes_one": "Checked {count} min ago",
+    "checkedMinutes_other": "Checked {count} min ago",
+    "checkedHours_one": "Checked {count} h ago",
+    "checkedHours_other": "Checked {count} h ago",
+    "checkedOn": "Checked on {date}",
+    "corrected_one": "{count} game corrected, {library} in your library",
+    "corrected_other": "{count} games corrected, {library} in your library",
+    "noCorrections": "No corrections yet",
+    "edits": {
+      "published": "Your edits are published to the cloud as soon as you save them.",
+      "awaitingToken": "Your edits are published once GitHub confirms the token.",
+      "local": "Your edits stay on this PC.",
+      "suggested": "Your edits are suggested to the maintainer when you save them.",
+      "suggestedQueued_one": "Your edits are suggested to the maintainer when you save them. {count} edit waiting to be suggested.",
+      "suggestedQueued_other": "Your edits are suggested to the maintainer when you save them. {count} edits waiting to be suggested.",
+      "noRelay": "Your edits are kept here and suggested once the suggestion service is set up.",
+      "noRelayQueued_one": "Your edits are kept here and suggested once the suggestion service is set up. {count} edit waiting to be suggested.",
+      "noRelayQueued_other": "Your edits are kept here and suggested once the suggestion service is set up. {count} edits waiting to be suggested.",
+      "twoSentences": "{first} {second}"
+    }
+  }
+}

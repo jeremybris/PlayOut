@@ -1,0 +1,34 @@
+{
+  "noHandler": "{title} has no Co-Op handler.",
+  "handlerMissing": "The Co-Op handler for {title} is missing: download the handlers again in Settings > Library.",
+  "noHelper": "This build of PlayOut has no Co-Op helper.",
+  "devicesFailed": "Could not list the controllers: {error}",
+  "exeMissing": "{exe} was not found in {title}'s install folder. Choose it in Co-Op setup.",
+  "theGameExe": "The game exe",
+  "sessionRunning": "A Co-Op session is already running.",
+  "alreadyStarting": "Co-Op is already starting a game.",
+  "preparing": "Getting Co-Op ready…",
+  "handlersFailed": "The Co-Op handlers could not be downloaded. Check the internet connection and try again.",
+  "keyboardMouse": "Keyboard and mouse",
+  "devicesTimeout": "the Co-Op helper did not list the devices in time",
+  "devicesExit": "the Co-Op helper failed to list devices (exit {code})",
+  "plan": {
+    "noDevices": "No controllers or keyboard found.",
+    "noControllers": "No controllers found. Connect a controller for each player.",
+    "monitors": "This game takes one player per monitor: connect another monitor for Co-Op.",
+    "twoPlayers": "Co-Op needs at least two players.",
+    "onlyKeyboard": "Co-Op needs two players: only the keyboard and mouse found. Connect another controller.",
+    "onlyKeyboardAllow": "Co-Op needs two players: only the keyboard and mouse found. Connect another controller, or allow the keyboard and mouse as a player in Settings > Library.",
+    "oneController": "Co-Op needs two players: one controller found. Connect another controller.",
+    "oneControllerAllow": "Co-Op needs two players: one controller found. Connect another controller, or allow the keyboard and mouse as a player in Settings > Library."
+  },
+  "tools": {
+    "rateLimited": "GitHub is limiting requests from this connection (HTTP {status}): the Nucleus Co-op tools could not be looked up. Try again in an hour.",
+    "unreadable": "the Nucleus Co-op release could not be read (unexpected answer from GitHub)",
+    "noRelease": "the Nucleus Co-op project has no release to take the tools from",
+    "noPackage": "the Nucleus Co-op release has no app package",
+    "lookupFailed": "the Nucleus Co-op release could not be looked up (HTTP {status})",
+    "lookupFailedSaid": "the Nucleus Co-op release could not be looked up (HTTP {status}: {said})"
+  },
+  "noHelperLower": "this build of PlayOut has no Co-Op helper"
+}

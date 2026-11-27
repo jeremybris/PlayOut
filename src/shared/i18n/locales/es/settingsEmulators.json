@@ -1,0 +1,112 @@
+{
+  "title": "Emuladores",
+  "lead": "{found} de {total} emuladores encontrados. PlayOut busca en las carpetas de instalación habituales; indícale el ejecutable cuando falte alguno.",
+  "leadLoading": "Buscando emuladores instalados…",
+  "toasts": {
+    "listFailed": "No se pudo leer la lista de emuladores",
+    "systemsFailed": "No se pudo leer la lista de sistemas",
+    "setupReadFailed": "No se pudo leer la configuración de emuladores",
+    "setupFailed": "No se pudo iniciar la configuración de emuladores",
+    "updateFailed": "No se pudieron actualizar los emuladores",
+    "folderFailed": "No se pudo abrir la carpeta",
+    "pathSet": "{name} apunta a {path}",
+    "overrideCleared": "Ruta personalizada de {name} borrada",
+    "pathFailed": "No se pudo actualizar {name}",
+    "filePickerFailed": "No se pudo abrir el selector de archivos",
+    "downloadFailed": "No se pudo abrir la página de descarga",
+    "folderPickerFailed": "No se pudo abrir el selector de carpetas"
+  },
+  "pickers": {
+    "locate": "Buscar {name}",
+    "programs": "Programas",
+    "cores": "Elige la carpeta de núcleos de RetroArch"
+  },
+  "detected": {
+    "title": "Emuladores detectados",
+    "searching": "Buscando emuladores",
+    "customPath": "Ruta personalizada",
+    "installedByPlayOut": "Instalado por PlayOut",
+    "detected": "Detectado",
+    "notFound": "No encontrado",
+    "browse": "Examinar",
+    "clearOverride": "Borrar ruta personalizada",
+    "installing": "Instalando…",
+    "install": "Instalar",
+    "download": "Descargar",
+    "hidePaths": "Ocultar rutas",
+    "searchedPaths": "Rutas buscadas",
+    "hidePathsLabel": "Ocultar las rutas buscadas de {name}",
+    "showPathsLabel": "Mostrar las rutas buscadas de {name}",
+    "locationsSearched_one": "{count} ubicación buscada",
+    "locationsSearched_other": "{count} ubicaciones buscadas",
+    "noFindRules": "No hay reglas de búsqueda para este emulador."
+  },
+  "cores": {
+    "label": "Carpeta de núcleos",
+    "detected": "Detectada: {path}",
+    "description": "Carpeta que contiene los núcleos *_libretro.dll. Déjala vacía para usar la carpeta junto a retroarch.exe.",
+    "autoDetect": "Detección automática",
+    "notSet": "Sin definir"
+  },
+  "ps3": {
+    "title": "Actualizaciones de juegos de PS3",
+    "label": "Actualizar juegos de PS3 automáticamente",
+    "description": "PlayOut consulta el servidor de actualizaciones de Sony para tus juegos de PS3 al iniciar y cuando se añade uno, e instala las actualizaciones que falten con RPCS3 en Updates and DLC\\PS3 mientras RPCS3 está cerrado. El menú de cada juego también tiene Actualizar juego de PS3."
+  },
+  "preferred": {
+    "title": "Emulador preferido por sistema",
+    "loading": "Cargando sistemas",
+    "noSystems": "No hay sistemas definidos.",
+    "notFound": "{label} (no encontrado)",
+    "withGames_one": "{count} juego · {available} de {total} emuladores disponibles",
+    "withGames_other": "{count} juegos · {available} de {total} emuladores disponibles",
+    "available": "{available} de {total} emuladores disponibles"
+  },
+  "playout": {
+    "title": "Emuladores de PlayOut",
+    "reading": "Leyendo la configuración de emuladores",
+    "installedIn": "Instalados en",
+    "settingUp": "Configurando emuladores…",
+    "installedCount": "{installed} de {total} emuladores instalados",
+    "setupRunning": "Configurando…",
+    "setup": "Configurar emuladores",
+    "open": "Abrir",
+    "bios": {
+      "label": "Carpeta de BIOS",
+      "description": "Pon aquí tus archivos de BIOS y firmware; PlayOut enlaza todos los emuladores a ella."
+    },
+    "update": {
+      "label": "Actualizar todos los emuladores",
+      "first": "Configura los emuladores primero; luego esto los actualiza.",
+      "description": "Instala la compilación nightly más reciente de cada emulador que instaló PlayOut (la estable cuando no se publica ninguna), desde el mismo servidor que usa el actualizador del propio emulador. Los ajustes, las partidas guardadas y los enlaces a la carpeta Emulation se conservan; un emulador abierto no se toca.",
+      "running": "Actualizando…",
+      "button": "Actualizar todo",
+      "reportLabel": "Última actualización de emuladores"
+    },
+    "failed": "No se pudo configurar {name}.",
+    "failedWithError": "No se pudo configurar {name}: {error}"
+  },
+  "updateReport": {
+    "unknownVersion": "una versión desconocida",
+    "updated": "Actualizado de {from} a {to}",
+    "updatedChannel": "Actualizado de {from} a {to} ({channel})",
+    "current": "Al día: {version}",
+    "currentChannel": "Al día: {version} ({channel})",
+    "running": "Abierto, así que no se tocó: ciérralo y vuelve a actualizar",
+    "unavailable": "No hay versiones más nuevas publicadas",
+    "failed": "No se pudo actualizar (se conserva la versión instalada)",
+    "failedWhy": "No se pudo actualizar: {error} (se conserva la versión instalada)",
+    "summary": {
+      "none": "No hay emuladores que actualizar",
+      "noneNewer": "Ningún emulador tiene una versión más nueva",
+      "updated_one": "{count} emulador actualizado",
+      "updated_other": "{count} emuladores actualizados",
+      "current_one": "{count} ya al día",
+      "current_other": "{count} ya al día",
+      "running_one": "{count} abierto, sin tocar",
+      "running_other": "{count} abiertos, sin tocar",
+      "failed_one": "{count} con error",
+      "failed_other": "{count} con error"
+    }
+  }
+}

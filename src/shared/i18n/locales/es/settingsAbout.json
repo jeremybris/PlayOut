@@ -1,0 +1,53 @@
+{
+  "title": "Acerca de",
+  "version": "{name} {version} · {platform}",
+  "versionDev": "{name} {version} (compilación de desarrollo) · {platform}",
+  "versionUnavailable": "PlayOut · versión no disponible",
+  "versionLoading": "Cargando la versión…",
+  "install": {
+    "title": "Esta instalación",
+    "updates": "Actualizaciones",
+    "loading": "Cargando…",
+    "progress": "Progreso de la actualización",
+    "check": "Buscar actualizaciones",
+    "dataFolder": "Carpeta de datos",
+    "dataFolderDescription": "Aquí están la base de datos de la biblioteca, los ajustes, los registros y las imágenes en caché.",
+    "openFolder": "Abrir carpeta"
+  },
+  "toasts": {
+    "linkFailed": "No se pudo abrir el enlace",
+    "dataFolderFailed": "No se pudo abrir la carpeta de datos"
+  },
+  "credits": {
+    "title": "Créditos y licencias",
+    "note": "PlayOut es de código abierto bajo la licencia MIT. Se basa en los proyectos y servicios siguientes; los textos completos de las licencias están en docs/LICENSES.md.",
+    "website": "Sitio web",
+    "websiteLabel": "Abrir el sitio web de {name}",
+    "esde": "Las definiciones de sistemas, las convenciones de carpetas de ROM, las reglas de búsqueda de emuladores y las plantillas de comandos de inicio derivan de EmulationStation Desktop Edition (licencia MIT, © Northwestern Software AB, Leon Styhre, Alec Lofquist).",
+    "playnite": "La detección de tiendas para Steam, Epic Games, GOG, EA app, Battle.net, Ubisoft Connect y Xbox, la tabla de productos de Battle.net y el registro del tiempo de juego por procesos siguen a Playnite (licencia MIT, © Josef Nemec).",
+    "xboxWake": "Reactivar con el botón Xbox (Ajustes › Sistema) adapta la reactivación por mando de Console-Style PC Wizard de SoCal IT (licencia MIT, © SoCal IT).",
+    "nucleus": "Co-Op ejecuta los handlers de Nucleus Co-op mediante PlayOut Co-Op, un programa aparte bajo la GNU GPL v3 creado a partir del motor de Nucleus Co-op (SplitScreen.Me, ZeroFox, Lucas Assis y colaboradores); su código fuente está en github.com/jeremybris/PlayOut-CoOp. Los handlers y las herramientas de Nucleus se descargan cuando se piden y conservan sus propias licencias.",
+    "peerparty": "El juego en LAN (el recuadro de PeerParty en la página de un juego) inicia los juegos mediante PeerParty (licencia MIT, © 2026 colaboradores de PeerParty). No se incluye con PlayOut: se descarga de sus versiones en GitHub la primera vez que se usa, se comprueba con la suma de verificación publicada y se ejecuta sin modificar en la carpeta de datos de PlayOut. Su versión enumera las licencias del software que incluye.",
+    "xisosharp": "Las conversiones de imágenes de Xbox y Xbox 360 usan XISOSharp, CCISharp, ZArchiveSharp y StfsSharp (MIT, © PureLogicCode.com) y CHDSharp (MIT; desarrolladores originales Peterson Fernandes y Gordon Jefferyes; su códec FLAC es LGPL 2.1), el motor de XISO Studio. Este producto incluye software desarrollado por in <in@fishtank.com> (extract-xiso). Textos completos: resources\\xbox\\LICENSES.txt.",
+    "steamgriddb": "Imágenes de SteamGridDB, aportadas por su comunidad. Requiere tu propia clave de API.",
+    "igdb": "Datos y valoraciones de usuarios (para juegos sin puntuación de reseñas de Steam) de IGDB.com, a través de la plataforma de desarrolladores de Twitch para uso no comercial.",
+    "screenscraper": "Datos de ScreenScraper.fr. Los medios se descargan con tus credenciales, se guardan en caché localmente y nunca se redistribuyen.",
+    "thegamesdb": "Datos de TheGamesDB.net.",
+    "steam": "Con la tecnología de Steam. El tiempo de juego y los logros provienen de la Steam Web API según sus condiciones de uso; las imágenes de la tienda siguen siendo propiedad de los editores.",
+    "hltb": "Tiempos de HowLongToBeat.com. Opcional, una consulta por juego, en caché durante 30 días.",
+    "simpleIcons": "Logotipos de plataformas de simple-icons (CC0 1.0); glifos de la interfaz de Lucide (ISC). Las marcas siguen siendo propiedad de sus dueños."
+  },
+  "support": {
+    "title": "Apoya PlayOut",
+    "kofi": "Donar en Ko-fi",
+    "kofiDescription": "PlayOut es gratuito. Si te gusta, una donación ayuda a que siga adelante.",
+    "donate": "Donar",
+    "discord": "Servidor de Discord",
+    "discordDescription": "Pide ayuda, comparte ideas e informa de errores con otros jugadores.",
+    "join": "Unirse"
+  },
+  "links": {
+    "title": "Enlaces",
+    "lucide": "Iconos de Lucide"
+  }
+}

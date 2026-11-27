@@ -1,0 +1,366 @@
+/*
+ * PlayOut design tokens.
+ * The :root block, the reduced-motion override and .glass are the measured "Winhanced" token table from
+ * docs/research/winhanced-design.md section 4, reproduced verbatim. --u is one 1080p canvas pixel derived
+ * from the viewport height; base.css additionally sets html { font-size: calc(100vh / 108) } so 1rem = 10u.
+ * PlayOut-specific additions live in the clearly marked block at the end of this file.
+ */
+
+:root {
+  /* ---- scale ---------------------------------------------------------- */
+  --u: clamp(0.62px, calc(100vh / 1080), 2.5px); /* 1 canvas px */
+  --safe-x: 0px; /* TV-safe insets; TV mode sets 96u / 54u */
+  --safe-y: 0px;
+
+  /* ---- colour: surfaces (WinUI 3 dark values measured in the screenshots) */
+  --color-bg: #1f1f1f;
+  --color-surface: #1f1f1f; /* action bar, opaque panels */
+  --color-surface-translucent: rgba(31, 31, 31, 0.92); /* store pill, close button, chips */
+  --color-control: #2d2d2d; /* buttons, placeholders */
+  --color-control-hover: #333333;
+  --color-control-pressed: #272727;
+  --color-control-disabled: #262626;
+  --color-control-stroke: rgba(255, 255, 255, 0.07);
+  --color-divider: rgba(255, 255, 255, 0.2);
+  --color-divider-strong: rgba(255, 255, 255, 0.3);
+  --color-split-divider: #3d3d3d;
+  --color-glass-tint: rgba(0, 0, 0, 0.22);
+  --color-glass-stroke: rgba(255, 255, 255, 0.28);
+  --color-glass-hover: rgba(255, 255, 255, 0.14);
+  --color-scrim: rgba(0, 0, 0, 0.6); /* popups other than the detail modal */
+
+  /* ---- colour: text & icons ------------------------------------------- */
+  --color-text: #ffffff;
+  --color-text-strong: rgba(255, 255, 255, 0.9); /* meta line, system pill */
+  --color-text-secondary: rgba(255, 255, 255, 0.8); /* description, chips, stat values use .85 */
+  --color-text-stat: rgba(255, 255, 255, 0.85);
+  --color-text-tertiary: rgba(255, 255, 255, 0.55); /* "Released", developer, publisher */
+  --color-text-label: rgba(255, 255, 255, 0.42); /* uppercase stat labels (#7e7e7e) */
+  --color-text-disabled: rgba(255, 255, 255, 0.36);
+  --color-icon: rgba(255, 255, 255, 0.92);
+  --color-icon-muted: rgba(255, 255, 255, 0.6); /* scroll chevron */
+  --color-icon-faint: rgba(255, 255, 255, 0.35); /* achievements chevron */
+
+  /* ---- colour: accent & focus ----------------------------------------- */
+  --color-accent: #0078d4; /* Windows accent; measured ring #0373c4 */
+  --color-accent-hover: #1a86d9;
+  --color-focus-ring: var(--color-accent);
+  --color-danger: #e81123;
+  --color-success: #6ccb5f;
+  --color-warning: #fce100; /* Windows caution yellow: notices about other services (a store outage) */
+
+  /* ---- colour: store badges (simple-icons hex unless noted) ----------- */
+  --badge-steam: #1b4e7a; /* measured; simple-icons steam is #000000 */
+  --badge-epicgames: #313131;
+  --badge-gogdotcom: #86328a;
+  --badge-ea: #000000;
+  --badge-battledotnet: #4381c3;
+  --badge-ubisoft: #000000;
+  --badge-xbox: #107c10; /* Xbox green, UNVERIFIED brand value; glyph from Segoe Fluent Icons */
+  --badge-playstation: #0070d1;
+  --badge-nintendo: #e60012; /* UNVERIFIED brand value; text badge, no simple-icons glyph */
+  --badge-sega: #0089cf;
+  --badge-atari: #e4202e;
+  --badge-commodore: #1e2a4e;
+  --badge-retroarch: #000000;
+  --badge-manual: #355c8a; /* manual .exe / PC games: lucide glyph on a steel-blue disc (reads as a disc on dark art) */
+
+  /* ---- gradients ------------------------------------------------------- */
+  --gradient-hero-left: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.62) 22%,
+    rgba(0, 0, 0, 0.35) 45%,
+    rgba(0, 0, 0, 0.08) 65%,
+    rgba(0, 0, 0, 0) 80%
+  );
+  --gradient-hero-bottom: linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.55) 12%,
+    rgba(0, 0, 0, 0.15) 30%,
+    rgba(0, 0, 0, 0) 45%
+  );
+  /* detail panel scrim (visual review round 1): the left ~40% darkens for the logo and text, the right
+     stays fully bright; the bottom third fades into the action bar */
+  --gradient-modal-left: linear-gradient(
+    90deg,
+    rgba(12, 10, 10, 0.92) 0%,
+    rgba(12, 10, 10, 0.78) 30%,
+    rgba(12, 10, 10, 0.35) 55%,
+    rgba(12, 10, 10, 0) 75%
+  );
+  --gradient-modal-bottom: linear-gradient(
+    0deg,
+    rgba(12, 10, 10, 0.85) 0%,
+    rgba(12, 10, 10, 0) 35%
+  );
+
+  /* ---- radii ----------------------------------------------------------- */
+  --radius-card: calc(16 * var(--u));
+  --radius-card-ring: calc(20 * var(--u)); /* card radius + ring width */
+  --radius-modal: calc(24 * var(--u));
+  --radius-bar: calc(20 * var(--u));
+  --radius-button: calc(10 * var(--u));
+  --radius-icon-button: calc(12 * var(--u));
+  --radius-popup: calc(24 * var(--u));
+  --radius-pill: 9999px;
+
+  /* ---- blur / shadow ---------------------------------------------------- */
+  --blur-glass: 40px; /* not scaled: blur radius is in device px */
+  --shadow-card-focus: 0 calc(14 * var(--u)) calc(36 * var(--u)) rgba(0, 0, 0, 0.55);
+  --shadow-modal: 0 calc(24 * var(--u)) calc(80 * var(--u)) rgba(0, 0, 0, 0.6);
+  --shadow-popup: 0 calc(16 * var(--u)) calc(48 * var(--u)) rgba(0, 0, 0, 0.55);
+
+  /* ---- typography -------------------------------------------------------- */
+  --font-ui: 'Segoe UI Variable Text', 'Segoe UI', 'Selawik', system-ui, -apple-system, sans-serif;
+  --font-display:
+    'Segoe UI Variable Display', 'Segoe UI', 'Selawik', system-ui, -apple-system, sans-serif;
+  --font-icons: 'Segoe Fluent Icons', 'Segoe MDL2 Assets'; /* only for the Xbox glyph fallback */
+  --fs-caption: max(calc(18 * var(--u)), 12px); /* version label, chips, stat labels, store pill */
+  --fs-body: max(calc(20 * var(--u)), 12px); /* system pill text, counts */
+  --fs-body-lg: max(calc(22 * var(--u)), 13px); /* description, meta line, quick-action labels */
+  --fs-meta: max(calc(24 * var(--u)), 14px); /* hero meta line */
+  --fs-button: max(calc(26 * var(--u)), 14px); /* Play */
+  --fs-row-title: max(calc(32 * var(--u)), 16px); /* row headers, popup titles */
+  --fs-stat: max(calc(32 * var(--u)), 16px); /* stat values */
+  --fs-title: max(calc(48 * var(--u)), 20px); /* logo fallback */
+  --fw-regular: 400;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --lh-tight: 1.25;
+  --lh-body: 1.5;
+  --ls-label: 0.08em;
+
+  /* ---- layout: home --------------------------------------------------------- */
+  --page-inset-x: calc(88 * var(--u) + var(--safe-x));
+  --hero-logo-left: calc(74 * var(--u) + var(--safe-x));
+  --hero-logo-top: calc(66 * var(--u) + var(--safe-y));
+  --hero-logo-max-w: calc(420 * var(--u));
+  --hero-logo-max-h: calc(200 * var(--u));
+  --hero-meta-top: calc(300 * var(--u) + var(--safe-y));
+  --quick-actions-top: calc(424 * var(--u) + var(--safe-y));
+  --quick-action-h: calc(56 * var(--u));
+  --quick-action-pad-x: calc(24 * var(--u));
+  --quick-action-gap: calc(16 * var(--u));
+  --row-header-h: calc(44 * var(--u));
+  --row-header-gap: calc(38 * var(--u)); /* header line box → card track */
+  --row-gap: calc(
+    144 * var(--u)
+  ); /* between row blocks: the next header starts below the 1080 fold */
+  --row-scroll-anchor: calc(150 * var(--u)); /* header top when a row is focused */
+  --home-first-row-top: calc(
+    496 * var(--u)
+  ); /* Recent Games header line box on the un-scrolled home */
+  --card-w: calc(240 * var(--u));
+  --card-h: calc(360 * var(--u));
+  --card-gap: calc(30 * var(--u));
+  --card-track-h: calc(396 * var(--u)); /* room for the 1.10 scale */
+  --card-focus-scale: 1.1;
+  --card-ring-w: calc(2 * var(--u)); /* thin light rim on the focused card */
+  /* a favourite's glow around its cover: halo blur (wider on the focused card) and spread */
+  --color-favorite-glow: rgba(255, 200, 61, 0.95);
+  --card-glow-blur: calc(34 * var(--u));
+  --card-glow-blur-focus: calc(44 * var(--u));
+  --card-glow-spread: calc(7 * var(--u));
+  --card-glow-room: calc(
+    48 * var(--u)
+  ); /* space a row keeps under its cards so the glow is not cut */
+  --card-top-room: calc(
+    16 * var(--u)
+  ); /* space a row keeps above its cards so an enlarged card's rim and shadow are not cut */
+  --badge-size: calc(36 * var(--u));
+  --badge-inset: calc(12 * var(--u));
+  --badge-glyph: calc(22 * var(--u));
+  --chevron-hint-size: calc(36 * var(--u));
+  --chevron-hint-bottom: calc(7 * var(--u));
+
+  /* ---- layout: system pill ------------------------------------------------- */
+  --pill-h: calc(74 * var(--u));
+  --pill-top: calc(42 * var(--u) + var(--safe-y));
+  --pill-right: calc(38 * var(--u) + var(--safe-x));
+  --pill-pad-left: calc(24 * var(--u));
+  --pill-pad-right: calc(18 * var(--u));
+  --pill-item-gap: calc(36 * var(--u));
+  --pill-divider-gap: calc(28 * var(--u));
+  --pill-divider-h: calc(36 * var(--u));
+  --pill-hit: calc(44 * var(--u));
+  --icon-sm: calc(20 * var(--u));
+  --icon-md: calc(24 * var(--u));
+  --icon-lg: calc(28 * var(--u));
+  --icon-battery: calc(32 * var(--u));
+  --icon-stroke: 1.5; /* lucide stroke width in the system pill (thin Fluent-style glyphs) */
+  --pill-icon: calc(22 * var(--u));
+  --pill-icon-battery: calc(26 * var(--u));
+
+  /* ---- layout: detail modal ------------------------------------------------- */
+  --modal-w: min(calc(1680 * var(--u)), calc(100vw - 240 * var(--u)));
+  --modal-h: min(calc(960 * var(--u)), calc(100vh - 120 * var(--u)));
+  /* panel modals (detail, Add games, Settings) start just below the system pill and run almost to the edges */
+  --panel-top: calc(var(--pill-top) + var(--pill-h) + 8 * var(--u));
+  --panel-inset-x: calc(64 * var(--u) + var(--safe-x));
+  --panel-bottom: calc(20 * var(--u) + var(--safe-y));
+  --modal-logo-left: calc(60 * var(--u));
+  --modal-logo-top: calc(48 * var(--u));
+  --modal-logo-max-w: calc(360 * var(--u));
+  --modal-logo-max-h: calc(120 * var(--u));
+  --modal-header-top: calc(52 * var(--u));
+  --modal-header-right: calc(60 * var(--u));
+  --modal-header-gap: calc(20 * var(--u));
+  --modal-inset-x: calc(72 * var(--u));
+  --modal-pill-h: calc(50 * var(--u));
+  --modal-pill-pad-x: calc(28 * var(--u));
+  --modal-desc-max-w: calc(720 * var(--u));
+  --modal-desc-lines: 5;
+  --modal-desc-lh: calc(33 * var(--u));
+  --modal-meta-gap: calc(40 * var(--u));
+  --modal-stack-gap-chips: calc(24 * var(--u));
+  --modal-stack-gap-meta: calc(10 * var(--u));
+  --modal-stack-gap-bar: calc(18 * var(--u));
+  --chip-h: calc(44 * var(--u));
+  --chip-pad-x: calc(24 * var(--u));
+  --chip-gap: calc(16 * var(--u));
+  --chip-icon-gap: calc(20 * var(--u));
+  --bar-inset: calc(38 * var(--u));
+  --bar-h: calc(134 * var(--u));
+  --bar-pad-x: calc(34 * var(--u));
+  --bar-group-gap: calc(40 * var(--u));
+  --bar-divider-h: calc(52 * var(--u));
+  --bar-label-top: calc(39 * var(--u));
+  --bar-value-top: calc(73 * var(--u));
+  --btn-play-w: calc(225 * var(--u));
+  --btn-play-h: calc(76 * var(--u));
+  --btn-play-split-w: calc(52 * var(--u));
+  --btn-icon-size: calc(52 * var(--u));
+  --btn-icon-gap: calc(24 * var(--u));
+
+  /* ---- layout: popups (Add Games, power menu, context menu) ------------- */
+  --popup-w: calc(880 * var(--u));
+  --popup-h: calc(640 * var(--u));
+  --popup-pad: calc(40 * var(--u));
+  --menu-item-h: calc(56 * var(--u));
+  --menu-w: calc(420 * var(--u));
+
+  /* ---- motion (Fluent "Motion in Windows" values) ----------------------- */
+  --dur-instant: 83ms; /* fade in/out, pressed state */
+  --dur-focus: 150ms; /* card scale / ring */
+  --dur-fast: 167ms; /* exits */
+  --dur-normal: 250ms; /* entrances, modal open */
+  --dur-slow: 333ms; /* row/page scroll */
+  --dur-hero: 400ms; /* hero crossfade */
+  --ease-enter: cubic-bezier(0, 0, 0, 1); /* Direct Entrance / Fast-In */
+  --ease-p2p: cubic-bezier(0.55, 0.55, 0, 1); /* Point-to-point: focus scale, scroll */
+  --ease-exit-soft: cubic-bezier(1, 0, 1, 1); /* Gentle Exit */
+  --ease-linear: linear;
+  --focus-bump: calc(8 * var(--u)); /* end-of-row bump distance */
+  --dur-screen: 260ms; /* home <-> library slide */
+  --dur-tab: 200ms; /* tab underline slide, grid crossfade */
+  --dur-modal: 180ms; /* modal open / close */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-focus: 0ms;
+    --dur-fast: 0ms;
+    --dur-normal: 0ms;
+    --dur-slow: 0ms;
+    --dur-hero: 0ms;
+    --dur-screen: 0ms;
+    --dur-tab: 0ms;
+    --dur-modal: 0ms;
+    --card-focus-scale: 1;
+  }
+}
+
+/* Glass material used by the system pill and quick actions */
+.glass {
+  background: var(--color-glass-tint);
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(1.2);
+  backdrop-filter: blur(var(--blur-glass)) saturate(1.2);
+  border: 1px solid var(--color-glass-stroke);
+  border-radius: var(--radius-pill);
+}
+
+/* ---------------------------------------------------------------------------
+ * PlayOut additions (not part of the research table)
+ * ------------------------------------------------------------------------- */
+:root {
+  /* z-order of the fixed layers */
+  --z-page: 0;
+  --z-hints: 40;
+  --z-pill: 50;
+  --z-modal: 100;
+  --z-osk: 200;
+  --z-toast: 300;
+
+  /* focus ring colour: transparent for pointer input, accent for gamepad/keyboard (set on <html> below) */
+  --ring: transparent;
+  --ring-w: calc(4 * var(--u));
+  --ring-offset: calc(2 * var(--u));
+
+  --color-accent-soft: rgba(0, 120, 212, 0.35);
+  /* a toggle that is on (the Library's playable-first button): an accent halo around an accent-tinted bubble */
+  --glow-accent:
+    0 0 calc(18 * var(--u)) calc(2 * var(--u)) rgba(0, 120, 212, 0.65),
+    inset 0 0 calc(10 * var(--u)) rgba(26, 134, 217, 0.45);
+  --color-toast-bg: rgba(31, 31, 31, 0.94);
+  --color-hint-a: #107c10;
+  --color-hint-b: #e81123;
+  --color-hint-x: #0078d4;
+  --color-hint-y: #e6b800;
+
+  --control-h: calc(52 * var(--u)); /* buttons, text fields */
+  --control-h-lg: calc(76 * var(--u)); /* Play-sized buttons */
+  --field-h: calc(56 * var(--u)); /* settings rows */
+  --toggle-w: calc(52 * var(--u));
+  --toggle-h: calc(28 * var(--u));
+  --hint-size: calc(28 * var(--u));
+  --osk-key: calc(64 * var(--u));
+  --osk-gap: calc(8 * var(--u));
+  --sheet-w: calc(560 * var(--u));
+  --dialog-w: calc(640 * var(--u));
+
+  /* ---- layout: library view (the full-screen grid below the Recent row) ---- */
+  --library-band-h: calc(72.5 * var(--u)); /* translucent tab band */
+  --library-bar-h: calc(58 * var(--u)); /* translucent bottom band */
+  /* one background progress bar at the bottom edge (components/ScanBars.tsx); --scan-bar-h is this times the bars shown */
+  --scan-bar-size: calc(36 * var(--u));
+  --library-tab-fs: max(calc(26 * var(--u)), 14px);
+  --library-tab-gap: calc(50 * var(--u));
+  --library-tab-underline-w: calc(60 * var(--u));
+  --library-tab-underline-h: calc(10 * var(--u));
+  --library-header-top: calc(88.5 * var(--u));
+  --library-header-h: calc(58 * var(--u)); /* search / select pills */
+  --library-header-inset-l: calc(52 * var(--u) + var(--safe-x));
+  --library-header-inset-r: calc(36 * var(--u) + var(--safe-x));
+  --library-title-fs: max(calc(32 * var(--u)), 18px);
+  --library-count-fs: max(calc(22 * var(--u)), 13px);
+  --library-grid-top: calc(
+    169.5 * var(--u)
+  ); /* scroll viewport top; the first card sits 17u lower */
+  --library-grid-gap: calc(36 * var(--u));
+  --library-grid-inset-x: calc(150 * var(--u)); /* side insets the columns must fit between */
+  --library-grid-pad-top: calc(17 * var(--u));
+  --library-card-scale: 1.08;
+
+  /* when animations are disabled in settings, App sets data-animations="off" on <html> */
+  --anim: 1;
+}
+
+html[data-input-method='gamepad'],
+html[data-input-method='keyboard'] {
+  --ring: var(--color-focus-ring);
+}
+
+html[data-animations='off'] {
+  --dur-instant: 0ms;
+  --dur-focus: 0ms;
+  --dur-fast: 0ms;
+  --dur-normal: 0ms;
+  --dur-slow: 0ms;
+  --dur-hero: 0ms;
+  --dur-screen: 0ms;
+  --dur-tab: 0ms;
+  --dur-modal: 0ms;
+  --anim: 0;
+}

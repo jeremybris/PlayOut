@@ -1,0 +1,21 @@
+{
+  "listFailed": "Steam's DLC list could not be read, so nothing was changed. Try again, or use Open in Steam.",
+  "runningCheckFailed": "Could not tell whether a Steam game is running, so Steam was left alone. Try again in a moment.",
+  "gameRunning": "A game is running. Close it first: Steam has to restart to change DLC.",
+  "steamDownloading": "Steam is downloading or updating a game. Wait until it finishes: Steam has to restart to change DLC.",
+  "notInLibrary": "This game is not in the library.",
+  "notSteamGame": "{title} is not a Steam game.",
+  "listUnavailable": "Steam's DLC list could not be read right now (offline or Steam's info service is down).",
+  "slowRestart": "Steam was slow to close after the last change and has not been started again yet. Try again in a minute.",
+  "steamMissing": "Steam is not installed on this PC.",
+  "noInstallRecord": "Steam has no install record of {title}.",
+  "recordUnreadable": "Steam's install record of {title} could not be read.",
+  "steamRunningUnknown": "Could not tell whether Steam is running, so nothing was changed.",
+  "closeTimeout": "Steam did not close within {seconds} seconds, so nothing was changed. It will be started again once it has closed.",
+  "notSaved": "The DLC choice could not be saved: {error}",
+  "notDlc": "Not a DLC of {title}: {ids}",
+  "noInstallRecordHere": "Steam has no install record of {title} on this PC, so nothing was changed. Use Open in Steam.",
+  "noRecordYet": "Steam has no install record of it yet.",
+  "planTimeouts": "Steam did not close in time (twice), so the DLC choice was not applied. Use Manage DLC to try again.",
+  "notApplied": "Not applied."
+}

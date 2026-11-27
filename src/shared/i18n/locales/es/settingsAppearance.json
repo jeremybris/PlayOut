@@ -1,0 +1,30 @@
+{
+  "title": "Apariencia",
+  "lead": "Cómo se ve y se comporta PlayOut en pantalla.",
+  "window": {
+    "title": "Ventana",
+    "fullscreen": {
+      "label": "Iniciar en pantalla completa",
+      "description": "Abre PlayOut como un panel a pantalla completa sin bordes (F11 lo alterna en cualquier momento)."
+    },
+    "minimize": {
+      "label": "Minimizar al jugar",
+      "description": "Oculta el panel cuando empieza un juego y lo muestra de nuevo cuando termina."
+    }
+  },
+  "dashboard": {
+    "title": "Panel",
+    "clock": {
+      "label": "Reloj de 24 horas",
+      "description": "Muestra el reloj de la barra del sistema como 19:30 en lugar de 7:30 PM."
+    },
+    "recent": {
+      "label": "Juegos de la portada",
+      "description": "Cuántos juegos muestra la fila de la portada (Jugados recientemente, Añadidos recientemente, Favoritos o Más jugados: Ajustes › Biblioteca)."
+    },
+    "animations": {
+      "label": "Animaciones",
+      "description": "Zoom al enfocar, fundidos de la imagen principal y movimiento de las ventanas. Desactívalas en equipos lentos."
+    }
+  }
+}

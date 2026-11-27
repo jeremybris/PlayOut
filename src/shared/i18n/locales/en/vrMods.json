@@ -1,0 +1,120 @@
+{
+  "title": "Browse VR mods",
+  "mods_one": "{count} mod",
+  "mods_other": "{count} mods",
+  "downloadedCount_one": "{count} downloaded",
+  "downloadedCount_other": "{count} downloaded",
+  "readFailed": "Could not read the VR mod list.",
+  "tryAgain": "Try again",
+  "reading": "Reading the VR mod list",
+  "searchPlaceholder": "Search games, mods, authors, tags",
+  "searchTitle": "Search VR mods",
+  "sortBy": "Sort by",
+  "show": "Show",
+  "noMatch": "No VR mods match “{query}”.",
+  "noneHere": "No VR mods here.",
+  "listEmpty": "The VR mod list is empty.",
+  "showMore_one": "Show more ({count} more mods)",
+  "showMore_other": "Show more ({count} more mods)",
+  "listLabel": "VR mods",
+  "filters": {
+    "all": "All",
+    "debut": "New mods",
+    "alpha": "Updates & alphas",
+    "tool": "Tools",
+    "profile": "Profiles",
+    "quest": "Quest standalone",
+    "installed": "Downloaded"
+  },
+  "sorts": {
+    "newest": "Newest first",
+    "oldest": "Oldest first",
+    "title": "Name"
+  },
+  "kind": {
+    "debut": "New mod",
+    "alpha": "Update",
+    "tool": "Tool",
+    "profile": "Profile"
+  },
+  "toast": {
+    "downloading": "Downloading {title}…",
+    "downloadFailed": "Could not download {title}",
+    "openPageFailed": "Could not open the page",
+    "openFolderFailed": "Could not open the folder",
+    "removed": "{title} removed",
+    "removeFailed": "Could not remove {title}"
+  },
+  "remove": {
+    "title": "Remove {title}?",
+    "message": "Its folder in the VR Mods folder is deleted, with anything you put in it (your own files are zipped into the backups first).",
+    "confirm": "Remove"
+  },
+  "row": {
+    "noDownloadLink": "no download link",
+    "update": "Update",
+    "downloaded": "Downloaded"
+  },
+  "detail": {
+    "by": "by {author}",
+    "downloaded": "Downloaded",
+    "available": "{version} available",
+    "outside": "Outside the Flat2VR server",
+    "download": "Download",
+    "updateTo": "Update to {version}",
+    "openFolder": "Open folder",
+    "openPage": "Open page",
+    "openPageOn": "Open page ({site})",
+    "projectPage": "Project page",
+    "remove": "Remove",
+    "questOnly": "This mod is for a Quest by itself: its build (.apk) is installed on the headset, not on this PC. Get it from its page; a release below with a PC file can still be downloaded.",
+    "savedHere": "Downloads are saved in the VR Mods folder, one folder per mod; PlayOut never runs them.",
+    "savedHereQuest": "Downloads are saved in the VR Mods folder, one folder per mod; PlayOut never runs them. A Quest standalone build (.apk) is installed on the headset, not here.",
+    "notOnGithub": "This mod is not on GitHub: get it from its page.",
+    "notOnGithubSite": "This mod is not on GitHub: get it from its page on {site}.",
+    "noLink": "The list has no download link for this mod."
+  },
+  "releases": {
+    "label": "Releases",
+    "asking": "Asking GitHub for the releases…",
+    "unreachable": "GitHub could not be reached.",
+    "none": "This project has no releases on GitHub yet: open its page to see how to get it.",
+    "hide": "Hide releases",
+    "show": "Show releases",
+    "download": "Download this one",
+    "update": "Update to this one",
+    "back": "Go back to this one",
+    "noFile": "No file PlayOut can download",
+    "prerelease": "Pre-release",
+    "downloaded": "Downloaded",
+    "hideNotes": "Hide notes",
+    "notes": "Notes"
+  },
+  "readme": {
+    "reading": "Reading the README…",
+    "none": "The project has no README, or GitHub could not be reached.",
+    "hide": "Hide README",
+    "show": "Show README"
+  },
+  "progress": {
+    "removing": "Removing…",
+    "saving": "Saving to the VR Mods folder…"
+  },
+  "links": {
+    "video": "Video",
+    "reddit": "Reddit",
+    "sourceThread": "Source thread",
+    "sourceThreadOn": "Source thread ({site})"
+  },
+  "facts": {
+    "status": "Status: {status}",
+    "downloaded": "downloaded {tag}",
+    "downloadedUnverified": "downloaded {tag} (not verified)",
+    "onDisk": "{size} on disk"
+  },
+  "lead": {
+    "empty": "Mods that let you play flat PC games in VR.",
+    "count": "{mods} VR mods for PC games, {github} of them on GitHub.",
+    "countListed": "{mods} VR mods for PC games, {github} of them on GitHub, listed up to {updated}."
+  }
+}

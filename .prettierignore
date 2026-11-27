@@ -1,0 +1,11 @@
+out
+dist
+coop-helper
+ps5pkg-helper
+metadata-relay/.wrangler
+metadata-relay/package-lock.json
+pnpm-lock.yaml
+LICENSE.md
+tsconfig.json
+tsconfig.*.json
+LICENSE

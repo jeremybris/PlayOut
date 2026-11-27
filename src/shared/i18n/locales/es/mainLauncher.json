@@ -1,0 +1,14 @@
+{
+  "couldNotStart": "No se pudo iniciar {title}: {error}",
+  "badScheme": "{title} no se puede iniciar: su enlace de inicio usa {scheme}, que no es un enlace de un cliente de tienda",
+  "noLink": "{title} no se puede iniciar: no tiene un enlace de inicio utilizable",
+  "unsafeArgument": "El argumento contiene caracteres que cmd.exe interpretaría y no se puede pasar a {file}: {argument}",
+  "shortcutNoTarget": "El acceso directo no tiene destino: {file}",
+  "shortcutChain": "El acceso directo apunta a otro acceso directo: {file}",
+  "shortcutTargetMissing": "No se encontró el destino del acceso directo: {file}",
+  "elevationFailed": "No se pudo iniciar {title}: necesita permisos de administrador y la solicitud de elevación se rechazó o falló",
+  "elevationFailedWhy": "No se pudo iniciar {title}: necesita permisos de administrador y la solicitud de elevación se rechazó o falló ({detail})",
+  "executableMissing": "No se encontró el ejecutable: {path}",
+  "emulatorMissing": "No se encontró el emulador: {path}",
+  "romMissing": "No se encontró la ROM: {path}"
+}

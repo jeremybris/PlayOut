@@ -1,0 +1,14 @@
+{
+  "couldNotStart": "Could not start {title}: {error}",
+  "badScheme": "{title} cannot be started: its launch link uses {scheme} which is not a store client's link",
+  "noLink": "{title} cannot be started: it has no usable launch link",
+  "unsafeArgument": "Argument contains characters cmd.exe would interpret and cannot be passed to {file}: {argument}",
+  "shortcutNoTarget": "Shortcut has no target: {file}",
+  "shortcutChain": "Shortcut points at another shortcut: {file}",
+  "shortcutTargetMissing": "Shortcut target not found: {file}",
+  "elevationFailed": "Could not start {title}: it needs administrator rights and the elevation prompt was declined or failed",
+  "elevationFailedWhy": "Could not start {title}: it needs administrator rights and the elevation prompt was declined or failed ({detail})",
+  "executableMissing": "Executable not found: {path}",
+  "emulatorMissing": "Emulator not found: {path}",
+  "romMissing": "ROM not found: {path}"
+}

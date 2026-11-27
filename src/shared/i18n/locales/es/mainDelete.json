@@ -1,0 +1,102 @@
+{
+  "folder": {
+    "programOutside": "El programa del juego no está dentro de su carpeta",
+    "none": "El juego no tiene carpeta de instalación",
+    "driveTop": "El juego está en la raíz de una unidad",
+    "inWindows": "El juego está dentro de la carpeta de Windows",
+    "systemFolder": "{folder} es una carpeta del sistema o del usuario (o contiene una), así que no se elimina",
+    "playoutFolder": "{folder} contiene PlayOut, sus datos o tu carpeta de ROM / Emulation, así que no se elimina",
+    "belowDriveTop": "{folder} está justo debajo de la raíz de su unidad, así que podría contener más de un juego",
+    "storeLibrary": "{folder} es la biblioteca de juegos de una tienda o una carpeta propia de una tienda",
+    "inStoreLibrary": "{folder} está en la biblioteca de juegos de una tienda ({library}); desinstálalo desde esa tienda",
+    "inStoreFolder": "{folder} está en la biblioteca o carpeta de una tienda ({store}); desinstálalo desde esa tienda",
+    "notOnPc": "{folder} no está en este PC",
+    "tooManyFiles": "{folder} tiene demasiados archivos para revisarlos",
+    "tooLarge": "{folder} ocupa más de 200 GB",
+    "unreadable": "No se puede leer {folder}",
+    "holdsStore": "{folder} contiene {name}, una carpeta o programa de una tienda",
+    "mixedGames": "{folder} contiene programas de juegos distintos ({first}, {second})",
+    "tooManyFolders": "{folder} tiene demasiadas carpetas para revisarlas",
+    "holdsStoreInner": "{folder} contiene {name}, una carpeta o programa de una tienda",
+    "holdsOtherGame": "{folder} también contiene {name}, que parece otro juego"
+  },
+  "uninstaller": {
+    "storeProgram": "Su desinstalador es un programa de una tienda ({name}); desinstálalo desde esa tienda",
+    "removesOther": "{reason}, así que su desinstalador también eliminaría ese juego"
+  },
+  "refused": {
+    "notInLibrary": "Este juego no está en la biblioteca",
+    "otherPc": "{title} está en otro PC; aquí no hay nada que eliminar",
+    "notInstalled": "{title} no está instalado en este PC",
+    "running": "{title} está en ejecución. Ciérralo primero.",
+    "queued": "{title} está en la cola de descargas. Quítalo de la cola primero.",
+    "notHere": "Este juego no se puede eliminar desde aquí",
+    "cannotDelete": "Este juego no se puede eliminar"
+  },
+  "rom": {
+    "outsideFolder": "{path} está fuera de la carpeta de ROM",
+    "systemFolder": "{path} es una carpeta de sistema de la carpeta de ROM",
+    "savesOrBios": "{path} contiene partidas guardadas o archivos de BIOS",
+    "noFolder": "No hay carpeta de ROM configurada, así que no se pueden revisar los archivos",
+    "converting": "Hay una conversión en curso. Espera a que termine.",
+    "heldImage": "{path} contiene una imagen de disco que PlayOut aparta mientras comprueba una recompilación; responde primero esa pregunta",
+    "sharedWith": "{path} también contiene {title}",
+    "allShared": "Todos los archivos de este juego los usa también otro juego",
+    "clash": "{path} también contiene {title}"
+  },
+  "image": {
+    "inRecycleBin": "La imagen de disco de {title} ya está en la Papelera de reciclaje (inicia su recompilación)",
+    "none": "{title} no tiene imagen de disco en este PC",
+    "cannotMove": "Sus archivos no se pueden mover",
+    "downloading": "Un PC vinculado lo está descargando ahora mismo",
+    "gameGone": "el juego no está en la biblioteca",
+    "noRecycleBin": "No se pudo mover {file} a la Papelera de reciclaje (¿una unidad de red o una sin papelera?). No se eliminó nada.",
+    "partial": "Solo {moved} de {total} archivos fueron a la Papelera de reciclaje (restáuralos desde allí); no se pudo mover {file}.",
+    "moved": "{file} se movió a la Papelera de reciclaje"
+  },
+  "uninstall": {
+    "settingsOpen": "Configuración de Windows está abierta: desinstala {title} desde Aplicaciones",
+    "storeUninstalling": "{store} está desinstalando {title}",
+    "storeOpen": "{store} está abierto: desinstala {title} desde su biblioteca",
+    "notFound": "No se encontró el desinstalador de {title}",
+    "open": "El desinstalador de {title} está abierto"
+  },
+  "files": {
+    "noRecycleBin": "No se pudo mover {title} a la Papelera de reciclaje (¿una unidad de red o una sin papelera?). No se eliminó nada.",
+    "partial": "Solo {moved} de {total} archivos de {title} fueron a la Papelera de reciclaje (restáuralos desde allí); no se pudo mover {file}.",
+    "movedExtrasFailed": "{title} se movió a la Papelera de reciclaje; {failed} de sus actualizaciones y DLC no se pudieron mover ({files})",
+    "movedWithExtras": "{title} y sus actualizaciones y DLC se movieron a la Papelera de reciclaje",
+    "moved": "{title} se movió a la Papelera de reciclaje",
+    "couldNotDelete": "No se pudo eliminar {title}: {error}"
+  },
+  "nothingDeleted": "No se eliminó nada: {why}.",
+  "unpacked": {
+    "systemFolder": "{folder} está directamente en una carpeta del sistema o del usuario, así que no se elimina",
+    "saves": "{folder} contiene o está dentro de tus partidas guardadas, estados o BIOS, así que no se elimina",
+    "link": "{folder} es un enlace a otra carpeta, así que no se elimina",
+    "gone": "{folder} ya no está",
+    "notFolder": "{folder} no es una carpeta",
+    "downloading": "Un PC vinculado está descargando desde ella ahora mismo",
+    "noRecycleBin": "No se pudo mover {folder} a la Papelera de reciclaje (¿una unidad de red o una sin papelera?). No se eliminó nada.",
+    "moved": "{folder} se movió a la Papelera de reciclaje"
+  },
+  "held": {
+    "noteFailed": "No se eliminó nada: PlayOut no pudo anotar lo que mueve ({error}).",
+    "stuck": "{error}; {files} archivo(s) no se pudieron devolver y siguen apartados (PlayOut pregunta qué hacer con ellos).",
+    "movedAside": "Apartado",
+    "cannotMoveAside": "{path} no se puede apartar",
+    "otherDrive": "No se pudo apartar {file} en su propia unidad",
+    "couldNotMoveAside": "No se pudo apartar {file} ({error})",
+    "notMovedByPlayOut": "{path} no es un archivo que PlayOut haya apartado; no se restauró nada.",
+    "blocked": "Ahora hay algo en {path}, así que no se restauró nada (PlayOut nunca lo sobrescribe). Muévelo a otro lugar y elige Restaurar de nuevo.",
+    "couldNotPutBack": "No se pudo devolver {file} ({error})",
+    "stillAside": "{error}. Sigue apartado; elige Restaurar de nuevo.",
+    "restoredMissing": "Se restauró lo que quedaba; {files} ya no estaba.",
+    "notMovedByPlayOutDelete": "{path} no es un archivo que PlayOut haya apartado; no se eliminó nada más.",
+    "recycleFailed": "No se pudo mover {file} a la Papelera de reciclaje ({error}); sigue apartado.",
+    "moved": "Se movió a la Papelera de reciclaje",
+    "movedFileAside": "Se apartó {file}"
+  },
+  "nothingDeletedError": "No se eliminó nada: {error}.",
+  "hostGamesReadOnly": "Los juegos del host no se pueden editar en este PC"
+}

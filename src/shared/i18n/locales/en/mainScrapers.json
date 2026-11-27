@@ -1,0 +1,56 @@
+{
+  "check": {
+    "unexpectedError": "unexpected error",
+    "cannotCheck": "{service}: couldn't check right now ({reason})",
+    "unexpectedResponse": "unexpected response",
+    "unreadable": "unreadable response"
+  },
+  "sgdb": {
+    "enterKey": "SteamGridDB: enter an API key to check it",
+    "badCharacters": "SteamGridDB: API key doesn't work (it contains spaces or hidden characters; copy it again)",
+    "works": "SteamGridDB: API key works",
+    "rejected": "rejected",
+    "doesNotWork": "SteamGridDB: API key doesn't work ({reason})"
+  },
+  "igdb": {
+    "enterBoth": "IGDB: enter both the client ID and the client secret",
+    "unexpectedTwitch": "unexpected response from Twitch",
+    "rejected": "IGDB: client ID or secret doesn't work (Twitch rejected them)",
+    "works": "IGDB: client ID and secret work"
+  },
+  "ss": {
+    "needDev": "ScreenScraper: enter the developer ID and password too; PlayOut needs them to use ScreenScraper",
+    "enterBoth": "ScreenScraper: enter both your user name and password",
+    "devWorks": "ScreenScraper: developer ID and password work",
+    "devRejected": "ScreenScraper: developer ID or password doesn't work",
+    "bothWork": "ScreenScraper: login and developer credentials work",
+    "userRejected": "ScreenScraper: user name or password doesn't work"
+  },
+  "tgdb": {
+    "enterKey": "TheGamesDB: enter an API key to check it",
+    "worksLeft": "TheGamesDB: API key works ({left} requests left this month)",
+    "worksUsedUp": "TheGamesDB: API key works, but this month's request allowance is used up",
+    "invalid": "TheGamesDB: API key doesn't work (TheGamesDB says it is invalid)",
+    "refused": "TheGamesDB: the key was refused; it is wrong or this month's request allowance is used up"
+  },
+  "steam": {
+    "badId": "Steam: the SteamID64 must be the 17-digit number from your profile",
+    "enterKey": "Steam: enter a Web API key to check it",
+    "rejected": "Steam: Web API key doesn't work (Steam rejected it)",
+    "enterId": "Steam: Web API key works; enter your SteamID64 too",
+    "noAccount": "Steam: the Web API key works, but no account has that SteamID64",
+    "bothWork": "Steam: Web API key and SteamID64 work",
+    "bothWorkPersona": "Steam: Web API key and SteamID64 work ({persona})"
+  },
+  "ra": {
+    "enterBoth": "RetroAchievements: enter your username and Web API key to check them",
+    "noUser": "RetroAchievements: the Web API key works, but no user is named \"{user}\"",
+    "signedIn": "RetroAchievements: signed in as {user}",
+    "rejected": "RetroAchievements: Web API key doesn't work (RetroAchievements rejected it)"
+  },
+  "http": {
+    "rateLimit": "rate limit exceeded, try again later",
+    "serverError": "server error (HTTP {status})",
+    "unexpected": "unexpected response (HTTP {status})"
+  }
+}

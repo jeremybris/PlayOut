@@ -1,0 +1,7 @@
+{
+  "title": "¿Conectar con un host de PlayOut?",
+  "notNow": "Ahora no",
+  "messageOne": "PlayOut se está ejecutando en {name} en tu red. Conéctate a él para obtener sus juegos, metadatos e inicios de sesión, y su carpeta Emulation (BIOS, partidas guardadas y lo demás). Escribe el PIN que ese equipo muestra en Ajustes › Streaming › Mostrar PIN.",
+  "messageMany_other": "PlayOut se está ejecutando en {count} equipos de tu red. Conéctate a uno para obtener sus juegos, metadatos e inicios de sesión, y su carpeta Emulation (BIOS, partidas guardadas y lo demás). Escribe el PIN que ese equipo muestra en Ajustes › Streaming › Mostrar PIN.",
+  "connectTo": "Conectar con {name}"
+}

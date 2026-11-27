@@ -1,0 +1,59 @@
+name = "playout-metadata-relay"
+main = "src/index.ts"
+compatibility_date = "2025-11-01"
+# Served at https://playout-metadata-relay.jeremybris.workers.dev; no preview URLs (they would be extra ways in).
+workers_dev = true
+preview_urls = false
+
+# Where suggestions go. The GitHub App credentials are secrets: `npx wrangler secret put GITHUB_APP_ID` and
+# GITHUB_APP_PRIVATE_KEY (SETUP.md, step 6).
+[vars]
+REPO_OWNER = "jeremybris"
+REPO_NAME = "PlayOut-metadata"
+BASE_BRANCH = "main"
+# Rate limits (per rolling clock hour). Counted in the RATE_LIMIT KV namespace below. Raised in 0.1.151 for several
+# suggesters; Workers KV free plan = 1,000 writes a day and a suggestion costs 3-4, so about 250-330 suggestions a day
+# in all whatever these say (the paid plan lifts that).
+# The code's defaults without these (src/ratelimit.ts DEFAULT_RATE_LIMITS, src/index.ts DEFAULT_MAX_OPEN_SUGGESTIONS)
+# are the same numbers, and PlayOut tells its user RATE_CLIENT_PER_HOUR (src/shared/metadata-cloud.ts
+# RELAY_SUGGESTIONS_PER_HOUR): change them together.
+RATE_IP_PER_HOUR = "40"
+# Per IPv6 /48 (one subscriber or cloud host rotating /64s inside its delegation).
+RATE_IP48_PER_HOUR = "60"
+RATE_CLIENT_PER_HOUR = "30"
+RATE_GLOBAL_PER_HOUR = "120"
+# No new suggestion (429, Retry-After one hour) while this many suggestion PRs are open, waiting for review.
+MAX_OPEN_SUGGESTIONS = "300"
+
+# The PlayOut database (POST /contribute): new games are appended straight to the `database` branch of the metadata
+# repository above (only rows for keys it lacks; existing rows are never changed). Its main stays owner-only: the
+# code allows exactly jeremybris/PlayOut-metadata on the branch `database` (src/database.ts DB_REPO), and any other
+# value here makes /contribute answer 503. SETUP.md, "PlayOut database".
+DB_REPO_OWNER = "jeremybris"
+DB_REPO_NAME = "PlayOut-metadata"
+DB_BRANCH = "database"
+# Contributions per rolling clock hour (one request carries up to 25 games). They are counted in the DB_LIMITS
+# Durable Object below, not in the RATE_LIMIT KV namespace: it counts atomically (KV would let requests sent at the
+# same moment all pass, and nobody reviews these writes) and leaves KV's writes (free plan: 1,000 a day) to the
+# suggestions. The code's defaults without them are the same numbers (src/ratelimit.ts DEFAULT_DB_RATE_LIMITS):
+# change both together.
+RATE_DB_IP_PER_HOUR = "20"
+RATE_DB_IP48_PER_HOUR = "40"
+RATE_DB_CLIENT_PER_HOUR = "12"
+RATE_DB_GLOBAL_PER_HOUR = "30"
+
+# The PlayOut database's rate-limit counters (src/db-limiter.ts). SQLite-backed, which the Workers free plan allows;
+# `npx wrangler deploy` creates it from the migration. Without it /contribute answers 503.
+[[durable_objects.bindings]]
+name = "DB_LIMITS"
+class_name = "DbRateLimiter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["DbRateLimiter"]
+
+# Rate-limit counters. Create the namespace with `npx wrangler kv namespace create RATE_LIMIT` and paste the
+# id it prints here (see SETUP.md).
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "0b27b7a4255a4058b7fa1982da03395e"

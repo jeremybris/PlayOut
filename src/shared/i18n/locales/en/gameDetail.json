@@ -1,0 +1,494 @@
+{
+  "notFound": {
+    "title": "Game not found",
+    "message": "This game is no longer in the library."
+  },
+  "header": {
+    "similar": "Similar games",
+    "close": "Close"
+  },
+  "hints": {
+    "select": "Select",
+    "back": "Back",
+    "favourite": "Favourite",
+    "unfavourite": "Unfavourite",
+    "options": "Options"
+  },
+  "badges": {
+    "coopLabel": "Co-Op",
+    "coop": "Nucleus Co-Op: split-screen",
+    "coopMax": "Nucleus Co-Op: split-screen for up to {max} players"
+  },
+  "players": {
+    "upTo_one": "1 player",
+    "upTo_other": "Up to {count} players"
+  },
+  "chips": {
+    "playingNow": "{players} playing now",
+    "showStore": "Show {store} games in the Library",
+    "ownedOn": "Owned on {store}",
+    "notInstalled": "Not installed",
+    "addFilter": "Add {name} to this Library tab's filters",
+    "removeFilter": "Remove {name} from this Library tab's filters",
+    "addDeveloper": "Add games developed by {name} to this Library tab's filters",
+    "addPublisher": "Add games published by {name} to this Library tab's filters"
+  },
+  "description": {
+    "more": "More",
+    "less": "Less"
+  },
+  "meta": {
+    "released": "Released {date}"
+  },
+  "toasts": {
+    "metadataFailed": "Could not fetch metadata",
+    "launching": "Launching {title}…",
+    "launchFailed": "Could not launch {title}",
+    "checkingUpdates": "Checking {title} for updates…",
+    "updateFailed": "Could not update {title}",
+    "emulatorListFailed": "Could not read the emulator list"
+  },
+  "recomp": {
+    "squareLabel": "Recompilations",
+    "installFailed": "The install failed",
+    "installRecompFailed": "Could not install the recompilation",
+    "starting": "Starting {title} (recompilation)…",
+    "pickFiles": "Pick your game files for {title} first",
+    "startFailed": "Could not start the recompilation of {title}",
+    "delete": {
+      "title": "Are you sure you want to delete this Recompilation?",
+      "messageNamed": "{name} (the recompilation of {title}) and all of the files it built are deleted from this PC. Saves it keeps outside its folder stay, and its own folder's saves and settings are kept in a backup.",
+      "message": "The recompilation of {title} and all of the files it built are deleted from this PC. Saves it keeps outside its folder stay, and its own folder's saves and settings are kept in a backup.",
+      "leavesLibrary": "It leaves your library too, as it is there only for this recompilation.",
+      "yes": "Yes",
+      "no": "No",
+      "deletedNamed": "Deleted {name}",
+      "deleted": "Deleted the recompilation of {title}",
+      "failed": "Could not delete the recompilation of {title}"
+    }
+  },
+  "bar": {
+    "label": "Game actions",
+    "play": "Play",
+    "running": "Running",
+    "install": "Install",
+    "download": "Download",
+    "stream": "Stream",
+    "retry": "Retry",
+    "resume": "Resume",
+    "resumeDownload": "Resume download",
+    "unqueue": "Unqueue",
+    "removeFromQueue": "Remove from queue",
+    "stopStreaming": "Stop streaming",
+    "addingToLibrary": "Adding to library…",
+    "notInstalled": "Not installed",
+    "notAvailableFrom": "Not available from {host}",
+    "pressToCancel": "{status} Press to cancel.",
+    "sizeAria": "{action}, {size}",
+    "sizeAriaEstimate": "{action}, about {size}",
+    "streamFailed": "Could not stream from {host}",
+    "hostOffline": "{host} cannot be reached right now: this is its game as of the last time it answered",
+    "queued": "Queued",
+    "placeAfter": "{place}, after {title}",
+    "theStore": "the store",
+    "moreOptions": "More options",
+    "editGame": "Edit game",
+    "performancePanel": "Performance panel",
+    "addFavourite": "Add to favourites",
+    "removeFavourite": "Remove from favourites",
+    "installing": "Installing…",
+    "bytesOf": "{done} of {total}"
+  },
+  "stats": {
+    "achievements": "Achievements",
+    "playTime": "Play time",
+    "playTimeVsMain": "Play time / Main story",
+    "playTimeVsSolo": "Play time / Solo",
+    "playedVsMain": "Played / Main",
+    "playedVsSolo": "Played / Solo",
+    "rating": "{score} ({source})",
+    "players": {
+      "label": "Players",
+      "peakTitle": "All-time peak (SteamCharts)",
+      "currentTitle": "Playing now (Steam)",
+      "ariaBoth": "Players: all-time peak {peak}, {current} playing now",
+      "ariaPeakOnly": "Players: all-time peak {peak}, number playing now unknown",
+      "ariaCurrentOnly": "Players: all-time peak unknown, {current} playing now",
+      "ariaNone": "Players: all-time peak unknown, number playing now unknown"
+    }
+  },
+  "features": {
+    "label": "Game features",
+    "upgrade": "Upgrade",
+    "coopStarting": "Starting Co-Op",
+    "coopPlay": "Play in Co-Op (split-screen)",
+    "coopTitle": "Nucleus Co-Op: split-screen with a controller for each player",
+    "peerPartyTitle": "PeerParty: LAN play",
+    "peerPartyPlay": "Play on your network with PeerParty"
+  },
+  "playMenu": {
+    "label": "Play options",
+    "play": "Play",
+    "install": "Install",
+    "retryInstall": "Retry install",
+    "download": "Download",
+    "retryDownload": "Retry download",
+    "downloadFrom": "Download from {host}",
+    "cancelDownload": "Cancel download",
+    "cancelTracking": "Cancel tracking",
+    "starting": "Starting…",
+    "stream": "Stream",
+    "streamFrom": "Stream from {host}",
+    "stopStreaming": "Stop streaming",
+    "cancelStream": "Cancel stream",
+    "notAvailableFrom": "Not available from {host}",
+    "recompilationHint": "Recompilation",
+    "removeFromQueue": "Remove from queue",
+    "pauseDownload": "Pause download",
+    "resumeDownload": "Resume download",
+    "paused": "Paused",
+    "openStore": "Open {store}",
+    "playWith": "Play with {emulator}",
+    "notFound": "Not found",
+    "recompilation": "Recompilation…",
+    "ps3Update": "Update PS3 game",
+    "manageDlc": "Manage DLC",
+    "deleteRecomp": "Delete recompilation",
+    "coopSetup": "Co-Op setup…",
+    "convertEntry": "Convert…",
+    "openFolder": "Open install folder",
+    "openStorePage": "Open store page",
+    "refreshMetadata": "Refresh metadata",
+    "searchMetadataEntry": "Search metadata…",
+    "showGame": "Show game",
+    "hideGame": "Hide game",
+    "removeFromLibrary": "Remove from library",
+    "deleteFromPc": "Delete from this PC",
+    "convert": {
+      "label": "Convert {title}",
+      "back": "Convert",
+      "closeGameFirst": "Close the game first",
+      "conversionRunning": "A conversion is running",
+      "fromTo": "{from} to {to}",
+      "to": "To {to}",
+      "notPlayableHere": "Not playable here",
+      "started": "Converting {title} to {to}… (Settings › Convert shows progress)",
+      "failed": "Could not convert {title}"
+    },
+    "search": {
+      "title": "Search metadata",
+      "placeholder": "Game title",
+      "searching": "Searching…",
+      "failed": "Search failed: {message}",
+      "noMatches": "No matches. Try a shorter title.",
+      "matches": "Matches",
+      "prompt": "Type a title and press Enter."
+    },
+    "toasts": {
+      "applied": "Applied metadata from {source}",
+      "applyFailed": "Could not apply that metadata",
+      "recompFolderFailed": "Could not open the recompilation folder",
+      "installFolderFailed": "Could not open the install folder",
+      "storePageFailed": "Could not open the store page",
+      "trackingStopped": "Stopped tracking the install of {title}. {store} keeps downloading it.",
+      "trackingStoppedNoStore": "Stopped tracking the install of {title}. The store keeps downloading it.",
+      "stopTrackingFailed": "Could not stop tracking the install",
+      "openStoreFailed": "Could not open {store}",
+      "refreshing": "Refreshing metadata for {title}…",
+      "refreshFailed": "Could not refresh metadata",
+      "hidden": "Hidden {title}. Find it in the Library under Filters → Hidden.",
+      "shown": "{title} is back in your library.",
+      "hideFailed": "Could not hide the game",
+      "showFailed": "Could not show the game",
+      "removed": "Removed {title}",
+      "removeFailed": "Could not remove the game"
+    },
+    "remove": {
+      "title": "Remove from library",
+      "messageRecomp": "Remove {title} from your library? It can be added again from the recompilations browser.",
+      "message": "Remove {title} from your library? The game's files are not deleted.",
+      "confirm": "Remove"
+    }
+  },
+  "upgrades": {
+    "label": "Upgrades",
+    "checkingFiles": "Checking the game's files…",
+    "checkingGame": "Checking the game…",
+    "readFailed": "Could not read the upgrades",
+    "failed": "The upgrade failed",
+    "savesAbout": "Saves about {size}",
+    "dlls": "Update DLSS / FSR / XeSS",
+    "restore": "Restore the original files",
+    "dlss5Opens": "Opens DLSS AiO Swapper",
+    "dlss5Downloads": "Downloads DLSS AiO Swapper",
+    "shaders": "Precompile shaders",
+    "removeOptiScaler": "Remove OptiScaler",
+    "installOptiScaler": "Install OptiScaler",
+    "optiScalerNeedsInputs": "Needs DLSS, FSR or XeSS in the game",
+    "optiScalerNvidia": "Made for AMD and Intel graphics",
+    "optiScalerOther": "DLSS options on AMD / Intel",
+    "compress": "Compress game",
+    "compressAgain": "Compress again",
+    "compressPartial": "An update left files uncompressed",
+    "uncompress": "Uncompress game",
+    "stop": "Stop",
+    "compressConfirm": {
+      "title": "Compress this game?",
+      "message": "Windows compresses {title}'s files to free disk space. Compressed games can take longer to load, because every file is unpacked as it is read, and a game update leaves the files it rewrites uncompressed. You can uncompress it again at any time.",
+      "confirm": "Compress"
+    },
+    "risk": {
+      "title": "Risk of a ban",
+      "confirm": "Continue anyway",
+      "reasonTags": "{title} looks like an online or competitive game: its Steam tags ({tags}).",
+      "reasonAntiCheat": "{title} looks like an online or competitive game: anti-cheat in its folder ({files}).",
+      "reasonBoth": "{title} looks like an online or competitive game: its Steam tags ({tags}) and anti-cheat in its folder ({files}).",
+      "consequence": "Anti-cheat software can treat changed game files or injected mods as cheating, and your account could be banned. Use upgrades in single-player only, or not at all in this game."
+    }
+  },
+  "similar": {
+    "title": "Similar games",
+    "none": "You have 0 similar games in your library.",
+    "percent": "{percent}% similar"
+  },
+  "screenshots": {
+    "label": "Screenshots",
+    "item": "Screenshot {number}",
+    "viewer": "Screenshot {number} of {total}",
+    "image": "Screenshot",
+    "previous": "Previous screenshot",
+    "next": "Next screenshot",
+    "close": "Close"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "points": "{earned}/{total} points",
+    "loading": "Loading achievements",
+    "loadFailed": "Could not load achievements: {message}",
+    "hostNone": "{host} didn't return achievements for this game. Its Steam or RetroAchievements account may be signed out there, or it runs an older PlayOut.",
+    "hostNoneUnknown": "The host didn't return achievements for this game. Its Steam or RetroAchievements account may be signed out there, or it runs an older PlayOut.",
+    "steamNone": "Steam didn't return achievements for this game. Sign in to Steam in the Library's Library Import, or add your Steam Web API key in Settings. If you are signed in, the game may have no achievements, or your profile's game details may be private.",
+    "openMetadataSettings": "Open metadata settings",
+    "raNotSignedIn": "RetroAchievements is not signed in.",
+    "raCheckSettings": "{message} Check your username and Web API key in Settings.",
+    "raSignInHint": "Sign in to RetroAchievements in Settings to track achievements for ROM games.",
+    "raSignIn": "Sign in to RetroAchievements",
+    "raUnknownRom": "RetroAchievements doesn't recognise this ROM, or the game has no achievements yet. Disc images are matched by title, so a renamed file may not be found.",
+    "noData": "No achievement data is available for this game.",
+    "noneInGame": "This game has no achievements.",
+    "hidden": "Hidden achievement",
+    "hiddenHint": "Unlock it to reveal the details.",
+    "pts": "{points} pts",
+    "unlockedOn": "Unlocked {date}",
+    "unlocked": "Unlocked",
+    "hardcore": "Hardcore",
+    "locked": "Locked"
+  },
+  "coop": {
+    "subtitle": "Co-Op setup",
+    "label": "Co-Op setup for {title}",
+    "controller": "Controller {number}",
+    "keyboardMouse": "Keyboard + mouse",
+    "readFailed": "Could not read the Co-Op setup",
+    "saveFailed": "Could not save the Co-Op setup",
+    "chooseExeTitle": "Choose {title}'s exe",
+    "programs": "Programs",
+    "handlerRemoved": "Co-Op handler removed. It is extracted again the next time you play in Co-Op.",
+    "removeFailed": "Could not remove the Co-Op handler",
+    "handler": "Handler: {name}. Co-Op sets everything up automatically; change anything here and it is kept for this game.",
+    "handlerMax": "Handler: {name} · up to {max} players. Co-Op sets everything up automatically; change anything here and it is kept for this game.",
+    "noHandler": "No Co-Op handler matches this game.",
+    "risks": "This handler uses {risks}.",
+    "readingControllers": "Reading controllers",
+    "ready": "Ready: {players} players, {layout}.",
+    "play": "Play Co-Op",
+    "checkControllers": "Check controllers",
+    "allAutomatic": "All automatic",
+    "automatic": "Automatic",
+    "gameTitle": "Game",
+    "gameExe": "Game exe",
+    "notFound": "Not found",
+    "chooseExe": "Choose exe…",
+    "playersTitle": "Players",
+    "players": "Players",
+    "playersNow_one": "{players} now · {count} device connected",
+    "playersNow_other": "{players} now · {count} devices connected",
+    "layout": "Screen layout",
+    "layoutNow": "Now: {layout}",
+    "player": "Player {number}",
+    "handlerTitle": "Handler",
+    "removeHandler": "Remove Co-Op handler",
+    "handlerNote": "The handler stays downloaded and is extracted again the next time you play in Co-Op."
+  },
+  "edit": {
+    "subtitle": "Edit game",
+    "label": "Edit {title}",
+    "readFailed": "Could not read the game metadata",
+    "readFailedMessage": "The game metadata could not be read.",
+    "cancel": "Cancel",
+    "save": "Save",
+    "reset": "Reset",
+    "checkFields": "Check the fields",
+    "sizeFormat": "Enter the install size like \"45 GB\" or \"800 MB\"",
+    "saved": "Game saved",
+    "saveFailed": "Could not save the game",
+    "origin": {
+      "local": "Your edit",
+      "cloud": "PlayOut cloud",
+      "scraped": "Scraped",
+      "host": "From the host",
+      "changed": "Changed",
+      "notSet": "Not set",
+      "backToCloud": "Back to the cloud value",
+      "backToScraped": "Back to the scraped value",
+      "backToHost": "Back to the host's value"
+    },
+    "sections": {
+      "info": "Game information",
+      "players": "Players and controls",
+      "time": "Time to beat, rating and difficulty",
+      "settings": "Settings",
+      "artwork": "Artwork"
+    },
+    "fields": {
+      "title": { "label": "Title", "reset": "Reset title" },
+      "description": {
+        "label": "Description",
+        "reset": "Reset description",
+        "placeholder": "No description"
+      },
+      "shortDescription": {
+        "label": "Short description",
+        "reset": "Reset short description",
+        "placeholder": "None"
+      },
+      "releaseDate": {
+        "label": "Release date",
+        "reset": "Reset release date",
+        "placeholder": "YYYY-MM-DD"
+      },
+      "developers": {
+        "label": "Developers",
+        "reset": "Reset developers",
+        "placeholder": "Comma-separated"
+      },
+      "publishers": {
+        "label": "Publishers",
+        "reset": "Reset publishers",
+        "placeholder": "Comma-separated"
+      },
+      "genresTags": {
+        "label": "Genres & Tags",
+        "reset": "Reset genres & tags",
+        "summary": "Genres & Tags: {summary}",
+        "alsoOnGame": "Also on this game",
+        "search": "Search genres & tags",
+        "searchPlaceholder": "Type a genre or tag…",
+        "suggestions": "Matching genres & tags",
+        "noMatch": "No matching genre or tag"
+      },
+      "localPlayers": {
+        "label": "Local players",
+        "reset": "Reset local players",
+        "select": "Players on one PC",
+        "none": "None shown",
+        "notKnown": "Not known"
+      },
+      "controls": {
+        "label": "Controls",
+        "reset": "Reset controls",
+        "controller": "Controller",
+        "vr": "VR",
+        "full": "Full controller support",
+        "partial": "Partial controller support",
+        "keyboard": "Keyboard and mouse",
+        "noVr": "No VR",
+        "vrSupported": "VR supported",
+        "vrOnly": "VR only"
+      },
+      "hltb": {
+        "label": "How Long to Beat (hours)",
+        "reset": "Reset how long to beat (hours)",
+        "main": "Main story",
+        "extra": "Main + extras",
+        "completionist": "Completionist",
+        "solo": "Solo"
+      },
+      "rating": {
+        "label": "Rating",
+        "reset": "Reset rating",
+        "aria": "Rating, 0 to 100",
+        "shownAs": "Shown as",
+        "steam": "Steam reviews (% positive)",
+        "igdb": "IGDB rating (0-100)"
+      },
+      "difficulty": {
+        "label": "Difficulty",
+        "reset": "Reset difficulty",
+        "select": "Filters › Difficulty",
+        "defaultFromTag": "Default ({level}, from the {tag} tag)",
+        "default": "Default ({level})",
+        "tools": "N/A (Tools)"
+      }
+    },
+    "notes": {
+      "remote": "This game is on {host}: its details come from there. Your edits stay on this PC (the host keeps its own) and go with the game if you download it. Reset a field to go back to the PlayOut cloud's value, else the host's. The emulator, launch arguments, install size, hiding and custom artwork can be set once the game is on this PC.",
+      "remoteHost": "a paired computer",
+      "local": "Your edits stay on this PC and replace what the scrapers found, which can no longer change them. Reset a field to go back to the PlayOut cloud's value, else the scraped one."
+    },
+    "settings": {
+      "emulator": "Emulator",
+      "defaultEmulator": "Default ({emulator})",
+      "default": "Default",
+      "args": "Extra launch arguments",
+      "argsPlaceholder": "e.g. -windowed",
+      "size": "Install size",
+      "sizePlaceholder": "e.g. 45 GB",
+      "hide": "Hide from library",
+      "hideDescription": "Hidden games appear when Settings → Library → Show hidden is on"
+    },
+    "artwork": {
+      "custom": "Custom image",
+      "fromScrapers": "From scrapers",
+      "none": "None",
+      "choose": "Choose…",
+      "note": "Artwork stays on this PC and changes at once.",
+      "sources": "Metadata and artwork from {sources}.",
+      "noSources": "No metadata source matched yet. Use \"Search metadata…\" in the play menu to pick one.",
+      "cover": {
+        "label": "Cover",
+        "hint": "Portrait box art (2:3)",
+        "chooseTitle": "Choose a cover image",
+        "chooseAria": "Choose cover image",
+        "resetAria": "Reset cover image",
+        "updated": "Cover updated",
+        "resetDone": "Cover reset to the scraped image",
+        "setFailed": "Could not set the cover",
+        "resetFailed": "Could not reset the cover"
+      },
+      "hero": {
+        "label": "Hero",
+        "hint": "Wide background art",
+        "chooseTitle": "Choose a hero image",
+        "chooseAria": "Choose hero image",
+        "resetAria": "Reset hero image",
+        "updated": "Hero updated",
+        "resetDone": "Hero reset to the scraped image",
+        "setFailed": "Could not set the hero",
+        "resetFailed": "Could not reset the hero"
+      },
+      "logo": {
+        "label": "Logo",
+        "hint": "Transparent PNG",
+        "chooseTitle": "Choose a logo image",
+        "chooseAria": "Choose logo image",
+        "resetAria": "Reset logo image",
+        "updated": "Logo updated",
+        "resetDone": "Logo reset to the scraped image",
+        "setFailed": "Could not set the logo",
+        "resetFailed": "Could not reset the logo"
+      }
+    },
+    "imagesFilter": "Images"
+  }
+}

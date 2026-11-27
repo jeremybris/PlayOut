@@ -1,0 +1,155 @@
+{
+  "title": "Sistema",
+  "lead": "Idioma, inicio, acciones de energía, perfiles de energía, memoria, música y accesos directos de Windows.",
+  "exit": {
+    "button": "Salir de PlayOut",
+    "confirmTitle": "Salir de PlayOut",
+    "confirmToTray": "¿Cerrar el panel en la bandeja del sistema? PlayOut seguirá funcionando allí.",
+    "confirmToDesktop": "¿Cerrar el panel y volver al escritorio de Windows?",
+    "confirmButton": "Salir",
+    "failed": "No se pudo salir de PlayOut"
+  },
+  "language": {
+    "title": "Idioma",
+    "label": "Idioma",
+    "description": "Los menús y mensajes de PlayOut. Los nombres y detalles de los juegos se muestran tal como los escriben sus tiendas y fuentes.",
+    "machineTranslated": "{language} (traducción automática)"
+  },
+  "startup": {
+    "title": "Inicio y energía",
+    "launchAtLogin": {
+      "label": "Abrir al iniciar sesión",
+      "description": "Abre PlayOut cuando inicias sesión en Windows."
+    },
+    "minimizeToTray": {
+      "label": "Minimizar a la bandeja",
+      "description": "Al cerrar PlayOut, sigue funcionando en la bandeja del sistema. Sal desde el menú del icono de la bandeja."
+    },
+    "confirmPowerActions": {
+      "label": "Confirmar acciones de energía",
+      "description": "Pregunta antes de suspender, reiniciar, apagar o salir."
+    },
+    "enhancedSleepWake": {
+      "label": "Suspensión/reactivación mejorada",
+      "description": "Congela el juego en curso mientras el PC está en suspensión o la pantalla está bloqueada, y lo reanuda cuando vuelves. La suspensión pausa las aplicaciones en segundo plano y la red, solo tú puedes reactivar el PC, y este hiberna tras 48 horas de suspensión para ahorrar batería (un paso de administrador; se deshace al desactivarlo)."
+    },
+    "controllerWake": {
+      "label": "Reactivar con el botón Xbox",
+      "description": "Pulsar el botón Xbox de un mando de Xbox reactiva el PC de la suspensión. Necesita el Adaptador inalámbrico Xbox o un cable USB (Bluetooth normalmente no puede reactivar un PC), y un PC cuya suspensión permita que los dispositivos USB lo reactiven. Un paso de administrador; se deshace al desactivarlo."
+    }
+  },
+  "power": {
+    "title": "Perfiles de energía",
+    "noteDynamic": "Cambia desde la superposición (el botón Home). Dynamic TDP (el predeterminado) sube o baja los vatios durante una partida para mantener tu velocidad de fotogramas objetivo; Vatios personalizados fija límites concretos.",
+    "noteStatic": "Cambia de perfil desde la superposición (el botón Home). Cada perfil ajusta el modo de energía de Windows, el máximo de CPU y el turbo de CPU, y con el asistente de energía, los vatios.",
+    "defaultProfile": {
+      "label": "Fuera de los juegos",
+      "description": "Se usa cuando no hay ningún juego en marcha, y para los juegos sin perfil propio."
+    },
+    "targetFps": {
+      "label": "Objetivo de Dynamic TDP",
+      "description": "La velocidad de fotogramas que Dynamic TDP mantiene en los juegos sin objetivo propio."
+    },
+    "dynamicMin": {
+      "label": "Vatios mínimos de Dynamic TDP",
+      "description": "Nunca por debajo de esto, aunque el objetivo sea fácil de alcanzar."
+    },
+    "dynamicMax": {
+      "label": "Vatios máximos de Dynamic TDP",
+      "description": "Nunca por encima de esto, aunque no se alcance el objetivo (más frío y silencioso)."
+    },
+    "perGame": {
+      "label": "Perfiles por juego",
+      "description": "Cambia al perfil propio de un juego mientras se ejecuta, y vuelve después."
+    },
+    "useWatts": {
+      "label": "Fijar vatios",
+      "description": "Usa los límites sostenido y de turbo del asistente de energía cuando está instalado."
+    },
+    "helper": {
+      "label": "Asistente de energía",
+      "install": "Instalar",
+      "update": "Actualizar",
+      "remove": "Quitar",
+      "installFailed": "No se pudo instalar el asistente de energía",
+      "removeFailed": "No se pudo quitar el asistente de energía"
+    }
+  },
+  "memory": {
+    "title": "Memoria",
+    "label": "Liberar memoria mientras PlayOut está en marcha",
+    "manual": "Limpieza manual",
+    "freeNow": "Liberar memoria ahora",
+    "failed": "No se pudo liberar memoria",
+    "description": "Reduce la memoria de las aplicaciones en segundo plano cuando empieza un juego y cuando queda poca memoria. Es temporal: Windows vuelve a llenar su caché y las aplicaciones a las que vuelvas pueden ir lentas un momento.",
+    "ago": {
+      "justNow": "ahora mismo",
+      "minutes_one": "hace {count} minuto",
+      "minutes_other": "hace {count} minutos",
+      "hours_one": "hace {count} hora",
+      "hours_other": "hace {count} horas",
+      "days_one": "hace {count} día",
+      "days_other": "hace {count} días"
+    },
+    "pass": {
+      "nothing": "Esta vez no se pudo liberar nada",
+      "freed": "Liberados {size}",
+      "freedIn": "Liberados {size} en {seconds} s"
+    },
+    "result": {
+      "checking": "Comprobando…",
+      "running": "Liberando memoria…",
+      "idle": "Hace una limpieza ahora. PlayOut, tu juego y la aplicación en primer plano nunca se tocan.",
+      "withAgo": "{result} · {ago}"
+    },
+    "tier": {
+      "missing": "Solo se reducen tus propias aplicaciones. La limpieza de todo el sistema necesita el asistente de energía: instálalo desde la fila Asistente de energía de arriba.",
+      "outdated": "Solo se reducen tus propias aplicaciones. La limpieza de todo el sistema necesita la versión nueva del asistente de energía: pulsa Instalar o Actualizar en la fila Asistente de energía de arriba.",
+      "notAnswering": "Solo se reducen tus propias aplicaciones. El asistente de energía no responde: quítalo y vuelve a instalarlo desde la fila Asistente de energía de arriba.",
+      "unavailable": "Solo se reducen tus propias aplicaciones: la limpieza de todo el sistema necesita el asistente de energía, que no está disponible en este PC."
+    }
+  },
+  "music": {
+    "title": "Música",
+    "folder": {
+      "label": "Carpeta de música",
+      "description": "Archivos de música (mp3, m4a, aac, flac, ogg, opus, wav) que la superposición puede reproducir en cualquier juego.",
+      "notSet": "Sin definir",
+      "chooseFailed": "No se pudo elegir la carpeta de música"
+    },
+    "gameStart": {
+      "label": "Al iniciar un juego",
+      "description": "Los juegos tienen sus propias listas de reproducción en la pestaña Música de la superposición."
+    },
+    "note": "La música suena desde el reproductor de la superposición: ábrela con el botón Home para ver qué se está reproduciendo.",
+    "volume": "Volumen de la música"
+  },
+  "windows": {
+    "title": "Configuración de Windows",
+    "note": "Abre la página correspondiente de la aplicación Configuración de Windows.",
+    "failed": "No se pudo abrir la configuración de Windows",
+    "pages": {
+      "bluetooth": "Bluetooth",
+      "wifi": "Wi-Fi",
+      "sound": "Sonido",
+      "display": "Pantalla",
+      "power": "Energía",
+      "controllers": "Mandos"
+    }
+  },
+  "controllerWake": {
+    "working": "Pidiendo a Windows la aprobación de administrador…",
+    "offDeclined": "Desactivar el despertar necesita la aprobación de administrador, y se rechazó. Activa y desactiva el interruptor para volver a pedirla.",
+    "offFailed": "Windows no desactivó el despertar. Activa y desactiva el interruptor para volver a intentarlo, o desmarca \"Permitir que este dispositivo reactive el equipo\" en el Administrador de dispositivos.",
+    "offFailedFor": "Windows no desactivó el despertar para {devices}. Activa y desactiva el interruptor para volver a intentarlo, o desmarca \"Permitir que este dispositivo reactive el equipo\" en el Administrador de dispositivos.",
+    "unreadable": "No se pudo leer de Windows la configuración de despertar.",
+    "declined": "Se rechazó la aprobación de administrador. Desactiva y activa el interruptor para volver a pedirla.",
+    "refused": "Windows no permitió {refused}. En el Administrador de dispositivos, ábrelo, ve a Administración de energía y marca \"Permitir que este dispositivo reactive el equipo\"; o desactiva y activa el interruptor para volver a intentarlo.",
+    "refusedBeside": "Despiertan el PC: {wakes}. Windows no permitió {refused}. En el Administrador de dispositivos, ábrelo, ve a Administración de energía y marca \"Permitir que este dispositivo reactive el equipo\"; o desactiva y activa el interruptor para volver a intentarlo.",
+    "wakes": "Despiertan el PC: {devices}.",
+    "waiting": "Esperando para permitir: {devices}.",
+    "locked": "Windows indica que {devices} puede despertar el PC, pero no deja cambiar su configuración. Comprueba que el controlador de accesorios de Xbox está instalado.",
+    "adapterCannotWake": "El Adaptador inalámbrico Xbox está conectado, pero Windows no lo indica como capaz de despertar este PC. Comprueba que su controlador está instalado y que la suspensión en la BIOS permite despertar por USB (S3).",
+    "noDevice": "No se encontró ningún Adaptador inalámbrico Xbox ni mando Xbox con cable que pueda despertar este PC. Conecta uno; se configura en el próximo inicio o al volver a activar el interruptor."
+  }
+}

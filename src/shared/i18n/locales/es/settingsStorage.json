@@ -1,0 +1,21 @@
+{
+  "title": "Almacenamiento",
+  "readFailed": "No se pudieron leer las unidades de este PC.",
+  "tryAgain": "Reintentar",
+  "reading": "Leyendo las unidades…",
+  "thisPc": "Este PC",
+  "thisPcDrives": "Este PC ({drives})",
+  "size": "Tamaño: {size}",
+  "barLabel": "Juegos {games}, otros {other}, libre {free}",
+  "free": "Espacio libre: {size}",
+  "games": "Juegos",
+  "other": "Otros",
+  "listTitle_one": "Juegos en este PC ({count} juego)",
+  "listTitle_other": "Juegos en este PC ({count} juegos)",
+  "none": "No hay juegos instalados en este PC.",
+  "about": "Unos {size}",
+  "openRecomp": "Abrir la recompilación de {title} (elimínala allí)",
+  "recomp": "Recompilación",
+  "deleteLabel": "Eliminar {title} de este PC",
+  "delete": "Eliminar"
+}

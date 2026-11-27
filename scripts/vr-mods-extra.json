@@ -1,0 +1,88 @@
+[
+  {
+    "date": "2026-11-16",
+    "title": "Elden Ring VR (ERVR)",
+    "author": "IlyaMez",
+    "status": "v0.9.2",
+    "group": "debut",
+    "outside": true,
+    "accent": "#baf56a",
+    "tags": ["PCVR", "native VR mod", "motion controls"],
+    "summary": "Native VR for ELDEN RING: your head is the camera, the weapons are in your hands, and your swing is the attack.",
+    "highlights": [
+      "Native VR mod, not a UEVR profile",
+      "Motion-controlled melee",
+      "From the maker of Spidy VR"
+    ],
+    "source": "https://github.com/IlyaMez/EldenringVR",
+    "video": null
+  },
+  {
+    "date": "2026-11-14",
+    "title": "S.T.A.L.K.E.R. 2 VR (UEVR)",
+    "author": "letmein-vr",
+    "status": "2.7.3",
+    "group": "profile",
+    "outside": true,
+    "accent": "#bba7ff",
+    "tags": ["PCVR", "UEVR profile", "motion controls"],
+    "summary": "UEVR mod for S.T.A.L.K.E.R. 2: Heart of Chornobyl. It needs the custom UEVR build from its releases page; inject at the main menu once shader compilation has finished.",
+    "highlights": [
+      "Custom UEVR build included in the release",
+      "Aim fix plugin (stalker2_uevr.dll)",
+      "X and B swap option"
+    ],
+    "source": "https://github.com/letmein-vr/STALKER2-UEVR",
+    "video": null
+  },
+  {
+    "date": "2026-10-19",
+    "title": "Twilight Princess VR (TPVR)",
+    "author": "JoeyAW",
+    "status": "2.4.0",
+    "group": "debut",
+    "outside": true,
+    "accent": "#baf56a",
+    "tags": ["PCVR", "motion controls", "native stereo"],
+    "summary": "VR mod for Dusklight, the PC port of The Legend of Zelda: Twilight Princess, aiming to stay true to the original game while playing it in VR.",
+    "highlights": [
+      "Full stereoscopic 3D with controller tracking",
+      "Needs the Dusklight PC port",
+      "Not affiliated with the Dusklight team"
+    ],
+    "source": "https://github.com/JoeyAW/TPVR",
+    "video": null
+  },
+  {
+    "date": "2025-03-05",
+    "title": "REFramework",
+    "author": "praydog",
+    "status": "v1.5.9.1",
+    "group": "tool",
+    "outside": true,
+    "accent": "#52d8ff",
+    "tags": ["PCVR", "RE Engine", "mod loader"],
+    "summary": "Mod loader, scripting platform and VR support for RE Engine games: Resident Evil 2, 3, 4, 7, 8 and 9, Devil May Cry 5, Monster Hunter Rise and Wilds, Street Fighter 6 and more.",
+    "highlights": [
+      "VR for every RE Engine game",
+      "Lua scripting and mod loading",
+      "Free camera and other tools"
+    ],
+    "source": "https://github.com/praydog/REFramework",
+    "video": null
+  },
+  {
+    "date": "2025-03-02",
+    "title": "NomaiVR (Outer Wilds VR)",
+    "author": "Raicuparta",
+    "status": "2.10.0",
+    "group": "debut",
+    "outside": true,
+    "accent": "#baf56a",
+    "tags": ["PCVR", "6DoF motion controls", "SteamVR"],
+    "summary": "Outer Wilds VR mod with 6DOF tracking and full motion control support.",
+    "highlights": ["6DOF tracking", "Full motion controls", "Runs through SteamVR"],
+    "source": "https://github.com/Raicuparta/nomai-vr",
+    "video": null
+  }
+]

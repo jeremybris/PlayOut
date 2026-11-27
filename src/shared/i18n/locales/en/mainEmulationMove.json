@@ -1,0 +1,23 @@
+{
+  "blocked": {
+    "install": "The Emulation folder cannot be inside PlayOut's install folder: uninstalling or updating PlayOut would delete it. Choose a folder outside it, such as Documents.",
+    "data": "The Emulation folder cannot be inside PlayOut's data folder (AppData). Choose a folder outside it, such as Documents.",
+    "insideCurrent": "The new place is inside the Emulation folder in use. Choose a folder outside it.",
+    "containsCurrent": "The Emulation folder in use is inside the new place. Choose another folder, or one named Emulation.",
+    "notFolder": "A file with that name is in the way. Choose another folder.",
+    "currentIsLink": "The Emulation folder in use is a link to another folder. Choose the real folder it points to as the Emulation folder first, then move that.",
+    "noSpace": "The Emulation folder ({size}) does not fit on that drive ({free} free, and 1 GB is kept free).",
+    "notEmpty": "The new place is not empty: choose to move into it or to use it as it is."
+  },
+  "busy": {
+    "game": "A game is running. Close it before moving the Emulation folder.",
+    "setup": "PlayOut is setting up or updating emulators. Move the Emulation folder when it has finished.",
+    "convert": "A conversion is running. Move the Emulation folder when it has finished.",
+    "sending": "A paired PC is downloading from the Emulation folder. Move it when the download has finished.",
+    "emulator": "Close {names} before moving the Emulation folder.",
+    "moving": "The Emulation folder is being moved. Try again when the move has finished."
+  },
+  "alreadyRunning": "The Emulation folder is already being moved.",
+  "cancelled": "Move cancelled. Nothing was moved; the Emulation folder is where it was.",
+  "saveFailed": "PlayOut could not save the new Emulation folder setting, so nothing was moved. The Emulation folder is where it was."
+}

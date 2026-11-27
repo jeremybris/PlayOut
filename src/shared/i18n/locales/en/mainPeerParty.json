@@ -1,0 +1,51 @@
+{
+  "blocked": {
+    "remote": "The game is on another PC.",
+    "rom": "PeerParty works with PC games, not emulated ones.",
+    "recomp": "A recompilation card has no PC game for PeerParty to start.",
+    "notInstalled": "The game is not installed.",
+    "noFolder": "PlayOut does not know the game's folder.",
+    "competitive": "It is a competitive or free-to-play online game, where anti-cheat may ban a modified game.",
+    "noMultiplayer": "Its tags show no multiplayer.",
+    "antiCheat": "Its folder has anti-cheat, which may ban a modified game.",
+    "antiCheatUnknown": "Its folder could not be fully checked for anti-cheat.",
+    "noExe": "PlayOut could not find the game's program.",
+    "noService": "It uses none of the multiplayer services PeerParty supports.",
+    "xbox360": "It is an Xbox 360 game that Windows runs in its emulator, which PeerParty can't carry.",
+    "kernelAntiCheat": "It uses {kernel} anti-cheat, which may ban a modified game.",
+    "competitiveTags": "Its tags ({tags}) mark a free-to-play, competitive or massively multiplayer online game, where anti-cheat may ban a modified game.",
+    "vac": "Steam lists Valve Anti-Cheat for it, which may ban a modified game.",
+    "vacUnknown": "Steam has not been asked yet whether it uses Valve Anti-Cheat.",
+    "antiCheatNamed": "Its folder has anti-cheat ({names}), which may ban a modified game."
+  },
+  "notInLibrary": "The game is not in the library.",
+  "alreadyRunning": "{title} is already running through PeerParty.",
+  "alreadyStarting": "{title} is already being started with PeerParty.",
+  "alreadyStartingThis": "{title} is already being started with PeerParty.",
+  "checking": "Checking the game…",
+  "busy": "PeerParty is already running a game. Close that game first.",
+  "notOffered": "PeerParty is not offered for {title}: {reason}",
+  "starting": "Starting with PeerParty…",
+  "blockedByWindows": "PeerParty could not be started ({code}); Windows security may have blocked it.",
+  "couldNotStart": "PeerParty could not start {title}: {error}",
+  "invite": {
+    "missing": "PlayOut’s invite helper is missing. Reinstall PlayOut to get it back.",
+    "noAnswer": "PlayOut’s invite helper did not answer.",
+    "noSession": "No game runs through PeerParty now.",
+    "failed": "The invite could not be sent."
+  },
+  "release": {
+    "rateLimited": "GitHub is limiting requests from this connection (HTTP {status}). Try again in an hour.",
+    "lookupFailed": "the PeerParty release could not be looked up (HTTP {status})",
+    "unreadable": "the PeerParty release could not be read (unexpected answer from GitHub)",
+    "downloadFailed": "PeerParty could not be downloaded: {error}",
+    "noExe": "the PeerParty release {tag} has no {file}",
+    "cannotCheck": "Could not check the PeerParty download",
+    "hashNotChecksum": "its hash is not the one in {file}",
+    "hashNotGithub": "its hash is not GitHub's",
+    "sizeMismatch": "it is {size} bytes, not {expected}",
+    "sizeMismatchChecksum": "it is {size} bytes, not {expected}",
+    "notWindows": "it is not a Windows program",
+    "checkFailed": "the PeerParty download failed its check: {problems}"
+  }
+}

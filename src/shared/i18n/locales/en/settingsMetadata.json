@@ -1,0 +1,94 @@
+{
+  "title": "Metadata & artwork",
+  "lead": "Keys are stored on this PC only and used with the services below. Fields save as you type, and each key is checked with its service as soon as you enter it.",
+  "steamStore": "Steam store",
+  "links": {
+    "getApiKey": "Get API key",
+    "getClientId": "Get client ID",
+    "createAccount": "Create account",
+    "getWebApiKey": "Get Web API key",
+    "label": "{link} for {service} (opens in your browser)"
+  },
+  "regions": {
+    "us": "USA",
+    "eu": "Europe",
+    "jp": "Japan",
+    "wor": "World"
+  },
+  "refresh": {
+    "all": "Refresh all metadata",
+    "missing": "Refresh missing",
+    "allStarted": "Refreshing metadata and artwork for every game",
+    "missingStarted": "Fetching metadata for games that have none",
+    "failed": "Could not start the metadata refresh",
+    "missingQueued_one": "Looking for missing art for {count} game…",
+    "missingQueued_other": "Looking for missing art for {count} games…",
+    "nothingMissing": "Nothing is missing",
+    "needsSignIn": "Covers need a SteamGridDB, ScreenScraper or IGDB sign-in. Add one in Settings › Metadata."
+  },
+  "artSourceNeeded": "Covers for games the stores have no art for need a SteamGridDB, ScreenScraper, IGDB or TheGamesDB sign-in below. Once one is added, the missing covers are looked for automatically.",
+  "openLinkFailed": "Could not open the link",
+  "scraping": {
+    "title": "Scraping",
+    "autoScrape": {
+      "label": "Scrape automatically",
+      "description": "Fetch metadata and artwork for new games right after a scan."
+    },
+    "localArt": {
+      "label": "Use art from installed store clients",
+      "description": "Reuse covers that Steam, GOG Galaxy and Epic already downloaded to this PC before fetching anything."
+    },
+    "hltb": {
+      "label": "HowLongToBeat times",
+      "description": "Look up main story / completionist times (one query per game, cached 30 days)."
+    },
+    "steamTags": {
+      "label": "Steam tags",
+      "description": "Read Steam's player tags (Roguelike, Souls-like, ...) for every game, including other stores' games that are also on Steam."
+    },
+    "region": {
+      "label": "Preferred region",
+      "description": "Which regional release, title and box art to prefer for ROMs."
+    }
+  },
+  "database": {
+    "title": "PlayOut database",
+    "use": {
+      "label": "Use the PlayOut database",
+      "description": "Fill each game's release date, genres, tags, developers, publishers and local players from the shared PlayOut database before asking the scrapers."
+    },
+    "contribute": {
+      "label": "Add missing games to the database",
+      "description": "Send the title and facts of games the database lacks, with an anonymous install id; nothing personal and never your own edits."
+    }
+  },
+  "artwork": {
+    "title": "Artwork sources (tried in this order)",
+    "moveUp": "Move {source} up",
+    "moveDown": "Move {source} down"
+  },
+  "steamgriddb": {
+    "note": "Covers, heroes and logos. Sign in to SteamGridDB, then generate a key under Preferences › API.",
+    "apiKey": "API key"
+  },
+  "igdb": {
+    "note": "Descriptions, genres and release dates, and the user rating shown for games without a Steam review score. Register an application on the Twitch developer console, then copy its client ID and generate a client secret.",
+    "clientId": "Client ID",
+    "clientSecret": "Client secret"
+  },
+  "screenscraper": {
+    "note": "ROM metadata and artwork by file hash. The developer ID and password are required (ScreenScraper issues them on its forum); a user account raises the daily quota.",
+    "username": "Username",
+    "password": "Password",
+    "devId": "Developer ID",
+    "devPassword": "Developer password"
+  },
+  "thegamesdb": {
+    "note": "Box art and descriptions. Sign in to TheGamesDB to see your API key.",
+    "apiKey": "API key"
+  },
+  "steam": {
+    "note": "Achievements and play time from the Steam Web API. Your SteamID64 is the 17-digit number on your profile.",
+    "apiKey": "Web API key"
+  }
+}

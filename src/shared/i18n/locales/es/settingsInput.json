@@ -1,0 +1,105 @@
+{
+  "title": "Controles",
+  "lead": "El botón Home y el comportamiento del mando. El teclado y el ratón siempre funcionan junto al mando.",
+  "ms": "{value} ms",
+  "tester": {
+    "title": "Probador de mando",
+    "noController": "No se detectó ningún mando",
+    "standard": "Asignación estándar · pulsa cualquier botón para probarlo",
+    "nonStandard": "Asignación no estándar ({mapping}) · los botones pueden variar",
+    "unknownMapping": "desconocida",
+    "connect": "Conecta un mando y pulsa un botón.",
+    "leftStick": "Stick izquierdo",
+    "rightStick": "Stick derecho",
+    "buttons": {
+      "up": "Arriba",
+      "down": "Abajo",
+      "left": "Izquierda",
+      "right": "Derecha"
+    }
+  },
+  "capture": {
+    "title": "Pulsa los nuevos botones",
+    "cancel": "Cancelar",
+    "message": "Mantén los botones a la vez en cualquier mando y luego suéltalos todos: de dos a cuatro botones, o Home solo. Pulsa Escape o haz clic en Cancelar para parar.",
+    "waiting": "Esperando botones…",
+    "readFailed": "No se pudieron leer los mandos"
+  },
+  "combo": {
+    "buttons": "Botones",
+    "notSet": "Sin definir",
+    "change": "Cambiar",
+    "set": "Definir",
+    "clear": "Borrar",
+    "overlapsKeyboard": "Esos botones coinciden con los del teclado en pantalla: elige otros.",
+    "overlapsHome": "Esos botones coinciden con los del botón Home: elige otros."
+  },
+  "home": {
+    "title": "Botón Home",
+    "enabled": {
+      "label": "El botón Home abre la superposición",
+      "description": "Energía, pantalla, sonido y música sobre cualquier juego, con volver al juego, PlayOut y salir."
+    },
+    "hold": {
+      "label": "Tiempo de pulsación",
+      "description": "Cuánto tiempo deben mantenerse los botones antes de que se abra la superposición.",
+      "atOnce": "Al instante"
+    },
+    "steam": {
+      "label": "Quitarle a Steam el botón Guide",
+      "description": "PlayOut desactiva \"Guide button focuses Steam\" y \"Enable the Steam Overlay while in-game\" de Steam (Steam se reinicia sin avisar) y los restablece cuando desactivas esto.",
+      "onlyWithHome": "Steam solo importa mientras los botones incluyan Home."
+    },
+    "gameBar": {
+      "label": "Desactivar Xbox Game Bar",
+      "description": "Para que nunca se abra sobre la superposición: se desactivan sus atajos y vínculos del mando, y Game Bar se cierra si algo la inicia de todos modos. Todo se restablece cuando desactivas esto."
+    },
+    "pause": {
+      "label": "Pausar el juego mientras la superposición está abierta",
+      "description": "El juego se congela para que no reciba ninguno de tus botones, y sigue cuando se cierra la superposición. Los juegos con antitrampas y los juegos en línea competitivos (Multijugador en línea › Todos competitivos) nunca se pausan."
+    },
+    "touchSwipe": {
+      "label": "Deslizar desde la izquierda para abrir la superposición",
+      "description": "En una pantalla táctil, desliza hacia la derecha desde el lado izquierdo de la pantalla durante una partida. Empieza a un dedo de distancia del borde: Windows reserva el borde mismo para su propio gesto."
+    }
+  },
+  "ingame": {
+    "title": "Superposición en el juego",
+    "label": "Superposición en el juego",
+    "description": "Sobre un juego en pantalla completa exclusiva, PlayOut dibuja su superposición dentro del juego para que este no se minimice. Nunca en juegos con antitrampas.",
+    "never": "Juegos sin la superposición en el juego",
+    "neverDescription": "Recibe la superposición en ventana (puede minimizarse en pantalla completa exclusiva).",
+    "allowLabel": "Volver a usar la superposición en el juego para {title}",
+    "remove": "Quitar"
+  },
+  "keyboard": {
+    "title": "Teclado en pantalla",
+    "note": "Abre el teclado en pantalla de Windows sobre cualquier juego o en PlayOut, para escribir con el mando."
+  },
+  "controller": {
+    "title": "Mando",
+    "deadzone": {
+      "label": "Zona muerta del stick",
+      "description": "Recorrido del stick que se ignora antes de registrar una dirección."
+    },
+    "vibration": {
+      "label": "Vibración",
+      "description": "Una vibración corta al seleccionar algo."
+    },
+    "swapAB": {
+      "label": "Intercambiar A y B",
+      "description": "Distribución estilo Nintendo: B selecciona y A vuelve atrás."
+    }
+  },
+  "repeat": {
+    "title": "Repetición de navegación",
+    "delay": {
+      "label": "Retardo de repetición",
+      "description": "Cuánto tiempo debe mantenerse una dirección antes de que el foco empiece a repetirse."
+    },
+    "rate": {
+      "label": "Velocidad de repetición",
+      "description": "Tiempo entre movimientos repetidos mientras se mantiene una dirección."
+    }
+  }
+}

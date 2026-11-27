@@ -1,0 +1,97 @@
+{
+  "label": "Quick panel",
+  "playing": "Playing {title}",
+  "downloads": "Downloads",
+  "tileLabel": "{detail}: {value}",
+  "battery": {
+    "pluggedIn": "Plugged in",
+    "noBattery": "No battery",
+    "charging": "Charging",
+    "onBattery": "On battery"
+  },
+  "network": {
+    "offline": "Offline",
+    "noNetwork": "No network",
+    "ethernet": "Ethernet",
+    "wired": "Wired connection",
+    "wifi": "Wi-Fi",
+    "signal": "{percent} signal"
+  },
+  "bluetooth": {
+    "name": "Bluetooth",
+    "unavailable": "Unavailable",
+    "noAdapter": "No Bluetooth adapter",
+    "on": "On",
+    "off": "Off"
+  },
+  "volume": {
+    "label": "Volume",
+    "muted": "Muted",
+    "mute": "Mute",
+    "unmute": "Unmute"
+  },
+  "brightness": "Brightness",
+  "powerMode": {
+    "title": "Power mode",
+    "efficiency": "Efficiency",
+    "balanced": "Balanced",
+    "performance": "Performance",
+    "buttonLabel": "{mode} power mode"
+  },
+  "power": "Power",
+  "performance": {
+    "title": "Performance",
+    "cpu": "CPU",
+    "memory": "Memory",
+    "gpu": "GPU"
+  },
+  "windowsSettings": {
+    "title": "Windows settings",
+    "bluetooth": "Bluetooth",
+    "wifi": "Wi-Fi",
+    "sound": "Sound",
+    "display": "Display",
+    "power": "Power",
+    "gamepad": "Gamepad"
+  },
+  "hints": {
+    "select": "Select",
+    "close": "Close"
+  },
+  "errors": {
+    "windowsSettings": "Could not open Windows settings",
+    "volume": "Could not change the volume",
+    "mute": "Could not mute",
+    "unmute": "Could not unmute",
+    "brightness": "Could not change the brightness",
+    "powerMode": "Could not change the power mode"
+  },
+  "powerMenu": {
+    "label": "Power",
+    "exit": {
+      "label": "Exit PlayOut",
+      "message": "Close the dashboard and return to the Windows desktop?",
+      "failed": "Could not exit playout"
+    },
+    "minimize": {
+      "label": "Minimize",
+      "message": "Minimize PlayOut to the taskbar?",
+      "failed": "Could not minimize"
+    },
+    "sleep": {
+      "label": "Sleep",
+      "message": "Put the PC to sleep now?",
+      "failed": "Could not sleep"
+    },
+    "restart": {
+      "label": "Restart",
+      "message": "Restart the PC now? Running games will be closed.",
+      "failed": "Could not restart"
+    },
+    "shutdown": {
+      "label": "Shut down",
+      "message": "Shut the PC down now? Running games will be closed.",
+      "failed": "Could not shut down"
+    }
+  }
+}

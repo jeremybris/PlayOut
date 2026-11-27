@@ -1,0 +1,35 @@
+{
+  "hints": {
+    "open": "Open",
+    "favourite": "Favourite",
+    "options": "Options",
+    "library": "Library",
+    "search": "Search",
+    "settings": "Settings"
+  },
+  "loadingLibrary": "Loading library",
+  "emptyLibrary": "Your library is empty",
+  "played": "Played {time}",
+  "quickActions": {
+    "label": "Quick actions",
+    "settings": "Settings",
+    "exit": "Exit"
+  },
+  "systemBar": {
+    "label": "System",
+    "search": "Search",
+    "power": "Power",
+    "clock": "Clock",
+    "bluetoothOn": "Bluetooth on",
+    "bluetoothOff": "Bluetooth off",
+    "battery": "Battery {percent}%",
+    "batteryCharging": "Battery {percent}%, charging",
+    "volume": "Volume",
+    "volumeMuted": "Volume muted",
+    "volumeLevel": "Volume {percent}%",
+    "noNetwork": "No network",
+    "ethernet": "Ethernet",
+    "wifi": "Wi-Fi",
+    "wifiNamed": "Wi-Fi: {ssid}"
+  }
+}

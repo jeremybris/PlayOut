@@ -1,0 +1,47 @@
+{
+  "title": "RV",
+  "lead": "Mods que te permiten jugar en RV juegos de PC planos.",
+  "readFailed": "No se pudieron leer los mods de RV.",
+  "tryAgain": "Reintentar",
+  "reading": "Leyendo los mods de RV",
+  "mods": {
+    "title": "Mods de RV",
+    "note": "La lista viene de la lista de lanzamientos de la comunidad Flat2VR. Los mods que están en GitHub se pueden descargar aquí en la carpeta VR Mods, una carpeta por mod; PlayOut solo los guarda y nunca los ejecuta. Sigue las instrucciones de cada mod para usarlo con tu juego.",
+    "browser": "Explorador de mods de RV",
+    "browseCount_one": "{count} mod para explorar, {github} con descarga en GitHub",
+    "browseCount_other": "{count} mods para explorar, {github} con descarga en GitHub",
+    "browse": "Explorar",
+    "downloadedTo": "Descargados en",
+    "open": "Abrir"
+  },
+  "downloaded": {
+    "title": "Mods de RV descargados",
+    "updatesAvailable_one": "{count} actualización disponible",
+    "updatesAvailable_other": "{count} actualizaciones disponibles",
+    "updates": "Actualizaciones",
+    "updatesNote": "Pregunta a GitHub por la versión más reciente de cada mod descargado. Tus propios archivos en la carpeta de un mod se respaldan antes de actualizarlo.",
+    "check": "Buscar actualizaciones",
+    "none": "Todavía ninguno. Abre el explorador para descargar un mod de RV."
+  },
+  "upToDate": "Todos los mods de RV están al día",
+  "checkFailed": "No se pudieron buscar actualizaciones",
+  "openFolderFailed": "No se pudo abrir la carpeta",
+  "remove": {
+    "title": "¿Quitar {title}?",
+    "message": "Se elimina su carpeta dentro de la carpeta VR Mods, con todo lo que hayas puesto en ella (tus propios archivos se comprimen antes en las copias de seguridad).",
+    "confirm": "Quitar",
+    "done": "{title} quitado",
+    "failed": "No se pudo quitar {title}"
+  },
+  "card": {
+    "onDisk": "{size} en disco",
+    "notVerified": "sin verificar",
+    "available": "{version} disponible",
+    "removing": "Quitando…",
+    "downloading": "Descargando…",
+    "updateTo": "Actualizar a {version}",
+    "updateFailed": "No se pudo actualizar {title}",
+    "openFolder": "Abrir carpeta",
+    "remove": "Quitar"
+  }
+}

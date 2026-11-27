@@ -1,0 +1,24 @@
+{
+  "title": "Search",
+  "subtitle": "Title, platform, genre or developer",
+  "noMatches": "No matches",
+  "results_one": "{count} result",
+  "results_other": "{count} results",
+  "placeholder": "Search your library",
+  "resultsLabel": "Search results",
+  "empty": {
+    "title": "Search your library",
+    "gamepad": "Pick letters with the keyboard. Results appear as you type.",
+    "keyboard": "Type a title, platform, genre or developer. Results appear as you type."
+  },
+  "noGames": {
+    "title": "No games found",
+    "description": "Nothing in your library matches \"{query}\"."
+  },
+  "hints": {
+    "open": "Open",
+    "backspace": "Backspace",
+    "space": "Space",
+    "close": "Close"
+  }
+}

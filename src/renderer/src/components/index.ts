@@ -1,0 +1,26 @@
+/**
+ * Barrel for the UI foundation components. Screens may import from here or from the individual files.
+ * Focus key helpers live in lib/focusKeys.ts and badge resolution in lib/badge.ts.
+ */
+export { Button, type ButtonProps } from './Button'
+export { ButtonHints, type ButtonHintsProps, type Hint, type HintButton } from './ButtonHints'
+export { Chip, type ChipProps } from './Chip'
+export { ConfirmDialog, type ConfirmDialogProps } from './ConfirmDialog'
+export { Divider, type DividerProps } from './Divider'
+export { EmptyState, type EmptyStateProps } from './EmptyState'
+export { AddGamesTile, GameCard, type AddGamesTileProps, type GameCardProps } from './GameCard'
+export { IconButton, type IconButtonProps } from './IconButton'
+export { LaunchErrorDialog, type LaunchErrorDialogProps } from './LaunchErrorDialog'
+export { Menu, MenuItem, type MenuItemProps, type MenuProps } from './MenuItem'
+export { Modal, type ModalProps, type ModalSize } from './Modal'
+export { OnScreenKeyboard, type OnScreenKeyboardProps } from './OnScreenKeyboard'
+export { Pill, PillDivider, type PillProps } from './Pill'
+export { PlatformBadge, type PlatformBadgeProps } from './PlatformBadge'
+export { Row, type RowProps } from './Row'
+export { SelectField, type SelectFieldProps, type SelectOption } from './SelectField'
+export { Slider, type SliderProps } from './Slider'
+export { Spinner, type SpinnerProps } from './Spinner'
+export { Stat, type StatProps } from './Stat'
+export { TextField, type TextFieldProps } from './TextField'
+export { Toast, ToastHost, type ToastProps } from './Toast'
+export { Toggle, type ToggleProps } from './Toggle'

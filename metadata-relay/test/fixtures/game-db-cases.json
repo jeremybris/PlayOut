@@ -1,0 +1,1424 @@
+{
+  "about": "The PlayOut database format cases. PlayOut (src/shared/game-database.ts, tested by src/shared/game-database.relay-parity.test.ts) and the relay (metadata-relay/src/database-format.ts, tested by metadata-relay/test/database-format.test.ts) must both pass every case: change the two copies and these cases together.",
+  "maxRowsPerRequest": 25,
+  "shardCount": 16,
+  "columns": [
+    "key",
+    "title",
+    "platform",
+    "release_date",
+    "genres",
+    "tags",
+    "developers",
+    "publishers",
+    "local_players",
+    "steam_appid"
+  ],
+  "accepted": [
+    {
+      "key": "steam-427520",
+      "title": "Factorio",
+      "platform": "pc",
+      "releaseDate": "2020-08-14",
+      "genres": ["Simulation", "Strategy"],
+      "tags": ["Automation", "Base Building"],
+      "developers": ["Wube Software LTD."],
+      "publishers": ["Wube Software LTD."],
+      "localPlayers": null,
+      "steamAppId": 427520
+    },
+    {
+      "key": "steam-620",
+      "title": "Portal 2",
+      "platform": "pc",
+      "releaseDate": "2020-08-14",
+      "genres": ["Simulation", "Strategy"],
+      "tags": ["Puzzle", "Co-op"],
+      "developers": ["Wube Software LTD."],
+      "publishers": ["Wube Software LTD."],
+      "localPlayers": 2,
+      "steamAppId": 620
+    },
+    {
+      "key": "gog-1207658924",
+      "title": "Heroes of Might & Magic 3: \"Complete\", HD",
+      "platform": "pc",
+      "releaseDate": "2020-08-14",
+      "genres": ["Simulation", "Strategy"],
+      "tags": ["Automation", "Base Building"],
+      "developers": ["Wube Software LTD."],
+      "publishers": ["Wube Software LTD."],
+      "localPlayers": null,
+      "steamAppId": null
+    },
+    {
+      "key": "ps2-slus20772",
+      "title": "SSX 3",
+      "platform": "ps2",
+      "releaseDate": "2003",
+      "genres": ["Sports"],
+      "tags": [],
+      "developers": [],
+      "publishers": [],
+      "localPlayers": null,
+      "steamAppId": null
+    },
+    {
+      "key": "steam-1",
+      "title": "-ERROR-",
+      "platform": "pc",
+      "releaseDate": "2020-08-14",
+      "genres": ["Simulation", "Strategy"],
+      "tags": ["Automation", "Base Building"],
+      "developers": ["Wube Software LTD."],
+      "publishers": ["Wube Software LTD."],
+      "localPlayers": null,
+      "steamAppId": 427520
+    },
+    {
+      "key": "snes-pokemon-red",
+      "title": "Pokémon Ü — 東方 ✓",
+      "platform": "snes",
+      "releaseDate": "1996-02",
+      "genres": [],
+      "tags": [],
+      "developers": ["Game Freak, Inc."],
+      "publishers": [],
+      "localPlayers": null,
+      "steamAppId": null
+    },
+    {
+      "key": "manual-to-the-moon-game",
+      "title": "To the Moon",
+      "platform": "pc",
+      "releaseDate": "",
+      "genres": [],
+      "tags": [],
+      "developers": [],
+      "publishers": [],
+      "localPlayers": 4,
+      "steamAppId": null
+    },
+    {
+      "key": "rom-xbox-halo",
+      "title": "Halo",
+      "platform": "xbox",
+      "releaseDate": "",
+      "genres": [
+        "Genre 1",
+        "Genre 2",
+        "Genre 3",
+        "Genre 4",
+        "Genre 5",
+        "Genre 6",
+        "Genre 7",
+        "Genre 8",
+        "Genre 9",
+        "Genre 10",
+        "Genre 11",
+        "Genre 12",
+        "Genre 13",
+        "Genre 14",
+        "Genre 15",
+        "Genre 16",
+        "Genre 17",
+        "Genre 18",
+        "Genre 19",
+        "Genre 20"
+      ],
+      "tags": [
+        "Tag 1",
+        "Tag 2",
+        "Tag 3",
+        "Tag 4",
+        "Tag 5",
+        "Tag 6",
+        "Tag 7",
+        "Tag 8",
+        "Tag 9",
+        "Tag 10",
+        "Tag 11",
+        "Tag 12",
+        "Tag 13",
+        "Tag 14",
+        "Tag 15",
+        "Tag 16",
+        "Tag 17",
+        "Tag 18",
+        "Tag 19",
+        "Tag 20",
+        "Tag 21",
+        "Tag 22",
+        "Tag 23",
+        "Tag 24",
+        "Tag 25",
+        "Tag 26",
+        "Tag 27",
+        "Tag 28",
+        "Tag 29",
+        "Tag 30"
+      ],
+      "developers": [],
+      "publishers": [],
+      "localPlayers": 64,
+      "steamAppId": null
+    },
+    {
+      "key": "epic-fn.app_1",
+      "title": "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+      "platform": "pc",
+      "releaseDate": "2020-08-14",
+      "genres": ["Simulation", "Strategy"],
+      "tags": ["Automation", "Base Building"],
+      "developers": [
+        "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+      ],
+      "publishers": ["Wube Software LTD."],
+      "localPlayers": null,
+      "steamAppId": 2147483647
+    },
+    {
+      "key": "steam-2",
+      "title": "A - B = C",
+      "platform": "pc",
+      "releaseDate": "2020-08-14",
+      "genres": ["Action-Adventure"],
+      "tags": ["Automation", "Base Building"],
+      "developers": ["Wube Software LTD."],
+      "publishers": ["At  home? no: \"x@y\""],
+      "localPlayers": null,
+      "steamAppId": 427520
+    }
+  ],
+  "refused": [
+    {
+      "row": {
+        "key": "PS2 SLUS",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "key is not a game key"
+    },
+    {
+      "row": {
+        "key": "",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "key is not a game key"
+    },
+    {
+      "row": {
+        "key": "-steam-1",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "key is not a game key"
+    },
+    {
+      "row": {
+        "key": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "key is not a game key"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "=cmd(\"/c calc\")",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "title starts like a spreadsheet formula"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "+1",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "formula"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "@SUM(A1)",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "formula"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "-1+1",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "formula"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "-",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "formula"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["-HYPERLINK(\"https://evil.example\",\"Valve\")"],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "developers value starts like a spreadsheet formula"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "-WEBSERVICE(\"https://evil.example/x\")",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "title starts like a spreadsheet formula"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["=HYPERLINK(\"http://x\")"],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "developers value starts like a spreadsheet formula"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["-5"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "tags value starts like a spreadsheet formula"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "title is empty"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": " Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "title has spaces at the start or end"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "title is longer than 200 characters"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Tab\there",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "title has control characters"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Bad\u202eText",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "control characters"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["A\nB"],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "developers value has control characters"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": [
+          "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+        ],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "publishers value is longer than 100 characters"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Action|RPG"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "genres value contains \"|\""
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Action", "action"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "genres lists \"action\" twice"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": [""],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "genres value is empty"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": [
+          "Genre 1",
+          "Genre 2",
+          "Genre 3",
+          "Genre 4",
+          "Genre 5",
+          "Genre 6",
+          "Genre 7",
+          "Genre 8",
+          "Genre 9",
+          "Genre 10",
+          "Genre 11",
+          "Genre 12",
+          "Genre 13",
+          "Genre 14",
+          "Genre 15",
+          "Genre 16",
+          "Genre 17",
+          "Genre 18",
+          "Genre 19",
+          "Genre 20",
+          "Genre 21"
+        ],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "genres has more than 20 values"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": [
+          "Tag 1",
+          "Tag 2",
+          "Tag 3",
+          "Tag 4",
+          "Tag 5",
+          "Tag 6",
+          "Tag 7",
+          "Tag 8",
+          "Tag 9",
+          "Tag 10",
+          "Tag 11",
+          "Tag 12",
+          "Tag 13",
+          "Tag 14",
+          "Tag 15",
+          "Tag 16",
+          "Tag 17",
+          "Tag 18",
+          "Tag 19",
+          "Tag 20",
+          "Tag 21",
+          "Tag 22",
+          "Tag 23",
+          "Tag 24",
+          "Tag 25",
+          "Tag 26",
+          "Tag 27",
+          "Tag 28",
+          "Tag 29",
+          "Tag 30",
+          "Tag 31"
+        ],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "tags has more than 30 values"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": [
+          "Dev 1",
+          "Dev 2",
+          "Dev 3",
+          "Dev 4",
+          "Dev 5",
+          "Dev 6",
+          "Dev 7",
+          "Dev 8",
+          "Dev 9",
+          "Dev 10",
+          "Dev 11",
+          "Dev 12",
+          "Dev 13",
+          "Dev 14",
+          "Dev 15",
+          "Dev 16",
+          "Dev 17",
+          "Dev 18",
+          "Dev 19",
+          "Dev 20",
+          "Dev 21"
+        ],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "developers has more than 20 values"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "PC",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "platform is not a platform id"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "platform is not a platform id"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "p_c",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "platform is not a platform id"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2003-13",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "release date is not YYYY, YYYY-MM or YYYY-MM-DD"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2003-02-30x",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "release date"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "03",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 427520
+      },
+      "error": "release date"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": 0,
+        "steamAppId": 427520
+      },
+      "error": "local players is not a number from 1 to 64"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": 65,
+        "steamAppId": 427520
+      },
+      "error": "local players"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": 1.5,
+        "steamAppId": 427520
+      },
+      "error": "local players"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 0
+      },
+      "error": "Steam app id is not a positive whole number"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": 2147483648
+      },
+      "error": "Steam app id"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "2020-08-14",
+        "genres": ["Simulation", "Strategy"],
+        "tags": ["Automation", "Base Building"],
+        "developers": ["Wube Software LTD."],
+        "publishers": ["Wube Software LTD."],
+        "localPlayers": null,
+        "steamAppId": -3
+      },
+      "error": "Steam app id"
+    },
+    {
+      "row": {
+        "key": "steam-427520",
+        "title": "Factorio",
+        "platform": "pc",
+        "releaseDate": "",
+        "genres": [],
+        "tags": [],
+        "developers": [],
+        "publishers": [],
+        "localPlayers": null,
+        "steamAppId": null
+      },
+      "error": "has no facts"
+    }
+  ],
+  "encode": [
+    {
+      "rows": [],
+      "csv": "key,title,platform,release_date,genres,tags,developers,publishers,local_players,steam_appid\n"
+    },
+    {
+      "rows": [
+        {
+          "key": "steam-427520",
+          "title": "Factorio",
+          "platform": "pc",
+          "releaseDate": "2020-08-14",
+          "genres": ["Simulation", "Strategy"],
+          "tags": ["Automation", "Base Building"],
+          "developers": ["Wube Software LTD."],
+          "publishers": ["Wube Software LTD."],
+          "localPlayers": null,
+          "steamAppId": 427520
+        },
+        {
+          "key": "steam-620",
+          "title": "Portal 2",
+          "platform": "pc",
+          "releaseDate": "2020-08-14",
+          "genres": ["Simulation", "Strategy"],
+          "tags": ["Puzzle", "Co-op"],
+          "developers": ["Wube Software LTD."],
+          "publishers": ["Wube Software LTD."],
+          "localPlayers": 2,
+          "steamAppId": 620
+        },
+        {
+          "key": "gog-1207658924",
+          "title": "Heroes of Might & Magic 3: \"Complete\", HD",
+          "platform": "pc",
+          "releaseDate": "2020-08-14",
+          "genres": ["Simulation", "Strategy"],
+          "tags": ["Automation", "Base Building"],
+          "developers": ["Wube Software LTD."],
+          "publishers": ["Wube Software LTD."],
+          "localPlayers": null,
+          "steamAppId": null
+        },
+        {
+          "key": "ps2-slus20772",
+          "title": "SSX 3",
+          "platform": "ps2",
+          "releaseDate": "2003",
+          "genres": ["Sports"],
+          "tags": [],
+          "developers": [],
+          "publishers": [],
+          "localPlayers": null,
+          "steamAppId": null
+        },
+        {
+          "key": "steam-1",
+          "title": "-ERROR-",
+          "platform": "pc",
+          "releaseDate": "2020-08-14",
+          "genres": ["Simulation", "Strategy"],
+          "tags": ["Automation", "Base Building"],
+          "developers": ["Wube Software LTD."],
+          "publishers": ["Wube Software LTD."],
+          "localPlayers": null,
+          "steamAppId": 427520
+        },
+        {
+          "key": "snes-pokemon-red",
+          "title": "Pokémon Ü — 東方 ✓",
+          "platform": "snes",
+          "releaseDate": "1996-02",
+          "genres": [],
+          "tags": [],
+          "developers": ["Game Freak, Inc."],
+          "publishers": [],
+          "localPlayers": null,
+          "steamAppId": null
+        },
+        {
+          "key": "manual-to-the-moon-game",
+          "title": "To the Moon",
+          "platform": "pc",
+          "releaseDate": "",
+          "genres": [],
+          "tags": [],
+          "developers": [],
+          "publishers": [],
+          "localPlayers": 4,
+          "steamAppId": null
+        },
+        {
+          "key": "rom-xbox-halo",
+          "title": "Halo",
+          "platform": "xbox",
+          "releaseDate": "",
+          "genres": [
+            "Genre 1",
+            "Genre 2",
+            "Genre 3",
+            "Genre 4",
+            "Genre 5",
+            "Genre 6",
+            "Genre 7",
+            "Genre 8",
+            "Genre 9",
+            "Genre 10",
+            "Genre 11",
+            "Genre 12",
+            "Genre 13",
+            "Genre 14",
+            "Genre 15",
+            "Genre 16",
+            "Genre 17",
+            "Genre 18",
+            "Genre 19",
+            "Genre 20"
+          ],
+          "tags": [
+            "Tag 1",
+            "Tag 2",
+            "Tag 3",
+            "Tag 4",
+            "Tag 5",
+            "Tag 6",
+            "Tag 7",
+            "Tag 8",
+            "Tag 9",
+            "Tag 10",
+            "Tag 11",
+            "Tag 12",
+            "Tag 13",
+            "Tag 14",
+            "Tag 15",
+            "Tag 16",
+            "Tag 17",
+            "Tag 18",
+            "Tag 19",
+            "Tag 20",
+            "Tag 21",
+            "Tag 22",
+            "Tag 23",
+            "Tag 24",
+            "Tag 25",
+            "Tag 26",
+            "Tag 27",
+            "Tag 28",
+            "Tag 29",
+            "Tag 30"
+          ],
+          "developers": [],
+          "publishers": [],
+          "localPlayers": 64,
+          "steamAppId": null
+        },
+        {
+          "key": "epic-fn.app_1",
+          "title": "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+          "platform": "pc",
+          "releaseDate": "2020-08-14",
+          "genres": ["Simulation", "Strategy"],
+          "tags": ["Automation", "Base Building"],
+          "developers": [
+            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+          ],
+          "publishers": ["Wube Software LTD."],
+          "localPlayers": null,
+          "steamAppId": 2147483647
+        },
+        {
+          "key": "steam-2",
+          "title": "A - B = C",
+          "platform": "pc",
+          "releaseDate": "2020-08-14",
+          "genres": ["Action-Adventure"],
+          "tags": ["Automation", "Base Building"],
+          "developers": ["Wube Software LTD."],
+          "publishers": ["At  home? no: \"x@y\""],
+          "localPlayers": null,
+          "steamAppId": 427520
+        }
+      ],
+      "csv": "key,title,platform,release_date,genres,tags,developers,publishers,local_players,steam_appid\nepic-fn.app_1,TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT,pc,2020-08-14,Simulation|Strategy,Automation|Base Building,DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD,Wube Software LTD.,,2147483647\ngog-1207658924,\"Heroes of Might & Magic 3: \"\"Complete\"\", HD\",pc,2020-08-14,Simulation|Strategy,Automation|Base Building,Wube Software LTD.,Wube Software LTD.,,\nmanual-to-the-moon-game,To the Moon,pc,,,,,,4,\nps2-slus20772,SSX 3,ps2,2003,Sports,,,,,\nrom-xbox-halo,Halo,xbox,,Genre 1|Genre 2|Genre 3|Genre 4|Genre 5|Genre 6|Genre 7|Genre 8|Genre 9|Genre 10|Genre 11|Genre 12|Genre 13|Genre 14|Genre 15|Genre 16|Genre 17|Genre 18|Genre 19|Genre 20,Tag 1|Tag 2|Tag 3|Tag 4|Tag 5|Tag 6|Tag 7|Tag 8|Tag 9|Tag 10|Tag 11|Tag 12|Tag 13|Tag 14|Tag 15|Tag 16|Tag 17|Tag 18|Tag 19|Tag 20|Tag 21|Tag 22|Tag 23|Tag 24|Tag 25|Tag 26|Tag 27|Tag 28|Tag 29|Tag 30,,,64,\nsnes-pokemon-red,Pokémon Ü — 東方 ✓,snes,1996-02,,,\"Game Freak, Inc.\",,,\nsteam-1,-ERROR-,pc,2020-08-14,Simulation|Strategy,Automation|Base Building,Wube Software LTD.,Wube Software LTD.,,427520\nsteam-2,A - B = C,pc,2020-08-14,Action-Adventure,Automation|Base Building,Wube Software LTD.,\"At  home? no: \"\"x@y\"\"\",,427520\nsteam-427520,Factorio,pc,2020-08-14,Simulation|Strategy,Automation|Base Building,Wube Software LTD.,Wube Software LTD.,,427520\nsteam-620,Portal 2,pc,2020-08-14,Simulation|Strategy,Puzzle|Co-op,Wube Software LTD.,Wube Software LTD.,2,620\n"
+    },
+    {
+      "rows": [
+        {
+          "key": "steam-620",
+          "title": "Portal 2",
+          "platform": "pc",
+          "releaseDate": "2020-08-14",
+          "genres": ["Simulation", "Strategy"],
+          "tags": ["Puzzle", "Co-op"],
+          "developers": ["Wube Software LTD."],
+          "publishers": ["Wube Software LTD."],
+          "localPlayers": 2,
+          "steamAppId": 620
+        },
+        {
+          "key": "steam-427520",
+          "title": "Factorio",
+          "platform": "pc",
+          "releaseDate": "2020-08-14",
+          "genres": ["Simulation", "Strategy"],
+          "tags": ["Automation", "Base Building"],
+          "developers": ["Wube Software LTD."],
+          "publishers": ["Wube Software LTD."],
+          "localPlayers": null,
+          "steamAppId": 427520
+        }
+      ],
+      "csv": "key,title,platform,release_date,genres,tags,developers,publishers,local_players,steam_appid\nsteam-427520,Factorio,pc,2020-08-14,Simulation|Strategy,Automation|Base Building,Wube Software LTD.,Wube Software LTD.,,427520\nsteam-620,Portal 2,pc,2020-08-14,Simulation|Strategy,Puzzle|Co-op,Wube Software LTD.,Wube Software LTD.,2,620\n"
+    }
+  ],
+  "parse": [
+    {
+      "name": "empty text",
+      "csv": "",
+      "rows": []
+    },
+    {
+      "name": "header only",
+      "csv": "key,title,platform,release_date,genres,tags,developers,publishers,local_players,steam_appid\n",
+      "rows": []
+    },
+    {
+      "name": "everything the encoder writes",
+      "csv": "key,title,platform,release_date,genres,tags,developers,publishers,local_players,steam_appid\nepic-fn.app_1,TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT,pc,2020-08-14,Simulation|Strategy,Automation|Base Building,DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD,Wube Software LTD.,,2147483647\ngog-1207658924,\"Heroes of Might & Magic 3: \"\"Complete\"\", HD\",pc,2020-08-14,Simulation|Strategy,Automation|Base Building,Wube Software LTD.,Wube Software LTD.,,\nmanual-to-the-moon-game,To the Moon,pc,,,,,,4,\nps2-slus20772,SSX 3,ps2,2003,Sports,,,,,\nrom-xbox-halo,Halo,xbox,,Genre 1|Genre 2|Genre 3|Genre 4|Genre 5|Genre 6|Genre 7|Genre 8|Genre 9|Genre 10|Genre 11|Genre 12|Genre 13|Genre 14|Genre 15|Genre 16|Genre 17|Genre 18|Genre 19|Genre 20,Tag 1|Tag 2|Tag 3|Tag 4|Tag 5|Tag 6|Tag 7|Tag 8|Tag 9|Tag 10|Tag 11|Tag 12|Tag 13|Tag 14|Tag 15|Tag 16|Tag 17|Tag 18|Tag 19|Tag 20|Tag 21|Tag 22|Tag 23|Tag 24|Tag 25|Tag 26|Tag 27|Tag 28|Tag 29|Tag 30,,,64,\nsnes-pokemon-red,Pokémon Ü — 東方 ✓,snes,1996-02,,,\"Game Freak, Inc.\",,,\nsteam-1,-ERROR-,pc,2020-08-14,Simulation|Strategy,Automation|Base Building,Wube Software LTD.,Wube Software LTD.,,427520\nsteam-2,A - B = C,pc,2020-08-14,Action-Adventure,Automation|Base Building,Wube Software LTD.,\"At  home? no: \"\"x@y\"\"\",,427520\nsteam-427520,Factorio,pc,2020-08-14,Simulation|Strategy,Automation|Base Building,Wube Software LTD.,Wube Software LTD.,,427520\nsteam-620,Portal 2,pc,2020-08-14,Simulation|Strategy,Puzzle|Co-op,Wube Software LTD.,Wube Software LTD.,2,620\n",
+      "rows": [
+        {
+          "key": "epic-fn.app_1",
+          "title": "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+          "platform": "pc",
+          "releaseDate": "2020-08-14",
+          "genres": ["Simulation", "Strategy"],
+          "tags": ["Automation", "Base Building"],
+          "developers": [
+            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+          ],
+          "publishers": ["Wube Software LTD."],
+          "localPlayers": null,
+          "steamAppId": 2147483647
+        },
+        {
+          "key": "gog-1207658924",
+          "title": "Heroes of Might & Magic 3: \"Complete\", HD",
+          "platform": "pc",
+          "releaseDate": "2020-08-14",
+          "genres": ["Simulation", "Strategy"],
+          "tags": ["Automation", "Base Building"],
+          "developers": ["Wube Software LTD."],
+          "publishers": ["Wube Software LTD."],
+          "localPlayers": null,
+          "steamAppId": null
+        },
+        {
+          "key": "manual-to-the-moon-game",
+          "title": "To the Moon",
+          "platform": "pc",
+          "releaseDate": "",
+          "genres": [],
+          "tags": [],
+          "developers": [],
+          "publishers": [],
+          "localPlayers": 4,
+          "steamAppId": null
+        },
+        {
+          "key": "ps2-slus20772",
+          "title": "SSX 3",
+          "platform": "ps2",
+          "releaseDate": "2003",
+          "genres": ["Sports"],
+          "tags": [],
+          "developers": [],
+          "publishers": [],
+          "localPlayers": null,
+          "steamAppId": null
+        },
+        {
+          "key": "rom-xbox-halo",
+          "title": "Halo",
+          "platform": "xbox",
+          "releaseDate": "",
+          "genres": [
+            "Genre 1",
+            "Genre 2",
+            "Genre 3",
+            "Genre 4",
+            "Genre 5",
+            "Genre 6",
+            "Genre 7",
+            "Genre 8",
+            "Genre 9",
+            "Genre 10",
+            "Genre 11",
+            "Genre 12",
+            "Genre 13",
+            "Genre 14",
+            "Genre 15",
+            "Genre 16",
+            "Genre 17",
+            "Genre 18",
+            "Genre 19",
+            "Genre 20"
+          ],
+          "tags": [
+            "Tag 1",
+            "Tag 2",
+            "Tag 3",
+            "Tag 4",
+            "Tag 5",
+            "Tag 6",
+            "Tag 7",
+            "Tag 8",
+            "Tag 9",
+            "Tag 10",
+            "Tag 11",
+            "Tag 12",
+            "Tag 13",
+            "Tag 14",
+            "Tag 15",
+            "Tag 16",
+            "Tag 17",
+            "Tag 18",
+            "Tag 19",
+            "Tag 20",
+            "Tag 21",
+            "Tag 22",
+            "Tag 23",
+            "Tag 24",
+            "Tag 25",
+            "Tag 26",
+            "Tag 27",
+            "Tag 28",
+            "Tag 29",
+            "Tag 30"
+          ],
+          "developers": [],
+          "publishers": [],
+          "localPlayers": 64,
+          "steamAppId": null
+        },
+        {
+          "key": "snes-pokemon-red",
+          "title": "Pokémon Ü — 東方 ✓",
+          "platform": "snes",
+          "releaseDate": "1996-02",
+          "genres": [],
+          "tags": [],
+          "developers": ["Game Freak, Inc."],
+          "publishers": [],
+          "localPlayers": null,
+          "steamAppId": null
+        },
+        {
+          "key": "steam-1",
+          "title": "-ERROR-",
+          "platform": "pc",
+          "releaseDate": "2020-08-14",
+          "genres": ["Simulation", "Strategy"],
+          "tags": ["Automation", "Base Building"],
+          "developers": ["Wube Software LTD."],
+          "publishers": ["Wube Software LTD."],
+          "localPlayers": null,
+          "steamAppId": 427520
+        },
+        {
+          "key": "steam-2",
+          "title": "A - B = C",
+          "platform": "pc",
+          "releaseDate": "2020-08-14",
+          "genres": ["Action-Adventure"],
+          "tags": ["Automation", "Base Building"],
+          "developers": ["Wube Software LTD."],
+          "publishers": ["At  home? no: \"x@y\""],
+          "localPlayers": null,
+          "steamAppId": 427520
+        },
+        {
+          "key": "steam-427520",
+          "title": "Factorio",
+          "platform": "pc",
+          "releaseDate": "2020-08-14",
+          "genres": ["Simulation", "Strategy"],
+          "tags": ["Automation", "Base Building"],
+          "developers": ["Wube Software LTD."],
+          "publishers": ["Wube Software LTD."],
+          "localPlayers": null,
+          "steamAppId": 427520
+        },
+        {
+          "key": "steam-620",
+          "title": "Portal 2",
+          "platform": "pc",
+          "releaseDate": "2020-08-14",
+          "genres": ["Simulation", "Strategy"],
+          "tags": ["Puzzle", "Co-op"],
+          "developers": ["Wube Software LTD."],
+          "publishers": ["Wube Software LTD."],
+          "localPlayers": 2,
+          "steamAppId": 620
+        }
+      ]
+    },
+    {
+      "name": "columns read by the header, BOM and CRLF, unusable rows skipped",
+      "csv": "\ufefftitle,key,platform,release_date,genres\r\nSSX 3,ps2-slus20772,ps2,2003-10-20,Sports\r\nEmpty,ps2-empty,ps2,,\r\n=HYPERLINK(\"x\"),ps2-bad,ps2,2003,Sports\r\nBad date,ps2-date,ps2,2003-13,Sports\r\nBad key,PS2 SLUS,ps2,2003,Sports\r\n",
+      "rows": [
+        {
+          "releaseDate": "2003-10-20",
+          "genres": ["Sports"],
+          "tags": [],
+          "developers": [],
+          "publishers": [],
+          "localPlayers": null,
+          "steamAppId": null,
+          "key": "ps2-slus20772",
+          "title": "SSX 3",
+          "platform": "ps2"
+        }
+      ]
+    },
+    {
+      "name": "a column added later is ignored, the first of two rows with one key wins, list values are trimmed",
+      "csv": "key,title,platform,release_date,genres,tags,developers,publishers,local_players,steam_appid,future\nsteam-10,Counter-Strike,pc,2000-11, Action |  Shooter ,,Valve,Valve,32,10,whatever\nsteam-10,Counter-Strike again,pc,2001,,,,,,,\nsteam-20,\"Team Fortress Classic\",pc,1999,\"Action\",,\"Valve\",,,20,x\n",
+      "rows": [
+        {
+          "releaseDate": "2000-11",
+          "genres": ["Action", "Shooter"],
+          "tags": [],
+          "developers": ["Valve"],
+          "publishers": ["Valve"],
+          "localPlayers": 32,
+          "steamAppId": 10,
+          "key": "steam-10",
+          "title": "Counter-Strike",
+          "platform": "pc"
+        },
+        {
+          "releaseDate": "1999",
+          "genres": ["Action"],
+          "tags": [],
+          "developers": ["Valve"],
+          "publishers": [],
+          "localPlayers": null,
+          "steamAppId": 20,
+          "key": "steam-20",
+          "title": "Team Fortress Classic",
+          "platform": "pc"
+        }
+      ]
+    },
+    {
+      "name": "a quoted line break makes its row invalid without breaking the next one; numbers that are not numbers",
+      "csv": "key,title,platform,release_date,genres,tags,developers,publishers,local_players,steam_appid\ngog-1,\"Two\nLines\",pc,2001,,,,,,\ngog-2,Players,pc,2001,,,,,abc,\ngog-3,\"Quoted \"\"Name\"\"\",pc,2002,,,,,,\ngog-4,No newline at the end,pc,2003,,,,,2,",
+      "rows": [
+        {
+          "releaseDate": "2002",
+          "genres": [],
+          "tags": [],
+          "developers": [],
+          "publishers": [],
+          "localPlayers": null,
+          "steamAppId": null,
+          "key": "gog-3",
+          "title": "Quoted \"Name\"",
+          "platform": "pc"
+        },
+        {
+          "releaseDate": "2003",
+          "genres": [],
+          "tags": [],
+          "developers": [],
+          "publishers": [],
+          "localPlayers": 2,
+          "steamAppId": null,
+          "key": "gog-4",
+          "title": "No newline at the end",
+          "platform": "pc"
+        }
+      ]
+    },
+    {
+      "name": "a missing column reads as empty",
+      "csv": "key,title,platform,local_players\nmanual-x,X,pc,3\n",
+      "rows": [
+        {
+          "releaseDate": "",
+          "genres": [],
+          "tags": [],
+          "developers": [],
+          "publishers": [],
+          "localPlayers": 3,
+          "steamAppId": null,
+          "key": "manual-x",
+          "title": "X",
+          "platform": "pc"
+        }
+      ]
+    }
+  ],
+  "shards": [
+    {
+      "key": "steam-427520",
+      "path": "data/steam/10.csv"
+    },
+    {
+      "key": "steam-620",
+      "path": "data/steam/06.csv"
+    },
+    {
+      "key": "steam-1",
+      "path": "data/steam/01.csv"
+    },
+    {
+      "key": "gog-1207658924",
+      "path": "data/gog/05.csv"
+    },
+    {
+      "key": "ps2-slus20772",
+      "path": "data/ps2/12.csv"
+    },
+    {
+      "key": "rom-xbox-halo",
+      "path": "data/rom/06.csv"
+    },
+    {
+      "key": "manual-to-the-moon-game",
+      "path": "data/manual/14.csv"
+    },
+    {
+      "key": "snes-pokemon-red",
+      "path": "data/snes/10.csv"
+    },
+    {
+      "key": "epic-fn.app_1",
+      "path": "data/epic/14.csv"
+    },
+    {
+      "key": "nodash",
+      "path": "data/nodash/10.csv"
+    },
+    {
+      "key": "a",
+      "path": "data/a/12.csv"
+    }
+  ],
+  "fnv1a": [
+    {
+      "text": "",
+      "hash": 2166136261
+    },
+    {
+      "text": "a",
+      "hash": 3826002220
+    },
+    {
+      "text": "steam-427520",
+      "hash": 105439994
+    },
+    {
+      "text": "Pokémon",
+      "hash": 1343368553
+    }
+  ]
+}

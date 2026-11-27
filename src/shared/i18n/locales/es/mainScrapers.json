@@ -1,0 +1,56 @@
+{
+  "check": {
+    "unexpectedError": "error inesperado",
+    "cannotCheck": "{service}: no se pudo comprobar en este momento ({reason})",
+    "unexpectedResponse": "respuesta inesperada",
+    "unreadable": "respuesta ilegible"
+  },
+  "sgdb": {
+    "enterKey": "SteamGridDB: ingresa una clave de API para comprobarla",
+    "badCharacters": "SteamGridDB: la clave de API no funciona (tiene espacios o caracteres ocultos; cópiala de nuevo)",
+    "works": "SteamGridDB: la clave de API funciona",
+    "rejected": "rechazada",
+    "doesNotWork": "SteamGridDB: la clave de API no funciona ({reason})"
+  },
+  "igdb": {
+    "enterBoth": "IGDB: ingresa el ID de cliente y el secreto de cliente",
+    "unexpectedTwitch": "respuesta inesperada de Twitch",
+    "rejected": "IGDB: el ID de cliente o el secreto no funcionan (Twitch los rechazó)",
+    "works": "IGDB: el ID de cliente y el secreto funcionan"
+  },
+  "ss": {
+    "needDev": "ScreenScraper: ingresa también el ID y la contraseña de desarrollador; PlayOut los necesita para usar ScreenScraper",
+    "enterBoth": "ScreenScraper: ingresa tu nombre de usuario y tu contraseña",
+    "devWorks": "ScreenScraper: el ID y la contraseña de desarrollador funcionan",
+    "devRejected": "ScreenScraper: el ID o la contraseña de desarrollador no funcionan",
+    "bothWork": "ScreenScraper: el inicio de sesión y las credenciales de desarrollador funcionan",
+    "userRejected": "ScreenScraper: el nombre de usuario o la contraseña no funcionan"
+  },
+  "tgdb": {
+    "enterKey": "TheGamesDB: ingresa una clave de API para comprobarla",
+    "worksLeft": "TheGamesDB: la clave de API funciona (quedan {left} solicitudes este mes)",
+    "worksUsedUp": "TheGamesDB: la clave de API funciona, pero ya se usó el cupo de solicitudes de este mes",
+    "invalid": "TheGamesDB: la clave de API no funciona (TheGamesDB dice que no es válida)",
+    "refused": "TheGamesDB: se rechazó la clave; es incorrecta o ya se usó el cupo de solicitudes de este mes"
+  },
+  "steam": {
+    "badId": "Steam: el SteamID64 debe ser el número de 17 dígitos de tu perfil",
+    "enterKey": "Steam: ingresa una clave de Web API para comprobarla",
+    "rejected": "Steam: la clave de Web API no funciona (Steam la rechazó)",
+    "enterId": "Steam: la clave de Web API funciona; ingresa también tu SteamID64",
+    "noAccount": "Steam: la clave de Web API funciona, pero ninguna cuenta tiene ese SteamID64",
+    "bothWork": "Steam: la clave de Web API y el SteamID64 funcionan",
+    "bothWorkPersona": "Steam: la clave de Web API y el SteamID64 funcionan ({persona})"
+  },
+  "ra": {
+    "enterBoth": "RetroAchievements: ingresa tu nombre de usuario y tu clave de Web API para comprobarlos",
+    "noUser": "RetroAchievements: la clave de Web API funciona, pero ningún usuario se llama \"{user}\"",
+    "signedIn": "RetroAchievements: sesión iniciada como {user}",
+    "rejected": "RetroAchievements: la clave de Web API no funciona (RetroAchievements la rechazó)"
+  },
+  "http": {
+    "rateLimit": "se superó el límite de solicitudes, inténtalo de nuevo más tarde",
+    "serverError": "error del servidor (HTTP {status})",
+    "unexpected": "respuesta inesperada (HTTP {status})"
+  }
+}

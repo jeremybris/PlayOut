@@ -1,0 +1,22 @@
+node_modules
+dist
+out
+.DS_Store
+.eslintcache
+*.tsbuildinfo
+*.log*
+docs/screenshots/real-home.png
+resources/coop/
+coop-handlers/
+xbox-helper/bin/
+xbox-helper/obj/
+xbox-helper/dist/
+ingame-helper/build/
+
+# Private, never published
+/*.cjs
+/.claude/
+/PlayOut-analysis-notes.md
+/secrets/
+.env
+.env.*

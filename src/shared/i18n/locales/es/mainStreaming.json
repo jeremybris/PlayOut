@@ -1,0 +1,159 @@
+{
+  "status": {
+    "moonlightRetry": "Streaming aún sin vincular: se reintenta cuando transmitas",
+    "doubleNat": "Esta red está detrás de otro router o de la dirección compartida de tu proveedor (CGNAT)",
+    "streamPorts": "No se pudieron redirigir los puertos de streaming: los juegos se pueden listar y descargar por internet, pero no transmitir"
+  },
+  "download": {
+    "tooMuchData": "El host envió más datos de los esperados",
+    "noFiles": "{name} no lista archivos para este juego",
+    "notScanned": "{title} se descargó, pero el escaneo de ROM no lo añadió: revisa su carpeta de sistema en Ajustes > Biblioteca",
+    "failed": "Falló la descarga: {error}",
+    "onlyHostGames": "Solo se pueden descargar juegos de otro PC",
+    "chooseEmulationFolder": "Elige primero tu carpeta Emulation en Ajustes > Biblioteca",
+    "notOffered": "{name} no ofrece este juego en este momento",
+    "notDownloadable": "Este juego no se puede descargar",
+    "closing": "PlayOut se está cerrando",
+    "cancelled": "Descarga cancelada",
+    "romFolder": "carpeta de ROM",
+    "noSpace": "No hay suficiente espacio libre en la {place} (se necesitan {needed}, hay {free} libres)",
+    "tooMuchDataFor": "El host envió más datos de los esperados para {file}",
+    "stoppedEarly": "La descarga de {file} se detuvo antes de terminar"
+  },
+  "net": {
+    "refused": "PlayOut no está aceptando conexiones allí",
+    "notFound": "no se encontró ese nombre de equipo",
+    "noAnswer": "sin respuesta: ¿está encendido y en esta red?",
+    "cut": "se cortó la conexión",
+    "failed": "falló la red"
+  },
+  "address": {
+    "portNumber": "El puerto después de \":\" debe ser un número",
+    "ipv4": "Usa la dirección IPv4 del equipo (por ejemplo, 192.168.1.20)",
+    "enter": "Ingresa una dirección IP o un nombre de equipo, por ejemplo, 192.168.1.20",
+    "badPort": "Ese puerto no es válido"
+  },
+  "stream": {
+    "moonlightClosed": "Moonlight se cerró: {line}",
+    "imageInRecycleBin": "su imagen de disco está en la Papelera de reciclaje",
+    "notPaired": "Ese equipo ya no está vinculado",
+    "busy": "{name} ya está ejecutando otro juego",
+    "notInstalled": "Este juego ya no está instalado en {name}",
+    "unauthorized": "{name} ya no reconoce este PC: vincúlalo de nuevo",
+    "noAnswer": "{name} no respondió: {error}",
+    "alreadyRunning": "Ya hay una transmisión en curso: detenla primero",
+    "hostCouldNotStart": "El host no pudo iniciar el juego: {error}",
+    "moonlightClosedEarly": "Moonlight se cerró antes de que empezara la transmisión",
+    "moonlightClosedEarlyCode": "Moonlight se cerró antes de que empezara la transmisión (salida {code})"
+  },
+  "host": {
+    "turnedOff": "el streaming está desactivado",
+    "gameNotInstalledOn": "Este juego ya no está instalado en {name}",
+    "busyOtherGame": "{name} ya está ejecutando otro juego",
+    "busyOtherClient": "{name} está transmitiendo a otro equipo",
+    "notReady": "El streaming no está listo en {name}: {error}",
+    "portsWarning": "{name} no pudo redirigir sus puertos de streaming, así que quizá solo transmita en su propia red",
+    "pinNeeded": "se necesita un PIN de 4 dígitos",
+    "notReadyLower": "el streaming no está listo en {name}: {error}",
+    "pairingTimeout": "Moonlight no terminó la vinculación a tiempo",
+    "nothingToStart": "nada que iniciar: ningún equipo con PlayOut pidió un juego",
+    "gameGone": "el juego ya no está instalado",
+    "otherGameRunning": "ya hay otro juego en ejecución",
+    "gameCouldNotStart": "no se pudo iniciar el juego",
+    "certificate": "No se pudo crear el certificado de seguridad de este PC: {error}",
+    "portInUse": "Otro programa usa el puerto {port}: elige otro puerto",
+    "couldNotStart": "No se pudo iniciar el servicio de host: {error}",
+    "discovery": "Otros PC no pueden encontrar este en la red (UDP {port}: {error}).",
+    "launchPipe": "No se pueden iniciar juegos para una transmisión: {error}.",
+    "hostCertificate": "No se pudo crear el certificado del host"
+  },
+  "router": {
+    "noAddress": "Este PC no tiene dirección en la red del router",
+    "refused": "El router se negó a redirigir el puerto"
+  },
+  "hosts": {
+    "noAddress": "no se conoce ninguna dirección de {name}",
+    "otherComputer": "{address} ahora es otro equipo con PlayOut",
+    "offline": "{name} está desconectado o no se puede acceder ({error})",
+    "unreachable": "No se pudo acceder a {name}: {error}",
+    "noneOffers": "Ningún equipo vinculado ofrece este juego",
+    "alsoClient": "{name} también es cliente de este PC: quita una de las dos vinculaciones",
+    "forgotThisPc": "{name} ya no reconoce este PC: quítalo y vincúlalo de nuevo"
+  },
+  "favourites": {
+    "needSync": "Los favoritos de juegos del host necesitan \"Sincronizar favoritos\" (Ajustes › Streaming)",
+    "notHostGame": "No es un juego de un equipo vinculado",
+    "hostOff": "{name} no sincroniza favoritos (está desactivado allí, o tiene un PlayOut anterior)"
+  },
+  "emuSync": {
+    "gameRunningHere": "hay un juego en ejecución en este PC",
+    "stoppedGameStarted": "detenida: se inició un juego en este PC",
+    "syncOff": "{name} tiene desactivada la sincronización de la carpeta Emulation",
+    "gameRunningThere": "hay un juego en ejecución en {name}",
+    "folderMissing": "falta la carpeta Emulation ({folder})",
+    "folderUnreadable": "no se pudo leer una carpeta ({folder}): {error}",
+    "tooManyFiles": "la carpeta Emulation tiene más de {max} archivos",
+    "hostDriveFull": "la unidad del host está llena"
+  },
+  "pair": {
+    "moonlightClosed": "Moonlight se cerró antes de terminar la vinculación",
+    "notAccepted": "el host no aceptó la vinculación",
+    "stillNotPaired": "Moonlight todavía no está vinculado con el host",
+    "wrongPin": "PIN incorrecto: revisa el PIN que muestra el otro PC",
+    "expired": "El PIN caducó: muestra uno nuevo en el otro PC",
+    "locked": "Demasiados PIN incorrectos: el otro PC rechaza vinculaciones durante 10 minutos",
+    "notShowing": "El otro PC no está mostrando un PIN: primero pulsa Mostrar PIN en \"Vincular un equipo\" en él",
+    "isHost": "El otro PC ya es host de este PC: un host no puede ser también su cliente",
+    "unreachable": "No se pudo acceder a PlayOut en {address}: {error}",
+    "moonlightFailed": "Moonlight no pudo vincularse con {name}: {error}",
+    "lockedHost": "Demasiados PIN incorrectos: la vinculación está bloqueada por un rato"
+  },
+  "pin": {
+    "hostingOff": "Activa primero \"Permitir que otros equipos con PlayOut se conecten\"",
+    "hostNotRunning": "El servicio de host no está en ejecución: mira el mensaje en Ajustes > Streaming"
+  },
+  "add": {
+    "unusableId": "Ese equipo respondió con un id inutilizable",
+    "thisPc": "Esa dirección es este PC",
+    "isClient": "{name} es cliente de este PC: un cliente no puede ser también su host"
+  },
+  "wan": {
+    "notPaired": "Ese equipo ya no está vinculado",
+    "lanAddress": "Esa es una dirección de red local: ingresa la dirección o el nombre de internet del host",
+    "portMismatch": "{name} escucha en el puerto {port}: redirige ese mismo puerto en su router y no incluyas el puerto"
+  },
+  "rom": {
+    "outside": "Esta ROM está fuera de la carpeta de ROM",
+    "gone": "Esta ROM ya no está en este PC",
+    "tooManyFiles": "Esta carpeta de ROM tiene demasiados archivos para descargar",
+    "noFiles": "Esta ROM no tiene archivos que se puedan descargar",
+    "fileGone": "Este archivo de ROM ya no está en este PC"
+  },
+  "client": {
+    "certificateChanged": "Cambió el certificado de seguridad del host; vincúlalo de nuevo si es lo esperado",
+    "noCertificate": "El host no presentó ningún certificado",
+    "tooMuchData": "El host envió demasiados datos",
+    "unreadable": "El host envió una respuesta ilegible",
+    "wholeFile": "El host envió el archivo completo en lugar de la parte que faltaba",
+    "sessionClosed": "Esta sesión de descarga está cerrada"
+  },
+  "sunshine": {
+    "notInstalled": "Sunshine no está instalado",
+    "keepsClosing": "Sunshine se sigue cerrando; mira su registro en la carpeta de streaming",
+    "otherCopy": "ya hay otra copia de Sunshine en ejecución en este PC (los puertos {port} y {port2} están en uso)",
+    "notConfigured": "Sunshine aún no está configurado",
+    "loginNotSaved": "Sunshine no pudo guardar su inicio de sesión (salida {code})",
+    "closedWhileStarting": "Sunshine se cerró al iniciarse",
+    "closedWhileStartingWhy": "Sunshine se cerró al iniciarse ({error})",
+    "notStarted": "Sunshine no se inició a tiempo",
+    "notStartedWhy": "Sunshine no se inició a tiempo ({error})"
+  },
+  "firewall": {
+    "blockedRetry": "El Firewall de Windows impide que otros PC accedan a este (puerto {port}): desactiva y vuelve a activar el hosting para que se pidan permisos de administrador de nuevo.",
+    "blocked": "El Firewall de Windows impide que otros PC accedan a este: permite TCP {tcp} y UDP {udp} en Seguridad de Windows › Firewall, o desactiva y vuelve a activar el hosting para intentarlo de nuevo."
+  },
+  "moonlight": {
+    "notInstalled": "Moonlight no está instalado"
+  },
+  "hostOffline": "Esperando a que {host} vuelva a estar en línea"
+}

@@ -1,0 +1,97 @@
+{
+  "label": "Panel rápido",
+  "playing": "Jugando a {title}",
+  "downloads": "Descargas",
+  "tileLabel": "{detail}: {value}",
+  "battery": {
+    "pluggedIn": "Conectado",
+    "noBattery": "Sin batería",
+    "charging": "Cargando",
+    "onBattery": "Con batería"
+  },
+  "network": {
+    "offline": "Sin conexión",
+    "noNetwork": "Sin red",
+    "ethernet": "Ethernet",
+    "wired": "Conexión por cable",
+    "wifi": "Wi-Fi",
+    "signal": "Señal {percent}"
+  },
+  "bluetooth": {
+    "name": "Bluetooth",
+    "unavailable": "No disponible",
+    "noAdapter": "Sin adaptador Bluetooth",
+    "on": "Activado",
+    "off": "Desactivado"
+  },
+  "volume": {
+    "label": "Volumen",
+    "muted": "Silenciado",
+    "mute": "Silenciar",
+    "unmute": "Activar sonido"
+  },
+  "brightness": "Brillo",
+  "powerMode": {
+    "title": "Modo de energía",
+    "efficiency": "Eficiencia",
+    "balanced": "Equilibrado",
+    "performance": "Rendimiento",
+    "buttonLabel": "Modo de energía {mode}"
+  },
+  "power": "Energía",
+  "performance": {
+    "title": "Rendimiento",
+    "cpu": "CPU",
+    "memory": "Memoria",
+    "gpu": "GPU"
+  },
+  "windowsSettings": {
+    "title": "Configuración de Windows",
+    "bluetooth": "Bluetooth",
+    "wifi": "Wi-Fi",
+    "sound": "Sonido",
+    "display": "Pantalla",
+    "power": "Energía",
+    "gamepad": "Mandos"
+  },
+  "hints": {
+    "select": "Seleccionar",
+    "close": "Cerrar"
+  },
+  "errors": {
+    "windowsSettings": "No se pudo abrir la configuración de Windows",
+    "volume": "No se pudo cambiar el volumen",
+    "mute": "No se pudo silenciar",
+    "unmute": "No se pudo activar el sonido",
+    "brightness": "No se pudo cambiar el brillo",
+    "powerMode": "No se pudo cambiar el modo de energía"
+  },
+  "powerMenu": {
+    "label": "Energía",
+    "exit": {
+      "label": "Salir de PlayOut",
+      "message": "¿Cerrar el panel y volver al escritorio de Windows?",
+      "failed": "No se pudo salir de PlayOut"
+    },
+    "minimize": {
+      "label": "Minimizar",
+      "message": "¿Minimizar PlayOut a la barra de tareas?",
+      "failed": "No se pudo minimizar"
+    },
+    "sleep": {
+      "label": "Suspender",
+      "message": "¿Suspender el PC ahora?",
+      "failed": "No se pudo suspender"
+    },
+    "restart": {
+      "label": "Reiniciar",
+      "message": "¿Reiniciar el PC ahora? Los juegos en curso se cerrarán.",
+      "failed": "No se pudo reiniciar"
+    },
+    "shutdown": {
+      "label": "Apagar",
+      "message": "¿Apagar el PC ahora? Los juegos en curso se cerrarán.",
+      "failed": "No se pudo apagar"
+    }
+  }
+}

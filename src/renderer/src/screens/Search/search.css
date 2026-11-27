@@ -1,0 +1,97 @@
+/*
+ * Search overlay: a sheet dropping from the top edge (the foundation's sheet is right-anchored; :has()
+ * re-anchors the backdrop for this one), the large search field, the inline on-screen keyboard beside the
+ * result grid for gamepad users, and the result grid itself.
+ */
+
+.modal-backdrop--sheet:has(> .search-sheet) {
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.modal.search-sheet {
+  width: var(--modal-w);
+  height: min(calc(100vh - 6rem), 100rem);
+  border-radius: 0 0 var(--radius-modal) var(--radius-modal);
+  border: 1px solid var(--color-glass-stroke);
+  border-top: 0;
+  animation: search-drop var(--dur-modal) var(--ease-enter);
+}
+
+.modal-backdrop .modal.search-sheet.modal--closing {
+  animation: search-drop var(--dur-modal) var(--ease-exit-soft) reverse forwards;
+}
+
+@keyframes search-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-3rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-sheet .modal__header {
+  padding-bottom: 0.4rem;
+}
+
+.search-sheet .modal__body.search__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding-top: 1.6rem;
+  overflow: hidden;
+}
+
+.search__field {
+  flex: none;
+  margin: 0;
+}
+
+.search__layout {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 3.2rem;
+  min-height: 0;
+}
+
+/* smaller keys than the floating keyboard so three cards fit beside it at 1080p */
+.search__keyboard {
+  flex: none;
+  padding-top: 0.8rem;
+  --osk-key: calc(56 * var(--u));
+  --osk-gap: calc(6 * var(--u));
+}
+
+.search__keyboard .osk--inline {
+  padding: 0;
+  align-items: flex-start;
+}
+
+/* the lg field above already shows the query */
+.search__keyboard .osk__preview {
+  display: none;
+}
+
+.search__results {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding: 4rem 0;
+}
+
+.search__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--card-gap);
+  padding: 4rem 1.6rem 2.4rem;
+}
+
+.search__empty {
+  min-height: 32rem;
+  height: 100%;
+}

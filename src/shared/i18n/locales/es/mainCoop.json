@@ -1,0 +1,34 @@
+{
+  "noHandler": "{title} no tiene un handler de Co-Op.",
+  "handlerMissing": "Falta el handler de Co-Op de {title}: vuelve a descargar los handlers en Ajustes > Biblioteca.",
+  "noHelper": "Esta versión de PlayOut no tiene el asistente de Co-Op.",
+  "devicesFailed": "No se pudieron listar los mandos: {error}",
+  "exeMissing": "No se encontró {exe} en la carpeta de instalación de {title}. Elígelo en la configuración de Co-Op.",
+  "theGameExe": "El exe del juego",
+  "sessionRunning": "Ya hay una sesión de Co-Op en curso.",
+  "alreadyStarting": "Co-Op ya está iniciando un juego.",
+  "preparing": "Preparando Co-Op…",
+  "handlersFailed": "No se pudieron descargar los handlers de Co-Op. Revisa la conexión a internet e inténtalo de nuevo.",
+  "keyboardMouse": "Teclado y ratón",
+  "devicesTimeout": "el asistente de Co-Op no listó los dispositivos a tiempo",
+  "devicesExit": "el asistente de Co-Op no pudo listar los dispositivos (salida {code})",
+  "plan": {
+    "noDevices": "No se encontraron mandos ni teclado.",
+    "noControllers": "No se encontraron mandos. Conecta un mando por jugador.",
+    "monitors": "Este juego usa un jugador por monitor: conecta otro monitor para Co-Op.",
+    "twoPlayers": "Co-Op necesita al menos dos jugadores.",
+    "onlyKeyboard": "Co-Op necesita dos jugadores: solo se encontró el teclado y ratón. Conecta otro mando.",
+    "onlyKeyboardAllow": "Co-Op necesita dos jugadores: solo se encontró el teclado y ratón. Conecta otro mando, o permite el teclado y ratón como jugador en Ajustes > Biblioteca.",
+    "oneController": "Co-Op necesita dos jugadores: se encontró un mando. Conecta otro mando.",
+    "oneControllerAllow": "Co-Op necesita dos jugadores: se encontró un mando. Conecta otro mando, o permite el teclado y ratón como jugador en Ajustes > Biblioteca."
+  },
+  "tools": {
+    "rateLimited": "GitHub está limitando las solicitudes de esta conexión (HTTP {status}): no se pudieron buscar las herramientas de Nucleus Co-op. Inténtalo de nuevo en una hora.",
+    "unreadable": "no se pudo leer la versión de Nucleus Co-op (respuesta inesperada de GitHub)",
+    "noRelease": "el proyecto Nucleus Co-op no tiene una versión de la que tomar las herramientas",
+    "noPackage": "la versión de Nucleus Co-op no tiene paquete de la app",
+    "lookupFailed": "no se pudo buscar la versión de Nucleus Co-op (HTTP {status})",
+    "lookupFailedSaid": "no se pudo buscar la versión de Nucleus Co-op (HTTP {status}: {said})"
+  },
+  "noHelperLower": "esta versión de PlayOut no tiene el asistente de Co-Op"
+}

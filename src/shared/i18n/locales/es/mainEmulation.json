@@ -1,0 +1,51 @@
+{
+  "launch": {
+    "shortcutsWindowsOnly": "Los accesos directos de Windows solo se pueden leer en Windows",
+    "noRomPath": "{title} no tiene ruta de ROM.",
+    "romNotFound": "No se encontró la ROM: {path}",
+    "placeholderSystem": "{system} no tiene comando de inicio en Windows (sistema de marcador de ES-DE).",
+    "commandEmpty": "El comando de inicio de {system} está vacío.",
+    "emulatorNotFound": "No se encontró el emulador {emulator}.{searched}",
+    "emulatorMissing": "{name} ({id}) no está instalado o no se pudo encontrar.{searched}",
+    "noExecutable": "No se pudo determinar el ejecutable del emulador para {system}.",
+    "coreNotFound": "No se encontró el núcleo {core} {file}.{searched}",
+    "startDirFailed": "No se pudo crear la carpeta de inicio {folder}: {error}",
+    "noPs3Serial": "{file} no contiene un serial de PS3 (como BLUS30443), así que RPCS3 no puede iniciarlo.",
+    "notRpcs3Shortcut": "{file} no es un acceso directo de juego de RPCS3, así que RPCS3 no puede iniciarlo.",
+    "unknownSystem": "Sistema desconocido '{system}' para {title}.",
+    "lookedIn": "Se buscó en:",
+    "searchedMore": "… y {count} más",
+    "noEmulatorFolder": "PlayOut aún no tiene un emulador de {system}, así que {game} no se puede iniciar. Puedes poner junto a esa carpeta un acceso directo de Windows (.lnk) a un emulador que lo ejecute y jugarlo así.",
+    "noEmulatorFile": "PlayOut aún no tiene un emulador de {system}, así que {game} no se puede iniciar. Puedes poner en la misma carpeta un acceso directo de Windows (.lnk) a un emulador que lo ejecute y jugarlo así."
+  },
+  "ps3": {
+    "noRomFolder": "No hay carpeta de ROM configurada",
+    "noSerial": "No se encontró el serial de PS3 de {title}, así que no se pueden buscar sus actualizaciones",
+    "serverUnreachable": "No se pudo acceder al servidor de actualizaciones de Sony ({error})",
+    "noUpdatesForGame": "Sony no lista actualizaciones para este juego",
+    "rpcs3Open": "RPCS3 está abierto: ciérralo para instalar la actualización",
+    "rpcs3Missing": "RPCS3 no está instalado (Ajustes › Emuladores)",
+    "rpcs3Opened": "RPCS3 se abrió mientras tanto",
+    "installFailed": "No se pudo instalar la actualización {version} de {title}: {error}",
+    "updatedTo": "{title} se actualizó a {version}",
+    "latestVersion": "la última versión",
+    "upToDate": "{title} está al día ({version})",
+    "noUpdates": "Sony no lista actualizaciones para {title}",
+    "notPs3Game": "Ese no es un juego de PS3 en este PC",
+    "listTooLarge": "la lista de actualizaciones es demasiado grande",
+    "serverNoAnswer": "El servidor de actualizaciones de Sony no respondió",
+    "serverAnswered": "El servidor de actualizaciones de Sony respondió {status} para {titleId}",
+    "notPkg": "no es un PKG: demasiado pequeño",
+    "downloadFailed": "falló la descarga de la actualización ({status})",
+    "wrongSize": "la descarga de la actualización tiene un tamaño incorrecto ({size} bytes, Sony indica {expected})",
+    "tooLarge": "la descarga de la actualización es más grande de lo que indica Sony ({expected} bytes)",
+    "incomplete": "la descarga de la actualización está incompleta ({size} de {expected} bytes)",
+    "checksum": "la descarga de la actualización no coincide con la suma de verificación de Sony",
+    "rpcs3Failed": "RPCS3 no la instaló (salida {code})",
+    "rpcs3FailedSaid": "RPCS3 no la instaló (salida {code}: {said})"
+  },
+  "hdd": {
+    "doesNotFit": "el disco duro de PS3 ({size}) no cabe en la unidad de {folder} ({free} libres)",
+    "partial": "parte de {folder} aún no se pudo mover"
+  }
+}

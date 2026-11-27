@@ -1,0 +1,348 @@
+{
+  "checking": "Comprobando…",
+  "on": "Sí",
+  "off": "No",
+  "fps": "{fps} fps",
+  "fpsUpper": "{fps} FPS",
+  "tabs": {
+    "performance": "Rendimiento",
+    "music": "Música",
+    "display": "Pantalla",
+    "downloads": "Descargas",
+    "friends": "Amigos",
+    "peerparty": "PeerParty",
+    "settings": "Ajustes",
+    "power": "Energía"
+  },
+  "rail": {
+    "label": "Secciones de la superposición"
+  },
+  "header": {
+    "paused": "En pausa",
+    "pausedTitle": "El juego está en pausa hasta que se cierre la superposición",
+    "cpuPower": "Consumo de la CPU",
+    "powerProfile": "Perfil de energía",
+    "battery": "Batería",
+    "fpsTitle": "Velocidad de fotogramas",
+    "fpsTitleRtss": "Velocidad de fotogramas (RivaTuner Statistics Server)",
+    "fpsTitleDynamic": "Velocidad de fotogramas (Dynamic TDP)"
+  },
+  "game": {
+    "back": "Volver al juego",
+    "close": "Cerrar",
+    "quit": "Salir del juego",
+    "quitTitle": "Salir del juego",
+    "quitMessage": "¿Cerrar {title}? Se perderá todo lo que no esté guardado en el juego.",
+    "quitMessageUnknown": "¿Cerrar el juego? Se perderá todo lo que no esté guardado en el juego.",
+    "quitConfirm": "Salir del juego",
+    "closeFailed": "No se pudo cerrar {title}",
+    "closeFailedUnknown": "No se pudo cerrar el juego",
+    "openPlayOutFailed": "No se pudo abrir PlayOut"
+  },
+  "profiles": {
+    "title": "Perfil de energía",
+    "labels": {
+      "dynamic": "Dinámico",
+      "silent": "Silencioso",
+      "balanced": "Equilibrado",
+      "performance": "Rendimiento",
+      "custom": "Personalizado",
+      "none": "No"
+    },
+    "descriptions": {
+      "dynamic": "Mantiene los FPS",
+      "silent": "Poco ruido",
+      "balanced": "Diario",
+      "performance": "Máxima velocidad",
+      "custom": "El tuyo",
+      "none": "Windows"
+    },
+    "customWatts": "Vatios personalizados",
+    "chipFps": "{label} · {fps} fps",
+    "chipWatts": "{label} · {watts}",
+    "chipOff": "Windows",
+    "useFor": "Usar para {game}",
+    "useForThisGame": "Usar para este juego",
+    "perGameOff": "Los perfiles por juego están desactivados en Ajustes › Sistema.",
+    "dynamicEveryStart": "Usar Dynamic TDP con este objetivo cada vez que empiece el juego.",
+    "profileEveryStart": "Cambiar a este perfil cada vez que empiece el juego.",
+    "editCustomWatts": "Editar vatios personalizados",
+    "editCustom": "Editar Personalizado",
+    "helperNeedsUpdate": "El asistente de energía necesita una actualización para Dynamic TDP (un aviso de administrador).",
+    "installing": "Instalando…",
+    "updateHelper": "Actualizar el asistente de energía",
+    "installHelper": "Instalar el asistente de energía para vatios exactos",
+    "failed": "No se pudo cambiar el perfil de energía",
+    "installFailed": "No se pudo instalar el asistente de energía",
+    "removeFailed": "No se pudo quitar el asistente de energía"
+  },
+  "custom": {
+    "label": "Perfil personalizado",
+    "powerMode": "Modo de energía de Windows",
+    "modes": {
+      "efficiency": "Eficiencia",
+      "balanced": "Equilibrado",
+      "performance": "Rendimiento"
+    },
+    "cpuMax": "Máximo de la CPU",
+    "cpuBoost": {
+      "label": "Turbo de la CPU",
+      "description": "Picos breves por encima de la frecuencia base. Sin él funciona más fresca y silenciosa."
+    },
+    "setWatts": {
+      "label": "Fijar vatios",
+      "description": "Desactivado, la CPU usa sus propios límites de energía."
+    },
+    "sustained": "Sostenido",
+    "boost": "Turbo"
+  },
+  "dynamic": {
+    "label": "Dynamic TDP",
+    "target": "Fotogramas objetivo",
+    "idle": "Empieza con un juego · objetivo {fps} fps",
+    "noFps": "No se midieron fotogramas",
+    "noFpsWatts": "No se midieron fotogramas · {watts}",
+    "measuring": "Midiendo…",
+    "measuringWatts": "Midiendo… · {watts}",
+    "plateau": "{reading} · más vatios no ayudarían",
+    "max": "{reading} · al máximo de vatios"
+  },
+  "watts": {
+    "ready": "Asistente de energía listo.",
+    "readyMethod": "Asistente de energía listo ({method}).",
+    "readyRange": "Asistente de energía listo ({min} a {max}).",
+    "readyMethodRange": "Asistente de energía listo ({method}, {min} a {max}).",
+    "notInstalled": "Los vatios exactos necesitan el asistente de energía de PlayOut. Instalarlo pide permisos de administrador a Windows una vez.",
+    "notInstalledMethod": "Los vatios exactos necesitan el asistente de energía de PlayOut ({method}). Instalarlo pide permisos de administrador a Windows una vez.",
+    "unsupported": "Este PC no tiene una forma compatible de fijar vatios. Los perfiles igual cambian la configuración de energía de Windows.",
+    "error": "El asistente de energía no funciona.",
+    "errorMessage": "El asistente de energía no funciona: {message}"
+  },
+  "combo": {
+    "notSet": "Sin asignar",
+    "singleButton": "Los juegos usan cada botón por separado, salvo Home: mantén dos o más botones a la vez.",
+    "noButtons": "No se mantuvo ningún botón.",
+    "twice": "Un botón se registró dos veces.",
+    "tooMany": "Mantén como máximo {max} botones a la vez.",
+    "notRecorded": "No se pudieron registrar esos botones: inténtalo de nuevo."
+  },
+  "override": {
+    "off": "PlayOut deja {name} como está.",
+    "steamApplied": "Steam ya no se abre con el botón Guía. PlayOut lo restaura cuando desactivas esto.",
+    "gameBarApplied": "Xbox Game Bar está desactivada: ya no se abre con el botón Guía ni desde otros programas. PlayOut la restaura cuando desactivas esto.",
+    "steamAlready": "Steam ya ignora el botón Guía.",
+    "gameBarAlready": "Xbox Game Bar ya está desactivada.",
+    "missing": "{name} no está instalado.",
+    "steamPending": "Esperando a que Steam se cierre…",
+    "gameBarPending": "Cambiando Game Bar…",
+    "error": "No se pudo cambiar {name}."
+  },
+  "reader": {
+    "starting": "Iniciando el lector de mandos…",
+    "unavailable": "El lector de mandos no está disponible.",
+    "unavailableMessage": "El lector de mandos no está disponible: {message}",
+    "none": "Leyendo mandos. Ninguno conectado.",
+    "pads": "Leyendo mandos: {pads}."
+  },
+  "display": {
+    "screen": "Pantalla",
+    "screenNamed": "Pantalla · {name}",
+    "cannotChange": "PlayOut no puede cambiar el modo de pantalla de este monitor.",
+    "refreshRate": "Frecuencia de actualización",
+    "resolution": "Resolución",
+    "failed": "No se pudo cambiar el modo de pantalla"
+  },
+  "quick": {
+    "title": "Ajustes rápidos",
+    "show": "Mostrar",
+    "filters": {
+      "all": "Todo",
+      "display": "Pantalla",
+      "game": "Juego",
+      "sound": "Sonido",
+      "system": "Sistema"
+    },
+    "cpu": "CPU",
+    "gpu": "GPU",
+    "memory": "Memoria",
+    "memoryDetail": "{used} de {total}",
+    "battery": "Batería",
+    "pluggedIn": "Conectado",
+    "charging": "Cargando",
+    "onBattery": "Con batería",
+    "tile": "{label}: {value}",
+    "tileDetail": "{label}: {value}. {detail}"
+  },
+  "extras": {
+    "checking": "Comprobando los ajustes del juego…",
+    "unavailable": "No se pudieron leer los ajustes del juego",
+    "frameLimit": {
+      "label": "Límite de fotogramas",
+      "unlimited": "Sin límite",
+      "nowFollows": "Ahora: sigue a la pantalla",
+      "followsDisplay": "Sigue a la pantalla ({hz})",
+      "failed": "No se pudo cambiar el límite de fotogramas"
+    },
+    "sync": {
+      "label": "Sincronizar FPS + Hz",
+      "limit": "Límite = {hz}",
+      "followsDisplay": "Sigue a la pantalla",
+      "followsRefresh": "El límite sigue a la frecuencia",
+      "failed": "No se pudo cambiar Sincronizar FPS + Hz"
+    },
+    "perfOverlay": {
+      "label": "Datos de rendimiento",
+      "level": "Nivel {level}",
+      "level1": "FPS",
+      "level2": "FPS, tiempo de fotograma, CPU, GPU, vatios",
+      "level3": "Nivel 2 más RAM, batería y hora",
+      "showing": "Visible en el juego",
+      "showsInGames": "Se ve en juegos iniciados desde PlayOut",
+      "drawnBy": "Lo dibuja RivaTuner",
+      "failed": "No se pudieron cambiar los datos de rendimiento"
+    },
+    "autoHdr": {
+      "label": "Auto HDR",
+      "failed": "No se pudo cambiar Auto HDR"
+    },
+    "cpuBoost": {
+      "label": "Turbo de la CPU",
+      "changed": "{profile} (cambiado)",
+      "failed": "No se pudo cambiar el turbo de la CPU"
+    },
+    "endurance": {
+      "label": "Endurance Gaming",
+      "detail": "Ahorro de batería de Intel para juegos: regula los fotogramas con batería. Todos los juegos.",
+      "failed": "No se pudo cambiar Endurance Gaming"
+    }
+  },
+  "system": {
+    "volume": "Volumen",
+    "mute": "Silenciar",
+    "muted": "Silenciado",
+    "brightness": "Brillo",
+    "volumeFailed": "No se pudo cambiar el volumen",
+    "muteFailed": "No se pudo silenciar",
+    "unmuteFailed": "No se pudo quitar el silencio",
+    "brightnessFailed": "No se pudo cambiar el brillo"
+  },
+  "media": {
+    "title": "Reproduciendo",
+    "unknownTitle": "Título desconocido",
+    "nothing": "No se reproduce nada",
+    "anyApp": "Aquí aparece la música de cualquier app de este PC.",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "play": "Reproducir",
+    "pause": "Pausar",
+    "noAnswer": "La app no respondió"
+  },
+  "music": {
+    "title": "Música local",
+    "intro": "Reproduce tus propios archivos de música sobre cualquier juego. Elige la carpeta donde están.",
+    "choose": "Elegir carpeta de música",
+    "chooseFailed": "No se pudo elegir la carpeta de música",
+    "notPlaying": "Sin reproducir",
+    "previous": "Pista anterior",
+    "next": "Pista siguiente",
+    "shuffle": "Aleatorio",
+    "saveFailed": "No se pudo guardar la lista",
+    "playlist_one": "{title}: {count} pista",
+    "playlist_other": "{title}: {count} pistas",
+    "noPlaylist": "{title} todavía no tiene lista. Añade pistas con el botón +.",
+    "playPlaylist": "Reproducir lista",
+    "noFiles": "No hay archivos de música en esta carpeta.",
+    "more": "Y {count} más. Aleatorio las reproduce todas.",
+    "addToPlaylist": "Añadir a la lista",
+    "removeFromPlaylist": "Quitar de la lista",
+    "playFailed": "No se pudo reproducir esta pista",
+    "ingameHint": "El reproductor de tu carpeta de música no se muestra dentro de un juego a pantalla completa. Lo que reproduce sigue sonando."
+  },
+  "downloads": {
+    "title": "Cola de instalación"
+  },
+  "power": {
+    "game": "Juego",
+    "power": "Energía"
+  },
+  "settings": {
+    "power": "Energía",
+    "outsideGames": "Fuera de los juegos",
+    "dynamicTarget": "Objetivo de Dynamic TDP",
+    "perGame": "Perfiles por juego",
+    "setWatts": {
+      "label": "Fijar vatios",
+      "description": "Con el asistente de energía."
+    },
+    "music": "Música",
+    "gameStart": "Al iniciar un juego",
+    "musicVolume": "Volumen de la música",
+    "mute": "Silenciar",
+    "look": "Aspecto",
+    "animations": "Animaciones",
+    "hint": "El botón Home y todo lo demás está en PlayOut › Ajustes.",
+    "openPlayOut": "Abrir PlayOut"
+  },
+  "options": {
+    "profileOff": "No (Windows como está)",
+    "dynamic": "Dynamic TDP",
+    "customWatts": "Vatios personalizados",
+    "noLimit": "Sin límite",
+    "gameStart": {
+      "keep": "Seguir con lo que suena",
+      "play": "Reproducir la lista del juego",
+      "load": "Cargarla en pausa"
+    }
+  },
+  "friends": {
+    "refresh": "Actualizar",
+    "refreshing": "Actualizando…",
+    "loading": "Cargando tus amigos de Steam…",
+    "none": "Sin amigos de Steam",
+    "chatFailed": "No se pudo abrir el chat de Steam",
+    "listLabel": "Amigos de Steam",
+    "playing": "Jugando",
+    "online": "En línea",
+    "offline": "Desconectados",
+    "showMore": "Mostrar {count} más",
+    "showOffline": "Mostrar amigos desconectados ({count})",
+    "row": "{name}, {detail}. Enviar mensaje en Steam",
+    "message": "Mensaje",
+    "presence": {
+      "offline": "Desconectado",
+      "online": "En línea",
+      "busy": "Ocupado",
+      "away": "Ausente",
+      "snooze": "Dormido",
+      "trade": "Quiere intercambiar",
+      "play": "Quiere jugar"
+    },
+    "ago": {
+      "justNow": "ahora mismo",
+      "minutes": "hace {count} min",
+      "hours": "hace {count} h",
+      "days_one": "hace {count} día",
+      "days_other": "hace {count} días"
+    },
+    "lastOnline": "Última conexión {ago}",
+    "updatedJustNow": "Actualizado ahora mismo",
+    "updatedSeconds": "Actualizado hace {count} s",
+    "updated": "Actualizado {ago}"
+  },
+  "peerParty": {
+    "lan": {
+      "on": "Juego en LAN activado",
+      "starting": "Iniciando…",
+      "off": "Juego en LAN desactivado"
+    },
+    "players": "Jugadores de este juego en tu red: {count}",
+    "inviteSent": "Invitación enviada",
+    "inviteNone": "Ningún juego de PeerParty aceptó la invitación",
+    "inviteFailed": "No se pudo enviar la invitación",
+    "limitsNote": "Los nombres de los jugadores y las invitaciones a un solo jugador requieren un PeerParty más reciente.",
+    "checking": "Comprobando PeerParty…",
+    "noGame": "Ningún juego se ejecuta con PeerParty ahora.",
+    "inviting": "Invitando…",
+    "invite": "Invitar a todos en la LAN"
+  }
+}

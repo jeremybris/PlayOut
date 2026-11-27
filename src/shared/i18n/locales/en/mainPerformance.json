@@ -1,0 +1,77 @@
+{
+  "helper": {
+    "notRunning": "The power helper is not running: reinstall it in Settings › System.",
+    "connectionClosed": "The power helper closed the connection",
+    "clientClosed": "The power helper client is closed",
+    "noAnswer": "The power helper did not answer",
+    "outdated": "The power helper needs an update (one administrator prompt).",
+    "install": "Install the power helper to set watts (one administrator prompt).",
+    "notConnected": "The power helper is not connected",
+    "didNotStart": "The power helper was installed but did not start: {error}",
+    "lineTooLong": "The power helper sent a line that is too long",
+    "notJson": "The power helper did not answer with JSON",
+    "unexpected": "The power helper sent an unexpected answer",
+    "failed": "The power helper failed"
+  },
+  "fps": {
+    "noProcesses": "No processes to measure."
+  },
+  "memory": {
+    "helperNotReported": "The power helper did not report the memory cleanup: {error}",
+    "helperLost": "The power helper lost the memory cleanup",
+    "helperNoReport": "The power helper did not report the memory cleanup",
+    "timeout": "The memory cleanup did not finish in time",
+    "gameUnknown": "The running game's programs could not be told apart from the rest, so nothing was trimmed.",
+    "foregroundUnknown": "The window in front could not be read, so nothing was trimmed.",
+    "helperBusy": "The power helper is still busy with a memory cleanup.",
+    "stillFinishing": "The last memory cleanup is still finishing.",
+    "passTimeout": "The memory cleanup did not finish in time.",
+    "notRunning": "Memory cleanup is not available right now.",
+    "processesUnreadable": "The running programs could not be read.",
+    "helperDidNotStart": "The power helper did not start the memory cleanup",
+    "notReported": "not reported by the power helper"
+  },
+  "watts": {
+    "unsupported": "This PC has no supported way to set watts; profiles still set the power mode, CPU state and boost.",
+    "checking": "Checking this PC…",
+    "restoreFailed": "Could not put the watts back: {error}",
+    "noHelperNeeded": "This PC sets watts without the helper."
+  },
+  "asus": {
+    "wattsRefused": "The ASUS firmware did not accept {watts} W (answer {answer})",
+    "deviceRefused": "The ASUS firmware refused device {device}",
+    "modeRefused": "The ASUS firmware did not accept mode {mode} (answer {answer})"
+  },
+  "profiles": {
+    "unread": "Could not read Windows' power settings first, so they were left as they are.",
+    "pendingBattery": "The Windows power mode on battery could not be put back now (this Windows only sets the current power source); it is put back the next time PlayOut restores it on battery.",
+    "pendingPluggedIn": "The Windows power mode plugged in could not be put back now (this Windows only sets the current power source); it is put back the next time PlayOut restores it plugged in.",
+    "modeFailed": "Could not set the power mode (powercfg exit {code})",
+    "modeFailedDetail": "Could not set the power mode (powercfg exit {code}): {detail}"
+  },
+  "windowsUser": "Could not read the Windows user",
+  "dynamic": {
+    "needsHelper": "Dynamic TDP needs the power helper."
+  },
+  "install": {
+    "noProgramData": "Could not find the ProgramData folder",
+    "noModulesZip": "The PawnIO modules release has no zip",
+    "noInstaller": "The PawnIO release has no installer",
+    "declined": "The administrator prompt was declined.",
+    "pawnioChanged": "The PawnIO installer changed after it was downloaded; try again.",
+    "pawnioUnsigned": "The PawnIO installer is not properly signed, so it was not run.",
+    "pawnioFailed": "The PawnIO driver could not be installed.",
+    "copyFailed": "The power helper files could not be copied (or changed while copying).",
+    "taskFailed": "The power helper task could not be registered.",
+    "unfinished": "The administrator step did not finish.",
+    "exitCode": "The administrator step failed (exit {code})."
+  },
+  "cpu": {
+    "failed": "Could not change the processor settings (powercfg {command} exit {code})",
+    "failedDetail": "Could not change the processor settings (powercfg {command} exit {code}): {detail}"
+  },
+  "mode": {
+    "refusedBattery": "Windows did not accept the power mode for battery (error {error})",
+    "refusedPluggedIn": "Windows did not accept the power mode for plugged in (error {error})"
+  }
+}

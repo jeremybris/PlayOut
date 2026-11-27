@@ -1,0 +1,24 @@
+{
+  "title": "Buscar",
+  "subtitle": "Título, plataforma, género o desarrollador",
+  "noMatches": "Sin coincidencias",
+  "results_one": "{count} resultado",
+  "results_other": "{count} resultados",
+  "placeholder": "Buscar en tu biblioteca",
+  "resultsLabel": "Resultados de la búsqueda",
+  "empty": {
+    "title": "Buscar en tu biblioteca",
+    "gamepad": "Elige letras con el teclado. Los resultados aparecen mientras escribes.",
+    "keyboard": "Escribe un título, plataforma, género o desarrollador. Los resultados aparecen mientras escribes."
+  },
+  "noGames": {
+    "title": "No se encontraron juegos",
+    "description": "Nada en tu biblioteca coincide con \"{query}\"."
+  },
+  "hints": {
+    "open": "Abrir",
+    "backspace": "Borrar",
+    "space": "Espacio",
+    "close": "Cerrar"
+  }
+}

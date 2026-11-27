@@ -1,0 +1,89 @@
+{
+  "title": "Settings",
+  "loading": "Loading settings",
+  "navLabel": "Settings sections",
+  "hints": {
+    "section": "Section",
+    "select": "Select",
+    "back": "Back"
+  },
+  "sections": {
+    "library": "Library",
+    "emulators": "Emulators",
+    "recompilations": "Recompilations",
+    "vr": "VR",
+    "convert": "Convert",
+    "streaming": "Streaming",
+    "metadata": "Metadata",
+    "appearance": "Appearance",
+    "input": "Controls",
+    "storage": "Storage",
+    "system": "System",
+    "about": "About"
+  },
+  "path": {
+    "generate": "Generate",
+    "choose": "Choose",
+    "clear": "Clear"
+  },
+  "secret": {
+    "notSet": "Not set",
+    "show": "Show {label}",
+    "hide": "Hide {label}"
+  },
+  "credentials": {
+    "checkFailed": "{service}: couldn't check right now"
+  },
+  "coop": {
+    "title": "Co-Op",
+    "handlers": "Nucleus Co-Op handlers",
+    "downloaded_one": "Co-Op handlers downloaded: {count} game in your library can play in Co-Op",
+    "downloaded_other": "Co-Op handlers downloaded: {count} games in your library can play in Co-Op",
+    "downloadFailed": "Could not download the Co-Op handlers",
+    "loading": "Loading…",
+    "notDownloaded": "Not downloaded yet. Games with a handler get a Co-Op badge and button on their page.",
+    "handlerCount_one": "{count} handler",
+    "handlerCount_other": "{count} handlers",
+    "gameCount_one": "{count} game",
+    "gameCount_other": "{count} games",
+    "summary": "{handlers} downloaded · {games} in your library can play in Co-Op",
+    "progressLabel": "Co-Op handlers download",
+    "updateAll": "Update all handlers",
+    "downloadAll": "Download all handlers",
+    "twoPlayer": {
+      "label": "Two-player split-screen",
+      "description": "How two players share the screen in Co-Op. A game's Co-Op setup can choose its own.",
+      "stacked": "Top and bottom",
+      "sideBySide": "Left and right"
+    },
+    "keyboardMouse": {
+      "label": "Count the keyboard and mouse as a player",
+      "description": "Co-Op gives one player the keyboard and mouse, in games whose handler supports them. Off: one player per controller."
+    }
+  },
+  "retroAchievements": {
+    "checking": "Checking…",
+    "signedOut": "Not signed in. Enter your username and Web API key below.",
+    "syncing": "Signed in as {user}. Syncing your ROMs…",
+    "notSignedIn": "Not signed in.",
+    "signedInAs": "Signed in as {user}",
+    "points": "{points} points",
+    "recognised_one": "{matched} of {count} ROM recognised",
+    "recognised_other": "{matched} of {count} ROMs recognised",
+    "openLinkFailed": "Could not open the link",
+    "synced_one": "RetroAchievements: synced, {matched} of {count} ROM recognised",
+    "synced_other": "RetroAchievements: synced, {matched} of {count} ROMs recognised",
+    "syncFailed": "Could not sync RetroAchievements",
+    "signedOutToast": "Signed out of RetroAchievements",
+    "keyLinkLabel": "Get your Web API key from RetroAchievements (opens in your browser)",
+    "keyLink": "Get Web API key",
+    "note": "Achievements for ROM games. Sign in at retroachievements.org, open your account settings and copy your Web API key. Achievements are unlocked by the emulator itself, so sign in to RetroAchievements in RetroArch too (Settings › Achievements).",
+    "account": "Account",
+    "signedIn": "Signed in",
+    "notWorking": "Not working",
+    "syncNow": "Sync now",
+    "signOut": "Sign out",
+    "username": "Username",
+    "apiKey": "Web API key"
+  }
+}

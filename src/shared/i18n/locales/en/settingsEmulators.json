@@ -1,0 +1,112 @@
+{
+  "title": "Emulators",
+  "lead": "{found} of {total} emulators found. PlayOut looks in the usual install folders; point it at the executable when one is missing.",
+  "leadLoading": "Looking for installed emulators…",
+  "toasts": {
+    "listFailed": "Could not read the emulator list",
+    "systemsFailed": "Could not read the system list",
+    "setupReadFailed": "Could not read the emulator setup",
+    "setupFailed": "Could not start the emulator setup",
+    "updateFailed": "Could not update the emulators",
+    "folderFailed": "Could not open the folder",
+    "pathSet": "{name} set to {path}",
+    "overrideCleared": "{name} override cleared",
+    "pathFailed": "Could not update {name}",
+    "filePickerFailed": "Could not open the file picker",
+    "downloadFailed": "Could not open the download page",
+    "folderPickerFailed": "Could not open the folder picker"
+  },
+  "pickers": {
+    "locate": "Locate {name}",
+    "programs": "Programs",
+    "cores": "Choose the RetroArch cores folder"
+  },
+  "detected": {
+    "title": "Detected emulators",
+    "searching": "Searching for emulators",
+    "customPath": "Custom path",
+    "installedByPlayOut": "Installed by PlayOut",
+    "detected": "Detected",
+    "notFound": "Not found",
+    "browse": "Browse",
+    "clearOverride": "Clear override",
+    "installing": "Installing…",
+    "install": "Install",
+    "download": "Download",
+    "hidePaths": "Hide paths",
+    "searchedPaths": "Searched paths",
+    "hidePathsLabel": "Hide searched paths for {name}",
+    "showPathsLabel": "Show searched paths for {name}",
+    "locationsSearched_one": "{count} location searched",
+    "locationsSearched_other": "{count} locations searched",
+    "noFindRules": "No find rules for this emulator."
+  },
+  "cores": {
+    "label": "Cores folder",
+    "detected": "Detected: {path}",
+    "description": "Folder containing the *_libretro.dll cores. Leave empty to use the folder next to retroarch.exe.",
+    "autoDetect": "Auto-detect",
+    "notSet": "Not set"
+  },
+  "ps3": {
+    "title": "PS3 game updates",
+    "label": "Update PS3 games automatically",
+    "description": "PlayOut checks Sony's update server for your PS3 games at start and when one is added, and installs missing updates with RPCS3 into Updates and DLC\\PS3 while RPCS3 is closed. A game’s menu also has Update PS3 game."
+  },
+  "preferred": {
+    "title": "Preferred emulator per system",
+    "loading": "Loading systems",
+    "noSystems": "No systems are defined.",
+    "notFound": "{label} (not found)",
+    "withGames_one": "{count} game · {available} of {total} emulators available",
+    "withGames_other": "{count} games · {available} of {total} emulators available",
+    "available": "{available} of {total} emulators available"
+  },
+  "playout": {
+    "title": "PlayOut emulators",
+    "reading": "Reading the emulator setup",
+    "installedIn": "Installed in",
+    "settingUp": "Setting up emulators…",
+    "installedCount": "{installed} of {total} emulators installed",
+    "setupRunning": "Setting up…",
+    "setup": "Set up emulators",
+    "open": "Open",
+    "bios": {
+      "label": "BIOS folder",
+      "description": "Put your BIOS and firmware files here; PlayOut links every emulator to it."
+    },
+    "update": {
+      "label": "Update all emulators",
+      "first": "Set up emulators first; then this updates them.",
+      "description": "Puts in the newest nightly build of every emulator PlayOut installed (stable where none is published), from the same server the emulator’s own updater uses. Settings, saves and the Emulation folder links stay; an emulator that is open is left alone.",
+      "running": "Updating…",
+      "button": "Update all",
+      "reportLabel": "Last emulator update"
+    },
+    "failed": "{name} could not be set up.",
+    "failedWithError": "{name} could not be set up: {error}"
+  },
+  "updateReport": {
+    "unknownVersion": "an unknown version",
+    "updated": "Updated from {from} to {to}",
+    "updatedChannel": "Updated from {from} to {to} ({channel})",
+    "current": "Up to date: {version}",
+    "currentChannel": "Up to date: {version} ({channel})",
+    "running": "Open, so left alone: close it and update again",
+    "unavailable": "No newer builds are published",
+    "failed": "Could not be updated (the installed build is kept)",
+    "failedWhy": "Could not be updated: {error} (the installed build is kept)",
+    "summary": {
+      "none": "No emulators to update",
+      "noneNewer": "No emulator has a newer build",
+      "updated_one": "{count} emulator updated",
+      "updated_other": "{count} emulators updated",
+      "current_one": "{count} already up to date",
+      "current_other": "{count} already up to date",
+      "running_one": "{count} open, left alone",
+      "running_other": "{count} open, left alone",
+      "failed_one": "{count} failed",
+      "failed_other": "{count} failed"
+    }
+  }
+}

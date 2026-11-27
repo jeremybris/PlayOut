@@ -1,0 +1,149 @@
+{
+  "spinner": {
+    "loading": "Cargando"
+  },
+  "starRating": {
+    "label": "{stars} de 5 estrellas",
+    "labelWithSource": "{stars} de 5 estrellas ({source})"
+  },
+  "confirmDialog": {
+    "confirm": "Confirmar",
+    "cancel": "Cancelar"
+  },
+  "modal": {
+    "close": "Cerrar"
+  },
+  "textField": {
+    "clear": "Borrar"
+  },
+  "selectField": {
+    "reversed": "invertido",
+    "previousOption": "Opción anterior",
+    "nextOption": "Opción siguiente"
+  },
+  "recompBadge": {
+    "label": "Recomp",
+    "title": "Recomp: se juega desde su recompilación"
+  },
+  "keyboard": {
+    "label": "Teclado en pantalla",
+    "shift": "Mayús",
+    "letters": "Letras",
+    "symbols": "Símbolos",
+    "space": "Espacio",
+    "backspace": "Retroceso",
+    "done": "Listo"
+  },
+  "gameCard": {
+    "favourite": "{title} (favorito)",
+    "completed": "Completado",
+    "queued": "En cola · {place}",
+    "pausedInQueue": "En pausa · {place}",
+    "paused": "En pausa",
+    "remoteLabel": "De otros PC: en {host}",
+    "remoteTitle": "En {host}",
+    "notInstalled": "No instalado",
+    "copies_one": "{count} copia",
+    "copies_other": "{count} copias",
+    "starting": "Iniciando",
+    "downloading": "Descargando",
+    "installing": "Instalando",
+    "addGames": "Añadir juegos",
+    "coverSignIn": "Inicia sesión para ver portadas · Ajustes › Metadatos",
+    "coverSignInTitle": "Inicia sesión en SteamGridDB en Ajustes › Metadatos para obtener esta portada"
+  },
+  "launchError": {
+    "title": {
+      "emulatorMissing": "No se encontró el emulador",
+      "coreMissing": "No se encontró el núcleo de RetroArch",
+      "clientMissing": "No se encontró el cliente de la tienda",
+      "fileMissing": "No se encontraron los archivos del juego",
+      "failed": "No se pudo iniciar"
+    },
+    "subtitle": "No se pudo iniciar {title}",
+    "subtitleUnknown": "No se pudo iniciar este juego",
+    "emulator": "Emulador: {name}",
+    "core": "Núcleo: {file}",
+    "searched": "Se buscó en: {paths}",
+    "close": "Cerrar",
+    "download": "Descargar {name}",
+    "emulatorSettings": "Ajustes de emuladores",
+    "librarySettings": "Ajustes de biblioteca",
+    "rescan": "Reescanear",
+    "rescanning": "Reescaneando {source}…",
+    "rescanFailed": "No se pudo reescanear",
+    "downloadPageFailed": "No se pudo abrir la página de descarga"
+  },
+  "downloadQueue": {
+    "label": "Descargas",
+    "empty": "No hay descargas",
+    "pauseAll": "Pausar todo",
+    "resumeAll": "Reanudar todo",
+    "fromHost": "Desde {host}",
+    "waiting": "En espera",
+    "starting": "Iniciando…",
+    "waitingDetail": "{from} · {status} · {place}",
+    "activeDetail": "{from} · {status}",
+    "percent": "{percent}%",
+    "bytes": "{done} de {total}",
+    "progressLabel": "{title}: {status}",
+    "pause": "Pausar {title}",
+    "resume": "Reanudar {title}",
+    "moveUp": "Subir {title}",
+    "moveDown": "Bajar {title}",
+    "stop": {
+      "remove": {
+        "label": "Quitar de la cola",
+        "aria": "Quitar de la cola: {title}"
+      },
+      "cancelDownload": {
+        "label": "Cancelar descarga",
+        "aria": "Cancelar descarga: {title}",
+        "confirmTitle": "¿Cancelar la descarga?",
+        "confirmMessage": "La descarga de {title} desde {from} se detiene y empieza el siguiente juego de la cola."
+      },
+      "cancelInstall": {
+        "label": "Cancelar instalación",
+        "aria": "Cancelar instalación: {title}",
+        "confirmTitle": "¿Cancelar la instalación?",
+        "confirmMessage": "PlayOut deja de esperar a que {from} empiece a instalar {title} y empieza el siguiente juego de la cola."
+      },
+      "stopTracking": {
+        "label": "Dejar de seguir",
+        "aria": "Dejar de seguir: {title}",
+        "confirmTitle": "¿Dejar de seguir?",
+        "confirmMessage": "PlayOut deja de seguir la instalación de {title} y empieza el siguiente juego de la cola. {from} puede seguir descargándolo."
+      }
+    }
+  },
+  "coverMenu": {
+    "label": "Opciones de {title}",
+    "pauseDownload": "Pausar descarga",
+    "resumeDownload": "Reanudar descarga",
+    "removeFromQueue": "Quitar de la cola",
+    "cancelDownload": "Cancelar descarga",
+    "download": "Descargar",
+    "stopStreaming": "Detener transmisión",
+    "cancelStream": "Cancelar transmisión",
+    "stream": "Transmitir",
+    "streamFrom": "Transmitir desde {host}",
+    "details": "Detalles",
+    "stopTracking": "Dejar de seguir",
+    "starting": "Iniciando…",
+    "paused": "En pausa",
+    "downloading": "Descargando",
+    "showInFolder": "Mostrar en carpeta",
+    "recompilation": "Recompilación",
+    "notInstalled": "No instalado",
+    "installed": "Instalado",
+    "recompFolderFailed": "No se pudo abrir la carpeta de la recompilación",
+    "manageDlc": "Administrar DLC",
+    "markCompleted": "Marcar como completado",
+    "unmarkCompleted": "Desmarcar como completado",
+    "preferredCopy": "Copia preferida",
+    "copies_one": "{count} copia",
+    "copies_other": "{count} copias",
+    "copiesLabel": "Copias",
+    "deleteLocal": "Eliminar de este PC"
+  }
+}

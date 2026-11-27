@@ -1,0 +1,1071 @@
+/*
+ * The Recompilation page (RecompPage.tsx): a panel modal like the game page. The game's hero art fades out behind a
+ * header with the cover and title; below it scroll the versions list, the shown version (actions, tags, features,
+ * description, setup, game files, saves, releases, README) and a facts rail on the right.
+ */
+
+.recomp {
+  --recomp-inset-x: var(--modal-inset-x);
+  --recomp-rail-w: calc(400 * var(--u));
+  --recomp-gap: calc(40 * var(--u));
+  background: var(--color-bg);
+}
+
+/* ---- art and header ------------------------------------------------------------------------------------------ */
+
+.recomp__art {
+  position: absolute;
+  inset: 0 0 auto 0;
+  width: 100%;
+  height: calc(520 * var(--u));
+  object-fit: cover;
+  object-position: center 25%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.recomp__art-fade {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: calc(520 * var(--u));
+  background:
+    var(--gradient-modal-left),
+    linear-gradient(
+      0deg,
+      var(--color-bg) 0%,
+      rgba(31, 31, 31, 0.65) 45%,
+      rgba(31, 31, 31, 0.15) 100%
+    );
+  pointer-events: none;
+}
+
+.recomp__close {
+  position: absolute;
+  top: var(--modal-header-top);
+  right: var(--modal-header-right);
+  z-index: 2;
+}
+
+.recomp__scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding: calc(48 * var(--u));
+  padding: 0 var(--recomp-inset-x) calc(96 * var(--u));
+}
+
+.recomp__head {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: calc(36 * var(--u));
+  min-height: calc(380 * var(--u));
+  padding: calc(120 * var(--u)) calc(96 * var(--u)) calc(32 * var(--u)) 0;
+}
+
+.recomp__cover {
+  flex: none;
+  width: calc(150 * var(--u));
+  height: calc(225 * var(--u));
+  border-radius: var(--radius-card);
+  object-fit: cover;
+  box-shadow: var(--shadow-card-focus);
+}
+
+.recomp__head-text {
+  display: flex;
+  flex-direction: column;
+  gap: calc(10 * var(--u));
+  min-width: 0;
+}
+
+.recomp__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+.recomp__eyebrow > svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.recomp__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+.recomp__subtitle {
+  font-size: var(--fs-meta);
+  color: var(--color-text-strong);
+}
+
+.recomp__state {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(20 * var(--u));
+  padding: calc(40 * var(--u)) 0;
+  font-size: var(--fs-body-lg);
+  color: var(--color-text-secondary);
+}
+
+/* ---- sections ------------------------------------------------------------------------------------------------ */
+
+.recomp__section {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: calc(16 * var(--u));
+  padding: calc(28 * var(--u)) 0;
+  border-top: 1px solid var(--color-control-stroke);
+}
+
+.recomp__section:first-child {
+  border-top: none;
+}
+
+.recomp__section-title {
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-row-title);
+  font-weight: var(--fw-semibold);
+}
+
+.recomp__section-title > svg {
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+  color: var(--color-icon-muted);
+}
+
+.recomp__lead {
+  margin: 0;
+  font-size: var(--fs-body-lg);
+  line-height: var(--lh-body);
+  color: var(--color-text-tertiary);
+}
+
+.recomp__body {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--recomp-rail-w);
+  gap: var(--recomp-gap);
+  align-items: start;
+}
+
+.recomp__main {
+  min-width: 0;
+}
+
+/* ---- versions -------------------------------------------------------------------------------------------------- */
+
+.recomp__versions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(520 * var(--u)), 1fr));
+  gap: calc(16 * var(--u));
+}
+
+.recomp-version {
+  display: flex;
+  align-items: center;
+  gap: calc(20 * var(--u));
+  min-width: 0;
+  padding: calc(16 * var(--u)) calc(20 * var(--u));
+  border-radius: var(--radius-card);
+  background: var(--color-control);
+  border: 1px solid var(--color-control-stroke);
+  cursor: pointer;
+  outline: var(--ring-w) solid transparent;
+  outline-offset: var(--ring-offset);
+  transition:
+    background var(--dur-instant) var(--ease-linear),
+    outline-color var(--dur-instant) var(--ease-linear);
+}
+
+.recomp-version:hover,
+.recomp-version[data-focused='true'] {
+  background: var(--color-control-hover);
+}
+
+.recomp-version[data-focused='true'] {
+  outline-color: var(--ring);
+}
+
+.recomp-version--selected {
+  border-color: var(--color-accent);
+  background: rgba(0, 120, 212, 0.14);
+}
+
+.recomp-version__text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: calc(4 * var(--u));
+  min-width: 0;
+}
+
+.recomp-version__name {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recomp-version__author {
+  overflow: hidden;
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recomp-version__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(8 * var(--u));
+  margin-top: calc(4 * var(--u));
+}
+
+.recomp-version__meta {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: calc(6 * var(--u));
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.recomp-version__stars {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6 * var(--u));
+}
+
+.recomp-version__stars > svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  color: #e6b800;
+}
+
+.recomp-version__chosen {
+  width: var(--icon-md);
+  height: var(--icon-md);
+  color: var(--color-accent-hover);
+}
+
+.recomp-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: calc(64 * var(--u));
+  height: calc(64 * var(--u));
+  overflow: hidden;
+  border-radius: calc(14 * var(--u));
+  background: var(--color-surface-translucent);
+  border: 1px solid var(--color-control-stroke);
+  color: var(--color-icon-muted);
+}
+
+.recomp-icon--lg {
+  width: calc(88 * var(--u));
+  height: calc(88 * var(--u));
+  border-radius: calc(18 * var(--u));
+}
+
+.recomp-icon > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recomp-icon > svg {
+  width: 55%;
+  height: 55%;
+}
+
+.recomp-chip--warn {
+  background: rgba(232, 17, 35, 0.22);
+  border-color: transparent;
+  color: #ffb3ba;
+}
+
+.recomp-chip--update {
+  background: rgba(108, 203, 95, 0.2);
+  border-color: transparent;
+  color: #c7f0c0;
+}
+
+/* ---- the shown version -------------------------------------------------------------------------------------- */
+
+.recomp__entry-head {
+  display: flex;
+  align-items: center;
+  gap: calc(24 * var(--u));
+}
+
+.recomp__entry-text {
+  display: flex;
+  flex-direction: column;
+  gap: calc(4 * var(--u));
+  min-width: 0;
+}
+
+.recomp__entry-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-row-title);
+  font-weight: var(--fw-bold);
+}
+
+.recomp__entry-by {
+  font-size: var(--fs-body);
+  color: var(--color-text-tertiary);
+}
+
+.recomp__blurb {
+  margin: 0;
+  max-width: calc(1100 * var(--u));
+  font-size: var(--fs-body-lg);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+.recomp__actions,
+.recomp__row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(16 * var(--u));
+}
+
+.recomp__actions {
+  padding: calc(8 * var(--u)) 0;
+}
+
+.recomp__primary {
+  min-width: calc(260 * var(--u));
+}
+
+/* the install / update in progress, in the primary button's place (like the game page's install block) */
+.recomp-progress {
+  --p: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(4 * var(--u));
+  width: calc(420 * var(--u));
+  height: var(--control-h-lg);
+  padding: 0 calc(24 * var(--u));
+  overflow: hidden;
+  border-radius: var(--radius-button);
+  background: var(--color-control);
+  border: 1px solid var(--color-control-stroke);
+  color: var(--color-text);
+  text-align: left;
+  cursor: default;
+  outline: var(--ring-w) solid transparent;
+  outline-offset: var(--ring-offset);
+}
+
+.recomp-progress[data-focused='true'] {
+  outline-color: var(--ring);
+}
+
+.recomp-progress__text {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.recomp-progress__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-semibold);
+}
+
+.recomp-progress__detail {
+  overflow: hidden;
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recomp-progress__bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(6 * var(--u));
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.recomp-progress__bar::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--p) * 1%);
+  background: var(--color-accent);
+  transition: width var(--dur-normal) var(--ease-linear);
+}
+
+.recomp-progress__bar--indeterminate::after {
+  width: 35%;
+  animation: recomp-indeterminate 1.4s ease-in-out infinite;
+}
+
+@keyframes recomp-indeterminate {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+html[data-animations='off'] .recomp-progress__bar--indeterminate::after {
+  animation: none;
+  width: 100%;
+  opacity: 0.5;
+}
+
+.recomp__note {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(10 * var(--u));
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+.recomp__note > svg {
+  flex: none;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  margin-top: calc(2 * var(--u));
+}
+
+.recomp__note--warn {
+  color: #ffd27a;
+}
+
+.recomp__note--error {
+  color: #ff6b76;
+}
+
+.recomp__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(10 * var(--u));
+}
+
+.recomp-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(20 * var(--u));
+  padding: calc(20 * var(--u)) calc(24 * var(--u));
+  border-radius: var(--radius-card);
+  background: var(--color-control);
+  border: 1px solid var(--color-control-stroke);
+}
+
+.recomp-banner--warn {
+  background: rgba(230, 184, 0, 0.12);
+  border-color: rgba(230, 184, 0, 0.45);
+}
+
+.recomp-banner__icon {
+  flex: none;
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+  color: #ffd27a;
+}
+
+.recomp-banner__text {
+  display: flex;
+  flex: 1 1 calc(400 * var(--u));
+  flex-direction: column;
+  gap: calc(4 * var(--u));
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+.recomp-banner__text strong {
+  font-size: var(--fs-body-lg);
+  color: var(--color-text);
+}
+
+.recomp-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(12 * var(--u));
+}
+
+.recomp__features {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(380 * var(--u)), 1fr));
+  gap: calc(10 * var(--u)) calc(28 * var(--u));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recomp__features li {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(10 * var(--u));
+  font-size: var(--fs-body-lg);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+.recomp__features svg {
+  flex: none;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  margin-top: calc(4 * var(--u));
+  color: var(--color-success);
+}
+
+.recomp__steps {
+  display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  margin: 0;
+  padding-left: calc(32 * var(--u));
+  font-size: var(--fs-body-lg);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+/* ---- game files ------------------------------------------------------------------------------------------------ */
+
+.recomp-files {
+  display: flex;
+  flex-direction: column;
+  gap: calc(12 * var(--u));
+}
+
+.recomp-file {
+  display: flex;
+  align-items: center;
+  gap: calc(24 * var(--u));
+  padding: calc(18 * var(--u)) calc(22 * var(--u));
+  border-radius: var(--radius-card);
+  background: var(--color-control);
+  border: 1px solid var(--color-control-stroke);
+}
+
+.recomp-file--missing {
+  border-color: rgba(230, 184, 0, 0.55);
+}
+
+.recomp-file__text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: calc(6 * var(--u));
+  min-width: 0;
+}
+
+.recomp-file__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-semibold);
+}
+
+.recomp-file__desc,
+.recomp-file__how {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+.recomp-file__spec,
+.recomp-file__source {
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+}
+
+.recomp-file__path {
+  overflow: hidden;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: var(--fs-caption);
+  color: var(--color-text-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recomp-file__path--empty {
+  font-family: var(--font-ui);
+  color: #ffd27a;
+}
+
+.recomp-file__warn {
+  font-size: var(--fs-body);
+  color: #ffb3ba;
+}
+
+.recomp-file__actions {
+  display: flex;
+  flex: none;
+  gap: calc(12 * var(--u));
+}
+
+/* ---- the program it starts ------------------------------------------------------------------------------------- */
+
+.recomp-exes {
+  display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  margin-top: calc(12 * var(--u));
+}
+
+.recomp-exe {
+  padding: calc(12 * var(--u)) calc(18 * var(--u));
+}
+
+/* An uninstaller, crash reporter or setup program: listed, but dimmed. */
+.recomp-exe--helper {
+  opacity: 0.72;
+}
+
+.recomp-exe--helper[data-focused='true'] {
+  opacity: 1;
+}
+
+.recomp-exe > .recomp-version__badges {
+  flex: none;
+  justify-content: flex-end;
+  margin-top: 0;
+}
+
+.recomp-exe__icon {
+  flex: none;
+  width: calc(28 * var(--u));
+  height: calc(28 * var(--u));
+  color: var(--color-text-secondary);
+}
+
+.recomp-exe__path {
+  overflow: hidden;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- saves ---------------------------------------------------------------------------------------------------- */
+
+.recomp-saves {
+  display: flex;
+  flex-direction: column;
+  gap: calc(6 * var(--u));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recomp-saves__path {
+  overflow: hidden;
+  padding: calc(10 * var(--u)) calc(16 * var(--u));
+  border-radius: var(--radius-button);
+  background: var(--color-control);
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: var(--fs-caption);
+  color: var(--color-text-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A save folder with its button (Remove, or Add for a suggestion). */
+.recomp-saves__row {
+  display: flex;
+  align-items: center;
+  gap: calc(12 * var(--u));
+  min-width: 0;
+}
+
+.recomp-saves__row > .recomp-saves__path {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* A folder "Find automatically" found but did not use. */
+.recomp-saves__path--suggested {
+  background: transparent;
+  outline: 1px dashed var(--color-control);
+  font-style: italic;
+}
+
+.recomp-saves__copies {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- releases ------------------------------------------------------------------------------------------------- */
+
+.recomp-releases {
+  display: flex;
+  flex-direction: column;
+  gap: calc(10 * var(--u));
+}
+
+.recomp-release {
+  display: flex;
+  flex-direction: column;
+  gap: calc(12 * var(--u));
+  padding: calc(14 * var(--u)) calc(20 * var(--u));
+  border-radius: var(--radius-card);
+  background: var(--color-control);
+  border: 1px solid var(--color-control-stroke);
+}
+
+.recomp-release--current {
+  border-color: var(--color-accent);
+}
+
+/* no Windows download: shown with the reason, not installable */
+.recomp-release--unavailable {
+  opacity: 0.6;
+}
+
+.recomp-release__head {
+  display: flex;
+  align-items: center;
+  gap: calc(20 * var(--u));
+}
+
+.recomp-release__text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: calc(4 * var(--u));
+  min-width: 0;
+}
+
+.recomp-release__tag {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recomp-release__name {
+  font-weight: var(--fw-regular);
+  color: var(--color-text-secondary);
+}
+
+.recomp-release__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+}
+
+.recomp-release__actions {
+  display: flex;
+  flex: none;
+  gap: calc(12 * var(--u));
+}
+
+.recomp-release__notes {
+  padding-top: calc(10 * var(--u));
+  border-top: 1px solid var(--color-control-stroke);
+}
+
+.recomp__chevron {
+  transition: transform var(--dur-focus) var(--ease-p2p);
+}
+
+.recomp__chevron--open {
+  transform: rotate(180deg);
+}
+
+.recomp__readme-toggle {
+  align-self: flex-start;
+}
+
+.recomp-readme {
+  padding: calc(24 * var(--u)) calc(28 * var(--u));
+  border-radius: var(--radius-card);
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--color-control-stroke);
+}
+
+/* ---- facts rail ----------------------------------------------------------------------------------------------- */
+
+.recomp__rail {
+  position: sticky;
+  /* below the close button, which floats over the scroller's top right */
+  top: calc(var(--modal-header-top) + var(--control-h) + 20 * var(--u));
+  padding-top: calc(28 * var(--u));
+}
+
+.recomp-facts {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: calc(8 * var(--u)) calc(24 * var(--u));
+  border-radius: var(--radius-card);
+  background: var(--color-surface-translucent);
+  border: 1px solid var(--color-control-stroke);
+}
+
+.recomp-facts__row {
+  display: flex;
+  justify-content: space-between;
+  gap: calc(16 * var(--u));
+  padding: calc(14 * var(--u)) 0;
+  border-top: 1px solid var(--color-control-stroke);
+}
+
+.recomp-facts__row:first-child {
+  border-top: none;
+}
+
+.recomp-facts__row dt {
+  flex: none;
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--color-text-label);
+}
+
+.recomp-facts__row dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--fs-body);
+  text-align: right;
+  color: var(--color-text-stat);
+  font-variant-numeric: tabular-nums;
+}
+
+.recomp-facts__row--warn dd {
+  color: #ffd27a;
+}
+
+/* narrow canvases: the facts go above the details instead of beside them */
+@media (max-aspect-ratio: 1416 / 1080) {
+  .recomp__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .recomp__rail {
+    position: static;
+    order: -1;
+  }
+
+  .recomp-facts {
+    flex-flow: row wrap;
+    column-gap: calc(32 * var(--u));
+  }
+
+  .recomp-facts__row,
+  .recomp-facts__row:first-child {
+    border-top: none;
+  }
+}
+
+/* ---- Markdown (Markdown.tsx) ------------------------------------------------------------------------------- */
+
+.md {
+  display: flex;
+  flex-direction: column;
+  gap: calc(14 * var(--u));
+  min-width: 0;
+  font-size: var(--fs-body-lg);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.md > :first-child {
+  margin-top: 0;
+}
+
+.md__heading {
+  margin: calc(10 * var(--u)) 0 0;
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-tight);
+  color: var(--color-text);
+}
+
+.md__heading--1 {
+  font-size: var(--fs-row-title);
+}
+
+.md__heading--2 {
+  font-size: calc(28 * var(--u));
+}
+
+.md__heading--3,
+.md__heading--4,
+.md__heading--5,
+.md__heading--6 {
+  font-size: var(--fs-body-lg);
+}
+
+.md__p {
+  margin: 0;
+}
+
+.md__list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(6 * var(--u));
+  margin: 0;
+  padding-left: calc(32 * var(--u));
+}
+
+.md__li--task {
+  list-style: none;
+  margin-left: calc(-28 * var(--u));
+}
+
+.md__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+  margin-right: calc(10 * var(--u));
+  border-radius: calc(5 * var(--u));
+  border: 1px solid var(--color-divider-strong);
+  font-size: var(--fs-caption);
+  vertical-align: middle;
+}
+
+.md__check--done {
+  background: var(--color-accent);
+  border-color: transparent;
+  color: var(--color-text);
+}
+
+.md__code,
+.md__pre {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 0.88em;
+}
+
+.md__code {
+  padding: 0.1em 0.4em;
+  border-radius: calc(6 * var(--u));
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.md__pre {
+  margin: 0;
+  padding: calc(16 * var(--u)) calc(20 * var(--u));
+  overflow-x: auto;
+  border-radius: var(--radius-button);
+  background: rgba(0, 0, 0, 0.35);
+  white-space: pre;
+}
+
+.md__quote {
+  display: flex;
+  flex-direction: column;
+  gap: calc(10 * var(--u));
+  margin: 0;
+  padding-left: calc(20 * var(--u));
+  border-left: calc(4 * var(--u)) solid var(--color-divider);
+  color: var(--color-text-tertiary);
+}
+
+.md__rule {
+  width: 100%;
+  height: 1px;
+  margin: calc(6 * var(--u)) 0;
+  border: none;
+  background: var(--color-control-stroke);
+}
+
+.md__link {
+  color: #6cb8ff;
+  text-decoration: underline;
+  text-decoration-color: rgba(108, 184, 255, 0.4);
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+
+.md__link:hover {
+  text-decoration-color: currentColor;
+}
+
+.md__table-wrap {
+  overflow-x: auto;
+}
+
+.md__table {
+  border-collapse: collapse;
+  font-size: var(--fs-body);
+}
+
+.md__table th,
+.md__table td {
+  padding: calc(8 * var(--u)) calc(14 * var(--u));
+  border: 1px solid var(--color-control-stroke);
+  text-align: left;
+  vertical-align: top;
+}
+
+.md__table th {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+  font-weight: var(--fw-semibold);
+}
+
+/* ---- the version in use (VersionManager: Change version, also in Settings › Recompilations) ------------------- */
+
+.recomp-vm__list {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: calc(16 * var(--u));
+}
+
+.recomp-vm__list > .btn {
+  align-self: flex-start;
+}
+
+/* "Pinned to v1.0" beside Back to latest, in the action row */
+.recomp-vm__pin {
+  align-self: center;
+}

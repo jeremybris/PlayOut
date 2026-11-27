@@ -1,0 +1,7 @@
+{
+  "code": "en",
+  "name": "English",
+  "nativeName": "English",
+  "machineTranslated": false,
+  "notes": "The source language: every key exists here first, and other languages fall back to it."
+}

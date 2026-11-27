@@ -1,0 +1,89 @@
+{
+  "title": "Ajustes",
+  "loading": "Cargando los ajustes",
+  "navLabel": "Secciones de los ajustes",
+  "hints": {
+    "section": "Sección",
+    "select": "Seleccionar",
+    "back": "Atrás"
+  },
+  "sections": {
+    "library": "Biblioteca",
+    "emulators": "Emuladores",
+    "recompilations": "Recompilaciones",
+    "vr": "RV",
+    "convert": "Convertir",
+    "streaming": "Streaming",
+    "metadata": "Metadatos",
+    "appearance": "Apariencia",
+    "input": "Controles",
+    "storage": "Almacenamiento",
+    "system": "Sistema",
+    "about": "Acerca de"
+  },
+  "path": {
+    "generate": "Generar",
+    "choose": "Elegir",
+    "clear": "Borrar"
+  },
+  "secret": {
+    "notSet": "Sin configurar",
+    "show": "Mostrar {label}",
+    "hide": "Ocultar {label}"
+  },
+  "credentials": {
+    "checkFailed": "{service}: no se pudo comprobar en este momento"
+  },
+  "coop": {
+    "title": "Co-Op",
+    "handlers": "Handlers de Nucleus Co-Op",
+    "downloaded_one": "Handlers de Co-Op descargados: {count} juego de tu biblioteca se puede jugar en Co-Op",
+    "downloaded_other": "Handlers de Co-Op descargados: {count} juegos de tu biblioteca se pueden jugar en Co-Op",
+    "downloadFailed": "No se pudieron descargar los handlers de Co-Op",
+    "loading": "Cargando…",
+    "notDownloaded": "Aún no se han descargado. Los juegos con un handler muestran una insignia y un botón de Co-Op en su página.",
+    "handlerCount_one": "{count} handler",
+    "handlerCount_other": "{count} handlers",
+    "gameCount_one": "{count} juego",
+    "gameCount_other": "{count} juegos",
+    "summary": "Descargados: {handlers} · {games} de tu biblioteca se pueden jugar en Co-Op",
+    "progressLabel": "Descarga de los handlers de Co-Op",
+    "updateAll": "Actualizar todos los handlers",
+    "downloadAll": "Descargar todos los handlers",
+    "twoPlayer": {
+      "label": "Pantalla dividida para dos jugadores",
+      "description": "Cómo comparten la pantalla dos jugadores en Co-Op. La configuración de Co-Op de un juego puede elegir la suya.",
+      "stacked": "Arriba y abajo",
+      "sideBySide": "Izquierda y derecha"
+    },
+    "keyboardMouse": {
+      "label": "Contar el teclado y el ratón como un jugador",
+      "description": "Co-Op le da el teclado y el ratón a un jugador, en los juegos cuyo handler los admite. Desactivado: un jugador por mando."
+    }
+  },
+  "retroAchievements": {
+    "checking": "Comprobando…",
+    "signedOut": "No has iniciado sesión. Escribe tu nombre de usuario y tu clave de Web API abajo.",
+    "syncing": "Sesión iniciada como {user}. Sincronizando tus ROM…",
+    "notSignedIn": "No has iniciado sesión.",
+    "signedInAs": "Sesión iniciada como {user}",
+    "points": "{points} puntos",
+    "recognised_one": "{matched} de {count} ROM reconocida",
+    "recognised_other": "{matched} de {count} ROM reconocidas",
+    "openLinkFailed": "No se pudo abrir el enlace",
+    "synced_one": "RetroAchievements: sincronizado, {matched} de {count} ROM reconocida",
+    "synced_other": "RetroAchievements: sincronizado, {matched} de {count} ROM reconocidas",
+    "syncFailed": "No se pudo sincronizar RetroAchievements",
+    "signedOutToast": "Sesión de RetroAchievements cerrada",
+    "keyLinkLabel": "Obtén tu clave de Web API en RetroAchievements (se abre en tu navegador)",
+    "keyLink": "Obtener clave de Web API",
+    "note": "Logros para juegos ROM. Inicia sesión en retroachievements.org, abre la configuración de tu cuenta y copia tu clave de Web API. Los logros los desbloquea el propio emulador, así que inicia sesión en RetroAchievements también en RetroArch (Settings › Achievements).",
+    "account": "Cuenta",
+    "signedIn": "Sesión iniciada",
+    "notWorking": "No funciona",
+    "syncNow": "Sincronizar ahora",
+    "signOut": "Cerrar sesión",
+    "username": "Nombre de usuario",
+    "apiKey": "Clave de Web API"
+  }
+}

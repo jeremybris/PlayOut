@@ -1,0 +1,21 @@
+{
+  "listFailed": "No se pudo leer la lista de DLC de Steam, así que no se cambió nada. Inténtalo de nuevo o usa Abrir en Steam.",
+  "runningCheckFailed": "No se pudo saber si hay un juego de Steam en ejecución, así que no se tocó Steam. Inténtalo de nuevo en un momento.",
+  "gameRunning": "Hay un juego en ejecución. Ciérralo primero: Steam tiene que reiniciarse para cambiar los DLC.",
+  "steamDownloading": "Steam está descargando o actualizando un juego. Espera a que termine: Steam tiene que reiniciarse para cambiar los DLC.",
+  "notInLibrary": "Este juego no está en la biblioteca.",
+  "notSteamGame": "{title} no es un juego de Steam.",
+  "listUnavailable": "No se pudo leer la lista de DLC de Steam en este momento (sin conexión o el servicio de información de Steam no funciona).",
+  "slowRestart": "Steam tardó en cerrarse tras el último cambio y aún no se volvió a iniciar. Inténtalo de nuevo en un minuto.",
+  "steamMissing": "Steam no está instalado en este PC.",
+  "noInstallRecord": "Steam no tiene registro de instalación de {title}.",
+  "recordUnreadable": "No se pudo leer el registro de instalación de {title} en Steam.",
+  "steamRunningUnknown": "No se pudo saber si Steam está en ejecución, así que no se cambió nada.",
+  "closeTimeout": "Steam no se cerró en {seconds} segundos, así que no se cambió nada. Se volverá a iniciar cuando se haya cerrado.",
+  "notSaved": "No se pudo guardar la elección de DLC: {error}",
+  "notDlc": "No es un DLC de {title}: {ids}",
+  "noInstallRecordHere": "Steam no tiene registro de instalación de {title} en este PC, así que no se cambió nada. Usa Abrir en Steam.",
+  "noRecordYet": "Steam aún no tiene registro de instalación.",
+  "planTimeouts": "Steam no se cerró a tiempo (dos veces), así que no se aplicó la elección de DLC. Usa Administrar DLC para intentarlo de nuevo.",
+  "notApplied": "No se aplicó."
+}

@@ -1,0 +1,78 @@
+{
+  "unavailable": {
+    "theStore": "the store",
+    "noAnswer": "no answer from the account page",
+    "accountPage": "the account page did not load",
+    "eaSite": "the EA app site",
+    "noBearer": "no bearer token was issued",
+    "noLegacyOffers": "no legacy offers returned",
+    "noOwnedList": "no owned list returned",
+    "noGamesList": "Steam answered without a games list (private game details or a temporary API error)",
+    "storePage": "the store page did not load"
+  },
+  "signIn": {
+    "windowOpen": "A sign-in window is already open",
+    "title": "Sign in to {store}",
+    "failed": "Sign-in failed: {error}"
+  },
+  "confirm": {
+    "battlenet": "Confirm the install in Battle.net",
+    "ea": "Confirm the install in the EA app",
+    "epic": "Confirm the install in the Epic Games Launcher",
+    "gog": "Confirm the install in GOG Galaxy",
+    "steam": "Confirm the install in Steam",
+    "ubisoft": "Confirm the install in Ubisoft Connect",
+    "xbox": "Press Install in the Xbox app"
+  },
+  "install": {
+    "battlenetMissing": "Battle.net is not installed: install it from blizzard.com to install and play these games.",
+    "battlenetClassic": "{title} is a classic game: download it from the Battle.net app's Classic Games section.",
+    "battlenetUnknown": "This game is not known to Battle.net, so it cannot be installed from here.",
+    "eaMissing": "The EA app is not installed: install it from ea.com/ea-app to install and play these games.",
+    "otherStore": "This game is managed by another store; install it there.",
+    "eaNoId": "This game has no EA content id, so the EA app cannot install it.",
+    "epicNoId": "This game has no Epic app name, so the Epic Games Launcher cannot install it.",
+    "epicMissing": "The Epic Games Launcher is not installed: install it from epicgames.com to install and play these games.",
+    "gogNoId": "This game has no GOG product id, so GOG Galaxy cannot install it.",
+    "gogMissing": "GOG Galaxy is not installed: install it from gog.com/galaxy, or download the offline installer from gog.com/account.",
+    "steamNoId": "This game has no Steam app id, so Steam cannot install it.",
+    "steamMissing": "Steam is not installed: install it from steampowered.com to install and play these games.",
+    "ubisoftNoId": "This game has no Ubisoft launch id, so Ubisoft Connect cannot install it.",
+    "ubisoftMissing": "Ubisoft Connect is not installed: install it from ubisoft.com/ubisoft-connect to install and play these games.",
+    "xboxNoId": "This game has no Microsoft Store product id, so the Xbox app cannot install it.",
+    "notFromStore": "This game is not from a store, so there is nothing to install.",
+    "cannotInstall": "{store} cannot install this game."
+  },
+  "token": {
+    "epic": "Epic did not return a token",
+    "gog": "GOG did not return a token",
+    "gogUser": "GOG did not return a user id",
+    "xboxUser": "Xbox Live did not return a user token",
+    "xsts": "Xbox Live did not return an XSTS token",
+    "microsoft": "Microsoft did not return a token"
+  },
+  "ubisoft": {
+    "noSignIn": "Ubisoft does not offer a sign-in that PlayOut can use; your owned games come from the Ubisoft Connect client."
+  },
+  "sessionExpired": "Session expired, sign in again",
+  "apiKeySignOut": "Steam is signed in with the Web API key from Settings > Metadata; clear it there to sign out.",
+  "notSupported": "Not supported",
+  "notSignedIn": "Not signed in",
+  "couldNotReach": "Could not reach {store}",
+  "importFailed": "Import failed: {error}",
+  "accountsUnsupported": "{store} accounts are not supported",
+  "sessionExpiredStore": "Session expired, sign in again to refresh your {store} library",
+  "couldNotReachWhy": "Could not reach {store} ({detail})",
+  "failure": {
+    "noAnswerAfter": "no answer after {seconds} s",
+    "server": "{owner} servers are not responding right now ({code}). This is a problem on {owner} side, not in PlayOut.",
+    "rateLimit": "{store} is limiting requests right now ({code}). This is on {owner} side, not in PlayOut.",
+    "timeout": "{store} did not answer in time. {owner} servers may be overloaded, or your internet connection may be slow or down.",
+    "timeoutWhy": "{store} did not answer in time ({detail}). {owner} servers may be overloaded, or your internet connection may be slow or down.",
+    "network": "Could not reach {store}. Your internet connection may be down, or {owner} servers may be having trouble.",
+    "networkWhy": "Could not reach {store} ({detail}). Your internet connection may be down, or {owner} servers may be having trouble.",
+    "retryIn": "PlayOut will try again in {minutes} minutes.",
+    "importLater": "Import again later to try once more.",
+    "unchanged": "{first} Your {store} games are unchanged; {next}"
+  }
+}

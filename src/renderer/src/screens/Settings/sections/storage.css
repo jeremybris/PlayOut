@@ -1,0 +1,109 @@
+/* Settings › Storage (Storage.tsx): a console-style storage bar (games, other, free) with its legend, then the games on
+   this PC, largest first. */
+.storage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 1.2rem 1.6rem 0.4rem;
+}
+
+.storage__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.6rem;
+}
+
+.storage__name {
+  font-size: var(--fs-body-lg, 2rem);
+  color: var(--color-text);
+}
+
+.storage__size,
+.storage__free {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+
+.storage__free {
+  align-self: flex-end;
+}
+
+/* The bar: the dark track is the free space; the games and Other fill it from the left. */
+.storage__bar {
+  display: flex;
+  height: 0.6rem;
+  border-radius: 0.3rem;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.storage__seg {
+  flex: none;
+  height: 100%;
+}
+
+.storage__seg--games,
+.storage__dot--games {
+  background: #3d9bf0;
+}
+
+.storage__seg--other,
+.storage__dot--other {
+  background: #d9d5d0;
+}
+
+/* A hairline between the two parts, as on the console's bar. */
+.storage__seg--other {
+  box-shadow: inset 0.2rem 0 0 rgba(0, 0, 0, 0.35);
+}
+
+.storage__legend {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.2rem;
+}
+
+.storage__legend-row {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  padding: 1.4rem 0.8rem;
+}
+
+.storage__legend-row + .storage__legend-row {
+  border-top: 1px solid var(--color-divider, rgba(255, 255, 255, 0.1));
+}
+
+.storage__dot {
+  flex: none;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+}
+
+.storage__legend-label {
+  flex: 1 1 auto;
+  color: var(--color-text);
+}
+
+.storage__legend-value,
+.storage__game-size {
+  flex: none;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.storage__list-title {
+  margin-top: 2.4rem;
+}
+
+.storage__games {
+  display: flex;
+  flex-direction: column;
+}
+
+.storage__game .settings-row__text {
+  flex: 1 1 28rem;
+}

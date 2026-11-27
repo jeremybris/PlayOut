@@ -1,0 +1,53 @@
+{
+  "title": "About",
+  "version": "{name} {version} · {platform}",
+  "versionDev": "{name} {version} (development build) · {platform}",
+  "versionUnavailable": "PlayOut · version unavailable",
+  "versionLoading": "Loading version…",
+  "install": {
+    "title": "This install",
+    "updates": "Updates",
+    "loading": "Loading…",
+    "progress": "Update progress",
+    "check": "Check for Updates",
+    "dataFolder": "Data folder",
+    "dataFolderDescription": "Library database, settings, logs and cached artwork live here.",
+    "openFolder": "Open folder"
+  },
+  "toasts": {
+    "linkFailed": "Could not open the link",
+    "dataFolderFailed": "Could not open the data folder"
+  },
+  "credits": {
+    "title": "Credits and licences",
+    "note": "PlayOut is open source under the MIT licence. It builds on the projects and services below; full licence texts are in docs/LICENSES.md.",
+    "website": "Website",
+    "websiteLabel": "Open {name} website",
+    "esde": "System definitions, ROM folder conventions, emulator find rules and launch command templates are derived from EmulationStation Desktop Edition (MIT licence, © Northwestern Software AB, Leon Styhre, Alec Lofquist).",
+    "playnite": "Store detection for Steam, Epic Games, GOG, EA app, Battle.net, Ubisoft Connect and Xbox, the Battle.net product table and process-based play time tracking follow Playnite (MIT licence, © Josef Nemec).",
+    "xboxWake": "Wake with the Xbox button (Settings › System) ports the controller wake of SoCal IT’s Console-Style PC Wizard (MIT licence, © SoCal IT).",
+    "nucleus": "Co-Op runs Nucleus Co-op handlers through PlayOut Co-Op, a separate program under the GNU GPL v3 built from the Nucleus Co-op engine (SplitScreen.Me, ZeroFox, Lucas Assis and contributors); its source code is at github.com/jeremybris/PlayOut-CoOp. Handlers and the Nucleus tools are downloaded on request and keep their own licences.",
+    "peerparty": "LAN play (the PeerParty square on a game’s page) starts games through PeerParty (MIT licence, © 2026 PeerParty contributors). It is not shipped with PlayOut: it is downloaded from its GitHub releases the first time it is used, checked against the published checksum, and runs unmodified in PlayOut’s data folder. Its release lists the licences of the software built into it.",
+    "xisosharp": "Xbox and Xbox 360 image conversions use XISOSharp, CCISharp, ZArchiveSharp and StfsSharp (MIT, © PureLogicCode.com) and CHDSharp (MIT; original developers Peterson Fernandes and Gordon Jefferyes; its FLAC codec is LGPL 2.1), the engine of XISO Studio. This product includes software developed by in <in@fishtank.com> (extract-xiso). Full texts: resources\\xbox\\LICENSES.txt.",
+    "steamgriddb": "Artwork from SteamGridDB, contributed by its community. Requires your own API key.",
+    "igdb": "Data and user ratings (for games without a Steam review score) from IGDB.com, accessed through the Twitch developer platform for non-commercial use.",
+    "screenscraper": "Data by ScreenScraper.fr. Media is downloaded with your credentials, cached locally and never redistributed.",
+    "thegamesdb": "Data from TheGamesDB.net.",
+    "steam": "Powered by Steam. Play time and achievements come from the Steam Web API under its terms of use; store artwork remains the property of the publishers.",
+    "hltb": "Times from HowLongToBeat.com. Optional, one query per game, cached for 30 days.",
+    "simpleIcons": "Platform logos from simple-icons (CC0 1.0); interface glyphs from Lucide (ISC). Brands remain trademarks of their owners."
+  },
+  "support": {
+    "title": "Support PlayOut",
+    "kofi": "Donate on Ko-fi",
+    "kofiDescription": "PlayOut is free. If you enjoy it, a donation helps keep it going.",
+    "donate": "Donate",
+    "discord": "Discord server",
+    "discordDescription": "Get help, share ideas and report bugs with other players.",
+    "join": "Join"
+  },
+  "links": {
+    "title": "Links",
+    "lucide": "Lucide icons"
+  }
+}

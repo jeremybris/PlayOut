@@ -1,0 +1,215 @@
+{
+  "accounts": {
+    "signedInAs": "Signed in to {store} as {name}",
+    "signedIn": "Signed in to {store} as you",
+    "signInFailed": "Could not sign in to {store}: {error}",
+    "signedOut": "Signed out of {store}",
+    "signOutFailed": "Could not sign out of {store}: {error}",
+    "importFailed": "Could not import your {store} library: {error}",
+    "importEnded": "{store} import failed: {error}"
+  },
+  "convert": {
+    "done": "Converted {title} to {format}",
+    "doneDetail": "Converted {title} to {format} ({detail})",
+    "failed": "{title} was not converted",
+    "failedDetail": "{title} was not converted: {detail}",
+    "skipped": "{title} was left as it is",
+    "skippedDetail": "{title} was left as it is: {detail}",
+    "stopped": "Converting {title} was stopped",
+    "trimmingOne": "Trimming {title}… (Settings › Convert shows progress)",
+    "trimmingLibrary_one": "Trimming {count} game… (Settings › Convert shows progress)",
+    "trimmingLibrary_other": "Trimming {count} games… (Settings › Convert shows progress)",
+    "trimmingNew_one": "Trimming {count} new game… (Settings › Convert shows progress)",
+    "trimmingNew_other": "Trimming {count} new games… (Settings › Convert shows progress)",
+    "trimSkipped": "Trim Games left {title} as it is: {reason}",
+    "trimSkippedMany": "Trim Games left {count} games as they are: {reason}"
+  },
+  "coop": {
+    "risksTitle": "Before Co-Op",
+    "risks": "{title}'s Co-Op handler uses {tools}. These tools remove copy protection or get around anti-cheat, which may break the game's terms of service and, for online games, can get an account banned. Use Co-Op with this game anyway?",
+    "risksConfirm": "Use Co-Op",
+    "saveFailed": "Could not save the choice",
+    "startFailed": "Could not start Co-Op: {error}",
+    "starting": "Starting {title} in Co-Op…"
+  },
+  "favorite": {
+    "added": "Added {title} to favourites",
+    "removed": "Removed {title} from favourites",
+    "completed": "Marked {title} as completed",
+    "notCompleted": "{title} is no longer marked completed",
+    "updateFailed": "Could not update the game",
+    "folderFailed": "Could not open the game folder"
+  },
+  "queue": {
+    "changeFailed": "Could not change the install queue",
+    "pauseFailed": "Could not pause the download",
+    "resumeFailed": "Could not resume the download",
+    "cancelled": "Cancelled the install of {title}",
+    "stoppedTracking": "Stopped tracking the install of {title}. {store} keeps downloading it.",
+    "paused": "Paused",
+    "pausedAt": "Paused at {percent}%",
+    "pausedStore": "Paused · also pause it in {store}",
+    "storeKeepsDownloading": "{store} keeps downloading {title} until you pause it there too",
+    "downloading": "Downloading {title}…",
+    "downloadingFrom": "Downloading {title} from {host}…",
+    "starting": "Starting…",
+    "queued": "{title} is queued; it starts when the current download ends",
+    "queuedAfter": "{title} is queued; it starts after {active}",
+    "summary": {
+      "downloads": "Downloads",
+      "allPaused": "Downloads paused",
+      "activePaused": "{title} paused",
+      "downloading": "Downloading {title}",
+      "downloadingPercent": "Downloading {title} ({percent})",
+      "waiting": "{count} waiting"
+    },
+    "place": {
+      "next": "Next in line",
+      "one": "{position}st in line",
+      "two": "{position}nd in line",
+      "few": "{position}rd in line",
+      "other": "{position}th in line"
+    }
+  },
+  "libraryTabs": {
+    "tooMany": "Up to {count} tabs: delete one to open this filter in a tab of its own."
+  },
+  "localDelete": {
+    "title": "Delete from this PC",
+    "toRecycleBin": "{title} will be moved to the Recycle Bin and removed from your library:",
+    "files_one": "{count} file{size}:",
+    "files_other": "{count} files{size}:",
+    "more": "… and {count} more",
+    "kept_one": "Kept because another game uses it: {files}",
+    "kept_other": "Kept because another game uses them: {files}",
+    "updatesDlc": "Its updates and DLC{size}:",
+    "windowsSettings": "Windows Settings opens on Apps: uninstall {title} from Apps there. It stays in your library and shows as not installed once it is uninstalled.",
+    "store": "{store} will ask to uninstall {title}. It stays in your library and shows as not installed once {store} is done.",
+    "storeUnnamed": "The store will ask to uninstall {title}. It stays in your library and shows as not installed once the store is done.",
+    "uninstaller": "The uninstaller of {title} opens ({path}). {title} leaves your library once it is uninstalled; if you cancel the uninstaller, it stays.",
+    "onlyThisPcStore": "Only this PC is affected: your store account, other PCs and the host keep the game.",
+    "folder": "Everything inside the folder, saves included, goes to the Recycle Bin. Other PCs and the host are not touched.",
+    "onlyThisPcFiles": "Only this PC is affected: other PCs, the host and your saves are not touched.",
+    "onlyThisPcUninstaller": "Only this PC is affected: other PCs and the host keep the game. The uninstaller decides what it removes.",
+    "hostKeeps_one": "{hosts} keeps its copy; it shows as Download here.",
+    "hostKeeps_other": "{hosts} keep its copy; it shows as Download here.",
+    "hostStreams": "You can still stream it from {hosts}.",
+    "confirm": {
+      "windowsSettings": "Open Windows Settings",
+      "store": "Uninstall in {store}",
+      "storeUnnamed": "Uninstall in store",
+      "uninstaller": "Open uninstaller",
+      "delete": "Delete"
+    },
+    "updatesOption": {
+      "label": "Also delete its updates and DLC",
+      "description": "They go to the Recycle Bin with the game. DLC licenses are kept."
+    },
+    "removeOnly": {
+      "title": "Remove from library",
+      "message": "{title} cannot be deleted from here: {reason}.\n\nRemove it from your library instead? Its files are not deleted.",
+      "confirm": "Remove",
+      "done": "Removed {title}",
+      "failed": "Could not remove the game"
+    },
+    "checkFailed": "Could not check {title}",
+    "refused": "{title} cannot be deleted now",
+    "notSafe": "its folder is not safe to delete",
+    "failed": "Could not delete {title}"
+  },
+  "peerparty": {
+    "downloading": "Downloading PeerParty…",
+    "downloadingPercent": "Downloading PeerParty… {percent}%",
+    "checking": "Checking PeerParty…",
+    "installing": "Installing PeerParty…",
+    "starting": "Starting with PeerParty…",
+    "title": "PeerParty: LAN play",
+    "titleServices": "PeerParty: LAN play ({services})",
+    "scanning": "Checking your games for PeerParty…",
+    "startingGame": "Starting {title} with PeerParty…",
+    "startFailed": "Could not start {title} with PeerParty"
+  },
+  "ps3Updates": {
+    "updated": "{title} is updated to {version}"
+  },
+  "recomp": {
+    "notFinished": "The install did not finish."
+  },
+  "recompImage": {
+    "delete": {
+      "image": "Delete the disc image",
+      "folder": "Delete the unpacked game folder",
+      "both": "Delete both"
+    },
+    "unpackedFolder": "the unpacked game folder",
+    "folderOnly": "{recomp} no longer uses the copy of {game} PlayOut unpacked for its setup program: {folder}{size}. Delete it? It goes to the Recycle Bin; installing the game again with the setup unpacks it again from the disc image.",
+    "fileAndMore_one": "{file} and {count} more file of it",
+    "fileAndMore_other": "{file} and {count} more files of it",
+    "ready": "{recomp} is ready. Delete the original {what}{size}? It goes to the Recycle Bin; {game} stays in your library and starts the recompilation.",
+    "readyWithFolder": "{image} The copy PlayOut unpacked for the setup program, {folder}{size}, is no longer used either: pick what to delete.",
+    "imageLine": "{recomp} no longer needs {file}. You can move it to the Recycle Bin; the game stays in your library and starts the recompilation.",
+    "folderLine": "{recomp} no longer uses the copy of the game PlayOut unpacked for its setup program: {folder}{size}. It can go to the Recycle Bin too; installing the game again with the setup unpacks it again from the disc image.",
+    "keptBefore": "You chose to keep it before."
+  },
+  "recompHeld": {
+    "both": "{file} and {folder}",
+    "files": "the files",
+    "crashed": {
+      "titleImage": "Restore the disc image?",
+      "titleFolder": "Restore the game folder?",
+      "messageImage": "A crash was detected: {recomp} may need the original {what}. Restore it? It goes back where it was and {game} is an ordinary game card again. Delete anyway moves it to the Recycle Bin.",
+      "messageFolder": "A crash was detected: {recomp} may need the original {what}. Restore it? It goes back where it was. Delete anyway moves it to the Recycle Bin."
+    },
+    "passed": {
+      "title": "Move it to the Recycle Bin?",
+      "messageImage": "{what} is still kept aside. Delete anyway tries the Recycle Bin again; Restore puts it back where it was and {game} is an ordinary game card again.",
+      "messageFolder": "{what} is still kept aside. Delete anyway tries the Recycle Bin again; Restore puts it back where it was."
+    },
+    "interrupted": {
+      "titleImage": "Finish checking the disc image?",
+      "titleFolder": "Finish checking the game folder?",
+      "message": "PlayOut moved {what} aside to check that {recomp} runs without it, but the check did not finish ({reason}). It is not deleted. Restore it, test again, or delete it anyway?",
+      "closed": "PlayOut closed"
+    },
+    "notStarted": {
+      "titleImage": "Could not check the disc image",
+      "titleFolder": "Could not check the game folder",
+      "message": "PlayOut could not start {recomp} to check it runs without {what}: {reason}. It is kept aside, not deleted. Restore it, test again, or delete it anyway?",
+      "notStarted": "it was not started"
+    }
+  },
+  "ra": {
+    "note": "RetroAchievements: {message}",
+    "signedIn": "RetroAchievements: signed in as {user}",
+    "notSignedIn": "RetroAchievements: not signed in",
+    "unreachable": "Couldn't reach RetroAchievements"
+  },
+  "settings": {
+    "saveFailed": "Could not save settings"
+  },
+  "steamDlc": {
+    "installFailed": "Could not start the install of {title}",
+    "installing": "Installing {title} through {store}…",
+    "saveFailed": "Could not save the DLC choice for {title}",
+    "noDownload": "No download (turns its content on or off)",
+    "changeInSteam": "Change it in Steam",
+    "pending": "Change waiting for Steam",
+    "installed": "Installed",
+    "applied": "{title}: DLC choices applied",
+    "applyFailed": "{title}: could not apply the DLC choices"
+  },
+  "streaming": {
+    "refreshFailed": "Could not ask the paired computers for their games",
+    "connecting": "Connecting to stream {title}…",
+    "streamFailed": "Could not stream {title}: {error}",
+    "stopFailed": "Could not stop the stream",
+    "downloadFailed": "Could not download {title}: {error}",
+    "cancelFailed": "Could not cancel the download",
+    "noRomFolder": "Choose an Emulation folder in Settings > Library to download ROMs",
+    "logins": "Using {host}'s logins for {services}",
+    "paired": "{name} is now paired",
+    "sessionFailed": "Could not stream from {host}",
+    "hostDownloadFailed": "The download from the host failed",
+    "downloaded": "Downloaded and added to your library"
+  }
+}

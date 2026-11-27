@@ -1,0 +1,64 @@
+{
+  "title": "Metadatos en la nube",
+  "repository": "Repositorio",
+  "repositoryLabel": "Abrir el repositorio de metadatos de PlayOut (se abre en tu navegador)",
+  "note": "Las correcciones hechas con el lápiz en la página de un juego se comparten a través de la nube de metadatos de PlayOut, un repositorio público de GitHub que cada PlayOut lee sin cuenta. Una corrección de la nube reemplaza lo que encontraron los scrapers; tu propia edición en este PC reemplaza a ambos. Las imágenes no forman parte de ella y se quedan en este PC.",
+  "cloud": {
+    "label": "Nube de PlayOut",
+    "lastError": "Falló el último intento: {error}",
+    "checkNow": "Comprobar ahora"
+  },
+  "suggest": {
+    "label": "Sugerir mis ediciones"
+  },
+  "relay": {
+    "label": "URL del relé de sugerencias",
+    "placeholder": "Sin definir (https://…workers.dev)",
+    "save": "Guardar",
+    "share": "Compartir con cada PlayOut",
+    "usingShared": "Se usa el relé que anuncia el repositorio ({url}).",
+    "note": "El relé es el Cloudflare Worker gratuito de metadata-relay (consulta su SETUP.md) que convierte las ediciones en pull requests para el mantenedor. Déjalo vacío para usar el que anuncia el repositorio."
+  },
+  "suggestions": {
+    "title": "Sugerencias",
+    "titleCount": "Sugerencias ({number})",
+    "refresh": "Actualizar",
+    "none": "No hay sugerencias abiertas.",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "openLabel": "Abrir la sugerencia {number} en GitHub (se abre en tu navegador)",
+    "noChange": "Ningún campo cambiaría."
+  },
+  "toasts": {
+    "relaySaved": "Relé guardado",
+    "approved": "{game}: aprobado; cada PlayOut lo recibe con la próxima sincronización",
+    "rejected": "{game}: sugerencia rechazada",
+    "relayShared": "URL del relé compartida; cada PlayOut la recibe con su próxima sincronización"
+  },
+  "status": {
+    "checking": "Buscando correcciones…",
+    "notChecked": "Aún no se ha comprobado",
+    "checked": "Comprobado",
+    "checkedJustNow": "Comprobado ahora mismo",
+    "checkedMinutes_one": "Comprobado hace {count} min",
+    "checkedMinutes_other": "Comprobado hace {count} min",
+    "checkedHours_one": "Comprobado hace {count} h",
+    "checkedHours_other": "Comprobado hace {count} h",
+    "checkedOn": "Comprobado el {date}",
+    "corrected_one": "{count} juego corregido, {library} en tu biblioteca",
+    "corrected_other": "{count} juegos corregidos, {library} en tu biblioteca",
+    "noCorrections": "Aún no hay correcciones",
+    "edits": {
+      "published": "Tus ediciones se publican en la nube en cuanto las guardas.",
+      "awaitingToken": "Tus ediciones se publicarán cuando GitHub confirme el token.",
+      "local": "Tus ediciones se quedan en este PC.",
+      "suggested": "Tus ediciones se sugieren al mantenedor cuando las guardas.",
+      "suggestedQueued_one": "Tus ediciones se sugieren al mantenedor cuando las guardas. {count} edición espera a sugerirse.",
+      "suggestedQueued_other": "Tus ediciones se sugieren al mantenedor cuando las guardas. {count} ediciones esperan a sugerirse.",
+      "noRelay": "Tus ediciones se guardan aquí y se sugerirán cuando el servicio de sugerencias esté configurado.",
+      "noRelayQueued_one": "Tus ediciones se guardan aquí y se sugerirán cuando el servicio de sugerencias esté configurado. {count} edición espera a sugerirse.",
+      "noRelayQueued_other": "Tus ediciones se guardan aquí y se sugerirán cuando el servicio de sugerencias esté configurado. {count} ediciones esperan a sugerirse.",
+      "twoSentences": "{first} {second}"
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "title": "Convertir",
+  "note": "Convierte juegos ROM y emulados entre formatos con Game Format Converter (gratuito, GPL-3.0, de Mr-Shizzy; se descarga la primera vez que se usa, unos 14 MB, con chdman de MAME). Cada resultado se escribe junto a su original y se comprueba; solo entonces el original va a la Papelera de reciclaje, y el juego conserva su tiempo de juego y sus imágenes en tu biblioteca. PlayOut desempaqueta él mismo los paquetes de PS4, los de PS5 su asistente de paquetes de PS5 (basado en PS5PKGTool de pearlxcore), y los juegos de Xbox y Xbox 360 los convierte su asistente de Xbox (basado en XISOSharp y CHDSharp, el motor de XISO Studio).",
+  "toolReady": "El conversor {version} está listo.",
+  "platform": "Plataforma",
+  "conversion": "Conversión",
+  "direction": {
+    "label": "Dirección de la conversión",
+    "reversible": "Convirtiendo {from} a {to}; invertir la dirección",
+    "oneWay": "Convirtiendo {from} a {to}; esta solo va en un sentido",
+    "reverseTitle": "Invertir la dirección",
+    "oneWayTitle": "Esta conversión solo va en un sentido",
+    "hintLeftToRight": "Convirtiendo de {from} (izquierda) a {to} (derecha).",
+    "hintRightToLeft": "Convirtiendo de {from} (derecha) a {to} (izquierda)."
+  },
+  "missing": {
+    "place": "Ponlo aquí: {place}",
+    "openFolder": "Abrir carpeta",
+    "putIn": "Ponlo en {place}"
+  },
+  "files": {
+    "chooseFiles": "Elegir archivos",
+    "chooseFolders": "Elegir carpetas",
+    "filesChosen_one": "{count} archivo elegido",
+    "filesChosen_other": "{count} archivos elegidos",
+    "foldersChosen_one": "{count} carpeta elegida",
+    "foldersChosen_other": "{count} carpetas elegidas",
+    "more": "y {count} más",
+    "hintFiles": "Uno o más archivos {format} de {platform}, convertidos a {to}.",
+    "hintFolders": "Una o más carpetas de {platform}, convertidas a {to}.",
+    "choose": "Elegir",
+    "convert": "Convertir",
+    "stop": "Detener"
+  },
+  "run": {
+    "converting": "Convirtiendo",
+    "lastRun": "Última ejecución",
+    "downloading": "Descargando Game Format Converter…",
+    "done": "{finished} de {total} terminados"
+  },
+  "state": {
+    "queued": "En espera",
+    "running": "Convirtiendo…",
+    "done": "Convertido",
+    "failed": "Falló",
+    "skipped": "Omitido",
+    "stopped": "Detenido"
+  },
+  "toasts": {
+    "pickerFailed": "No se pudo abrir el selector de archivos",
+    "startFailed": "No se pudo empezar a convertir"
+  },
+  "notes": {
+    "singleTrack": "Solo juegos de una pista.",
+    "isoUnchecked": "El conversor no comprueba la ISO que desempaqueta, así que se conserva el original.",
+    "popstarter": "Para jugar a juegos de PlayStation en una PS2 con POPStarter.",
+    "playlistPbp": "Todos los discos de la lista de reproducción van a un solo PBP.",
+    "cdOnlyBin": "Solo juegos en CD: un juego en DVD no puede ser un BIN.",
+    "cso2RealPsp": "Solo para una PSP real: PPSSPP no puede leer CSO versión 2.",
+    "encryptedDiscs": "Los discos cuyos archivos siguen cifrados no se pueden desempaquetar.",
+    "ps3PackageWithUpdates": "Elige el paquete de un juego junto con sus actualizaciones: se desempaquetan juntos en una sola carpeta.",
+    "psnFolderToPackage": "Una carpeta de juego de PSN se convierte en un paquete que instala RPCS3 (no para una PS3 real).",
+    "splitImage": "Las partes de una imagen dividida (multiMAN) se unen en una sola ISO.",
+    "ps4Package": "PlayOut desempaqueta el paquete por sí mismo en una carpeta de juego junto a él, como hace PS4PKGTool, y conserva el paquete. Solo paquetes falsos (fPKG): los paquetes comerciales están bloqueados con las claves de Sony.",
+    "ps5Package": "Se desempaqueta con la extracción propia de PS5PKGTool en una carpeta de juego descifrada junto al paquete (los archivos del juego y sce_sys), y se conserva el paquete. Solo paquetes falsos (FPKG): los paquetes comerciales están bloqueados con las claves de Sony, y los paquetes de actualización necesitan su juego.",
+    "gdromChd": "Un CHD de GD-ROM se convierte en un GDI: usa GDI ↔ CHD.",
+    "wudUnchecked": "El conversor no comprueba el WUD que desempaqueta, así que se conserva el original.",
+    "xboxTrim": "Un volcado completo del disco se convierte en un .xiso.iso más pequeño que contiene solo el juego: se quitan la partición de vídeo y el relleno, y cada archivo se comprueba con el volcado.",
+    "windowsNames": "Los nombres que Windows no admite (como aux o con) se renombran con un guion bajo.",
+    "xboxChd": "El CHD contiene el juego recortado (como lo hace XISO Studio): un volcado completo vuelve de él como XISO.",
+    "x360Xiso": "Para Xenia y consolas modificadas; se quitan la partición de vídeo y el relleno.",
+    "zarXenia": "Xenia Canary lee ZAR.",
+    "zarToIso": "La ISO hecha a partir de un ZAR es un XISO recortado.",
+    "godPackage": "Elige la carpeta de un paquete de Games on Demand: se convierte en una imagen de disco para Xenia, con el nombre del juego, junto a esa carpeta. No se descifra nada y se conserva el paquete.",
+    "n64ByteOrder": "Solo cambia el orden de los bytes; el juego es el mismo. La mayoría de los emuladores leen Z64.",
+    "snesHeaderOffSfc": "Solo se quita la cabecera de copiadora de 512 bytes; el juego no cambia. SFC es lo que esperan los emuladores.",
+    "snesHeaderOnFlash": "Se añade una cabecera de copiadora simple de 512 bytes, para las herramientas y los flash carts que la quieran.",
+    "interleavedToPlain": "La disposición intercalada de copiadora pasa a la disposición simple que leen los emuladores; el juego no cambia.",
+    "plainToInterleaved": "Para las copiadoras que quieren la disposición intercalada con su cabecera.",
+    "headerOff": "Solo se quita la cabecera de copiadora de 512 bytes; el juego no cambia.",
+    "headerOn": "Se añade una cabecera de copiadora de 512 bytes, para las herramientas que la quieran.",
+    "trimPadding": "Se quita el relleno vacío tras el juego; los bytes del propio juego no cambian. Un juego que guarda datos ahí no se toca.",
+    "padToFull": "Se rellena de nuevo hasta el tamaño completo del cartucho, para los flash carts y las herramientas que lo quieran.",
+    "switchMerge": "Elige el paquete de un juego junto con su actualización y su contenido adicional: se convierten en un solo XCI.",
+    "switchSplit": "Un paquete para el juego, otro para su actualización y uno para cada contenido adicional.",
+    "experimental": "Experimental.",
+    "decryptedForEmulators": "Solo juegos descifrados; para emuladores y firmware personalizado.",
+    "decryptedOnly": "Solo juegos descifrados."
+  }
+}

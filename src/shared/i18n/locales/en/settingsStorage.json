@@ -1,0 +1,21 @@
+{
+  "title": "Storage",
+  "readFailed": "Could not read this PC's drives.",
+  "tryAgain": "Try again",
+  "reading": "Reading the drives…",
+  "thisPc": "This PC",
+  "thisPcDrives": "This PC ({drives})",
+  "size": "Size: {size}",
+  "barLabel": "Games {games}, other {other}, free {free}",
+  "free": "Free space: {size}",
+  "games": "Games",
+  "other": "Other",
+  "listTitle_one": "Games on this PC ({count} game)",
+  "listTitle_other": "Games on this PC ({count} games)",
+  "none": "No games are installed on this PC.",
+  "about": "About {size}",
+  "openRecomp": "Open the recompilation of {title} (delete it there)",
+  "recomp": "Recompilation",
+  "deleteLabel": "Delete {title} from this PC",
+  "delete": "Delete"
+}
