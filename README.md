@@ -37,6 +37,16 @@ The game detail and library pictures are from PlayOut running on a real library;
   standalone emulators; every path can be overridden in Settings, and each system or game can use an
   alternative emulator.
 - **Manual games.** Add a single `.exe`, or scan a folder and let PlayOut pick out the games.
+- **Saves that follow you.** ROM and recompilation saves are kept in the Emulation folder automatically, which
+  PlayOut syncs between your PCs and which can sit in any folder your cloud app syncs (OneDrive, Google Drive...);
+  store games keep their own cloud saves, because they launch through their client.
+- **Emulators set up for you.** One-click, pre-configured setup of popular emulators: full screen, controllers
+  mapped, Big Picture modes and a Start + Select menu.
+- **Nucleus Co-op built in.** Split-screen local co-op for PC games that never had it, set up and started from the
+  game's page.
+- **Built-in PC tools.** DLSS swapping (DLSS 5 through AiO Swapper), OptiScaler, and game compression to save disk
+  space, from each game's Upgrade menu.
+- **Recompilations.** Browse and download the latest native PC recompilations of console games, with their updates.
 - **Artwork and metadata.** Covers, hero art, logos, icons, descriptions, release dates, genres and ratings
   from SteamGridDB, IGDB, ScreenScraper, TheGamesDB, the Steam store and GOG; HowLongToBeat times; local art
   from Steam's own cache; import of an existing ES-DE library (`gamelist.xml` + `downloaded_media`).
