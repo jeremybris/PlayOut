@@ -1747,7 +1747,7 @@ PlayOut stops asking it for an hour. Images are cached in `%APPDATA%\PlayOut\med
 Open Settings from the pill above the rows, the Menu (Start) button or `Tab`, or switch to the **Settings** tab of
 the Library (the gear and wrench left of _All_), which shows the same menu in place of the games.
 
-- **Tabs**: **Icons for tabs** (on by default; this PC only) makes the tabs at the top of the Library show the
+- **Tabs**: **Icons for tabs** (off by default; this PC only) makes the tabs at the top of the Library show the
   icons of their filters instead of their names (see _In the library_ below). Then the Library's tabs, left to right
   (named in words here). Each row shows the tab's name and sort, with **‹ ›** to move it
   left or right, its **Sort** and **Filters** pills (the same menus as the Library header) and a bin to delete it

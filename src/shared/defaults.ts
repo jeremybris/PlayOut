@@ -87,7 +87,7 @@ export function defaultSettings(): Settings {
       libraryScroll: {},
       libraryCoverScale: 1,
       // The Library's tabs show their filters' icons instead of their names (Settings > Library "Icons for tabs").
-      libraryTabIcons: true
+      libraryTabIcons: false
     },
     input: {
       deadzone: 0.25,

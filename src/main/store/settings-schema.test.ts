@@ -303,10 +303,10 @@ describe('normalizeSettings', () => {
   })
 
   it('"Icons for tabs" is on by default and for files from before it, keeps a choice and repairs a malformed one', () => {
-    expect(defaultSettings().ui.libraryTabIcons).toBe(true)
-    expect(normalizeSettings({ version: 4, ui: {} })!.ui.libraryTabIcons).toBe(true)
+    expect(defaultSettings().ui.libraryTabIcons).toBe(false)
+    expect(normalizeSettings({ version: 4, ui: {} })!.ui.libraryTabIcons).toBe(false)
     expect(normalizeSettings({ ui: { libraryTabIcons: false } })!.ui.libraryTabIcons).toBe(false)
-    expect(normalizeSettings({ ui: { libraryTabIcons: 'yes' } })!.ui.libraryTabIcons).toBe(true)
+    expect(normalizeSettings({ ui: { libraryTabIcons: 'yes' } })!.ui.libraryTabIcons).toBe(false)
     expect(parseSettingsPatch({ ui: { libraryTabIcons: false } }).ui?.libraryTabIcons).toBe(false)
     expect(() => parseSettingsPatch({ ui: { libraryTabIcons: 1 } })).toThrow()
   })
